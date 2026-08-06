@@ -1,91 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, Mail, Lock, LogIn, UserPlus, ArrowLeft, Loader2 } from 'lucide-react';
-import { supabase } from './lib/supabaseClient';
-import App from './App';
+import { useAuth } from '../context/AuthContext';
 
-// Gatekeeper mounted at the /app route: shows a sign-in/sign-up form until
-// there's a Supabase session, fetches the matching `profiles` row (created
-// automatically by the on_auth_user_created trigger), then hands both to
-// <App/>. App uses session.access_token to authorize /api/session and
-// /api/heartbeat calls against the backend's Supabase-JWT guard.
-export default function AuthGate({ onBackToHome }) {
-  const [session, setSession] = useState(undefined); // undefined = still checking
-  const [profile, setProfile] = useState(null);
-  const [profileError, setProfileError] = useState('');
-
-  const loadProfile = useCallback(async (userId) => {
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    if (error) {
-      console.error('[LEXIS] Failed to load profile:', error);
-      setProfileError('Could not load your account profile. Please refresh, or contact support if this persists.');
-      setProfile(null);
-    } else {
-      setProfileError('');
-      setProfile(data);
-    }
-  }, []);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) loadProfile(session.user.id);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session?.user) {
-        loadProfile(session.user.id);
-      } else {
-        setProfile(null);
-      }
-    });
-
-    return () => listener.subscription.unsubscribe();
-  }, [loadProfile]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
-
-  if (session === undefined) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!session) {
-    return <AuthForm onBackToHome={onBackToHome} />;
-  }
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4 px-4 text-center">
-        {profileError ? (
-          <p className="text-rose-400 text-sm max-w-sm">{profileError}</p>
-        ) : (
-          <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-        )}
-        <button onClick={handleLogout} className="text-xs text-slate-500 hover:text-slate-300 underline">
-          Sign out
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <App
-      session={session}
-      profile={profile}
-      onProfileRefresh={() => loadProfile(session.user.id)}
-      onLogout={handleLogout}
-      onBackToHome={onBackToHome}
-    />
-  );
-}
-
-function AuthForm({ onBackToHome }) {
+export default function AuthPage({ navigateTo }) {
+  const { session, signIn, signUp } = useAuth();
   const [mode, setMode] = useState('sign_in'); // 'sign_in' | 'sign_up'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -93,6 +11,11 @@ function AuthForm({ onBackToHome }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+
+  // Already signed in (e.g. followed a stale /auth link) — go straight in.
+  useEffect(() => {
+    if (session) navigateTo('/app');
+  }, [session, navigateTo]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -102,17 +25,12 @@ function AuthForm({ onBackToHome }) {
 
     try {
       if (mode === 'sign_up') {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { full_name: fullName } }
-        });
-        if (error) throw error;
+        await signUp(email, password, fullName);
         setNotice('Account created. Check your email to confirm, then sign in.');
         setMode('sign_in');
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        await signIn(email, password);
+        navigateTo('/app');
       }
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -124,7 +42,7 @@ function AuthForm({ onBackToHome }) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col items-center justify-center p-4">
       <button
-        onClick={onBackToHome}
+        onClick={() => navigateTo('/')}
         className="absolute top-6 left-6 flex items-center space-x-2 text-xs text-slate-400 hover:text-cyan-400 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />

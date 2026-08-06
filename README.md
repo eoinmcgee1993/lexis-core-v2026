@@ -2,34 +2,37 @@
 
 **Language Engine & eXecutive Intelligence System**
 
-A production-hardened, voice-native AI English tutor built on OpenAI Realtime API + native WebRTC, wrapped in a SaaS shell: Supabase email auth, a free-trial/subscription billing guard, Stripe Payment Links, and a bilingual (EN/TH) landing page. Designed for Thai youth ESL beta with sub-300ms latency, barge-in support, and real-time transcript streaming.
+A production-hardened, voice-native AI English tutor built on OpenAI Realtime API + native WebRTC, wrapped in a SaaS shell: Supabase email auth, a free-trial/subscription billing guard, Stripe subscription Checkout, and a bilingual (EN/TH) landing + pricing page. Designed for Thai youth ESL beta with sub-300ms latency, barge-in support, and real-time transcript streaming.
 
 ## Architecture
 
 ```
-┌─────────────┐   sign in / sign up    ┌─────────────┐
-│   Browser   │ ─────────────────────► │  Supabase   │
-│  (React 18) │ ◄───────────────────── │ Auth + DB   │
-└──────┬──────┘   JWT + profile row    └──────┬──────┘
-       │ POST /api/session                    │ service-role
-       │ POST /api/heartbeat (every 30s)       │ reads/writes
-       │ Authorization: Bearer <jwt>           ▼
-       ▼                              ┌─────────────┐
-┌─────────────┐                       │   Node.js   │
-│   Stripe    │ ── checkout.session ─►│   Broker    │
-│ Payment Link│    .completed webhook │ (Express)   │
-└─────────────┘                       └──────┬──────┘
-                                              │
-       WebRTC PeerConnection (SDP Offer/Answer)
-       OPUS Audio + DataChannel Events        │
-                                              ▼
-┌─────────────────────────────────────────────────────────┐
-│              OpenAI Realtime API (GA)                   │
-│         gpt-4o-realtime-preview-2024-12-17              │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│                             VERCEL FRONTEND CLIENT (SPA)                                 │
+│                                                                                          │
+│  / (LandingPage)     /pricing (PricingPage)     /auth (AuthPage)       /app (LexisApp)   │
+│  • TH/EN Bilingual   • Stripe Checkout Gateway  • Supabase Auth        • Sub-300ms WebRTC │
+│  • Conversion CTA    • ฿199 / ฿599 Passes       • Session Persistence  • Dual Visualizer  │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+           │                     │                        │                      │
+           │                     │ (Checkout Session)     │ (JWT Validation)     │ (Sub-300ms Audio)
+           ▼                     ▼                        ▼                      ▼
+┌──────────────────┐   ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│ Vercel Edge SPA  │   │ Stripe Checkout  │    │  Supabase Auth   │    │  OpenAI Realtime │
+│ Network Hosting  │   │ Payment Portal   │    │  & PostgreSQL    │    │  WebRTC Gateway  │
+└──────────────────┘   └──────────────────┘    └──────────────────┘    └──────────────────┘
+           │                     │                        │                      ▲
+           │                     │ (Stripe Webhook)       │ (Admin SDK)          │ (SDP Exchange)
+           ▼                     ▼                        ▼                      │
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│                              RAILWAY BACKEND BROKER                                      │
+│  • /api/session — Mint Ephemeral GA Tokens (/v1/realtime/client_secrets)                 │
+│  • /api/heartbeat — 30-Second Usage Telemetry & Trial Limit Enforcement                 │
+│  • /api/stripe/checkout, /api/stripe/webhook — Subscription Creation & Lifecycle        │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-The backend never talks to OpenAI on a user's behalf until `authenticateAndCheckBilling` has verified their Supabase JWT and confirmed they're inside their trial/subscription allowance — see `backend/server.mjs`.
+The backend never talks to OpenAI on a user's behalf until `authenticate` + `requireEntitlement` have verified the Supabase JWT and confirmed the user is inside their trial/subscription allowance — see `backend/server.mjs`. Checkout and `/api/me` deliberately use `authenticate` alone (no entitlement check), since a user who just ran out of trial time is exactly who needs to reach those endpoints.
 
 ## Reconciliation from Blueprint → v2026.3
 
@@ -39,20 +42,19 @@ The backend never talks to OpenAI on a user's behalf until `authenticateAndCheck
 | **WebRTC Endpoint** | `POST /v1/realtime?model=` (beta) | `POST /v1/realtime/calls?model=` (GA) |
 | **Session Schema** | Flat (`voice`, `instructions` at root) | Nested (`session.audio.output.voice`) |
 | **Auth** | Unauthenticated `cors(*)` | Supabase JWT + per-user billing guard + rate limiting |
-| **Billing** | None | Free trial (30 min) → Stripe-activated weekly/monthly pass |
+| **Billing** | None | Free trial (30 min) → Stripe subscription Checkout (weekly/monthly), lifecycle synced via webhook |
 | **Safety ID** | Missing | `OpenAI-Safety-Identifier` (SHA-256 hash of Supabase user id) |
 | **VAD Tuning** | Aggressive 500ms silence | Thai ESL profile: 800ms silence, 0.5 threshold |
 | **Pedagogy** | Generic tutor prompt | 15-25 word responses, gentle correction |
 | **Voice** | `alloy` | `verse` |
-| **UI** | Plain monospace terminal | Landing page + Tailwind/lucide-react app shell + transcript bubbles |
-| **Audio Viz** | None | Real-time `AudioContext` + `AnalyserNode` |
-| **Reconnect** | None | 3-attempt exponential backoff |
+| **UI** | Plain monospace terminal | Landing/pricing/auth pages + Tailwind/lucide-react app shell + dual-analyser waveform ring |
+| **Audio Viz** | None | Real-time dual `AudioContext` + `AnalyserNode` (student + LEXIS, color-coded) |
 | **Cleanup** | Partial | Full track stop, PC close, DOM cleanup, heartbeat interval cleared |
 
 ## Quick Start
 
 ```bash
-# 0. One-time: paste supabase/schema.sql into your Supabase project's SQL Editor
+# 0. One-time: paste backend/supabase-schema.sql into your Supabase project's SQL Editor
 
 # Terminal 1 — Backend
 cd backend && npm install && cp .env.example .env && npm run dev
@@ -61,7 +63,7 @@ cd backend && npm install && cp .env.example .env && npm run dev
 cd frontend && npm install && cp .env.example .env.local && npm run dev
 ```
 
-Fill in the Supabase/Stripe values in both `.env` files first — see `DEPLOY.md` for the full setup walkthrough. Open http://localhost:5173, click **Launch App**, sign up, then press **Space**, allow microphone, and speak.
+Fill in the Supabase/Stripe values in both `.env` files first — see `DEPLOY.md` for the full setup walkthrough. Open http://localhost:5173, click **Launch App**, sign up on `/auth`, then click **INITIATE LEXIS** on `/app`, allow microphone, and speak.
 
 ## OS Engineering Modules
 
