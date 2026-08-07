@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import LandingPage from './LandingPage';
-import AuthGate from './AuthGate';
+import LandingPage from './LandingPage.jsx';
+import AuthGate from './AuthGate.jsx';
 import './index.css';
 
 // Minimal client router — two routes ('/' and '/app') don't warrant a full
