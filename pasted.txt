@@ -1,0 +1,20 @@
+# 1. Unzip the package you have
+unzip lexis-core-v2026-commerce.zip
+cd lexis-core-v2026-commerce
+
+# 2. Clone existing repo
+git clone git@github.com:eoinmcgee1993/lexis-core-v2026.git
+# If SSH fails, use:
+# git clone https://github.com/eoinmcgee1993/lexis-core-v2026.git
+
+cd lexis-core-v2026
+
+# 3. Overlay commerce tree
+cp -R ../backend ../frontend ../supabase \
+      ../DEPLOY.md ../README.md ../railway.toml ../vercel.json .
+
+# 4. Commit & push
+git add -A
+git status
+git commit -m "feat: LEXIS Commerce v2026.3 — Stripe, PKCE, metering, webhook idempotency"
+git push origin main
