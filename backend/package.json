@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "dev": "node --watch server.mjs"
+    "dev": "node --watch server.mjs",
+    "build": "mkdir -p dist && echo '<!doctype html><title>LEXIS API</title><body>LEXIS backend — see /health' > dist/index.html"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
