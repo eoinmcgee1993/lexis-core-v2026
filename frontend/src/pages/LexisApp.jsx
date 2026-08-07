@@ -1,17 +1,28 @@
 // frontend/src/pages/LexisApp.jsx — Reconciled Commercial WebRTC Client
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabaseClient';
 import {
   Mic, MicOff, Volume2, VolumeX, Sparkles, Activity, ShieldCheck,
-  AlertCircle, PhoneOff, RotateCcw, Hand, LogOut, CreditCard
+  AlertCircle, PhoneOff, RotateCcw, Hand, LogOut, CreditCard, Clock
 } from 'lucide-react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
+function formatUsageLabel(profile) {
+  if (profile.subscription_status === 'active') {
+    return `${profile.subscription_tier} plan — unlimited`;
+  }
+  const remaining = Math.max(0, (profile.max_allowed_seconds || 0) - (profile.seconds_used || 0));
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+  return `${mins}m ${secs}s left in trial`;
+}
+
 export default function LexisApp({ navigateTo }) {
   // App.jsx's router already redirects to /auth before this component ever
   // mounts when there's no session, so `session` is guaranteed here.
-  const { session, signOut } = useAuth();
+  const { session, profile, refreshProfile, signOut } = useAuth();
 
   const justPaid = new URLSearchParams(window.location.search).get('payment') === 'success';
 
@@ -44,6 +55,15 @@ export default function LexisApp({ navigateTo }) {
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [transcripts]);
+
+  // Drop ?payment=success from the URL once shown, so refreshing this page
+  // later doesn't keep re-showing "payment confirmed" indefinitely.
+  useEffect(() => {
+    if (justPaid) {
+      window.history.replaceState({}, '', '/app');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Spacebar toggles session start/end, but only when focus is on the page
   // body (not while typing in a field elsewhere — not that this page has
@@ -229,15 +249,25 @@ export default function LexisApp({ navigateTo }) {
           setIsConnected(true);
           setIsConnecting(false);
 
-          // Trigger 30-second Telemetry Heartbeat
+          // Trigger 30-second Telemetry Heartbeat. Re-fetch the session on
+          // every tick rather than closing over the token from session
+          // start — supabase-js auto-rotates the JWT roughly hourly, and a
+          // long practice session would otherwise start sending a stale
+          // token, fail every heartbeat with 401, and silently stop
+          // recording usage with no error surfaced to the user.
           if (heartbeatIntervalRef.current) clearInterval(heartbeatIntervalRef.current);
           heartbeatIntervalRef.current = setInterval(async () => {
             try {
+              const { data: { session: freshSession } } = await supabase.auth.getSession();
+              if (!freshSession) {
+                endSession();
+                return;
+              }
               const res = await fetch(`${BACKEND_URL}/api/heartbeat`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${session.access_token}`
+                  'Authorization': `Bearer ${freshSession.access_token}`
                 }
               });
               if (res.status === 403) {
@@ -245,6 +275,8 @@ export default function LexisApp({ navigateTo }) {
                 setUpgradeRequired(true);
                 setUpgradeMessage(err.message || 'Usage limit reached. Please upgrade your pass.');
                 endSession();
+              } else if (res.ok) {
+                refreshProfile(); // keeps the header's remaining-time display live
               }
             } catch (e) {
               console.warn('[LEXIS Telemetry Warning]', e);
@@ -448,6 +480,12 @@ export default function LexisApp({ navigateTo }) {
         </div>
 
         <div className="flex items-center space-x-3">
+          {profile && (
+            <span className="hidden sm:flex items-center space-x-1.5 text-xs text-slate-400">
+              <Clock className="w-3.5 h-3.5" />
+              <span>{formatUsageLabel(profile)}</span>
+            </span>
+          )}
           <button onClick={() => navigateTo('/pricing')} className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-lg text-xs hover:bg-cyan-500/20">
             Upgrade Pass
           </button>

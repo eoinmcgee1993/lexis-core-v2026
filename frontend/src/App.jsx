@@ -24,17 +24,20 @@ function RouteController() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-slate-400 font-mono text-xs flex items-center justify-center">
-        Loading LEXIS…
-      </div>
-    );
-  }
-
-  // Auth guard: force /auth if an unauthenticated user requests /app directly.
-  if (currentPath === '/app' && !user) {
-    return <AuthPage navigateTo={navigateTo} />;
+  // Only /app needs a definitive signed-in/out answer before it can decide
+  // what to render. Gating every route (including the public landing page)
+  // behind the initial Supabase session check means every marketing visitor
+  // — the entire point of a landing page — sees a blank loading spinner
+  // before the hero ever paints, for an auth check they don't need.
+  if (currentPath === '/app') {
+    if (loading) {
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-400 font-mono text-xs flex items-center justify-center">
+          Loading LEXIS…
+        </div>
+      );
+    }
+    return user ? <LexisApp navigateTo={navigateTo} /> : <AuthPage navigateTo={navigateTo} />;
   }
 
   switch (currentPath) {
@@ -42,8 +45,6 @@ function RouteController() {
       return <PricingPage navigateTo={navigateTo} />;
     case '/auth':
       return <AuthPage navigateTo={navigateTo} />;
-    case '/app':
-      return <LexisApp navigateTo={navigateTo} />;
     default:
       return <LandingPage navigateTo={navigateTo} />;
   }

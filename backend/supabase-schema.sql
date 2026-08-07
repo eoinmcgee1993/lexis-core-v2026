@@ -42,17 +42,17 @@ ALTER TABLE public.usage_logs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can read own profile" ON public.profiles;
 CREATE POLICY "Users can read own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
 
--- NOTE: this UPDATE policy lets a signed-in user PATCH their own row directly
--- via the anon/authenticated PostgREST role — including subscription_status,
--- subscription_tier, seconds_used, etc. Every write this app actually makes
--- (checkout activation, heartbeat accounting) goes through the backend's
--- service-role key, which bypasses RLS entirely, so this policy is NOT
--- required for the app to function. Keeping it as specified, but be aware a
--- malicious client could otherwise grant themselves 'active'/'unlimited' by
--- calling the Supabase REST API directly. If that risk is unacceptable,
--- drop this policy — nothing server-side depends on it.
+-- No client-facing UPDATE policy on profiles, intentionally. A USING-only
+-- UPDATE policy (auth.uid() = id, no WITH CHECK) lets a signed-in user PATCH
+-- their own row directly via Supabase's REST API — bypassing this backend
+-- entirely — to any column, including subscription_status/seconds_used. That
+-- means "PATCH /rest/v1/profiles?id=eq.<self> {subscription_status:'active'}"
+-- with nothing but their own anon-signed JWT grants free unlimited access.
+-- Nothing in this app performs a client-side profile update (the frontend
+-- only ever SELECTs; every write — checkout activation, heartbeat
+-- accounting — goes through the backend's service-role key, which bypasses
+-- RLS anyway), so there is no legitimate write path this omission breaks.
 DROP POLICY IF EXISTS "Users can update own non-billing profile data" ON public.profiles;
-CREATE POLICY "Users can update own non-billing profile data" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 DROP POLICY IF EXISTS "Users can view own usage logs" ON public.usage_logs;
 CREATE POLICY "Users can view own usage logs" ON public.usage_logs FOR SELECT USING (auth.uid() = user_id);

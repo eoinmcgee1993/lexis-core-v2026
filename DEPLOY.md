@@ -15,6 +15,7 @@ lexis-core-v2026/
 ├── backend/
 │   ├── server.mjs               # Session broker + Supabase auth/billing guard + heartbeat + Stripe checkout/webhook
 │   ├── supabase-schema.sql      # profiles + usage_logs tables, RLS, signup trigger, RPCs
+│   ├── railway.toml             # Lives here, not repo root — see Root Directory note below
 │   ├── package.json
 │   └── .env.example
 ├── frontend/
@@ -35,7 +36,6 @@ lexis-core-v2026/
 │   ├── tailwind.config.js
 │   ├── postcss.config.js
 │   └── package.json
-├── railway.toml
 ├── vercel.json
 └── DEPLOY.md
 ```
@@ -45,7 +45,7 @@ lexis-core-v2026/
 2. **SQL Editor** → paste and run `backend/supabase-schema.sql`. This creates:
    - `public.profiles` (subscription status/tier, usage counters, Stripe customer + subscription ids)
    - `public.usage_logs` (per-session telemetry log table)
-   - RLS policies (`SELECT`/`UPDATE` own row on `profiles`, `SELECT` own rows on `usage_logs`)
+   - RLS policies (`SELECT`-only own row on `profiles`, `SELECT` own rows on `usage_logs` — no client-facing `UPDATE` policy; see the security checklist below for why)
    - a trigger that inserts a `profiles` row automatically on signup
    - `increment_sessions` and `record_heartbeat` RPCs used by the backend (service-role only)
 3. **Authentication → Providers**: Email is enabled by default; decide whether to require email confirmation (Authentication → Settings) — the sign-up form on `/auth` assumes confirmation is on and tells the user to check their inbox.
@@ -114,7 +114,7 @@ npm run dev
 ### Backend → Railway
 1. Push repo to GitHub.
 2. Railway: **New Project** → **Deploy from GitHub repo**.
-3. Railway auto-detects Node.js via `railway.toml`.
+3. **Settings → Root Directory → set to `backend`.** This is required, not optional: `backend/package.json` is nested, not at the repo root, and this is a two-app monorepo (backend + frontend) — without Root Directory set, Railway's nixpacks builder scans the repo root, finds no `package.json` there, and either fails outright or misdetects the app, regardless of what `railway.toml` says. Once Root Directory is `backend`, nixpacks auto-detects Node.js correctly and `railway.toml`'s `startCommand`/`healthcheckPath` apply.
 4. Railway Dashboard → **Variables**:
    - `OPENAI_API_KEY`
    - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
@@ -161,7 +161,7 @@ Run these against the actual deployed Railway/Vercel/Supabase/Stripe stack befor
 - [ ] `.env` / `.env.local` files are in `.gitignore` and never committed
 - [ ] `OpenAI-Safety-Identifier` headers are active (hashed Supabase user id + salt)
 - [ ] Rate limiting is active (10 req/min per IP on `/api/session`, 6 req/min on `/api/heartbeat`)
-- [ ] RLS is enabled on `public.profiles`/`public.usage_logs`; all billing/usage writes still happen server-side via the service-role key regardless of the client-facing policies
+- [ ] RLS is enabled on `public.profiles`/`public.usage_logs` with **no client-facing `UPDATE` policy on `profiles`** — a `USING`-only update policy (no `WITH CHECK`) would let any signed-in user `PATCH` their own row directly via Supabase's REST API to `subscription_status: 'active'`, bypassing this backend entirely. All billing/usage writes happen server-side via the service-role key, which doesn't need a client policy to work.
 - [ ] `/api/stripe/checkout` and `/api/me` require only a valid session (not an active plan) — a user whose trial just expired must still be able to reach checkout
 - [ ] Stripe Checkout success/cancel URLs are resolved from the request's `Origin` header only after checking it against `ALLOWED_ORIGINS` — never trust `Origin` unchecked, it's attacker-controlled
 
