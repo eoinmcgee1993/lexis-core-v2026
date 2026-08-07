@@ -34,12 +34,20 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
   : ['http://localhost:5173', 'http://127.0.0.1:5173'];
 
-// Where to send the browser back to after Stripe Checkout. Deliberately its
-// own variable rather than reusing allowedOrigins[0] — that list's order
-// isn't a meaningful "primary domain" signal, and silently redirecting a
-// production checkout to whatever happens to be first in ALLOWED_ORIGINS
-// is the kind of thing that's fine until someone reorders that env var.
-const FRONTEND_URL = process.env.FRONTEND_URL || allowedOrigins[0];
+// Where to send the browser back to after Stripe Checkout. Resolved per
+// request from the Origin header rather than a fixed "first entry in
+// ALLOWED_ORIGINS" — with multiple allowed origins (prod + a Vercel preview
+// deployment, say), a static first-entry pick sends every preview's checkout
+// back to production instead of itself, and if that first entry is ever a
+// localhost dev origin, production checkout redirects break outright.
+// Only trusts the Origin header when it's in the allowlist; the cors()
+// middleware above already rejects disallowed origins before a request
+// reaches this far, but the explicit check here doesn't depend on that.
+function resolveFrontendOrigin(req) {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) return origin;
+  return allowedOrigins.find(o => o.startsWith('https://')) || allowedOrigins[0];
+}
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -253,14 +261,15 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'Invalid planTier — expected "weekly" or "monthly".' });
     }
 
+    const frontendOrigin = resolveFrontendOrigin(req);
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'subscription',
       customer_email: req.user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       metadata: { user_id: req.user.id, plan_tier: planTier || 'weekly' },
-      success_url: `${FRONTEND_URL}/app?payment=success`,
-      cancel_url: `${FRONTEND_URL}/pricing?payment=cancelled`
+      success_url: `${frontendOrigin}/app?payment=success`,
+      cancel_url: `${frontendOrigin}/pricing?payment=cancelled`
     });
 
     res.json({ url: session.url });
@@ -332,6 +341,6 @@ app.listen(PORT, () => {
   console.log(`=======================================================`);
   console.log(`  LEXIS Commerce Server Active on Port ${PORT}`);
   console.log(`  Allowed Origins: ${allowedOrigins.join(', ')}`);
-  console.log(`  Frontend URL (Stripe redirects): ${FRONTEND_URL}`);
+  console.log(`  Stripe Checkout redirects: resolved per-request from Origin (fallback: ${allowedOrigins.find(o => o.startsWith('https://')) || allowedOrigins[0]})`);
   console.log(`=======================================================`);
 });

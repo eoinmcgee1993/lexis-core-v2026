@@ -3,8 +3,14 @@ import { Sparkles, ArrowLeft, Check, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-const WEEKLY_PRICE_ID = import.meta.env.VITE_STRIPE_WEEKLY_PRICE_ID || '';
-const MONTHLY_PRICE_ID = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || '';
+
+// Stripe recurring Price IDs — set these after creating the Weekly/Monthly
+// products in the Stripe Dashboard (Products → Add product → copy the
+// "price_..." ID, not the product ID). See DEPLOY.md Step 2.
+const STRIPE_PRICES = {
+  weekly: 'price_xxxxxxxxxxxxx',   // Your real ID
+  monthly: 'price_xxxxxxxxxxxxx'   // Your real ID
+};
 
 export default function PricingPage({ navigateTo }) {
   const { session } = useAuth();
@@ -20,8 +26,8 @@ export default function PricingPage({ navigateTo }) {
       navigateTo('/auth');
       return;
     }
-    if (!priceId) {
-      setError(`Missing Stripe price ID for the ${planTier} plan — set VITE_STRIPE_${planTier.toUpperCase()}_PRICE_ID.`);
+    if (!priceId || priceId.includes('xxxxxxxxxxxxx')) {
+      setError(`Missing Stripe price ID for the ${planTier} plan — set STRIPE_PRICES.${planTier} in PricingPage.jsx to your real Stripe price_... ID.`);
       return;
     }
 
@@ -115,7 +121,7 @@ export default function PricingPage({ navigateTo }) {
               </ul>
             </div>
             <button
-              onClick={() => startCheckout('weekly', WEEKLY_PRICE_ID)}
+              onClick={() => startCheckout('weekly', STRIPE_PRICES.weekly)}
               disabled={loadingTier === 'weekly'}
               className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-60 text-slate-950 font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center space-x-2"
             >
@@ -136,7 +142,7 @@ export default function PricingPage({ navigateTo }) {
               </ul>
             </div>
             <button
-              onClick={() => startCheckout('monthly', MONTHLY_PRICE_ID)}
+              onClick={() => startCheckout('monthly', STRIPE_PRICES.monthly)}
               disabled={loadingTier === 'monthly'}
               className="w-full py-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-60 text-slate-200 font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center space-x-2"
             >

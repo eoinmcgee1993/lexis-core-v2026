@@ -51,8 +51,16 @@ lexis-core-v2026/
 4. **Project Settings → API**: copy the Project URL, `anon` public key, and `service_role` secret key — you'll need all three below.
 
 ## 2. Stripe Setup
-1. **Product catalog** → create a "Weekly Pass" product with a recurring ฿199/week Price, and a "Monthly Immersion" product with a recurring ฿599/month Price. Copy each Price ID (`price_...`) — the frontend sends these to the backend, which creates the Checkout Session server-side (no Payment Links involved).
-2. **Developers → Webhooks** → add an endpoint at `https://your-backend.up.railway.app/api/stripe/webhook`, subscribed to `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`. Copy the endpoint's **Signing secret** (`whsec_...`).
+1. **Product catalog** → create a "Weekly Pass" product with a recurring ฿199/week Price, and a "Monthly Immersion" product with a recurring ฿599/month Price. Copy each Price ID (`price_...`, not the product id).
+2. Edit `frontend/src/pages/PricingPage.jsx` and set the `STRIPE_PRICES` object to your real IDs:
+   ```js
+   const STRIPE_PRICES = {
+     weekly: 'price_xxxxxxxxxxxxx',
+     monthly: 'price_xxxxxxxxxxxxx'
+   };
+   ```
+   The frontend sends the selected ID to the backend, which creates the Checkout Session server-side (no Payment Links involved).
+3. **Developers → Webhooks** → add an endpoint at `https://your-backend.up.railway.app/api/stripe/webhook`, subscribed to `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`. Copy the endpoint's **Signing secret** (`whsec_...`).
 
 ## Local Development
 
@@ -67,7 +75,6 @@ cp .env.example .env
 #   STRIPE_SECRET_KEY=...
 #   STRIPE_WEBHOOK_SECRET=...
 #   ALLOWED_ORIGINS=http://localhost:5173
-#   FRONTEND_URL=http://localhost:5173
 
 npm install
 npm run dev
@@ -86,8 +93,7 @@ cp .env.example .env.local
 #   VITE_BACKEND_URL=http://localhost:3001
 #   VITE_SUPABASE_URL=...
 #   VITE_SUPABASE_ANON_KEY=...
-#   VITE_STRIPE_WEEKLY_PRICE_ID=price_...
-#   VITE_STRIPE_MONTHLY_PRICE_ID=price_...
+# (Stripe price IDs are set directly in PricingPage.jsx — see Step 2 above)
 
 npm install
 npm run dev
@@ -113,8 +119,7 @@ npm run dev
    - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
    - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
    - `LEXIS_SALT` (any random string for hashing)
-   - `ALLOWED_ORIGINS` (your Vercel domain, e.g. `https://lexis.vercel.app`)
-   - `FRONTEND_URL` (same Vercel domain — used for Stripe Checkout success/cancel redirects)
+   - `ALLOWED_ORIGINS` (your Vercel domain(s), e.g. `https://lexis.vercel.app` — also doubles as the whitelist Stripe Checkout redirects are resolved against, see below)
    - `PORT` (Railway sets automatically)
 5. Deploy. Railway provides URL: `https://lexis-api.up.railway.app`.
 6. Point the Stripe webhook endpoint (step 2 above) at this URL.
@@ -129,11 +134,10 @@ npm run dev
 3. Vercel Dashboard → **Environment Variables**:
    - `VITE_BACKEND_URL` = Railway backend URL
    - `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
-   - `VITE_STRIPE_WEEKLY_PRICE_ID`, `VITE_STRIPE_MONTHLY_PRICE_ID`
 4. Deploy. `vercel.json` already rewrites all paths to `index.html` so `/pricing`, `/auth`, and `/app` all work on refresh.
 
 ### Post-Deployment
-- [ ] Update `ALLOWED_ORIGINS` and `FRONTEND_URL` in Railway to match the Vercel production domain
+- [ ] Update `ALLOWED_ORIGINS` in Railway to match the Vercel production domain (include every domain checkout should be able to redirect back to — production and any preview domains you use)
 - [ ] Verify `/health` returns `{"status":"Operational"}`
 - [ ] Complete a real Stripe test-mode purchase from `/pricing` and confirm the buyer's `profiles` row flips to `active` with the right `subscription_tier`
 - [ ] Cancel that test subscription in the Stripe Dashboard and confirm the webhook flips the row to `canceled`
@@ -150,6 +154,7 @@ npm run dev
 - [ ] Rate limiting is active (10 req/min per IP on `/api/session`, 6 req/min on `/api/heartbeat`)
 - [ ] RLS is enabled on `public.profiles`/`public.usage_logs`; all billing/usage writes still happen server-side via the service-role key regardless of the client-facing policies
 - [ ] `/api/stripe/checkout` and `/api/me` require only a valid session (not an active plan) — a user whose trial just expired must still be able to reach checkout
+- [ ] Stripe Checkout success/cancel URLs are resolved from the request's `Origin` header only after checking it against `ALLOWED_ORIGINS` — never trust `Origin` unchecked, it's attacker-controlled
 
 ## Troubleshooting
 
