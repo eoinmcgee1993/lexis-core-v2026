@@ -9,13 +9,9 @@ import {
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 export default function LexisApp({ navigateTo }) {
-  const { session, loading, signOut } = useAuth();
-
-  // Redirect straight to sign-in if there's no session — clicking "Launch
-  // App" while signed out should land here, not on a dead mic button.
-  useEffect(() => {
-    if (!loading && !session) navigateTo('/auth');
-  }, [loading, session, navigateTo]);
+  // App.jsx's router already redirects to /auth before this component ever
+  // mounts when there's no session, so `session` is guaranteed here.
+  const { session, signOut } = useAuth();
 
   const justPaid = new URLSearchParams(window.location.search).get('payment') === 'success';
 
@@ -48,6 +44,25 @@ export default function LexisApp({ navigateTo }) {
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [transcripts]);
+
+  // Spacebar toggles session start/end, but only when focus is on the page
+  // body (not while typing in a field elsewhere — not that this page has
+  // any text inputs today, but the guard costs nothing).
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.code === 'Space' && e.target === document.body) {
+        e.preventDefault();
+        if (isConnected) {
+          endSession();
+        } else if (!isConnecting) {
+          startSession();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, isConnecting]);
 
   useEffect(() => {
     return () => endSession();
@@ -410,7 +425,9 @@ export default function LexisApp({ navigateTo }) {
     setAudioLevel(0);
   };
 
-  if (loading || !session) {
+  // Defensive fallback only — App.jsx's router guarantees a session exists
+  // before this component ever mounts.
+  if (!session) {
     return <div className="min-h-screen bg-slate-950" />;
   }
 

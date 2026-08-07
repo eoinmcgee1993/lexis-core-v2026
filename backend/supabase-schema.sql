@@ -99,6 +99,11 @@ DECLARE
   v_max_seconds INT;
   v_status TEXT;
 BEGIN
+  -- Per-heartbeat telemetry row (usage_logs was otherwise write-only-in-name —
+  -- defined with a SELECT policy but nothing ever inserted into it).
+  INSERT INTO public.usage_logs (user_id, duration_seconds)
+  VALUES (user_id_param, increment_seconds);
+
   UPDATE public.profiles
   SET
     seconds_used = seconds_used + increment_seconds,

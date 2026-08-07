@@ -28,7 +28,8 @@ lexis-core-v2026/
 │   │   │   ├── PricingPage.jsx      # "/pricing" — Stripe Checkout gateway
 │   │   │   ├── AuthPage.jsx         # "/auth" — sign in / sign up
 │   │   │   └── LexisApp.jsx         # "/app" — sub-300ms WebRTC voice client + heartbeat
-│   │   └── main.jsx                 # Four-route client router
+│   │   ├── App.jsx                  # Four-route client router (auth-gates /app)
+│   │   └── main.jsx                 # Mounts <App/>
 │   ├── index.html
 │   ├── vite.config.js
 │   ├── tailwind.config.js
@@ -144,6 +145,14 @@ npm run dev
 - [ ] Test a full sign-up → free trial → 403 expiry → upgrade flow from the Vercel URL
 - [ ] Confirm mic permissions on mobile Safari/Chrome
 - [ ] Set up Railway log drains for monitoring
+
+## Go-Live Verification
+Run these against the actual deployed Railway/Vercel/Supabase/Stripe stack before calling it live — none of these are exercisable from a local sandbox without real accounts, so they're separate from the automated checks above.
+
+1. **Schema applied cleanly.** Pasting `backend/supabase-schema.sql` into the Supabase SQL Editor should report success with no errors. Check **Database → Triggers** and confirm `on_auth_user_created` is attached to `auth.users`.
+2. **CORS lockdown.** `curl -I -X OPTIONS -H "Origin: https://malicious-domain.com" -H "Access-Control-Request-Method: POST" https://your-railway-app.up.railway.app/api/session` should come back with no `Access-Control-Allow-Origin` header. (Verified locally against the dev server with an equivalent disallowed-origin request — see the security checklist below — but re-run it against the real Railway URL once deployed, since `ALLOWED_ORIGINS` there is a separate value.)
+3. **Dynamic Stripe redirect.** From `https://<your-vercel-domain>/pricing`, start a checkout. The Stripe-hosted page's return URL should be `https://<your-vercel-domain>/app?payment=success` — i.e. it matches wherever the checkout was actually started from, not a hardcoded domain. This is the request-`Origin`-based resolution in `resolveFrontendOrigin()` (`backend/server.mjs`) — confirmed against multiple `ALLOWED_ORIGINS` entries (prod + a second origin) locally; worth a real end-to-end click-through once Stripe is live.
+4. **Echo cancellation under load.** Run a live session on a laptop with built-in speakers at high volume (no headphones). LEXIS's response transcript should keep streaming without the barge-in / VAD logic falsely triggering from its own audio bleeding into the mic. If it does, that's `echoCancellation: false` on that device/browser — recommend headphones for the beta cohort.
 
 ## Security Checklist
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is set only on the backend (Railway) — never in frontend env vars or committed files
