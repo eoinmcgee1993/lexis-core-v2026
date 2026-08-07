@@ -1,0 +1,8 @@
+---
+- path: backend/package.json
+  message: chore(monitoring): add @sentry/node and @sentry/tracing
+  changes:
+    dependencies:
+      "@sentry/node": "^8.0.0",
+      "@sentry/tracing": "^7.0.0"
+---
