@@ -4,12 +4,12 @@ import { useAuth } from '../context/AuthContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
-// Stripe recurring Price IDs — set these after creating the Weekly/Monthly
-// products in the Stripe Dashboard (Products → Add product → copy the
-// "price_..." ID, not the product ID). See DEPLOY.md Step 2.
+// Stripe recurring Price IDs — LIVE mode (real charges). Created via the
+// Stripe MCP connector: "LEXIS Weekly Pass" (฿199/week) and "LEXIS Monthly
+// Immersion" (฿599/month). See DEPLOY.md Step 2.
 const STRIPE_PRICES = {
-  weekly: 'price_xxxxxxxxxxxxx',   // Your real ID
-  monthly: 'price_xxxxxxxxxxxxx'   // Your real ID
+  weekly: 'price_1U1hdLF1FdEsYK5EOSheNGGS',
+  monthly: 'price_1U1hdOF1FdEsYK5Ec6DgUlil'
 };
 
 export default function PricingPage({ navigateTo }) {
