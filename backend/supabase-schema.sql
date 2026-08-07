@@ -34,13 +34,21 @@ CREATE TABLE IF NOT EXISTS public.usage_logs (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- record_heartbeat (below) inserts here on every 30s tick — index the FK so
+-- that doesn't degrade as usage_logs grows.
+CREATE INDEX IF NOT EXISTS usage_logs_user_id_idx ON public.usage_logs(user_id);
+
 -- 4. Enable Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.usage_logs ENABLE ROW LEVEL SECURITY;
 
 -- 5. RLS Policies
+-- auth.uid() is wrapped in a scalar subquery — (select auth.uid()) — per
+-- Supabase's own RLS performance guidance: written bare, it gets
+-- re-evaluated on every row scanned instead of once per query.
 DROP POLICY IF EXISTS "Users can read own profile" ON public.profiles;
-CREATE POLICY "Users can read own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can read own profile" ON public.profiles
+  FOR SELECT USING ((select auth.uid()) = id);
 
 -- No client-facing UPDATE policy on profiles, intentionally. A USING-only
 -- UPDATE policy (auth.uid() = id, no WITH CHECK) lets a signed-in user PATCH
@@ -55,7 +63,8 @@ CREATE POLICY "Users can read own profile" ON public.profiles FOR SELECT USING (
 DROP POLICY IF EXISTS "Users can update own non-billing profile data" ON public.profiles;
 
 DROP POLICY IF EXISTS "Users can view own usage logs" ON public.usage_logs;
-CREATE POLICY "Users can view own usage logs" ON public.usage_logs FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can view own usage logs" ON public.usage_logs
+  FOR SELECT USING ((select auth.uid()) = user_id);
 
 -- 6. Trigger: Auto-Create Profile on Signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -78,6 +87,16 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- handle_new_user() is a TRIGGER function — only ever meant to run
+-- implicitly via the trigger above — but PostgREST still exposes any
+-- SECURITY DEFINER function as a callable RPC (/rest/v1/rpc/handle_new_user)
+-- to anon/authenticated by default. A direct call would error out (trigger
+-- functions require a real trigger context to populate NEW/OLD) but there's
+-- no reason to leave the endpoint reachable at all. Revoking EXECUTE here
+-- does not stop the trigger itself from firing — trigger invocation isn't
+-- subject to the caller's EXECUTE grant the way a direct RPC call is.
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
 
 -- 7. Stored Procedure: Atomic Session Counter
 CREATE OR REPLACE FUNCTION public.increment_sessions(user_id_param UUID)
