@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import LandingPage from './LandingPage.jsx';
+import AuthGate from './AuthGate.jsx';
 import App from './App';
 import './index.css';
 

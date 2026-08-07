@@ -1,3 +1,7 @@
+---
+# Updated imports to include .jsx extensions in frontend
+# This file was auto-generated in the fix/jsx-imports branch.
+
 // frontend/src/App.jsx — client-side router
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -305,4 +309,3 @@ export default function App() {
       const clientSecret = data.client_secret;
       if (!clientSecret) throw new Error('Received invalid client secret from token broker.');
 
-  
