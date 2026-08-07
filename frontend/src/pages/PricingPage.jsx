@@ -4,12 +4,10 @@ import { useAuth } from '../context/AuthContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
-// Stripe recurring Price IDs — set these after creating the Weekly/Monthly
-// products in the Stripe Dashboard (Products → Add product → copy the
-// "price_..." ID, not the product ID). See DEPLOY.md Step 2.
+// Stripe recurring Price IDs — live mode, Clearmark account (acct_1T1zS9F1FdEsYK5E).
 const STRIPE_PRICES = {
-  weekly: 'price_xxxxxxxxxxxxx',   // Your real ID
-  monthly: 'price_xxxxxxxxxxxxx'   // Your real ID
+  weekly: 'price_1U1hdLF1FdEsYK5EOSheNGGS',   // LEXIS Weekly Pass — ฿199.00/week
+  monthly: 'price_1U1hdOF1FdEsYK5Ec6DgUlil'   // LEXIS Monthly Immersion — ฿599.00/month
 };
 
 export default function PricingPage({ navigateTo }) {
