@@ -1,3 +1,7 @@
+---
+# Updated imports to include .jsx extensions in frontend
+# This file was auto-generated in the fix/jsx-imports branch.
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Mic, MicOff, Volume2, Sparkles, Activity, ShieldCheck,
@@ -255,4 +259,3 @@ export default function LexisTutor({ session, profile, onProfileRefresh, onLogou
       const clientSecret = data.client_secret;
       if (!clientSecret) throw new Error('Received invalid client secret from token broker.');
 
-  
