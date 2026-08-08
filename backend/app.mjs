@@ -195,6 +195,10 @@ app.get('/health', (req, res) => {
     status: missingEnv.length ? 'Misconfigured' : 'Operational',
     system: 'LEXIS Commerce v2026.3',
     timestamp: new Date().toISOString(),
+    // Host only, never the key — lets a misconfigured-but-non-empty
+    // SUPABASE_URL (wrong project, truncated value, etc.) be spotted from
+    // the outside without needing Vercel dashboard access.
+    supabaseUrlHost: process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).host : null,
     ...(missingEnv.length ? { missingEnv } : {})
   });
 });
@@ -298,7 +302,8 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
       line_items: [{ price: priceId, quantity: 1 }],
       metadata: { user_id: req.user.id, plan_tier: planTier || 'weekly' },
       success_url: `${frontendOrigin}/app?payment=success`,
-      cancel_url: `${frontendOrigin}/pricing?payment=cancelled`
+      cancel_url: `${frontendOrigin}/pricing?payment=cancelled`,
+      allow_promotion_codes: true
     });
 
     res.json({ url: session.url });
