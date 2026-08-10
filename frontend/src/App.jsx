@@ -1,4 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import LandingPage from './pages/LandingPage';
+import PricingPage from './pages/PricingPage';
+import AuthPage from './pages/AuthPage';
+import LexisApp from './pages/LexisApp';
+
+// Four routes don't warrant a full router dependency. Every page receives
+// navigateTo(path). Auth-gating for /app lives here, once, rather than each
+// page re-deriving "am I allowed to render?" from useAuth() itself.
+function RouteController() {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const { user, loading } = useAuth();
+
+  const navigateTo = (path) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+  };
 import { useAuth } from './context/AuthContext.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import PricingPage from './pages/PricingPage.jsx';
@@ -36,4 +53,12 @@ export default function App() {
     default:
       return <LandingPage onNavigate={navigateTo} />;
   }
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <RouteController />
+    </AuthProvider>
+  );
 }
