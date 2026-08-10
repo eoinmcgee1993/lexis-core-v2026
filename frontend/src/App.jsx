@@ -1,4 +1,3 @@
-// frontend/src/App.jsx — client-side router
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
@@ -17,6 +16,15 @@ function RouteController() {
     window.history.pushState({}, '', path);
     setCurrentPath(path);
   };
+import { useAuth } from './context/AuthContext.jsx';
+import LandingPage from './pages/LandingPage.jsx';
+import PricingPage from './pages/PricingPage.jsx';
+import AuthPage from './pages/AuthPage.jsx';
+import LexisApp from './pages/LexisApp.jsx';
+
+export default function App() {
+  const { user } = useAuth();
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
   useEffect(() => {
     const handlePopState = () => setCurrentPath(window.location.pathname);
@@ -24,29 +32,26 @@ function RouteController() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Only /app needs a definitive signed-in/out answer before it can decide
-  // what to render. Gating every route (including the public landing page)
-  // behind the initial Supabase session check means every marketing visitor
-  // — the entire point of a landing page — sees a blank loading spinner
-  // before the hero ever paints, for an auth check they don't need.
-  if (currentPath === '/app') {
-    if (loading) {
-      return (
-        <div className="min-h-screen bg-slate-950 text-slate-400 font-mono text-xs flex items-center justify-center">
-          Loading LEXIS…
-        </div>
-      );
-    }
-    return user ? <LexisApp navigateTo={navigateTo} /> : <AuthPage navigateTo={navigateTo} />;
+  const navigateTo = (path) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+  };
+
+  if (currentPath === '/app' && !user) {
+    return <AuthPage onNavigate={navigateTo} />;
   }
 
   switch (currentPath) {
+    case '/app':
+      return <LexisApp navigateTo={navigateTo} />;
     case '/pricing':
-      return <PricingPage navigateTo={navigateTo} />;
+      return <PricingPage onNavigate={navigateTo} />;
     case '/auth':
-      return <AuthPage navigateTo={navigateTo} />;
+      return <AuthPage onNavigate={navigateTo} />;
+    case '/':
+    case '/landing':
     default:
-      return <LandingPage navigateTo={navigateTo} />;
+      return <LandingPage onNavigate={navigateTo} />;
   }
 }
 
