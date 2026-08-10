@@ -8,12 +8,6 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 const STRIPE_PRICES = {
   weekly: 'price_1U1hdLF1FdEsYK5EOSheNGGS',   // LEXIS Weekly Pass — ฿199.00/week
   monthly: 'price_1U1hdOF1FdEsYK5Ec6DgUlil'   // LEXIS Monthly Immersion — ฿599.00/month
-// Stripe recurring Price IDs — LIVE mode (real charges). Created via the
-// Stripe MCP connector: "LEXIS Weekly Pass" (฿199/week) and "LEXIS Monthly
-// Immersion" (฿599/month). See DEPLOY.md Step 2.
-const STRIPE_PRICES = {
-  weekly: 'price_1U1hdLF1FdEsYK5EOSheNGGS',
-  monthly: 'price_1U1hdOF1FdEsYK5Ec6DgUlil'
 };
 
 export default function PricingPage({ navigateTo }) {

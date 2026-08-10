@@ -28,6 +28,20 @@ if (missingEnv.length) {
   console.error(`[LEXIS Fatal Error] Missing required environment variable(s): ${missingEnv.join(', ')}`);
 }
 
+// Logged once at startup (Vercel runtime logs / Railway logs), never
+// returned over HTTP — a non-empty-but-wrong SUPABASE_URL (wrong project,
+// truncated value, stray character) needs to be diagnosable without
+// dashboard access, but the host is still infra detail an unauthenticated
+// caller has no reason to see. Guarded: a malformed value must not throw
+// here and take the whole module down at import time.
+if (process.env.SUPABASE_URL) {
+  try {
+    console.log(`[LEXIS] Configured SUPABASE_URL host: ${new URL(process.env.SUPABASE_URL).host}`);
+  } catch {
+    console.error(`[LEXIS Fatal Error] SUPABASE_URL is set but not a valid URL: "${process.env.SUPABASE_URL}"`);
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────────────── */
 /* 2. CLIENTS                                                              */
 /* ─────────────────────────────────────────────────────────────────────── */
@@ -195,10 +209,6 @@ app.get('/health', (req, res) => {
     status: missingEnv.length ? 'Misconfigured' : 'Operational',
     system: 'LEXIS Commerce v2026.3',
     timestamp: new Date().toISOString(),
-    // Host only, never the key — lets a misconfigured-but-non-empty
-    // SUPABASE_URL (wrong project, truncated value, etc.) be spotted from
-    // the outside without needing Vercel dashboard access.
-    supabaseUrlHost: process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).host : null,
     ...(missingEnv.length ? { missingEnv } : {})
   });
 });
