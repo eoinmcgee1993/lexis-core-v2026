@@ -27,4 +27,15 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: #475569;
   }
+
+  /* Tutor avatar's idle blink (LexisApp.jsx's <TutorAvatar>) — a periodic,
+     natural-feeling blink independent of the live audio-driven mouth. */
+  .lexis-avatar-eye {
+    transform-origin: center;
+    animation: lexis-avatar-blink 4.5s ease-in-out infinite;
+  }
+  @keyframes lexis-avatar-blink {
+    0%, 96%, 100% { transform: scaleY(1); }
+    98% { transform: scaleY(0.1); }
+  }
 }

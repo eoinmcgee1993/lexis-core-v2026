@@ -3,11 +3,44 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import {
-  Mic, MicOff, Volume2, VolumeX, Sparkles, Activity, ShieldCheck,
+  Mic, MicOff, Volume2, VolumeX, Sparkles, ShieldCheck,
   AlertCircle, PhoneOff, RotateCcw, Hand, LogOut, CreditCard, Clock
 } from 'lucide-react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+
+// The tutor's face. A live avatar was the actual point of the product —
+// an abstract pulsing ring never was. Mouth height is driven by tutorLevel
+// (LEXIS's own voice energy specifically, not the combined mic+AI level
+// used for the ambient ring/waveform), so it opens when LEXIS talks and
+// stays shut while the student is the one speaking. No lip-sync vendor,
+// no new cost — same live analyser data the app was already computing.
+function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
+  const mouthHeight = 4 + Math.min(18, (tutorLevel / 100) * 18);
+  const active = isConnected || isConnecting;
+  return (
+    <svg viewBox="0 0 100 100" className="w-20 h-20 md:w-28 md:h-28" role="img" aria-label="LEXIS tutor avatar">
+      <defs>
+        <radialGradient id="lexisFaceGradient" cx="35%" cy="30%" r="80%">
+          <stop offset="0%" stopColor={active ? '#0e7490' : '#1e293b'} />
+          <stop offset="100%" stopColor={active ? '#083344' : '#0f172a'} />
+        </radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="46" fill="url(#lexisFaceGradient)" stroke={isConnected ? '#22d3ee' : '#475569'} strokeWidth="2" />
+      <ellipse cx="34" cy="42" rx="5" ry="6" className="lexis-avatar-eye" fill={active ? '#5eead4' : '#475569'} />
+      <ellipse cx="66" cy="42" rx="5" ry="6" className="lexis-avatar-eye" fill={active ? '#5eead4' : '#475569'} />
+      <rect
+        x="35"
+        y={62 - mouthHeight / 2}
+        width="30"
+        height={mouthHeight}
+        rx={mouthHeight / 2}
+        fill={isConnected ? '#34eba0' : '#334155'}
+        style={{ transition: 'height 60ms ease-out, y 60ms ease-out' }}
+      />
+    </svg>
+  );
+}
 
 function formatUsageLabel(profile) {
   if (profile.subscription_status === 'active') {
@@ -32,6 +65,7 @@ export default function LexisApp({ navigateTo }) {
   const [status, setStatus] = useState('Idle');
   const [transcripts, setTranscripts] = useState([]);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [tutorLevel, setTutorLevel] = useState(0); // LEXIS's own voice energy, drives the avatar's mouth
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
@@ -150,6 +184,7 @@ export default function LexisApp({ navigateTo }) {
 
         const effectiveLevel = Math.max(localLevel, remoteLevel * 0.9);
         setAudioLevel(Math.min(100, Math.round((effectiveLevel / 128) * 100)));
+        setTutorLevel(Math.min(100, Math.round((remoteLevel / 128) * 100)));
 
         // Render Canvas Waveform Ring
         const canvas = canvasRef.current;
@@ -455,6 +490,7 @@ export default function LexisApp({ navigateTo }) {
     setIsConnecting(false);
     setStatus('Disconnected');
     setAudioLevel(0);
+    setTutorLevel(0);
   };
 
   // Defensive fallback only — App.jsx's router guarantees a session exists
@@ -530,7 +566,7 @@ export default function LexisApp({ navigateTo }) {
             <div className={`w-32 h-32 md:w-44 md:h-44 rounded-full flex items-center justify-center border ${
               isConnected ? 'bg-cyan-950/40 border-cyan-400/50 shadow-inner' : 'bg-slate-800/50 border-slate-700'
             }`}>
-              <Activity className={`w-12 h-12 ${isConnected ? 'text-cyan-400 animate-pulse' : 'text-slate-600'}`} />
+              <TutorAvatar isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />
             </div>
           </div>
           <div className="absolute -bottom-8 text-center">
