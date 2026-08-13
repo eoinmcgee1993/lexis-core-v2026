@@ -408,6 +408,9 @@ export default function LexisApp({ navigateTo }) {
       // clientSecret via /v1/realtime/client_secrets, and this endpoint
       // rejects it as an unexpected parameter (same strictness that broke
       // the backend's session.turn_detection placement earlier).
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
       const sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
         method: 'POST',
         body: offer.sdp,
