@@ -238,7 +238,21 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
           model: process.env.OPENAI_MODEL || 'gpt-4o-realtime-preview-2024-12-17',
           audio: {
             output: { voice: 'verse' },
-            input: { transcription: { model: 'whisper-1' } }
+            input: {
+              transcription: { model: 'whisper-1' },
+              // Lives under audio.input in the client_secrets session shape —
+              // not a top-level session field. Left at the old top-level
+              // location this is silently rejected as an unknown parameter
+              // and /api/session 400s outright, which is what actually broke
+              // "start a session" (the invalid OPENAI_API_KEY masked this
+              // underneath it until that got fixed).
+              turn_detection: {
+                type: 'server_vad',
+                threshold: 0.5,
+                prefix_padding_ms: 400,
+                silence_duration_ms: 800
+              }
+            }
           },
           instructions: `You are LEXIS, an elite AI English tutor designed specifically for Thai youth.
 Speak clearly, naturally, warmly, and at a measured pace.
@@ -262,13 +276,7 @@ DELIVERY — target these specific Thai-ESL listening patterns, not just word ch
   quickly.
 - Warmth matters as much as correctness: an occasional light laugh or "Nice try!" before a
   correction keeps this encouraging rather than clinical — but don't overdo it, once per turn
-  at most.`,
-          turn_detection: {
-            type: 'server_vad',
-            threshold: 0.5,
-            prefix_padding_ms: 400,
-            silence_duration_ms: 800
-          }
+  at most.`
         }
       }),
     });
