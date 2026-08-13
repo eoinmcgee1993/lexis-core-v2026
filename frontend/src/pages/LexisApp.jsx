@@ -403,14 +403,12 @@ export default function LexisApp({ navigateTo }) {
         }
       };
 
-      // 6. SDP Exchange with OpenAI Calls Gateway
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-
-      const baseUrl = 'https://api.openai.com/v1/realtime';
-      const model = 'gpt-4o-realtime-preview-2024-12-17';
-
-      const sdpResponse = await fetch(`${baseUrl}/calls?model=${model}`, {
+      // 6. SDP Exchange with OpenAI Calls Gateway. No `model` query param —
+      // the model is already bound to the session the backend used to mint
+      // clientSecret via /v1/realtime/client_secrets, and this endpoint
+      // rejects it as an unexpected parameter (same strictness that broke
+      // the backend's session.turn_detection placement earlier).
+      const sdpResponse = await fetch('https://api.openai.com/v1/realtime/calls', {
         method: 'POST',
         body: offer.sdp,
         headers: {
