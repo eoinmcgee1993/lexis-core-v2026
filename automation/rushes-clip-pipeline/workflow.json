@@ -1,0 +1,690 @@
+{
+  "name": "Rushes clip pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rushes-clip-pipeline",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "4d45dcd2-d567-4b16-866c-cb21d845fb85",
+      "name": "New Job (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1200,
+        300
+      ],
+      "webhookId": "rushes-clip-pipeline"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "client_name",
+              "type": "string",
+              "value": "={{ $json.body.client_name }}"
+            },
+            {
+              "id": "a2",
+              "name": "source_url",
+              "type": "string",
+              "value": "={{ $json.body.source_url }}"
+            },
+            {
+              "id": "a3",
+              "name": "brief",
+              "type": "string",
+              "value": "={{ $json.body.brief }}"
+            },
+            {
+              "id": "a4",
+              "name": "orientation",
+              "type": "string",
+              "value": "={{ $json.body.orientation || 'portrait' }}"
+            },
+            {
+              "id": "a5",
+              "name": "notify_email",
+              "type": "string",
+              "value": "={{ $json.body.notify_email || 'YOUR_TEAM@yourdomain.com' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4aadfaec-a3dc-480a-8962-f7ff8bc22594",
+      "name": "Normalize Job Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -960,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: \"accepted\", message: \"Job received \\u2014 you'll get an email once clips are ready.\", client_name: $json.client_name } }}",
+        "options": {}
+      },
+      "id": "5f0e77dd-0620-4103-9af8-874d3141b063",
+      "name": "Respond: Job Accepted",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.reap.video/v1/projects",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_REAP_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ source_url: $json.source_url, brief: $json.brief, orientation: $json.orientation, client_name: $json.client_name }) }}",
+        "options": {}
+      },
+      "id": "f08606b5-4edc-40c4-9731-59f63dcfe3d1",
+      "name": "Reap: Create Clips",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "project_id",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "id": "b2",
+              "name": "poll_count",
+              "type": "number",
+              "value": 0
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7317a148-3ec9-4573-9ef6-e941c0d3263c",
+      "name": "Init Poll State",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "project_id",
+              "type": "string",
+              "value": "={{ $json.project_id || $('Init Poll State').item.json.project_id }}"
+            },
+            {
+              "id": "c2",
+              "name": "poll_count",
+              "type": "number",
+              "value": "={{ ($json.poll_count || 0) + 1 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d6857520-de76-42f0-a93d-825ba4a33a68",
+      "name": "Increment Poll Count",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 60,
+        "unit": "seconds"
+      },
+      "id": "223b2c61-e0ef-4ed3-82cb-44f217913a8c",
+      "name": "Wait 60s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ \"https://api.reap.video/v1/projects/\" + $('Init Poll State').item.json.project_id + \"/status\" }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_REAP_API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d3d8b08c-d001-4251-92eb-e9c6c3225ca6",
+      "name": "Reap: Get Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1",
+              "name": "status",
+              "type": "string",
+              "value": "={{ $json.status }}"
+            },
+            {
+              "id": "d2",
+              "name": "poll_count",
+              "type": "number",
+              "value": "={{ $('Increment Poll Count').item.json.poll_count }}"
+            },
+            {
+              "id": "d3",
+              "name": "project_id",
+              "type": "string",
+              "value": "={{ $('Init Poll State').item.json.project_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6b70f7d5-3f19-4587-b3ac-42b0e3e51748",
+      "name": "Merge Poll State",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "e1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2c5e12fc-8964-4f6d-9428-a2a1de8e777c",
+      "name": "IF: Status Complete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "f1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "failed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "f2",
+              "leftValue": "={{ $json.poll_count }}",
+              "rightValue": 30,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "8e55d695-b92b-4f14-b1b8-f81c323c358f",
+      "name": "IF: Failed or Timed Out?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ \"https://api.reap.video/v1/projects/\" + $json.project_id + \"/clips\" }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_REAP_API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "01723a0b-f159-45da-9f7f-bca97bafb2dd",
+      "name": "Reap: Get Clips",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "clips",
+        "options": {}
+      },
+      "id": "92efc88d-af92-41a8-bef9-7febd6ac958c",
+      "name": "Split Clips",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_ANTHROPIC_API_KEY"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"claude-sonnet-5\", max_tokens: 1024, messages: [ { role: \"user\", content: \"You are doing quality control on a video clip generated by an AI clipping tool, before it goes back to a client.\n\nCLIENT BRIEF:\n\" + $('Normalize Job Input').item.json.brief + \"\n\nCLIP UNDER REVIEW:\nTitle: \" + ($json.title || \"(no title)\") + \"\nDuration: \" + ($json.duration || \"unknown\") + \"s\nURL: \" + ($json.url || $json.download_url || \"\") + \"\nTranscript: \" + ($json.transcript || \"(not provided)\") + \"\n\nCheck the clip against the brief on these points:\n1. Does it match what the brief asked for (topic, tone, length limit)?\n2. Does it stand alone without extra context (a viewer who wasn't on the call understands it)?\n3. Is the title strong and accurate?\n4. Is there any risky cut — a sentence cut mid-thought, a promise or claim taken out of context, anything that could embarrass the client?\n\nThis is a starter rubric, not the client's real standardised workflow rules — replace this prompt once those are written down.\n\nReply with ONLY valid JSON, no other text, in this exact shape:\n{\\\"verdict\\\": \\\"pass\\\" or \\\"review\\\", \\\"reason\\\": \\\"one or two sentence explanation\\\"}\" } ] }) }}",
+        "options": {}
+      },
+      "id": "36bdd390-44d0-4357-8077-b000f6970ed4",
+      "name": "Claude: QC Review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all();\nconst splitItems = $('Split Clips').all();\nconst brief = $('Normalize Job Input').item.json.brief;\nconst clientName = $('Normalize Job Input').item.json.client_name;\nconst toEmail = $('Normalize Job Input').item.json.notify_email || 'YOUR_TEAM@yourdomain.com';\n\nconst passed = [];\nconst review = [];\n\nitems.forEach((item, i) => {\n  const clip = (splitItems[i] && splitItems[i].json) || {};\n  let verdict = { verdict: 'review', reason: 'Could not parse the QC response - check manually.' };\n  try {\n    const text = item.json.content[0].text;\n    const parsed = JSON.parse(text);\n    if (parsed && parsed.verdict) verdict = parsed;\n  } catch (e) {\n    // leave default \"review\" verdict above\n  }\n\n  const row = {\n    title: clip.title || 'Untitled clip',\n    url: clip.url || clip.download_url || '',\n    reason: verdict.reason || ''\n  };\n\n  (verdict.verdict === 'pass' ? passed : review).push(row);\n});\n\nfunction renderRows(rows) {\n  if (!rows.length) return '<p style=\"color:#888;margin:0 0 16px;\">None</p>';\n  return '<ul style=\"margin:0 0 16px;padding-left:20px;\">' + rows.map(r =>\n    '<li style=\"margin-bottom:8px;\"><strong>' + r.title + '</strong>' +\n    (r.url ? ' &mdash; <a href=\"' + r.url + '\">' + r.url + '</a>' : '') +\n    (r.reason ? '<br><span style=\"color:#555;\">' + r.reason + '</span>' : '') +\n    '</li>'\n  ).join('') + '</ul>';\n}\n\nconst html =\n  '<h2>Rushes QC summary &mdash; ' + (clientName || 'Untitled job') + '</h2>' +\n  '<p><strong>Brief:</strong> ' + (brief || '') + '</p>' +\n  '<h3>&#9989; Passed (' + passed.length + ')</h3>' + renderRows(passed) +\n  '<h3>&#9888;&#65039; Needs a look (' + review.length + ')</h3>' + renderRows(review);\n\nreturn [{\n  json: {\n    to_email: toEmail,\n    subject: 'Rushes QC: ' + (clientName || 'job') + ' — ' + passed.length + ' passed, ' + review.length + ' to review',\n    html\n  }\n}];"
+      },
+      "id": "70d48f63-ff6b-4ed6-9cde-c6fa101e70e0",
+      "name": "Build QC Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_RESEND_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ from: \"Rushes QC <qc@YOUR_VERIFIED_DOMAIN.com>\", to: [ $json.to_email ], subject: $json.subject, html: $json.html }) }}",
+        "options": {}
+      },
+      "id": "dde6ccc2-9f8b-45e7-b676-2fe12663afdf",
+      "name": "Resend: Send QC Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2160,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_RESEND_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ from: \"Rushes QC <qc@YOUR_VERIFIED_DOMAIN.com>\", to: [ $('Normalize Job Input').item.json.notify_email || \"YOUR_TEAM@yourdomain.com\" ], subject: \"Rushes pipeline FAILED — \" + ($('Normalize Job Input').item.json.client_name || \"unknown client\"), html: \"<p>The Rushes clip pipeline failed or timed out for <strong>\" + ($('Normalize Job Input').item.json.client_name || \"unknown client\") + \"</strong>.</p><p>Source: \" + ($('Normalize Job Input').item.json.source_url || \"\") + \"</p><p>Last known status: \" + ($json.status || \"unknown\") + \" after \" + ($json.poll_count || \"?\") + \" checks.</p>\" }) }}",
+        "options": {}
+      },
+      "id": "64b2822c-0039-418e-993a-34dbeb7b53ec",
+      "name": "Resend: Send Failure Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Rushes clip pipeline\n\nPOST a link + brief → Reap generates clips → Claude QC-reviews every clip against the brief → Resend emails what passed and what needs a look.\n\n**Before first run:** paste your Reap / Anthropic / Resend keys into the HTTP nodes below (see SETUP.md in this folder), then move them into n8n credentials once it's working.\n\n**Polling loop:** checks Reap every 60s, gives up (and alerts) after 30 checks (~30 min) via the poll_count counter, so a stuck Reap project can't loop forever.",
+        "height": 220,
+        "width": 480,
+        "color": 4
+      },
+      "id": "adeff512-cb64-41c9-9053-de1b10104b30",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Where the API keys go\n\n- `Reap: Create Clips`, `Reap: Get Status`, `Reap: Get Clips` → `Authorization: Bearer YOUR_REAP_API_KEY`\n- `Claude: QC Review` → `x-api-key: YOUR_ANTHROPIC_API_KEY`\n- `Resend: Send QC Summary`, `Resend: Send Failure Alert` → `Authorization: Bearer YOUR_RESEND_API_KEY`, plus a real `from` domain and `to` address\n\nAlso replace the QC rubric text inside `Claude: QC Review` with the client's real standardised rules once those are written down — what's there now is a starter checklist.",
+        "height": 260,
+        "width": 620,
+        "color": 5
+      },
+      "id": "b57bb41e-0380-4256-a82b-eed595fd6b8a",
+      "name": "Config keys",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        560
+      ]
+    }
+  ],
+  "connections": {
+    "New Job (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Normalize Job Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Job Input": {
+      "main": [
+        [
+          {
+            "node": "Respond: Job Accepted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond: Job Accepted": {
+      "main": [
+        [
+          {
+            "node": "Reap: Create Clips",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reap: Create Clips": {
+      "main": [
+        [
+          {
+            "node": "Init Poll State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Poll State": {
+      "main": [
+        [
+          {
+            "node": "Increment Poll Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increment Poll Count": {
+      "main": [
+        [
+          {
+            "node": "Wait 60s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 60s": {
+      "main": [
+        [
+          {
+            "node": "Reap: Get Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reap: Get Status": {
+      "main": [
+        [
+          {
+            "node": "Merge Poll State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Poll State": {
+      "main": [
+        [
+          {
+            "node": "IF: Status Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Status Complete?": {
+      "main": [
+        [
+          {
+            "node": "Reap: Get Clips",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF: Failed or Timed Out?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Failed or Timed Out?": {
+      "main": [
+        [
+          {
+            "node": "Resend: Send Failure Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Increment Poll Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reap: Get Clips": {
+      "main": [
+        [
+          {
+            "node": "Split Clips",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Clips": {
+      "main": [
+        [
+          {
+            "node": "Claude: QC Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude: QC Review": {
+      "main": [
+        [
+          {
+            "node": "Build QC Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build QC Summary": {
+      "main": [
+        [
+          {
+            "node": "Resend: Send QC Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "221568e5-7ca1-4663-863a-52a39adf4369"
+  }
+}
