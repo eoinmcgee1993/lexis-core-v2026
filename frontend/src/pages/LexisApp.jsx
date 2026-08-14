@@ -6,8 +6,14 @@ import {
   Mic, MicOff, Volume2, VolumeX, Sparkles, ShieldCheck,
   AlertCircle, PhoneOff, RotateCcw, Hand, LogOut, CreditCard, Clock
 } from 'lucide-react';
+import TutorAvatarPhoto from '../components/TutorAvatarPhoto';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+
+// Avatar priority: photo (best quality, cheapest — a real portrait, no
+// three.js) > 3D model (VITE_AVATAR_GLB_URL) > SVG placeholder. Each tier
+// only costs anything when its env var is actually set.
+const AVATAR_PHOTO_URL = import.meta.env.VITE_AVATAR_PHOTO_URL;
 
 // Optional 3D avatar model (MetaPerson / Ready Player Me .glb export). When
 // set, LEXIS renders a modeled 3D face instead of the SVG placeholder below,
@@ -79,6 +85,19 @@ class AvatarErrorBoundary extends React.Component {
 
 function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
   const svgFallback = <TutorAvatarSVG isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />;
+  const [photoFailed, setPhotoFailed] = useState(false);
+
+  if (AVATAR_PHOTO_URL && !photoFailed) {
+    return (
+      <TutorAvatarPhoto
+        photoUrl={AVATAR_PHOTO_URL}
+        isConnected={isConnected}
+        isConnecting={isConnecting}
+        tutorLevel={tutorLevel}
+        onError={() => setPhotoFailed(true)}
+      />
+    );
+  }
   if (!TutorAvatar3D) {
     return svgFallback;
   }
