@@ -363,7 +363,7 @@ export default function LexisApp({ navigateTo }) {
             try {
               const { data: { session: freshSession } } = await supabase.auth.getSession();
               if (!freshSession) {
-                endSession();
+                endSession('Session expired. Please sign in again.');
                 return;
               }
               const res = await fetch(`${BACKEND_URL}/api/heartbeat`, {
@@ -377,7 +377,7 @@ export default function LexisApp({ navigateTo }) {
                 const err = await res.json().catch(() => ({}));
                 setUpgradeRequired(true);
                 setUpgradeMessage(err.message || 'Usage limit reached. Please upgrade your pass.');
-                endSession();
+                endSession('Usage limit reached.');
               } else if (res.ok) {
                 refreshProfile(); // keeps the header's remaining-time display live
               }
@@ -387,8 +387,7 @@ export default function LexisApp({ navigateTo }) {
           }, 30000);
 
         } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-          setStatus('Connection lost. Cleaning up...');
-          endSession();
+          endSession('Connection lost. Cleaning up...');
         }
       };
 
@@ -496,9 +495,7 @@ export default function LexisApp({ navigateTo }) {
 
     } catch (err) {
       console.error('[LEXIS Session Error]', err);
-      setStatus(`Error: ${err.message}`);
-      setIsConnecting(false);
-      endSession();
+      endSession(`Error: ${err.message}`);
     }
   };
 
@@ -529,7 +526,13 @@ export default function LexisApp({ navigateTo }) {
     }
   };
 
-  const endSession = () => {
+  // finalStatus lets a caller that already knows *why* the session is
+  // ending say so — endSession used to unconditionally stamp 'Disconnected'
+  // over whatever specific status a caller had just set (e.g. a real error
+  // message, or 'Connection lost'), silently discarding it before the user
+  // ever saw it. Every failure mode collapsed to the same uninformative
+  // "Disconnected", which is exactly what was reported live.
+  const endSession = (finalStatus = 'Disconnected') => {
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
@@ -556,7 +559,7 @@ export default function LexisApp({ navigateTo }) {
     remoteAudioRef.current = null;
     setIsConnected(false);
     setIsConnecting(false);
-    setStatus('Disconnected');
+    setStatus(finalStatus);
     setAudioLevel(0);
     setTutorLevel(0);
   };
@@ -664,7 +667,7 @@ export default function LexisApp({ navigateTo }) {
               <button onClick={forceInterrupt} className="p-3.5 bg-slate-800 border border-slate-700 text-slate-200 rounded-xl hover:bg-slate-700" title="Manual Interrupt">
                 <Hand className="w-5 h-5 text-amber-400" />
               </button>
-              <button onClick={endSession} className="px-6 py-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-semibold rounded-xl flex items-center space-x-2">
+              <button onClick={() => endSession()} className="px-6 py-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-semibold rounded-xl flex items-center space-x-2">
                 <PhoneOff className="w-5 h-5" />
                 <span>TERMINATE</span>
               </button>

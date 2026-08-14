@@ -238,19 +238,21 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
           model: process.env.OPENAI_MODEL || 'gpt-4o-realtime-preview-2024-12-17',
           audio: {
             output: { voice: 'verse' },
-            input: { transcription: { model: 'whisper-1' } }
+            input: {
+              transcription: { model: 'whisper-1' },
+              turn_detection: {
+                type: 'server_vad',
+                threshold: 0.5,
+                prefix_padding_ms: 400,
+                silence_duration_ms: 800
+              }
+            }
           },
           instructions: `You are LEXIS, an elite AI English tutor designed specifically for Thai youth.
 Speak clearly, naturally, warmly, and at a measured pace.
 Keep each response short (15-25 words max) to maximize student speaking time.
 Correct speech errors gently by modeling the proper phrase, then ask a simple follow-up question.
-Be patient when the student pauses or hesitates.`,
-          turn_detection: {
-            type: 'server_vad',
-            threshold: 0.5,
-            prefix_padding_ms: 400,
-            silence_duration_ms: 800
-          }
+Be patient when the student pauses or hesitates.`
         }
       }),
     });
