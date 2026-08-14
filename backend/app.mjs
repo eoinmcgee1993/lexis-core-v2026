@@ -235,7 +235,13 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
       body: JSON.stringify({
         session: {
           type: 'realtime',
-          model: process.env.OPENAI_MODEL || 'gpt-4o-realtime-preview-2024-12-17',
+          // gpt-4o-realtime-preview-2024-12-17 (the old default here) 404s
+          // on POST /v1/realtime/calls — that dated preview snapshot isn't
+          // routable through the newer WebRTC calls gateway paired with
+          // client_secrets; OpenAI's own docs for this exact flow only ever
+          // reference the gpt-realtime family. Confirmed live: token minting
+          // and getUserMedia both succeeded, only the SDP exchange 404'd.
+          model: process.env.OPENAI_MODEL || 'gpt-realtime',
           audio: {
             output: { voice: 'verse' },
             input: {
