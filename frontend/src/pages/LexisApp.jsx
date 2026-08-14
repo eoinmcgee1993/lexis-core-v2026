@@ -278,7 +278,17 @@ export default function LexisApp({ navigateTo }) {
       });
       pcRef.current = pc;
 
+      // Separate from onconnectionstatechange below — ICE state fails first
+      // and more specifically (STUN-only negotiation actually breaking),
+      // while connectionState just reports the aggregate outcome afterward.
+      // Logged so a failure is diagnosable from the browser console instead
+      // of only ever showing the generic word "Disconnected".
+      pc.oniceconnectionstatechange = () => {
+        console.log('[LEXIS ICE State]', pc.iceConnectionState);
+      };
+
       pc.onconnectionstatechange = () => {
+        console.log('[LEXIS Connection State]', pc.connectionState);
         if (pc.connectionState === 'connected') {
           setStatus('LEXIS Active (Sub-300ms WebRTC)');
           setIsConnected(true);
@@ -319,8 +329,18 @@ export default function LexisApp({ navigateTo }) {
           }, 30000);
 
         } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-          setStatus('Connection lost. Cleaning up...');
-          endSession();
+          // Was 'Connection lost. Cleaning up...' followed immediately by
+          // endSession(), which unconditionally reset status to the generic
+          // 'Disconnected' — clobbering any specific reason before the user
+          // (or us, reading a screenshot) ever saw it. A 'failed' ICE state
+          // specifically — as opposed to a clean 'disconnected' — is the
+          // classic signature of STUN-only negotiation not surviving a
+          // carrier-grade NAT (common on mobile data), so call that out
+          // rather than showing an unhelpfully generic message.
+          const reason = pc.iceConnectionState === 'failed'
+            ? 'Connection failed — network blocked WebRTC (try Wi-Fi if on mobile data)'
+            : `Connection ${pc.connectionState}`;
+          endSession(reason);
         }
       };
 
@@ -429,9 +449,8 @@ export default function LexisApp({ navigateTo }) {
 
     } catch (err) {
       console.error('[LEXIS Session Error]', err);
-      setStatus(`Error: ${err.message}`);
       setIsConnecting(false);
-      endSession();
+      endSession(`Error: ${err.message}`);
     }
   };
 
@@ -462,7 +481,7 @@ export default function LexisApp({ navigateTo }) {
     }
   };
 
-  const endSession = () => {
+  const endSession = (finalStatus = 'Disconnected') => {
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
@@ -489,7 +508,7 @@ export default function LexisApp({ navigateTo }) {
     remoteAudioRef.current = null;
     setIsConnected(false);
     setIsConnecting(false);
-    setStatus('Disconnected');
+    setStatus(finalStatus);
     setAudioLevel(0);
     setTutorLevel(0);
   };
