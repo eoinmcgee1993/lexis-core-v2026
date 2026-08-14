@@ -55,14 +55,39 @@ function TutorAvatarSVG({ isConnected, isConnecting, tutorLevel }) {
   );
 }
 
+// Suspense only covers the *pending* state (the lazy import / useGLTF load
+// in flight) — it does nothing for a load that actually fails (404, CORS,
+// a corrupt/invalid .glb). Without this, a bad VITE_AVATAR_GLB_URL throws
+// past Suspense and, with no boundary to catch it, takes down the whole
+// LexisApp tree instead of just falling back to the SVG face. Caught during
+// PR review — see https://github.com/eoinmcgee1993/lexis-core-v2026/pull/13.
+class AvatarErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error) {
+    console.warn('[LEXIS Avatar] 3D model failed to load — falling back to the SVG face.', error);
+  }
+  render() {
+    return this.state.hasError ? this.props.fallback : this.props.children;
+  }
+}
+
 function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
+  const svgFallback = <TutorAvatarSVG isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />;
   if (!TutorAvatar3D) {
-    return <TutorAvatarSVG isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />;
+    return svgFallback;
   }
   return (
-    <Suspense fallback={<TutorAvatarSVG isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />}>
-      <TutorAvatar3D url={AVATAR_GLB_URL} isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />
-    </Suspense>
+    <AvatarErrorBoundary fallback={svgFallback}>
+      <Suspense fallback={svgFallback}>
+        <TutorAvatar3D url={AVATAR_GLB_URL} isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />
+      </Suspense>
+    </AvatarErrorBoundary>
   );
 }
 

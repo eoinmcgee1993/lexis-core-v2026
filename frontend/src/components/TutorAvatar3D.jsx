@@ -85,7 +85,14 @@ export default function TutorAvatar3D({ url, tutorLevel, isConnected, isConnecti
   const active = isConnected || isConnecting;
   return (
     <div className={`w-full h-full transition-opacity duration-300 ${active ? 'opacity-100' : 'opacity-70'}`}>
-      <Canvas camera={{ position: [0, 1.55, 0.9], fov: 30 }} dpr={[1, 2]}>
+      {/* R3F points the default camera at world origin (0,0,0) whenever
+          you pass only `position` (no explicit rotation) — see
+          @react-three/fiber's canvas setup. So the model needs its head
+          centered near the origin, not at human-scale "head height"; this
+          position/fov frames a head+shoulders bust for a model built that
+          way (see scripts/avatar/generate_avatar.py). If you swap in a
+          full-scale standing avatar export instead, re-tune this. */}
+      <Canvas camera={{ position: [0, 0.05, 0.62], fov: 32 }} dpr={[1, 2]}>
         <ambientLight intensity={0.9} />
         <directionalLight position={[1, 2, 2]} intensity={1.1} />
         <Suspense fallback={null}>
