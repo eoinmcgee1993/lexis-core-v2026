@@ -294,9 +294,15 @@ DELIVERY — target these specific Thai-ESL listening patterns, not just word ch
       console.error('[LEXIS Supabase] increment_sessions RPC failed (non-fatal):', rpcError);
     }
 
+    // /v1/realtime/client_secrets returns a flat body — { value, expires_at,
+    // session } — not a nested `client_secret` object. Reading
+    // sessionData.client_secret?.value silently produced undefined (the
+    // optional-chain swallowed the missing property instead of throwing),
+    // so response.ok was true and this always 200'd with an empty body —
+    // the frontend then correctly rejected it as "invalid client secret".
     res.json({
-      client_secret: sessionData.client_secret?.value,
-      expires_at: sessionData.client_secret?.expires_at
+      client_secret: sessionData.value,
+      expires_at: sessionData.expires_at
     });
 
   } catch (err) {
