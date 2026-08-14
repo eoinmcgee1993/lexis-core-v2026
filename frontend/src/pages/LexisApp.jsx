@@ -616,7 +616,7 @@ export default function LexisApp({ navigateTo }) {
               <button onClick={forceInterrupt} className="p-3.5 bg-slate-800 border border-slate-700 text-slate-200 rounded-xl hover:bg-slate-700" title="Manual Interrupt">
                 <Hand className="w-5 h-5 text-amber-400" />
               </button>
-              <button onClick={endSession} className="px-6 py-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-semibold rounded-xl flex items-center space-x-2">
+              <button onClick={() => endSession()} className="px-6 py-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-semibold rounded-xl flex items-center space-x-2">
                 <PhoneOff className="w-5 h-5" />
                 <span>TERMINATE</span>
               </button>
