@@ -1,5 +1,5 @@
 // frontend/src/pages/LexisApp.jsx — Reconciled Commercial WebRTC Client
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { Suspense, useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import {
@@ -9,13 +9,26 @@ import {
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
+// Optional 3D avatar model (MetaPerson / Ready Player Me .glb export). When
+// set, LEXIS renders a modeled 3D face instead of the SVG placeholder below,
+// still driven by the exact same tutorLevel data — see TutorAvatar3D.jsx.
+// Lazy-loaded (and three.js/@react-three only pulled into the bundle at all)
+// when this is actually configured, so an unset/still-being-made avatar
+// asset costs nothing and never blocks a session.
+const AVATAR_GLB_URL = import.meta.env.VITE_AVATAR_GLB_URL;
+const TutorAvatar3D = AVATAR_GLB_URL ? React.lazy(() => import('../components/TutorAvatar3D')) : null;
+
 // The tutor's face. A live avatar was the actual point of the product —
 // an abstract pulsing ring never was. Mouth height is driven by tutorLevel
 // (LEXIS's own voice energy specifically, not the combined mic+AI level
 // used for the ambient ring/waveform), so it opens when LEXIS talks and
 // stays shut while the student is the one speaking. No lip-sync vendor,
 // no new cost — same live analyser data the app was already computing.
-function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
+//
+// This is the fallback face, always available with zero extra deps. When
+// VITE_AVATAR_GLB_URL is set, the TutorAvatar wrapper below swaps in the
+// modeled 3D version instead (same tutorLevel signal, richer face).
+function TutorAvatarSVG({ isConnected, isConnecting, tutorLevel }) {
   const mouthHeight = 4 + Math.min(18, (tutorLevel / 100) * 18);
   const active = isConnected || isConnecting;
   return (
@@ -39,6 +52,42 @@ function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
         style={{ transition: 'height 60ms ease-out, y 60ms ease-out' }}
       />
     </svg>
+  );
+}
+
+// Suspense only covers the *pending* state (the lazy import / useGLTF load
+// in flight) — it does nothing for a load that actually fails (404, CORS,
+// a corrupt/invalid .glb). Without this, a bad VITE_AVATAR_GLB_URL throws
+// past Suspense and, with no boundary to catch it, takes down the whole
+// LexisApp tree instead of just falling back to the SVG face. Caught during
+// PR review — see https://github.com/eoinmcgee1993/lexis-core-v2026/pull/13.
+class AvatarErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error) {
+    console.warn('[LEXIS Avatar] 3D model failed to load — falling back to the SVG face.', error);
+  }
+  render() {
+    return this.state.hasError ? this.props.fallback : this.props.children;
+  }
+}
+
+function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
+  const svgFallback = <TutorAvatarSVG isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />;
+  if (!TutorAvatar3D) {
+    return svgFallback;
+  }
+  return (
+    <AvatarErrorBoundary fallback={svgFallback}>
+      <Suspense fallback={svgFallback}>
+        <TutorAvatar3D url={AVATAR_GLB_URL} isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />
+      </Suspense>
+    </AvatarErrorBoundary>
   );
 }
 
@@ -563,7 +612,7 @@ export default function LexisApp({ navigateTo }) {
             }`}
             style={{ transform: isConnected ? `scale(${1 + audioLevel / 350})` : 'scale(1)' }}
           >
-            <div className={`w-32 h-32 md:w-44 md:h-44 rounded-full flex items-center justify-center border ${
+            <div className={`w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden flex items-center justify-center border ${
               isConnected ? 'bg-cyan-950/40 border-cyan-400/50 shadow-inner' : 'bg-slate-800/50 border-slate-700'
             }`}>
               <TutorAvatar isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />
