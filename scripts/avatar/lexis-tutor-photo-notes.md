@@ -1,5 +1,12 @@
 # Photo avatar — provenance and upgrade path
 
+**Update (Aug 2026): the overlay approach described below has been
+replaced.** `TutorAvatarPhoto.jsx` now crossfades four real photos of the
+same generated identity — see "Real second/third/fourth photos" below for
+how they were made and how the component blends them. The overlay
+technique (hand-measured `MOUTH_*`/`EYE_*` shadow shapes) is kept described
+here for history/context but no longer reflects the shipped code.
+
 `frontend/public/avatar/lexis-tutor-photo.jpg` is a generated portrait, not a
 photo of a real person. It's a synthetic/generic character — no real
 individual's likeness.
@@ -56,20 +63,66 @@ Two independently generated photos of "the same" prompted character are
 micro-variation reads as a visible "jump" every time the mouth opens, which
 looks worse than the overlay approach shipped here.
 
-## Upgrading to real second/third photos later
+## Real second/third/fourth photos (done, Aug 2026)
 
-Once either of the above is available (Gamma plan upgrade, or Higgsfield
-credits — a one-time top-up wasn't available at the time, only $49+/mo
-subscriptions):
+A Higgsfield Basic plan ($5/mo, purchased directly on higgsfield.ai rather
+than through the MCP-only 3-day trial — the trial's checkout link kept
+returning "This link is incomplete" through the chat client, so the direct
+website signup was used instead) unlocked identity-preserving image-to-image
+editing. Confirmed the purchased credits work through the Higgsfield MCP
+tools used here (`balance` reflected them immediately), not just on
+higgsfield.ai — worth checking again if a similar upgrade is done in future,
+since Higgsfield's own docs note some *unlimited/free-generation* perks are
+web-only, though ordinary credits evidently aren't.
 
-1. Feed `lexis-tutor-photo.jpg` back in as the reference/subject image.
-2. Prompt for the same framing/lighting/identity: one variant mouth open as
-   if speaking, one variant eyes closed.
-3. Save as `frontend/public/avatar/lexis-tutor-photo-open.jpg` and
-   `frontend/public/avatar/lexis-tutor-photo-blink.jpg` (same crop/
-   dimensions as the base photo).
-4. Update `TutorAvatarPhoto.jsx` to crossfade full images by `tutorLevel`
-   (mouth) and by the blink timer (eyes) — same technique as
-   `TutorAvatar3D.jsx`'s morph-target lerp, just on `<img>` opacity —
-   instead of drawing the overlay shapes. Drop the `MOUTH_*`/`EYE_*` overlay
-   constants and geometry once that's in place.
+Process:
+1. `media_import_url` on the live production photo URL
+   (`https://lexis-core-v2026.vercel.app/avatar/lexis-tutor-photo.jpg`) to
+   get a Higgsfield `media_id` for the existing photo.
+2. `generate_image` with `model: nano_banana_pro`, that `media_id` as a
+   `medias: [{ role: "image" }]` reference, `aspect_ratio: "1:1"`,
+   `resolution: "1k"` — prompted for the same identity/framing/lighting/
+   clothing/background as the reference, changing only the described
+   feature. Three variants generated this way (2 credits each):
+   - mouth open, eyes open (as if speaking)
+   - mouth closed, eyes closed (as if blinking)
+   - mouth open, eyes closed (both at once)
+3. Saved as `frontend/public/avatar/lexis-tutor-photo-open.jpg`,
+   `-blink.jpg`, and `-open-blink.jpg` (converted from the generated PNGs
+   to JPEG quality 90, same ~150KB budget and 1024x1024 dimensions as the
+   base photo).
+4. The base photo's own circular white-vignette framing (not something
+   introduced by editing — it's baked into the *original* photo too) came
+   through identically in all three generations, so no cropping/alignment
+   work was needed; `object-cover` handles all four the same way it always
+   handled the one.
+
+## Why four images, not two
+
+Mouth and eyes move independently and *concurrently* — LEXIS blinks while
+talking most of the time, since talking dominates a session. Two
+independent crossfade layers (mouth-open, eyes-closed) would conflict
+whenever both are partially visible: each single-feature photo bakes in
+the *other* feature's neutral state, so blending fights itself. The fix,
+implemented in `TutorAvatarPhoto.jsx`: standard bilinear interpolation
+across all four corners of the mouth-x-eyes grid — each non-base layer's
+opacity is the product of how "on" each of its two features is
+(`openAmount * blinkAmount` for the combined layer, etc.), so the four
+opacities always sum to 1 and blend correctly to any point in that space,
+not just the four exact corners.
+
+## Second character (Thai-presenting) — banked, not wired in
+
+At the same time, a second character portrait was generated on request
+("for future reference") — a distinct identity, Thai-presenting, same
+brand styling (teal blouse, dark blurred background, warm professional
+headshot). Saved at
+`scripts/avatar/candidates/thai-tutor-photo-candidate.jpg` — a banked
+asset only. It is **not** referenced by any env var or component; the app
+still ships the one existing LEXIS identity. To actually use it as an
+avatar option, it would need the same treatment as the base photo (open/
+blink/open-blink identity-preserving variants generated the same way as
+above, then wired into `TutorAvatar` in `LexisApp.jsx` behind a new
+`VITE_AVATAR_PHOTO_URL`-style env var or a persona-selection mechanism —
+not attempted here since this was explicitly scoped as "for future
+reference," not an integration request).
