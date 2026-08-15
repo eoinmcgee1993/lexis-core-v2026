@@ -265,14 +265,30 @@ Be patient when the student pauses or hesitates.`
 
     const sessionData = await response.json();
 
+    // /v1/realtime/client_secrets returns a FLAT body — { value, expires_at,
+    // session } — not { client_secret: { value, ... } }. Reading a nested
+    // client_secret.value here silently resolves to undefined via the
+    // optional chain instead of throwing, so the endpoint returns 200 with
+    // an empty secret and the failure only surfaces client-side as "Received
+    // invalid client secret from token broker." This exact bug has
+    // regressed once already, so: prefer the flat shape, fall back to the
+    // nested one in case OpenAI's response shape drifts again, and fail
+    // loudly (not silently-200-with-nothing) if neither is present.
+    const clientSecretValue = sessionData.value ?? sessionData.client_secret?.value;
+    const clientSecretExpiresAt = sessionData.expires_at ?? sessionData.client_secret?.expires_at;
+    if (!clientSecretValue) {
+      console.error('[LEXIS OpenAI Error] client_secrets response missing value:', JSON.stringify(sessionData));
+      return res.status(502).json({ error: 'OpenAI did not return a client secret.' });
+    }
+
     const { error: rpcError } = await supabase.rpc('increment_sessions', { user_id_param: req.user.id });
     if (rpcError) {
       console.error('[LEXIS Supabase] increment_sessions RPC failed (non-fatal):', rpcError);
     }
 
     res.json({
-      client_secret: sessionData.client_secret?.value,
-      expires_at: sessionData.client_secret?.expires_at
+      client_secret: clientSecretValue,
+      expires_at: clientSecretExpiresAt
     });
 
   } catch (err) {
