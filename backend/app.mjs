@@ -245,10 +245,19 @@ function buildTutorInstructions(direction) {
   // unparseable Thai as their very first sound from the app — confusing,
   // and also the single longest continuous run of target-language audio
   // in the whole session, which is exactly where Thai audio synthesis is
-  // most likely to glitch (see the marin-voice fix above). Capping the
-  // opening turn's target-language content to one short phrase addresses
-  // both: an easier on-ramp, and a much smaller audio risk surface.
-  const opening = `Opening turn: the student hasn't said anything yet, so start gently. Your first message should be short (max ~15 words), mostly in ${baseLanguage} — a brief warm welcome and an easy opening question. Include at most ONE short ${curriculumTarget} word or phrase in this first message, never a full sentence or several phrases back to back. Do not front-load a long run of ${curriculumTarget} before the student has spoken at all — ease them in one short phrase at a time, and check in after each new one before adding more.`;
+  // most likely to glitch (see the marin-voice fix above). The fix for
+  // that (a short, mostly-base-language first line) is folded into a
+  // fuller onboarding flow below — requested explicitly: introduce
+  // herself, get the student's name, then establish level and topic
+  // before the lesson proper starts. Kept conversational and prompt-
+  // driven rather than a rigid script or new stateful backend, matching
+  // the "lightweight curriculum in the system prompt" approach already
+  // chosen for this product over a stateful lesson-tracking system.
+  const onboarding = `Onboarding (first few turns only, before the lesson proper begins):
+1. Your very first message: introduce yourself as LEXIS and ask the student's name. Keep it short (max ~15 words), mostly in ${baseLanguage}. Include at most ONE short ${curriculumTarget} word or phrase here, never a full sentence or several phrases back to back — do not front-load a long run of ${curriculumTarget} before the student has spoken at all.
+2. Once they give their name, greet them by it, then ask two things in one short turn: (a) whether they're a complete beginner or already know some ${curriculumTarget}, so you can set the right pace, and (b) what they'd like to practice today. If they seem unsure what to pick, offer 2-3 concrete example topics pulled from the curriculum below (e.g. greetings & introductions, ordering food, everyday small talk) rather than leaving it open-ended.
+3. Once you know their level and topic (or they've picked one of your examples, or stayed quiet and you've defaulted to the easiest one), begin the lesson itself. A stated beginner gets single words and very short 2-3 word phrases, heavy repetition, and a slow pace with no grammar talk yet. Anyone with some experience starts at the normal pace described below.
+Keep every onboarding turn short and conversational — this is a spoken exchange, not a menu being read aloud.`;
 
   return `${role}
 Speak clearly, naturally, warmly, and at a measured pace.
@@ -258,7 +267,7 @@ Be patient when the student pauses or hesitates.
 
 ${bilingual}
 
-${opening}
+${onboarding}
 
 CRITICAL: Always speak every word of your reply out loud — in English and in Thai alike. Never go silent, mute, or skip the audio for Thai words or phrases; the student needs to actually hear the Thai pronunciation, not just read it. If a sentence mixes English and Thai, voice both parts audibly with no gaps.
 
