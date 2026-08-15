@@ -110,6 +110,28 @@ function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
   );
 }
 
+// Translates getUserMedia's raw DOMException names into wording a student
+// can actually act on, instead of browser-internal phrasing like "Requested
+// device not found". Falls back to the browser's own message for anything
+// not recognized, so a genuinely new failure mode isn't silently hidden.
+function describeMicError(err) {
+  switch (err.name) {
+    case 'NotFoundError':
+    case 'DevicesNotFoundError':
+      return 'No microphone detected. Please connect a microphone and try again.';
+    case 'NotAllowedError':
+    case 'PermissionDeniedError':
+      return 'Microphone access denied. Please allow microphone access in your browser settings and try again.';
+    case 'NotReadableError':
+    case 'TrackStartError':
+      return 'Could not access your microphone — it may be in use by another application.';
+    case 'SecurityError':
+      return "Microphone access is blocked by your browser's security settings.";
+    default:
+      return err.message || 'Microphone access failed.';
+  }
+}
+
 function formatUsageLabel(profile) {
   if (profile.subscription_status === 'active') {
     return `${profile.subscription_tier} plan — unlimited`;
@@ -409,26 +431,34 @@ export default function LexisApp({ navigateTo }) {
       // 4. Microphone Capture with Hardware AEC Flags
       let stream;
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: { ideal: true },
-            noiseSuppression: { ideal: true },
-            autoGainControl: { ideal: true },
-            echoCancellationType: { ideal: 'system' },
-            channelCount: { ideal: 1 },
-            sampleRate: { ideal: 48000 },
-            googEchoCancellation: { ideal: true },
-            googNoiseSuppression: { ideal: true }
-          }
-        });
-      } catch (mediaErr) {
-        if (mediaErr.name === 'OverconstrainedError') {
+        try {
           stream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+            audio: {
+              echoCancellation: { ideal: true },
+              noiseSuppression: { ideal: true },
+              autoGainControl: { ideal: true },
+              echoCancellationType: { ideal: 'system' },
+              channelCount: { ideal: 1 },
+              sampleRate: { ideal: 48000 },
+              googEchoCancellation: { ideal: true },
+              googNoiseSuppression: { ideal: true }
+            }
           });
-        } else {
-          throw mediaErr;
+        } catch (mediaErr) {
+          if (mediaErr.name === 'OverconstrainedError') {
+            stream = await navigator.mediaDevices.getUserMedia({
+              audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+            });
+          } else {
+            throw mediaErr;
+          }
         }
+      } catch (mediaErr) {
+        // Translate the raw DOMException into something a student (not a
+        // web dev) can act on. Both the strict attempt above and its
+        // OverconstrainedError fallback land here on final failure, so this
+        // is the one place that needs to know the friendly wording.
+        throw new Error(describeMicError(mediaErr));
       }
 
       mediaStreamRef.current = stream;
