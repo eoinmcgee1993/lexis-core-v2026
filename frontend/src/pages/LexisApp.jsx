@@ -524,6 +524,23 @@ export default function LexisApp({ navigateTo }) {
           if (event.type === 'response.created') {
             isAssistantSpeakingRef.current = true;
             setStatus('LEXIS is speaking...');
+            // Every barge-in below (auto via VAD, or the manual hand
+            // button) explicitly pauses the <audio> element — and pause()
+            // doesn't auto-reverse itself just because the same underlying
+            // MediaStream keeps producing new frames for the *next*
+            // response. Without an explicit play() here, one interruption
+            // (even a false one from mic echo picking up LEXIS's own
+            // voice) leaves every later reply in the session silent while
+            // the transcript keeps working fine, since that's driven by
+            // the data channel, not audio element state. Live-verified:
+            // a stray one-word "YOU:" transcript entry appeared mid-reply,
+            // then LEXIS's next turns had text but no audio at all — this
+            // is that bug. Calling play() on an already-playing element is
+            // a harmless no-op, so this is safe to run on every response.
+            remoteAudioRef.current?.play().catch((playErr) => {
+              console.warn('[LEXIS Audio] Resume after barge-in blocked:', playErr);
+              setAudioBlocked(true);
+            });
           } else if (event.type === 'response.audio_transcript.delta' || event.type === 'response.output_audio_transcript.delta') {
             appendTranscript('lexis', event.delta);
           } else if (event.type === 'conversation.item.input_audio_transcription.completed') {
