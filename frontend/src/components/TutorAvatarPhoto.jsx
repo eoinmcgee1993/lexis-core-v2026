@@ -128,28 +128,27 @@ export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, is
   // avatar is broken, fall back to 3D/SVG". Only the base photo's onError
   // triggers that full fallback.
   const [variantFailed, setVariantFailed] = useState({ open: false, blink: false, openBlink: false });
-  // Live-verified: after fixing the flicker (useSmoothed below), the mouth
-  // still barely moved during actual speech — "speaking" screenshots
-  // looked nearly identical to idle. Two compounding causes:
-  // 1. /85 was carried over unchanged from the original overlay code, but
-  //    TutorAvatar3D.jsx calibrates the exact same tutorLevel signal
-  //    against /70 for its mouth morph target — the photo tier was
-  //    already tuned to need more signal than its sibling to reach fully
-  //    "open", for no principled reason. Lowered further, to /55, since
-  //    normal speech volume apparently doesn't reach even the 3D tier's
-  //    threshold reliably on a full-photo crossfade (a partial-opacity
-  //    blend of two whole faces reads far more subtly than a morph target
-  //    or a small shape ever did, so this tier needs more headroom, not
-  //    the same amount, to look equally alive).
-  // 2. A linear amplitude-to-opacity mapping under-represents ordinary
-  //    speech: real speech spends most of its time at low-to-mid energy
-  //    with only occasional peaks, so a linear map keeps the mouth mostly
-  //    faint and only briefly near "open". A perceptual curve (**0.6)
-  //    boosts that low-to-mid range toward visibility without letting loud
-  //    peaks overshoot past 1.
-  const normalizedLevel = Math.min(1, tutorLevel / 55);
-  const rawOpenAmount = Math.pow(normalizedLevel, 0.6); // 0 = mouth closed, 1 = fully open
-  const openAmount = useSmoothed(rawOpenAmount, 13); // eased — see useSmoothed above for why
+  // Live-verified across two rounds:
+  // 1. Originally /85 (carried over unchanged from the old overlay code,
+  //    stricter than TutorAvatar3D.jsx's /70 for the same tutorLevel
+  //    signal, for no principled reason) — the mouth barely moved during
+  //    real speech.
+  // 2. Overcorrected: /55 plus a **0.6 perceptual curve plus a snappier
+  //    smoothing rate (13) all stacked together, applied in one pass
+  //    without being able to watch it live in between — live-verified
+  //    that combination read as "even weirder," on top of the four
+  //    photos getting 2x heavier per pixel at the same time (four
+  //    2048px images recomposited every animation frame is real GPU
+  //    work; see scripts/avatar/lexis-tutor-photo-notes.md for the
+  //    image-size rollback), which is the more likely driver of that
+  //    report on a device already under battery-throttling duress.
+  //    Settled here in between both: still more sensitive and smoother
+  //    than the original /85 (so it stays visible), but pulled back from
+  //    the most aggressive settings on all three axes at once so it's not
+  //    over-reacting to every small change in level.
+  const normalizedLevel = Math.min(1, tutorLevel / 65);
+  const rawOpenAmount = Math.pow(normalizedLevel, 0.75); // 0 = mouth closed, 1 = fully open
+  const openAmount = useSmoothed(rawOpenAmount, 10); // eased — see useSmoothed above for why
   const blinkAmount = useBlink(); // 0 = eyes open, 1 = fully closed
 
   if (failed) return null;

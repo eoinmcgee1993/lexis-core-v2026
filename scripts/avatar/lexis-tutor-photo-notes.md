@@ -111,6 +111,35 @@ opacity is the product of how "on" each of its two features is
 opacities always sum to 1 and blend correctly to any point in that space,
 not just the four exact corners.
 
+## Upscale to 2K, then rolled back to 1K (Aug 2026)
+
+Requested: sharper avatar photos ("resemble like a 4k live video").
+Upscaled all four existing photos via Higgsfield's `upscale_image` tool
+(bytedance backend, targets an existing image rather than regenerating —
+no fresh identity-drift risk) to 4096x4096, then shipped a 2048x2048
+JPEG downsample (full 4096px PNGs would have been ~29MB total for four
+images, unreasonable for a mobile page).
+
+Live-verified immediately after: mouth motion reported as "even weirder"
+and general page jank ("dragging back down to chat box") — reported on a
+device visibly at 1% battery in the screenshots, which is exactly when
+Android throttles CPU/GPU hardest. Four 2048px images being recomposited
+every animation frame (the mouth crossfade runs continuously via
+`useSmoothed`, not just on discrete changes) is real, measurably more
+compositor work than four 1024px images — 4x the pixels per layer — and
+that's a plausible root cause for jank independent of whether the device
+was already stressed. Rather than debug further blind, rolled the
+shipped images back down to 1024x1024 — the same pixel dimensions
+already known to run smoothly — but re-derived from the 4K-upscaled
+PNGs rather than the original un-upscaled source, so quality is still
+modestly better than before (closer to supersampled/anti-aliased) at
+zero extra runtime cost. The 4096px source PNGs aren't kept in the repo
+(they lived in the session's scratchpad only); regenerate via the same
+`upscale_image` process in "Real second/third/fourth photos" above if a
+higher-resolution tier is wanted again later — ideally only after
+confirming the target devices can actually composite that smoothly, not
+just that they can download it.
+
 ## Second character (Thai-presenting) — banked, not wired in
 
 At the same time, a second character portrait was generated on request
