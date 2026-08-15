@@ -233,6 +233,22 @@ function buildTutorInstructions(direction) {
     : `Fixed target language: English. This is the language you are teaching for the entire session — it does not change based on what the student says. The student may speak English, Thai, or a mix while practicing; meet them wherever they are, and never block or scold them for using Thai. But always keep teaching and modeling English — that's the lesson. If they seem stuck, you may clarify briefly in Thai, then immediately continue the lesson in English. Do not fully switch into teaching Thai just because they used it.`;
 
   const curriculumTarget = learningThai ? 'Thai' : 'English';
+  // The language the student can already lean on comfortably — the fixed
+  // target's opposite number. Used only to soften the very first turn.
+  const baseLanguage = learningThai ? 'English' : 'Thai';
+
+  // Live-verified: pinning the target language firmly (above) fixed the
+  // drifting-mid-session problem, but exposed a worse first impression —
+  // with nothing yet said by the student, LEXIS opened sessions with a
+  // long stretch of pure target-language speech. For the 'th' direction
+  // especially, a student who doesn't know any Thai yet got a wall of
+  // unparseable Thai as their very first sound from the app — confusing,
+  // and also the single longest continuous run of target-language audio
+  // in the whole session, which is exactly where Thai audio synthesis is
+  // most likely to glitch (see the marin-voice fix above). Capping the
+  // opening turn's target-language content to one short phrase addresses
+  // both: an easier on-ramp, and a much smaller audio risk surface.
+  const opening = `Opening turn: the student hasn't said anything yet, so start gently. Your first message should be short (max ~15 words), mostly in ${baseLanguage} — a brief warm welcome and an easy opening question. Include at most ONE short ${curriculumTarget} word or phrase in this first message, never a full sentence or several phrases back to back. Do not front-load a long run of ${curriculumTarget} before the student has spoken at all — ease them in one short phrase at a time, and check in after each new one before adding more.`;
 
   return `${role}
 Speak clearly, naturally, warmly, and at a measured pace.
@@ -241,6 +257,8 @@ ${correction}
 Be patient when the student pauses or hesitates.
 
 ${bilingual}
+
+${opening}
 
 CRITICAL: Always speak every word of your reply out loud — in English and in Thai alike. Never go silent, mute, or skip the audio for Thai words or phrases; the student needs to actually hear the Thai pronunciation, not just read it. If a sentence mixes English and Thai, voice both parts audibly with no gaps.
 
