@@ -175,6 +175,13 @@ export default function LexisApp({ navigateTo }) {
       return 'en'; // localStorage can throw in some privacy modes — default, don't crash the page over a preference.
     }
   });
+  // Live-verified this was easy to miss: the header toggle below was
+  // 'hidden sm:flex', invisible on phone-width screens, so on mobile the
+  // direction was effectively whatever localStorage already had (silently
+  // defaulting to 'en') with no visible way to check or change it before
+  // starting. Now INITIATE LEXIS always asks explicitly first via this
+  // modal, so the choice is unmissable regardless of screen size.
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   // Mobile browsers can silently block autoplay on the remote <audio>
   // element — its srcObject is set inside pc.ontrack, which fires
   // asynchronously well after the click that started the session, outside
@@ -222,7 +229,7 @@ export default function LexisApp({ navigateTo }) {
         if (isConnected) {
           endSession();
         } else if (!isConnecting) {
-          startSession();
+          setShowLanguagePicker(true);
         }
       }
     };
@@ -344,13 +351,21 @@ export default function LexisApp({ navigateTo }) {
     }
   };
 
-  const startSession = async () => {
+  // directionOverride lets the language-picker modal start a session with
+  // the language the user just tapped, without a stale-closure bug: calling
+  // setTargetLanguage(lang) then startSession() in the same handler would
+  // still read the *previous* render's targetLanguage below (React batches
+  // the state update), so the picker passes the freshly-picked value in
+  // directly instead of relying on state having already re-rendered.
+  const startSession = async (directionOverride) => {
     if (isConnecting || isConnected) return;
 
     if (!session) {
       navigateTo('/auth');
       return;
     }
+
+    const direction = directionOverride ?? targetLanguage;
 
     setIsConnecting(true);
     setStatus('Authenticating & Fetching Token...');
@@ -365,7 +380,7 @@ export default function LexisApp({ navigateTo }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ direction: targetLanguage })
+        body: JSON.stringify({ direction })
       });
 
       if (!tokenRes.ok) {
@@ -616,6 +631,16 @@ export default function LexisApp({ navigateTo }) {
     }
   };
 
+  // Handles the language-picker modal shown on every INITIATE LEXIS tap.
+  // Persists the choice for next time (selectTargetLanguage) and starts the
+  // session with it immediately via startSession's directionOverride, so
+  // this doesn't need to wait a render for state to catch up.
+  const confirmLanguageAndStart = (lang) => {
+    selectTargetLanguage(lang);
+    setShowLanguagePicker(false);
+    startSession(lang);
+  };
+
   // finalStatus lets a caller that already knows *why* the session is
   // ending say so — endSession used to unconditionally stamp 'Disconnected'
   // over whatever specific status a caller had just set (e.g. a real error
@@ -687,9 +712,12 @@ export default function LexisApp({ navigateTo }) {
           {/* Which language to practice next session. Locked once connected
               — the running session's persona was already picked when it
               started, so changing this mid-call wouldn't do anything, and
-              showing it as live-editable would be misleading. */}
+              showing it as live-editable would be misleading. Visible on
+              all screen sizes (was 'hidden sm:flex' — invisible on phones,
+              which meant mobile users had no visible way to check or set
+              this before INITIATE LEXIS now also asks explicitly). */}
           {!isConnected && !isConnecting && (
-            <div className="hidden sm:flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs" title="Language to practice">
+            <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs" title="Language to practice">
               <button
                 onClick={() => selectTargetLanguage('en')}
                 className={`px-2.5 py-1 rounded-md transition-colors ${targetLanguage === 'en' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
@@ -783,7 +811,7 @@ export default function LexisApp({ navigateTo }) {
         <div className="flex items-center space-x-4 mt-8">
           {!isConnected ? (
             <button
-              onClick={startSession}
+              onClick={() => setShowLanguagePicker(true)}
               disabled={isConnecting}
               className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold text-base rounded-2xl shadow-lg shadow-cyan-500/20 transition-all hover:scale-105 active:scale-95 flex items-center space-x-3"
             >
@@ -831,6 +859,42 @@ export default function LexisApp({ navigateTo }) {
         </div>
         <div>Digital Renaissance System Architecture © 2026</div>
       </footer>
+
+      {/* Language picker — asked explicitly on every INITIATE LEXIS tap
+          rather than silently reusing whatever was last stored. The tutor
+          was live-verified drifting between teaching English and Thai
+          mid-session when the target wasn't pinned down clearly, and the
+          old header toggle this replaced as the primary path was hidden on
+          phone-width screens — so this is now the one unmissable, always-
+          asked choice, on every device, before every session. */}
+      {showLanguagePicker && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+            <h2 className="text-lg font-bold text-slate-100 mb-1">What do you want to practice?</h2>
+            <p className="text-xs text-slate-400 mb-6">Choose a language to start this session.</p>
+            <div className="space-y-3">
+              <button
+                onClick={() => confirmLanguageAndStart('en')}
+                className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold rounded-xl text-sm hover:scale-[1.02] transition-transform"
+              >
+                Learn English
+              </button>
+              <button
+                onClick={() => confirmLanguageAndStart('th')}
+                className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold rounded-xl text-sm hover:scale-[1.02] transition-transform"
+              >
+                เรียนภาษาไทย
+              </button>
+            </div>
+            <button
+              onClick={() => setShowLanguagePicker(false)}
+              className="w-full mt-4 py-2 text-xs text-slate-500 hover:text-slate-300"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
