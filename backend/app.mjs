@@ -246,7 +246,10 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
           // not shared config, so a future model change means updating both.
           model: process.env.OPENAI_MODEL || 'gpt-realtime',
           audio: {
-            output: { voice: 'verse' },
+            // 'verse' reads as male; the tutor avatar (frontend) is a
+            // consistently female persona, so the voice should match.
+            // 'shimmer' is a warm, clearly female OpenAI Realtime voice.
+            output: { voice: 'shimmer' },
             input: {
               transcription: { model: 'whisper-1' },
               turn_detection: {
@@ -261,7 +264,11 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
 Speak clearly, naturally, warmly, and at a measured pace.
 Keep each response short (15-25 words max) to maximize student speaking time.
 Correct speech errors gently by modeling the proper phrase, then ask a simple follow-up question.
-Be patient when the student pauses or hesitates.`
+Be patient when the student pauses or hesitates.
+
+Bilingual: the student may speak Thai, English, or a mix of both. Follow their lead and respond naturally in whichever language they use — never block or scold them for using Thai. As their English tutor, gently steer toward English practice when they seem comfortable, but their language choice always comes first.
+
+Curriculum: guide the conversation through everyday topics, rotating naturally across a session — greetings & daily routine, family & friends, school life, hobbies & interests, food & ordering, shopping, travel & directions, weather & plans, technology & social media, future dreams. Don't announce the topic; just steer toward it. Start with simple present-tense, everyday vocabulary. If the student is doing well, introduce more complex grammar (past/future tense, connecting ideas, opinions). If they're struggling, simplify and slow down. Adjust level continuously based on how they're actually doing, not on a fixed schedule.`
         }
       }),
     });
