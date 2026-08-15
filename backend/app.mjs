@@ -202,7 +202,44 @@ function requireEntitlement(req, res, next) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────── */
-/* 6. ROUTES                                                               */
+/* 6. TUTOR PERSONA                                                        */
+/*                                                                          */
+/* Parameterized by which language the student is learning. 'en' = a Thai  */
+/* speaker learning English (the original product); 'th' = an English     */
+/* speaker learning Thai — a full language-exchange direction, not just a */
+/* translated label. Defaults to 'en' for any missing/unrecognized value   */
+/* so a caller that doesn't send `direction` keeps prior behavior exactly. */
+/* ─────────────────────────────────────────────────────────────────────── */
+function buildTutorInstructions(direction) {
+  const learningThai = direction === 'th';
+
+  const role = learningThai
+    ? 'You are LEXIS, an elite AI Thai tutor for English speakers learning Thai.'
+    : 'You are LEXIS, an elite AI English tutor designed specifically for Thai youth.';
+
+  const correction = learningThai
+    ? "Correct speech errors gently by modeling the proper Thai phrase, then ask a simple follow-up question."
+    : 'Correct speech errors gently by modeling the proper phrase, then ask a simple follow-up question.';
+
+  const bilingual = learningThai
+    ? `Bilingual: the student may speak English, Thai, or a mix of both. Follow their lead and respond naturally in whichever language they use — never block or scold them for using English. As their Thai tutor, gently steer toward Thai practice when they seem comfortable, but their language choice always comes first.`
+    : `Bilingual: the student may speak Thai, English, or a mix of both. Follow their lead and respond naturally in whichever language they use — never block or scold them for using Thai. As their English tutor, gently steer toward English practice when they seem comfortable, but their language choice always comes first.`;
+
+  const curriculumTarget = learningThai ? 'Thai' : 'English';
+
+  return `${role}
+Speak clearly, naturally, warmly, and at a measured pace.
+Keep each response short (15-25 words max) to maximize student speaking time.
+${correction}
+Be patient when the student pauses or hesitates.
+
+${bilingual}
+
+Curriculum: guide the conversation through everyday topics, rotating naturally across a session — greetings & daily routine, family & friends, school life, hobbies & interests, food & ordering, shopping, travel & directions, weather & plans, technology & social media, future dreams. Don't announce the topic; just steer toward it. Start with simple present-tense, everyday ${curriculumTarget} vocabulary. If the student is doing well, introduce more complex grammar (past/future tense, connecting ideas, opinions). If they're struggling, simplify and slow down. Adjust level continuously based on how they're actually doing, not on a fixed schedule.`;
+}
+
+/* ─────────────────────────────────────────────────────────────────────── */
+/* 7. ROUTES                                                               */
 /* ─────────────────────────────────────────────────────────────────────── */
 app.get('/health', (req, res) => {
   res.json({
@@ -224,6 +261,7 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
     const safetyIdentifier = crypto.createHash('sha256')
       .update(req.user.id + (process.env.LEXIS_SALT || 'lexis_salt'))
       .digest('hex').substring(0, 32);
+    const direction = req.body?.direction === 'th' ? 'th' : 'en';
 
     const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
       method: 'POST',
@@ -260,15 +298,7 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
               }
             }
           },
-          instructions: `You are LEXIS, an elite AI English tutor designed specifically for Thai youth.
-Speak clearly, naturally, warmly, and at a measured pace.
-Keep each response short (15-25 words max) to maximize student speaking time.
-Correct speech errors gently by modeling the proper phrase, then ask a simple follow-up question.
-Be patient when the student pauses or hesitates.
-
-Bilingual: the student may speak Thai, English, or a mix of both. Follow their lead and respond naturally in whichever language they use — never block or scold them for using Thai. As their English tutor, gently steer toward English practice when they seem comfortable, but their language choice always comes first.
-
-Curriculum: guide the conversation through everyday topics, rotating naturally across a session — greetings & daily routine, family & friends, school life, hobbies & interests, food & ordering, shopping, travel & directions, weather & plans, technology & social media, future dreams. Don't announce the topic; just steer toward it. Start with simple present-tense, everyday vocabulary. If the student is doing well, introduce more complex grammar (past/future tense, connecting ideas, opinions). If they're struggling, simplify and slow down. Adjust level continuously based on how they're actually doing, not on a fixed schedule.`
+          instructions: buildTutorInstructions(direction)
         }
       }),
     });
