@@ -68,6 +68,43 @@ function useBlink() {
   return closeAmount;
 }
 
+// LexisApp.jsx recomputes tutorLevel every animation frame (~60/sec)
+// straight off raw audio byte-frequency data — no smoothing at all. That's
+// fine for the old overlay (a shape scaling continuously) but live-verified
+// to look wrong here: crossfading between full photos at that raw, jittery
+// rate reads as the mouth flickering too fast to actually watch, not a
+// person talking. TutorAvatar3D.jsx already has this exact problem solved
+// for its morph target (`current + (target - current) * min(1, delta*12)`,
+// an exponential ease) — same fix, applied to the derived openAmount here
+// instead of to tutorLevel itself, so it stays local to this component
+// rather than changing the shared audio-analysis signal every other avatar
+// tier also reads.
+function useSmoothed(target, rate = 10) {
+  const [value, setValue] = useState(target);
+  const valueRef = useRef(target);
+  const lastTsRef = useRef(null);
+  const rafRef = useRef(null);
+  const targetRef = useRef(target);
+  targetRef.current = target;
+
+  useEffect(() => {
+    const tick = (ts) => {
+      if (lastTsRef.current == null) lastTsRef.current = ts;
+      const delta = (ts - lastTsRef.current) / 1000;
+      lastTsRef.current = ts;
+      const next = valueRef.current + (targetRef.current - valueRef.current) * Math.min(1, delta * rate);
+      valueRef.current = next;
+      setValue(next);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return value;
+}
+
 // photoUrl is the base (mouth-closed, eyes-open) photo; the other three
 // variants are derived from it by filename convention — see
 // scripts/avatar/lexis-tutor-photo-notes.md for how they were generated.
@@ -91,7 +128,8 @@ export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, is
   // avatar is broken, fall back to 3D/SVG". Only the base photo's onError
   // triggers that full fallback.
   const [variantFailed, setVariantFailed] = useState({ open: false, blink: false, openBlink: false });
-  const openAmount = Math.min(1, tutorLevel / 85); // 0 = mouth closed, 1 = fully open
+  const rawOpenAmount = Math.min(1, tutorLevel / 85); // 0 = mouth closed, 1 = fully open
+  const openAmount = useSmoothed(rawOpenAmount); // eased — see useSmoothed above for why
   const blinkAmount = useBlink(); // 0 = eyes open, 1 = fully closed
 
   if (failed) return null;
@@ -123,7 +161,7 @@ export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, is
         <img
           src={open}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-100 ease-out"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-75 ease-out"
           style={{ opacity: mouthOnlyOpacity }}
           draggable={false}
           onError={() => markVariantFailed('open')}

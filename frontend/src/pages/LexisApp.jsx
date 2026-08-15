@@ -203,11 +203,22 @@ export default function LexisApp({ navigateTo }) {
   const remoteAudioRef = useRef(null);
   const heartbeatIntervalRef = useRef(null);
   const canvasRef = useRef(null);
-  const transcriptEndRef = useRef(null);
+  const transcriptContainerRef = useRef(null);
   const isAssistantSpeakingRef = useRef(false);
 
+  // Reported: while LEXIS is speaking, the page kept auto-scrolling down
+  // to the transcript, dragging the avatar out of view right when you'd
+  // want to watch it — every streamed transcript chunk (very frequent,
+  // word-by-word while she talks) re-triggered the scroll. Root cause:
+  // scrollIntoView() on a sentinel element defaults to block:'start',
+  // which scrolls *every* scrollable ancestor needed to satisfy that
+  // alignment — including the whole page, not just this bounded transcript
+  // box, whenever the box itself isn't fully within the viewport (routine
+  // on a phone). Setting scrollTop directly on the transcript container
+  // only ever scrolls that one element, never the page around it.
   useEffect(() => {
-    transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = transcriptContainerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [transcripts]);
 
   // Drop ?payment=success from the URL once shown, so refreshing this page
@@ -856,7 +867,7 @@ export default function LexisApp({ navigateTo }) {
 
         {/* Transcripts */}
         {transcripts.length > 0 && (
-          <div className="w-full mt-10 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 max-h-60 overflow-y-auto space-y-3">
+          <div ref={transcriptContainerRef} className="w-full mt-10 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 max-h-60 overflow-y-auto space-y-3">
             <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-2">Speech Transcripts</div>
             {transcripts.map((item, idx) => (
               <div key={idx} className={`text-xs p-3 rounded-xl ${item.speaker === 'lexis' ? 'bg-cyan-950/30 border border-cyan-800/30 text-cyan-200 ml-4' : 'bg-slate-800/50 border border-slate-700 text-slate-300 mr-4'}`}>
@@ -864,7 +875,6 @@ export default function LexisApp({ navigateTo }) {
                 {item.text}
               </div>
             ))}
-            <div ref={transcriptEndRef} />
           </div>
         )}
       </main>
