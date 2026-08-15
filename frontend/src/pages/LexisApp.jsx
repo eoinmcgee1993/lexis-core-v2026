@@ -522,7 +522,14 @@ export default function LexisApp({ navigateTo }) {
       });
 
       if (!sdpResponse.ok) {
-        throw new Error(`SDP exchange failed with status ${sdpResponse.status}`);
+        // A persistent 429 that survives several minutes and a page reload
+        // isn't a normal per-minute rate limit — likely a concurrent-session
+        // cap or quota issue on the OpenAI account/tier. Reading the body is
+        // the only way to tell those apart instead of guessing from the
+        // status code alone; OpenAI returns a JSON {error:{message,...}}
+        // body even for the SDP-exchange endpoint.
+        const errorBody = await sdpResponse.text().catch(() => '');
+        throw new Error(`SDP exchange failed with status ${sdpResponse.status}${errorBody ? `: ${errorBody.slice(0, 300)}` : ''}`);
       }
 
       const answerSdp = await sdpResponse.text();
