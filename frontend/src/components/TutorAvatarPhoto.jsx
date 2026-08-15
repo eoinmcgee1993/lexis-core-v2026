@@ -1,133 +1,36 @@
 // frontend/src/components/TutorAvatarPhoto.jsx
 //
-// The photo-based tutor avatar: a real generated portrait (see
-// scripts/avatar/lexis-tutor-photo-notes.md) with small synthetic "mouth
-// opening" and "eyes closed" accents layered on top. The mouth is driven by
-// tutorLevel — the same live remote-analyser signal LexisApp.jsx already
-// computes for the ambient waveform ring, straight off the WebRTC audio
-// track OpenAI's Realtime API is already streaming. The blink is a local
-// idle timer, same cadence as TutorAvatar3D.jsx's morph-target blink. No
-// lip-sync vendor, no three.js/WebGL — an <img> plus a couple of
-// absolutely-positioned overlay divs.
+// The photo-based tutor avatar: four real photos of the same generated
+// identity (see scripts/avatar/lexis-tutor-photo-notes.md) — neutral,
+// mouth-open, eyes-closed, and mouth-open-with-eyes-closed — crossfaded by
+// tutorLevel (mouth) and a local blink timer (eyes). No lip-sync vendor, no
+// three.js/WebGL — four absolutely-positioned <img> layers blended with
+// opacity. This replaced an earlier version that painted small dark
+// radial-gradient "shadow" shapes over a single static photo to fake mouth
+// and eye movement; live-verified that read as a smudge/bruise appearing
+// and disappearing on the face rather than a mouth opening, unsettling
+// enough to be called out directly. Real photos of the actual expressions
+// (via Higgsfield identity-preserving image-to-image editing once credits
+// were available — see the notes file) fix that at the root instead of
+// tuning the illusion further.
 //
-// Why overlays instead of real "mouth open" / "eyes closed" photos:
-// generating extra photos of the *same* face reliably needs
-// identity-preserving image-to-image editing (a reference-image feature),
-// which wasn't available when this was built (Gamma: plan-gated;
-// Higgsfield: out of credits, no one-time top-up option). An independently
-// generated second photo would drift in lighting/identity and visibly
-// "jump" on every crossfade. This overlay keeps the one real photo pristine
-// and untouched, and adds motion instead of swapping the whole face. It's a
-// deliberate trade — see the notes file for how to upgrade to real photos
-// later, if a paid tier ever gets added.
+// Why four images, not two: mouth and eyes change independently and
+// concurrently (LEXIS blinks *while* talking most of the time, since
+// talking dominates a session). Crossfading "mouth-open" and "eyes-closed"
+// as two independent layers would conflict whenever both are partially
+// visible at once — each single-feature photo bakes in the *other*
+// feature's neutral state, so blending them fights itself. Standard
+// bilinear interpolation across all four corners of the mouth x eyes grid
+// avoids that: each of the three non-base layers gets an opacity that is
+// the product of how "on" each of its two features is, and the base layer
+// (mouth closed, eyes open) is always fully opaque underneath. At any
+// combination of openAmount/blinkAmount the four opacities sum to 1 and
+// blend to the correct point in that 2x2 space — see the render() below.
 import React, { useEffect, useRef, useState } from 'react';
-
-// Mouth position, hand-measured against the base photo (percent of the
-// image box). Re-measure these if the photo changes.
-const MOUTH_CENTER_X_PCT = 51.0;
-const MOUTH_TOP_PCT = 47.6; // sits right at the lip seam
-const MOUTH_WIDTH_PCT = 10.0;
-const MOUTH_MAX_HEIGHT_PCT = 5.8;
-// A darkened/saturated version of the photo's own lip-seam shadow tone —
-// the sampled color as-is blended in too smoothly to read as an opening at
-// any usable size; this stays in the same family but keeps enough contrast
-// against the lip color to actually show up.
-const MOUTH_SHADOW_COLOR = '35, 8, 8';
-// A single uniform dark shape reads as a smudge appearing/disappearing on
-// the face, not a mouth opening — reported live as looking "weird" enough
-// to unsettle kids. Real open mouths show a bright line where teeth catch
-// the light; this is the single highest-leverage addition to sell the
-// illusion, layered on top of the cavity shape below.
-const TEETH_HIGHLIGHT_COLOR = '232, 222, 205';
-
-// Eye positions, same hand-measured approach. cx mirrors around the face's
-// vertical midline (roughly 49.25%, not exactly 50 — the photo's framing
-// isn't perfectly centered).
-const EYE_TOP_PCT = 34.0;
-const EYE_WIDTH_PCT = 7.0;
-const EYE_HEIGHT_PCT = 3.6;
-const EYE_CENTERS_X_PCT = [41.5, 57.0];
-// Sampled from the eyelid-crease shadow in the photo itself.
-const EYE_SHADOW_COLOR = '21, 10, 5';
 
 const BLINK_DURATION_S = 0.18;
 const BLINK_MIN_GAP_S = 2;
 const BLINK_MAX_GAP_S = 5;
-
-function MouthOverlay({ openAmount }) {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: 'absolute',
-        left: `${MOUTH_CENTER_X_PCT}%`,
-        top: `${MOUTH_TOP_PCT}%`,
-        width: `${MOUTH_WIDTH_PCT}%`,
-        height: `${MOUTH_MAX_HEIGHT_PCT}%`,
-        transform: `translateX(-50%) scaleY(${0.05 + openAmount * 0.95})`,
-        transformOrigin: 'top',
-        borderRadius: '50%',
-        background: `radial-gradient(ellipse at center, rgba(${MOUTH_SHADOW_COLOR}, ${0.75 + openAmount * 0.25}) 0%, rgba(${MOUTH_SHADOW_COLOR}, ${0.5 + openAmount * 0.3}) 55%, rgba(${MOUTH_SHADOW_COLOR}, 0) 100%)`,
-        // Softer falloff than before (was 0.5px) — a harder edge on a flat
-        // shape is exactly what makes it read as "pasted on" rather than
-        // part of the face.
-        filter: 'blur(0.9px)',
-        transition: 'transform 90ms ease-out, background 90ms ease-out',
-        pointerEvents: 'none',
-      }}
-    />
-  );
-}
-
-// Layered on top of MouthOverlay: a thin, soft highlight just inside the
-// top of the opening, only visible once the mouth is open enough to
-// plausibly show teeth. Without this, the cavity shape alone has nothing
-// to contrast against and just looks like a bruise or smudge growing and
-// shrinking on the face.
-function TeethHighlight({ openAmount }) {
-  const visibleFrom = 0.18;
-  const strength = Math.max(0, (openAmount - visibleFrom) / (1 - visibleFrom));
-  if (strength <= 0) return null;
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: 'absolute',
-        left: `${MOUTH_CENTER_X_PCT}%`,
-        top: `${MOUTH_TOP_PCT + 0.5}%`,
-        width: `${MOUTH_WIDTH_PCT * 0.7}%`,
-        height: `${MOUTH_MAX_HEIGHT_PCT * 0.22}%`,
-        transform: 'translateX(-50%)',
-        borderRadius: '50%',
-        background: `radial-gradient(ellipse at center, rgba(${TEETH_HIGHLIGHT_COLOR}, ${strength * 0.5}) 0%, rgba(${TEETH_HIGHLIGHT_COLOR}, 0) 80%)`,
-        filter: 'blur(0.7px)',
-        transition: 'opacity 90ms ease-out',
-        pointerEvents: 'none',
-      }}
-    />
-  );
-}
-
-function EyeOverlay({ centerXPct, closeAmount }) {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: 'absolute',
-        left: `${centerXPct}%`,
-        top: `${EYE_TOP_PCT}%`,
-        width: `${EYE_WIDTH_PCT}%`,
-        height: `${EYE_HEIGHT_PCT}%`,
-        transform: `translateX(-50%) scaleY(${0.05 + closeAmount * 0.95})`,
-        transformOrigin: 'center',
-        borderRadius: '50%',
-        background: `radial-gradient(ellipse at center, rgba(${EYE_SHADOW_COLOR}, ${closeAmount * 0.85}) 0%, rgba(${EYE_SHADOW_COLOR}, ${closeAmount * 0.55}) 55%, rgba(${EYE_SHADOW_COLOR}, 0) 100%)`,
-        filter: 'blur(0.4px)',
-        pointerEvents: 'none',
-      }}
-    />
-  );
-}
 
 // Idle blink timer — a local rAF loop, independent of tutorLevel. Same
 // cadence/shape as TutorAvatar3D.jsx's blink morph target: a quick sine
@@ -165,13 +68,44 @@ function useBlink() {
   return closeAmount;
 }
 
+// photoUrl is the base (mouth-closed, eyes-open) photo; the other three
+// variants are derived from it by filename convention — see
+// scripts/avatar/lexis-tutor-photo-notes.md for how they were generated.
+// Keeping this derivation here (rather than threading three more props
+// through LexisApp.jsx) means the naming convention lives in one place.
+function deriveVariantUrls(photoUrl) {
+  const base = photoUrl.replace(/\.jpg$/i, '');
+  return {
+    open: `${base}-open.jpg`,
+    blink: `${base}-blink.jpg`,
+    openBlink: `${base}-open-blink.jpg`,
+  };
+}
+
 export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, isConnecting, onError }) {
   const active = isConnected || isConnecting;
   const [failed, setFailed] = useState(false);
-  const openAmount = Math.min(1, tutorLevel / 85); // 0 = closed, 1 = fully open
-  const blinkAmount = useBlink();
+  // Each overlay variant fails independently of the base photo and of each
+  // other — if e.g. only the open-mouth photo 404s, the right response is
+  // "keep the static base photo, don't animate the mouth", not "the whole
+  // avatar is broken, fall back to 3D/SVG". Only the base photo's onError
+  // triggers that full fallback.
+  const [variantFailed, setVariantFailed] = useState({ open: false, blink: false, openBlink: false });
+  const openAmount = Math.min(1, tutorLevel / 85); // 0 = mouth closed, 1 = fully open
+  const blinkAmount = useBlink(); // 0 = eyes open, 1 = fully closed
 
   if (failed) return null;
+
+  const { open, blink, openBlink } = deriveVariantUrls(photoUrl);
+  const markVariantFailed = (key) => setVariantFailed((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+
+  // Bilinear blend across the four corners of the mouth x eyes grid — see
+  // the file header for why this avoids the two-layer conflict. The base
+  // photo is always fully opaque underneath; these three layers fade in on
+  // top of it and of each other.
+  const mouthOnlyOpacity = openAmount * (1 - blinkAmount);
+  const blinkOnlyOpacity = blinkAmount * (1 - openAmount);
+  const bothOpacity = openAmount * blinkAmount;
 
   return (
     <div className={`relative w-full h-full transition-opacity duration-300 ${active ? 'opacity-100' : 'opacity-70'}`}>
@@ -185,11 +119,36 @@ export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, is
           onError?.();
         }}
       />
-      <MouthOverlay openAmount={openAmount} />
-      <TeethHighlight openAmount={openAmount} />
-      {EYE_CENTERS_X_PCT.map((cx) => (
-        <EyeOverlay key={cx} centerXPct={cx} closeAmount={blinkAmount} />
-      ))}
+      {!variantFailed.open && (
+        <img
+          src={open}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-100 ease-out"
+          style={{ opacity: mouthOnlyOpacity }}
+          draggable={false}
+          onError={() => markVariantFailed('open')}
+        />
+      )}
+      {!variantFailed.blink && (
+        <img
+          src={blink}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: blinkOnlyOpacity }}
+          draggable={false}
+          onError={() => markVariantFailed('blink')}
+        />
+      )}
+      {!variantFailed.openBlink && (
+        <img
+          src={openBlink}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: bothOpacity }}
+          draggable={false}
+          onError={() => markVariantFailed('openBlink')}
+        />
+      )}
     </div>
   );
 }
