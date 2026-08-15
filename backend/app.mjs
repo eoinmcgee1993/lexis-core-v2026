@@ -330,7 +330,17 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
             // exactly this bilingual use case — so trying it in place of a
             // prompt-only fix. If Thai audio still drops, that's a real
             // model-level Thai-audio-synthesis gap, not a voice-pick problem.
-            output: { voice: 'marin' },
+            //
+            // Reported: LEXIS speaks too fast. `speed` is a real, dedicated
+            // parameter here — a post-processing playback-rate multiplier
+            // (0.25-1.5, default 1.0), independent of the "speak at a
+            // measured pace" prompt wording already in
+            // buildTutorInstructions(), which evidently isn't being
+            // followed strongly enough on its own. 0.85 is a deliberately
+            // modest slowdown (15%) rather than a guess at "much slower" —
+            // easier to verify live and nudge further than to overshoot
+            // into an unnaturally draggy voice on the first try.
+            output: { voice: 'marin', speed: 0.85 },
             input: {
               transcription: { model: 'whisper-1' },
               turn_detection: {
