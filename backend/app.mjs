@@ -221,42 +221,40 @@ function buildTutorInstructions(direction) {
     ? "Correct speech errors gently by modeling the proper Thai phrase, then ask a simple follow-up question."
     : 'Correct speech errors gently by modeling the proper phrase, then ask a simple follow-up question.';
 
-  // Previously this told the model to "follow their lead" on language with
-  // no fixed anchor — live-verified that reads as permission to actually
-  // switch which language it's teaching mid-session (student replies in
-  // English for a bit -> LEXIS drifts into teaching English, even in a
-  // 'th' session), not just to acknowledge them in it. The target language
-  // is chosen once, at session start, and must not drift — so state that
-  // explicitly and demote the other language to "brief clarification only".
-  const bilingual = learningThai
-    ? `Fixed target language: Thai. This is the language you are teaching for the entire session — it does not change based on what the student says. The student may speak Thai, English, or a mix while practicing; meet them wherever they are, and never block or scold them for using English. But always keep teaching and modeling Thai — that's the lesson. If they seem stuck, you may clarify briefly in English, then immediately continue the lesson in Thai. Do not fully switch into teaching English just because they used it.`
-    : `Fixed target language: English. This is the language you are teaching for the entire session — it does not change based on what the student says. The student may speak English, Thai, or a mix while practicing; meet them wherever they are, and never block or scold them for using Thai. But always keep teaching and modeling English — that's the lesson. If they seem stuck, you may clarify briefly in Thai, then immediately continue the lesson in English. Do not fully switch into teaching Thai just because they used it.`;
-
   const curriculumTarget = learningThai ? 'Thai' : 'English';
   // The language the student can already lean on comfortably — the fixed
-  // target's opposite number. Used only to soften the very first turn.
+  // target's opposite number.
   const baseLanguage = learningThai ? 'English' : 'Thai';
 
-  // Live-verified: pinning the target language firmly (above) fixed the
-  // drifting-mid-session problem, but exposed a worse first impression —
-  // with nothing yet said by the student, LEXIS opened sessions with a
-  // long stretch of pure target-language speech. For the 'th' direction
-  // especially, a student who doesn't know any Thai yet got a wall of
-  // unparseable Thai as their very first sound from the app — confusing,
-  // and also the single longest continuous run of target-language audio
-  // in the whole session, which is exactly where Thai audio synthesis is
-  // most likely to glitch (see the marin-voice fix above). The fix for
-  // that (a short, mostly-base-language first line) is folded into a
-  // fuller onboarding flow below — requested explicitly: introduce
-  // herself, get the student's name, then establish level and topic
-  // before the lesson proper starts. Kept conversational and prompt-
-  // driven rather than a rigid script or new stateful backend, matching
-  // the "lightweight curriculum in the system prompt" approach already
-  // chosen for this product over a stateful lesson-tracking system.
-  const onboarding = `Onboarding (first few turns only, before the lesson proper begins):
-1. Your very first message: introduce yourself as LEXIS and ask the student's name. Keep it short (max ~15 words), mostly in ${baseLanguage}. Include at most ONE short ${curriculumTarget} word or phrase here, never a full sentence or several phrases back to back — do not front-load a long run of ${curriculumTarget} before the student has spoken at all.
+  // Live-verified in BOTH directions, two rounds of bugs from the same
+  // root cause:
+  // 1) 'th' direction, first version of this text: an unanchored "follow
+  //    their lead" on language let the model actually drift into teaching
+  //    English mid-session. Fixed by pinning a firm target language.
+  // 2) 'en' direction, after that fix: the pin's wording — "always keep
+  //    teaching and modeling English... that's the lesson" — turned out
+  //    strong enough that the model applied it even during onboarding and
+  //    even when the student was visibly lost. Live-verified: a Thai
+  //    speaker asked "อะไรนะ" ("what?/huh?", real confusion, in their own
+  //    language) and got another pure-English reply back with no Thai at
+  //    all — the "you may clarify briefly" carve-out never fired. Having
+  //    the target-language pin and the onboarding softening as two
+  //    separate blocks let the model resolve the conflict either way;
+  //    rewritten as one explicit two-phase flow so there's no ambiguity
+  //    about which rule applies when, and the clarification carve-out is
+  //    now a MUST triggered by concrete confusion signals, not a "may".
+  const languageRules = `Language rules — two phases, in order:
+
+PHASE 1, Onboarding (the first 1-2 turns, before any lesson content): stay mostly in ${baseLanguage}. Introduce yourself, ask the student's name, then check their level and what they want to practice (see Onboarding below). At most ONE short ${curriculumTarget} word or phrase per turn here — the target-language rule in Phase 2 does not apply yet.
+
+PHASE 2, The lesson itself (once name, level, and topic are established): now ${curriculumTarget} is the fixed target language for the rest of the session — it does not drift based on what the student says. The student may still speak ${baseLanguage}, ${curriculumTarget}, or a mix; meet them wherever they are, and never block or scold them for using ${baseLanguage}. But keep the actual lesson content in ${curriculumTarget}.
+
+In BOTH phases: if the student seems confused — asks you to repeat, goes quiet, replies with something unrelated, or asks "what?" in ${baseLanguage} — you MUST switch briefly into ${baseLanguage} to clarify what you meant, then continue. Do not just repeat the same ${curriculumTarget} phrase again, louder or slower — that does not help someone who did not understand it the first time.`;
+
+  const onboarding = `Onboarding (first few turns only, before the lesson proper begins — see Phase 1 above):
+1. Your very first message: introduce yourself as LEXIS and ask the student's name. Keep it short (max ~15 words).
 2. Once they give their name, greet them by it, then ask two things in one short turn: (a) whether they're a complete beginner or already know some ${curriculumTarget}, so you can set the right pace, and (b) what they'd like to practice today. If they seem unsure what to pick, offer 2-3 concrete example topics pulled from the curriculum below (e.g. greetings & introductions, ordering food, everyday small talk) rather than leaving it open-ended.
-3. Once you know their level and topic (or they've picked one of your examples, or stayed quiet and you've defaulted to the easiest one), begin the lesson itself. A stated beginner gets single words and very short 2-3 word phrases, heavy repetition, and a slow pace with no grammar talk yet. Anyone with some experience starts at the normal pace described below.
+3. Once you know their level and topic (or they've picked one of your examples, or stayed quiet and you've defaulted to the easiest one), begin the lesson itself — this is where Phase 2 starts. A stated beginner gets single words and very short 2-3 word phrases, heavy repetition, and a slow pace with no grammar talk yet. Anyone with some experience starts at the normal pace described below.
 Keep every onboarding turn short and conversational — this is a spoken exchange, not a menu being read aloud.`;
 
   return `${role}
@@ -265,7 +263,7 @@ Keep each response short (15-25 words max) to maximize student speaking time.
 ${correction}
 Be patient when the student pauses or hesitates.
 
-${bilingual}
+${languageRules}
 
 ${onboarding}
 
