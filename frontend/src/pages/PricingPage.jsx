@@ -64,7 +64,7 @@ export default function PricingPage({ navigateTo }) {
             <Sparkles className="w-5 h-5" />
           </div>
           <span className="text-lg font-extrabold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-            LEXIS OS
+            LEXIS
           </span>
         </div>
         <div className="w-16" />
@@ -94,8 +94,8 @@ export default function PricingPage({ navigateTo }) {
               <p className="text-xs text-slate-400 mb-4">3 Practice Sessions (30 Mins)</p>
               <div className="text-3xl font-extrabold text-slate-100 mb-6">฿0</div>
               <ul className="text-xs space-y-3 text-slate-300 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>30 Total Mins Usage</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Real-Time Feedback</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>30 minutes of practice time</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Real-time feedback as you speak</span></li>
               </ul>
             </div>
             <button onClick={() => navigateTo('/app')} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition-all">
@@ -113,9 +113,9 @@ export default function PricingPage({ navigateTo }) {
               <p className="text-xs text-slate-400 mb-4">Unlimited Practice for 7 Days</p>
               <div className="text-3xl font-extrabold text-slate-100 mb-6">฿199 <span className="text-xs font-normal text-slate-500">/ week</span></div>
               <ul className="text-xs space-y-3 text-slate-300 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Unlimited Speaking Time</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Full Transcript History</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Adaptive AI Tutor Tuning</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Talk as much as you want</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Full conversation history</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>LEXIS adjusts to your level as you go</span></li>
               </ul>
             </div>
             <button
@@ -134,9 +134,9 @@ export default function PricingPage({ navigateTo }) {
               <p className="text-xs text-slate-400 mb-4">Unlimited Practice for 30 Days</p>
               <div className="text-3xl font-extrabold text-slate-100 mb-6">฿599 <span className="text-xs font-normal text-slate-500">/ month</span></div>
               <ul className="text-xs space-y-3 text-slate-300 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Best Value (Save 25%)</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Unlimited Speaking Time</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Priority Server Queue</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Best value — save 25% vs. weekly</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Talk as much as you want</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Great for building a daily habit</span></li>
               </ul>
             </div>
             <button

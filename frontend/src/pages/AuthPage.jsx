@@ -55,7 +55,7 @@ export default function AuthPage({ navigateTo }) {
             <Sparkles className="w-5 h-5" />
           </div>
           <span className="text-lg font-extrabold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-            LEXIS OS
+            LEXIS
           </span>
         </div>
 

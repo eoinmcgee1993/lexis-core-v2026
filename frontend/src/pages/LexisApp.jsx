@@ -160,7 +160,7 @@ export default function LexisApp({ navigateTo }) {
   // State Management
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [status, setStatus] = useState('Idle');
+  const [status, setStatus] = useState('Ready when you are');
   const [transcripts, setTranscripts] = useState([]);
   const [audioLevel, setAudioLevel] = useState(0);
   const [tutorLevel, setTutorLevel] = useState(0); // LEXIS's own voice energy, drives the avatar's mouth
@@ -179,7 +179,7 @@ export default function LexisApp({ navigateTo }) {
   // 'hidden sm:flex', invisible on phone-width screens, so on mobile the
   // direction was effectively whatever localStorage already had (silently
   // defaulting to 'en') with no visible way to check or change it before
-  // starting. Now INITIATE LEXIS always asks explicitly first via this
+  // starting. Now Start Talking always asks explicitly first via this
   // modal, so the choice is unmissable regardless of screen size.
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   // Mobile browsers can silently block autoplay on the remote <audio>
@@ -379,7 +379,7 @@ export default function LexisApp({ navigateTo }) {
     const direction = directionOverride ?? targetLanguage;
 
     setIsConnecting(true);
-    setStatus('Authenticating & Fetching Token...');
+    setStatus('Getting things ready...');
     setUpgradeRequired(false);
     setAudioBlocked(false);
 
@@ -408,7 +408,7 @@ export default function LexisApp({ navigateTo }) {
       const clientSecret = data.client_secret;
       if (!clientSecret) throw new Error('Received invalid client secret from token broker.');
 
-      setStatus('Establishing Sub-300ms WebRTC Stream...');
+      setStatus('Connecting you to LEXIS...');
 
       // 2. Instantiate PeerConnection
       const pc = new RTCPeerConnection({
@@ -421,7 +421,7 @@ export default function LexisApp({ navigateTo }) {
 
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === 'connected') {
-          setStatus('LEXIS Active (Sub-300ms WebRTC)');
+          setStatus("LEXIS is listening");
           setIsConnected(true);
           setIsConnecting(false);
 
@@ -460,7 +460,7 @@ export default function LexisApp({ navigateTo }) {
           }, 30000);
 
         } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-          endSession('Connection lost. Cleaning up...');
+          endSession('Connection lost — tap Start to try again.');
         }
       };
 
@@ -570,7 +570,7 @@ export default function LexisApp({ navigateTo }) {
             setStatus('Listening...');
           } else if (event.type === 'response.done') {
             isAssistantSpeakingRef.current = false;
-            setStatus('LEXIS Active (Sub-300ms WebRTC)');
+            setStatus("LEXIS is listening");
           }
         } catch (err) {
           console.error('[LEXIS Event Error]', err);
@@ -647,7 +647,7 @@ export default function LexisApp({ navigateTo }) {
 
   // Only meaningful before a session starts — the running session's system
   // prompt was already picked when it connected, so this only affects the
-  // *next* "INITIATE LEXIS" click. Disabled in the UI while connected for
+  // *next* "Start Talking" tap. Disabled in the UI while connected for
   // exactly that reason, rather than implying a live language switch.
   const selectTargetLanguage = (lang) => {
     setTargetLanguage(lang);
@@ -659,7 +659,7 @@ export default function LexisApp({ navigateTo }) {
     }
   };
 
-  // Handles the language-picker modal shown on every INITIATE LEXIS tap.
+  // Handles the language-picker modal shown on every "Start Talking" tap.
   // Persists the choice for next time (selectTargetLanguage) and starts the
   // session with it immediately via startSession's directionOverride, so
   // this doesn't need to wait a render for state to catch up.
@@ -675,7 +675,7 @@ export default function LexisApp({ navigateTo }) {
   // message, or 'Connection lost'), silently discarding it before the user
   // ever saw it. Every failure mode collapsed to the same uninformative
   // "Disconnected", which is exactly what was reported live.
-  const endSession = (finalStatus = 'Disconnected') => {
+  const endSession = (finalStatus = 'Session ended — see you next time!') => {
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
@@ -724,9 +724,9 @@ export default function LexisApp({ navigateTo }) {
           </div>
           <div>
             <h1 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-              LEXIS Voice OS
+              LEXIS
             </h1>
-            <p className="text-[10px] text-slate-400">Authenticated Voice Immersion Session</p>
+            <p className="text-[10px] text-slate-400">Your AI conversation partner</p>
           </div>
         </div>
 
@@ -743,7 +743,7 @@ export default function LexisApp({ navigateTo }) {
               showing it as live-editable would be misleading. Visible on
               all screen sizes (was 'hidden sm:flex' — invisible on phones,
               which meant mobile users had no visible way to check or set
-              this before INITIATE LEXIS now also asks explicitly). */}
+              this before Start Talking now also asks explicitly). */}
           {!isConnected && !isConnecting && (
             <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs" title="Language to practice">
               <button
@@ -831,7 +831,7 @@ export default function LexisApp({ navigateTo }) {
             </div>
           </div>
           <div className="absolute -bottom-8 text-center">
-            <p className="text-xs font-mono uppercase tracking-widest text-cyan-400/80">{status}</p>
+            <p className="text-sm text-cyan-300/90">{status}</p>
           </div>
         </div>
 
@@ -844,22 +844,40 @@ export default function LexisApp({ navigateTo }) {
               className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold text-base rounded-2xl shadow-lg shadow-cyan-500/20 transition-all hover:scale-105 active:scale-95 flex items-center space-x-3"
             >
               {isConnecting ? <RotateCcw className="w-5 h-5 animate-spin" /> : <Mic className="w-5 h-5" />}
-              <span>{isConnecting ? 'CONNECTING...' : 'INITIATE LEXIS'}</span>
+              <span>{isConnecting ? 'Connecting…' : 'Start Talking'}</span>
             </button>
           ) : (
             <div className="flex items-center space-x-3 bg-slate-900/80 border border-slate-800 p-2 rounded-2xl shadow-xl">
-              <button onClick={toggleMute} className={`p-3.5 rounded-xl border ${isMuted ? 'bg-rose-500/20 border-rose-500/50 text-rose-400' : 'bg-slate-800 border-slate-700 text-slate-200'}`}>
+              <button
+                onClick={toggleMute}
+                title={isMuted ? 'Unmute your mic' : 'Mute your mic'}
+                className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border text-[10px] font-medium ${isMuted ? 'bg-rose-500/20 border-rose-500/50 text-rose-400' : 'bg-slate-800 border-slate-700 text-slate-200'}`}
+              >
                 {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                <span>{isMuted ? 'Muted' : 'Mic on'}</span>
               </button>
-              <button onClick={toggleSpeakerMute} className={`p-3.5 rounded-xl border ${isSpeakerMuted ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' : 'bg-slate-800 border-slate-700 text-slate-200'}`}>
+              <button
+                onClick={toggleSpeakerMute}
+                title={isSpeakerMuted ? 'Unmute LEXIS' : 'Mute LEXIS'}
+                className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border text-[10px] font-medium ${isSpeakerMuted ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' : 'bg-slate-800 border-slate-700 text-slate-200'}`}
+              >
                 {isSpeakerMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                <span>{isSpeakerMuted ? 'Silenced' : 'Sound on'}</span>
               </button>
-              <button onClick={forceInterrupt} className="p-3.5 bg-slate-800 border border-slate-700 text-slate-200 rounded-xl hover:bg-slate-700" title="Manual Interrupt">
+              <button
+                onClick={forceInterrupt}
+                title="Jump in and interrupt LEXIS"
+                className="flex flex-col items-center gap-1 px-3 py-2.5 bg-slate-800 border border-slate-700 text-slate-200 rounded-xl hover:bg-slate-700 text-[10px] font-medium"
+              >
                 <Hand className="w-5 h-5 text-amber-400" />
+                <span>Interrupt</span>
               </button>
-              <button onClick={() => endSession()} className="px-6 py-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-semibold rounded-xl flex items-center space-x-2">
+              <button
+                onClick={() => endSession()}
+                className="flex flex-col items-center gap-1 px-4 py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-semibold rounded-xl text-[10px]"
+              >
                 <PhoneOff className="w-5 h-5" />
-                <span>TERMINATE</span>
+                <span>End Session</span>
               </button>
             </div>
           )}
@@ -868,7 +886,7 @@ export default function LexisApp({ navigateTo }) {
         {/* Transcripts */}
         {transcripts.length > 0 && (
           <div ref={transcriptContainerRef} className="w-full mt-10 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 max-h-60 overflow-y-auto space-y-3">
-            <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-2">Speech Transcripts</div>
+            <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Conversation</div>
             {transcripts.map((item, idx) => (
               <div key={idx} className={`text-xs p-3 rounded-xl ${item.speaker === 'lexis' ? 'bg-cyan-950/30 border border-cyan-800/30 text-cyan-200 ml-4' : 'bg-slate-800/50 border border-slate-700 text-slate-300 mr-4'}`}>
                 <span className="font-bold uppercase mr-2 opacity-60">{item.speaker === 'lexis' ? 'LEXIS:' : 'You:'}</span>
@@ -882,12 +900,12 @@ export default function LexisApp({ navigateTo }) {
       <footer className="w-full max-w-4xl flex items-center justify-between border-t border-slate-800 pt-4 text-xs text-slate-600">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Sub-300ms WebRTC Stream • Authenticated Session</span>
+          <span>Private &amp; secure — only you and LEXIS are on the call</span>
         </div>
-        <div>Digital Renaissance System Architecture © 2026</div>
+        <div>© 2026 LEXIS</div>
       </footer>
 
-      {/* Language picker — asked explicitly on every INITIATE LEXIS tap
+      {/* Language picker — asked explicitly on every "Start Talking" tap
           rather than silently reusing whatever was last stored. The tutor
           was live-verified drifting between teaching English and Thai
           mid-session when the target wasn't pinned down clearly, and the
