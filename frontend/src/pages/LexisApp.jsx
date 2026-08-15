@@ -160,6 +160,14 @@ export default function LexisApp({ navigateTo }) {
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [upgradeMessage, setUpgradeMessage] = useState('');
+  // Mobile browsers can silently block autoplay on the remote <audio>
+  // element — its srcObject is set inside pc.ontrack, which fires
+  // asynchronously well after the click that started the session, outside
+  // the window some browsers associate with that user gesture. Input (mic)
+  // keeps working fine either way, since that's a separate permission; only
+  // LEXIS's own voice goes silent, with no error — just a transcript with
+  // nothing audible behind it. See the button below driven by this flag.
+  const [audioBlocked, setAudioBlocked] = useState(false);
 
   // References
   const pcRef = useRef(null);
@@ -332,6 +340,7 @@ export default function LexisApp({ navigateTo }) {
     setIsConnecting(true);
     setStatus('Authenticating & Fetching Token...');
     setUpgradeRequired(false);
+    setAudioBlocked(false);
 
     try {
       // 1. Fetch Ephemeral Token with User JWT
@@ -424,6 +433,15 @@ export default function LexisApp({ navigateTo }) {
       pc.ontrack = (e) => {
         if (e.streams && e.streams[0]) {
           audioEl.srcObject = e.streams[0];
+          // `autoplay` alone doesn't guarantee playback starts — some mobile
+          // browsers block it here since this callback fires async, outside
+          // the gesture window. Explicitly attempt play() and surface a
+          // "tap to enable audio" prompt on rejection instead of failing
+          // silently (see the audioBlocked banner below).
+          audioEl.play().then(() => setAudioBlocked(false)).catch((playErr) => {
+            console.warn('[LEXIS Audio] Autoplay blocked, prompting for a tap:', playErr);
+            setAudioBlocked(true);
+          });
           setupDualVisualizers(mediaStreamRef.current, e.streams[0]);
         }
       };
@@ -604,6 +622,7 @@ export default function LexisApp({ navigateTo }) {
     setStatus(finalStatus);
     setAudioLevel(0);
     setTutorLevel(0);
+    setAudioBlocked(false);
   };
 
   // Defensive fallback only — App.jsx's router guarantees a session exists
@@ -660,6 +679,29 @@ export default function LexisApp({ navigateTo }) {
           <button onClick={() => navigateTo('/pricing')} className="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1">
             <CreditCard className="w-4 h-4" />
             <span>View Pricing</span>
+          </button>
+        </div>
+      )}
+
+      {/* Audio Blocked Notice — mobile browsers can silently block the
+          remote <audio> element's autoplay; this is a real click, so
+          play() from here isn't subject to the same restriction. */}
+      {audioBlocked && (
+        <div className="w-full max-w-4xl my-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center space-x-3 text-amber-400 text-xs">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span>LEXIS is talking, but your browser blocked the audio. Tap to enable it.</span>
+          </div>
+          <button
+            onClick={() => {
+              remoteAudioRef.current?.play().then(() => setAudioBlocked(false)).catch((err) => {
+                console.warn('[LEXIS Audio] Manual play still failed:', err);
+              });
+            }}
+            className="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1"
+          >
+            <Volume2 className="w-4 h-4" />
+            <span>Enable Audio</span>
           </button>
         </div>
       )}
