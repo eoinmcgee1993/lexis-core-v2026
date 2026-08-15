@@ -128,8 +128,28 @@ export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, is
   // avatar is broken, fall back to 3D/SVG". Only the base photo's onError
   // triggers that full fallback.
   const [variantFailed, setVariantFailed] = useState({ open: false, blink: false, openBlink: false });
-  const rawOpenAmount = Math.min(1, tutorLevel / 85); // 0 = mouth closed, 1 = fully open
-  const openAmount = useSmoothed(rawOpenAmount); // eased — see useSmoothed above for why
+  // Live-verified: after fixing the flicker (useSmoothed below), the mouth
+  // still barely moved during actual speech — "speaking" screenshots
+  // looked nearly identical to idle. Two compounding causes:
+  // 1. /85 was carried over unchanged from the original overlay code, but
+  //    TutorAvatar3D.jsx calibrates the exact same tutorLevel signal
+  //    against /70 for its mouth morph target — the photo tier was
+  //    already tuned to need more signal than its sibling to reach fully
+  //    "open", for no principled reason. Lowered further, to /55, since
+  //    normal speech volume apparently doesn't reach even the 3D tier's
+  //    threshold reliably on a full-photo crossfade (a partial-opacity
+  //    blend of two whole faces reads far more subtly than a morph target
+  //    or a small shape ever did, so this tier needs more headroom, not
+  //    the same amount, to look equally alive).
+  // 2. A linear amplitude-to-opacity mapping under-represents ordinary
+  //    speech: real speech spends most of its time at low-to-mid energy
+  //    with only occasional peaks, so a linear map keeps the mouth mostly
+  //    faint and only briefly near "open". A perceptual curve (**0.6)
+  //    boosts that low-to-mid range toward visibility without letting loud
+  //    peaks overshoot past 1.
+  const normalizedLevel = Math.min(1, tutorLevel / 55);
+  const rawOpenAmount = Math.pow(normalizedLevel, 0.6); // 0 = mouth closed, 1 = fully open
+  const openAmount = useSmoothed(rawOpenAmount, 13); // eased — see useSmoothed above for why
   const blinkAmount = useBlink(); // 0 = eyes open, 1 = fully closed
 
   if (failed) return null;
