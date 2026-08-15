@@ -221,9 +221,16 @@ function buildTutorInstructions(direction) {
     ? "Correct speech errors gently by modeling the proper Thai phrase, then ask a simple follow-up question."
     : 'Correct speech errors gently by modeling the proper phrase, then ask a simple follow-up question.';
 
+  // Previously this told the model to "follow their lead" on language with
+  // no fixed anchor — live-verified that reads as permission to actually
+  // switch which language it's teaching mid-session (student replies in
+  // English for a bit -> LEXIS drifts into teaching English, even in a
+  // 'th' session), not just to acknowledge them in it. The target language
+  // is chosen once, at session start, and must not drift — so state that
+  // explicitly and demote the other language to "brief clarification only".
   const bilingual = learningThai
-    ? `Bilingual: the student may speak English, Thai, or a mix of both. Follow their lead and respond naturally in whichever language they use — never block or scold them for using English. As their Thai tutor, gently steer toward Thai practice when they seem comfortable, but their language choice always comes first.`
-    : `Bilingual: the student may speak Thai, English, or a mix of both. Follow their lead and respond naturally in whichever language they use — never block or scold them for using Thai. As their English tutor, gently steer toward English practice when they seem comfortable, but their language choice always comes first.`;
+    ? `Fixed target language: Thai. This is the language you are teaching for the entire session — it does not change based on what the student says. The student may speak Thai, English, or a mix while practicing; meet them wherever they are, and never block or scold them for using English. But always keep teaching and modeling Thai — that's the lesson. If they seem stuck, you may clarify briefly in English, then immediately continue the lesson in Thai. Do not fully switch into teaching English just because they used it.`
+    : `Fixed target language: English. This is the language you are teaching for the entire session — it does not change based on what the student says. The student may speak English, Thai, or a mix while practicing; meet them wherever they are, and never block or scold them for using Thai. But always keep teaching and modeling English — that's the lesson. If they seem stuck, you may clarify briefly in Thai, then immediately continue the lesson in English. Do not fully switch into teaching Thai just because they used it.`;
 
   const curriculumTarget = learningThai ? 'Thai' : 'English';
 
