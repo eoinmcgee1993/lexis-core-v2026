@@ -288,8 +288,17 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
           audio: {
             // 'verse' reads as male; the tutor avatar (frontend) is a
             // consistently female persona, so the voice should match.
-            // 'shimmer' is a warm, clearly female OpenAI Realtime voice.
-            output: { voice: 'shimmer' },
+            // Tried 'shimmer' (warm, clearly female) first, but it
+            // live-verified going silent specifically on Thai portions of
+            // mixed English/Thai replies — even after the system prompt was
+            // told explicitly to never mute Thai audio (see buildTutorInstructions).
+            // 'marin' is OpenAI's newer flagship female Realtime voice,
+            // released alongside 'cedar' specifically with better handling
+            // of "switching seamlessly between languages mid-sentence" —
+            // exactly this bilingual use case — so trying it in place of a
+            // prompt-only fix. If Thai audio still drops, that's a real
+            // model-level Thai-audio-synthesis gap, not a voice-pick problem.
+            output: { voice: 'marin' },
             input: {
               transcription: { model: 'whisper-1' },
               turn_detection: {
