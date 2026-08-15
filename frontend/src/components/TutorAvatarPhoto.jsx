@@ -33,6 +33,12 @@ const MOUTH_MAX_HEIGHT_PCT = 5.8;
 // any usable size; this stays in the same family but keeps enough contrast
 // against the lip color to actually show up.
 const MOUTH_SHADOW_COLOR = '35, 8, 8';
+// A single uniform dark shape reads as a smudge appearing/disappearing on
+// the face, not a mouth opening — reported live as looking "weird" enough
+// to unsettle kids. Real open mouths show a bright line where teeth catch
+// the light; this is the single highest-leverage addition to sell the
+// illusion, layered on top of the cavity shape below.
+const TEETH_HIGHLIGHT_COLOR = '232, 222, 205';
 
 // Eye positions, same hand-measured approach. cx mirrors around the face's
 // vertical midline (roughly 49.25%, not exactly 50 — the photo's framing
@@ -62,8 +68,40 @@ function MouthOverlay({ openAmount }) {
         transformOrigin: 'top',
         borderRadius: '50%',
         background: `radial-gradient(ellipse at center, rgba(${MOUTH_SHADOW_COLOR}, ${0.75 + openAmount * 0.25}) 0%, rgba(${MOUTH_SHADOW_COLOR}, ${0.5 + openAmount * 0.3}) 55%, rgba(${MOUTH_SHADOW_COLOR}, 0) 100%)`,
-        filter: 'blur(0.5px)',
+        // Softer falloff than before (was 0.5px) — a harder edge on a flat
+        // shape is exactly what makes it read as "pasted on" rather than
+        // part of the face.
+        filter: 'blur(0.9px)',
         transition: 'transform 90ms ease-out, background 90ms ease-out',
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
+// Layered on top of MouthOverlay: a thin, soft highlight just inside the
+// top of the opening, only visible once the mouth is open enough to
+// plausibly show teeth. Without this, the cavity shape alone has nothing
+// to contrast against and just looks like a bruise or smudge growing and
+// shrinking on the face.
+function TeethHighlight({ openAmount }) {
+  const visibleFrom = 0.18;
+  const strength = Math.max(0, (openAmount - visibleFrom) / (1 - visibleFrom));
+  if (strength <= 0) return null;
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        left: `${MOUTH_CENTER_X_PCT}%`,
+        top: `${MOUTH_TOP_PCT + 0.5}%`,
+        width: `${MOUTH_WIDTH_PCT * 0.7}%`,
+        height: `${MOUTH_MAX_HEIGHT_PCT * 0.22}%`,
+        transform: 'translateX(-50%)',
+        borderRadius: '50%',
+        background: `radial-gradient(ellipse at center, rgba(${TEETH_HIGHLIGHT_COLOR}, ${strength * 0.5}) 0%, rgba(${TEETH_HIGHLIGHT_COLOR}, 0) 80%)`,
+        filter: 'blur(0.7px)',
+        transition: 'opacity 90ms ease-out',
         pointerEvents: 'none',
       }}
     />
@@ -148,6 +186,7 @@ export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, is
         }}
       />
       <MouthOverlay openAmount={openAmount} />
+      <TeethHighlight openAmount={openAmount} />
       {EYE_CENTERS_X_PCT.map((cx) => (
         <EyeOverlay key={cx} centerXPct={cx} closeAmount={blinkAmount} />
       ))}
