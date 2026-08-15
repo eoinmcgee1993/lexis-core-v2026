@@ -40,32 +40,32 @@ export default function LandingPage({ navigateTo }) {
   const content = {
     en: {
       en: {
-        heroTitle: "Master Conversational English with Sub-300ms AI Immersion",
-        heroSub: "Speak naturally, fix grammar instantly, and build real confidence — no expensive human tutors required.",
-        cta: "Start Free Practice",
+        heroTitle: "Speak English with Confidence — Practice Out Loud with LEXIS",
+        heroSub: "A friendly AI conversation partner who listens, replies, and gently corrects you in real time — practice as much as you want, whenever you want.",
+        cta: "Try It Free",
         pricingTeaser: "Free 30-minute trial, then ฿199/week or ฿599/month.",
         viewPricing: "View full pricing"
       },
       th: {
-        heroTitle: "ฝึกพูดภาษาอังกฤษอย่างมั่นใจ ด้วยระบบ AI เสียงเรียลไทม์",
-        heroSub: "พูดได้อย่างเป็นธรรมชาติ ปรับไวยากรณ์ทันที ไม่ต้องเสียค่าเรียนแพงๆ",
-        cta: "เริ่มฝึกใช้งานฟรี",
+        heroTitle: "ฝึกพูดภาษาอังกฤษอย่างมั่นใจ กับเพื่อนคู่ซ้อม AI",
+        heroSub: "LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้",
+        cta: "ลองใช้ฟรี",
         pricingTeaser: "ทดลองฟรี 30 นาที จากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน",
         viewPricing: "ดูแพ็กเกจทั้งหมด"
       }
     },
     th: {
       en: {
-        heroTitle: "Master Conversational Thai with Sub-300ms AI Immersion",
-        heroSub: "Speak naturally, fix grammar instantly, and build real confidence — no expensive human tutors required.",
-        cta: "Start Free Practice",
+        heroTitle: "Speak Thai with Confidence — Practice Out Loud with LEXIS",
+        heroSub: "A friendly AI conversation partner who listens, replies, and gently corrects you in real time — practice as much as you want, whenever you want.",
+        cta: "Try It Free",
         pricingTeaser: "Free 30-minute trial, then ฿199/week or ฿599/month.",
         viewPricing: "View full pricing"
       },
       th: {
-        heroTitle: "ฝึกพูดภาษาไทยอย่างมั่นใจ ด้วยระบบ AI เสียงเรียลไทม์",
-        heroSub: "พูดได้อย่างเป็นธรรมชาติ ปรับไวยากรณ์ทันที ไม่ต้องเสียค่าเรียนแพงๆ",
-        cta: "เริ่มฝึกใช้งานฟรี",
+        heroTitle: "ฝึกพูดภาษาไทยอย่างมั่นใจ กับเพื่อนคู่ซ้อม AI",
+        heroSub: "LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้",
+        cta: "ลองใช้ฟรี",
         pricingTeaser: "ทดลองฟรี 30 นาที จากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน",
         viewPricing: "ดูแพ็กเกจทั้งหมด"
       }
@@ -83,7 +83,7 @@ export default function LandingPage({ navigateTo }) {
             <Sparkles className="w-6 h-6 animate-pulse" />
           </div>
           <span className="text-xl font-extrabold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-            LEXIS OS
+            LEXIS
           </span>
         </div>
 
@@ -105,7 +105,7 @@ export default function LandingPage({ navigateTo }) {
             onClick={goPractice}
             className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-bold text-sm rounded-xl transition-all shadow-lg shadow-cyan-500/20 flex items-center space-x-2"
           >
-            <span>Launch App</span>
+            <span>Get Started</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -113,9 +113,9 @@ export default function LandingPage({ navigateTo }) {
 
       {/* Hero Section */}
       <section className="w-full max-w-4xl mx-auto px-6 py-16 text-center">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-xs font-mono text-cyan-400 mb-6">
+        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-xs text-cyan-400 mb-6">
           <Zap className="w-3.5 h-3.5" />
-          <span>Sub-300ms Latency • Powered by WebRTC</span>
+          <span>Talk in real time — no awkward pauses, no typing</span>
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-cyan-300 via-teal-200 to-emerald-400 bg-clip-text text-transparent leading-tight">
           {t.heroTitle}
@@ -164,15 +164,15 @@ export default function LandingPage({ navigateTo }) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-400">
           <div className="flex items-center space-x-2 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3">
             <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <span>Real-time gentle grammar correction</span>
+            <span>Gentle, real-time grammar correction</span>
           </div>
           <div className="flex items-center space-x-2 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3">
             <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <span>Barge-in — interrupt LEXIS naturally</span>
+            <span>Jump in and interrupt LEXIS anytime</span>
           </div>
           <div className="flex items-center space-x-2 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3">
             <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <span>Full transcript history on paid plans</span>
+            <span>Review what you practiced, anytime (paid plans)</span>
           </div>
         </div>
       </section>
@@ -181,9 +181,9 @@ export default function LandingPage({ navigateTo }) {
       <footer className="w-full max-w-6xl mx-auto p-6 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Encrypted WebRTC Gateway • Stripe Thailand Compliant</span>
+          <span>Private &amp; secure • Payments handled by Stripe</span>
         </div>
-        <div>Digital Renaissance System Architecture © 2026</div>
+        <div>© 2026 LEXIS</div>
       </footer>
     </div>
   );
