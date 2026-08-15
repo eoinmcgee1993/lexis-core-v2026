@@ -1,27 +1,78 @@
 import React, { useState } from 'react';
 import { Sparkles, Mic, ShieldCheck, Zap, Globe, Check, ArrowRight } from 'lucide-react';
 
-export default function LandingPage({ navigateTo }) {
-  const [lang, setLang] = useState('en');
+// Same key LexisApp.jsx reads on session start ('en' = practicing English,
+// 'th' = practicing Thai). Setting it here before navigating to /app means
+// the direction picked on the landing page is what the first session
+// actually uses, without needing a query param or extra plumbing.
+const TARGET_LANGUAGE_STORAGE_KEY = 'lexis_target_language';
 
-  const content = {
-    en: {
-      heroTitle: "Master Conversational English with Sub-300ms AI Immersion",
-      heroSub: "Designed specifically for Thai youth. Speak naturally, fix grammar instantly, and build real confidence without expensive human tutors.",
-      cta: "Start Free Practice",
-      pricingTeaser: "Free 30-minute trial, then ฿199/week or ฿599/month.",
-      viewPricing: "View full pricing"
-    },
-    th: {
-      heroTitle: "ฝึกพูดภาษาอังกฤษอย่างมั่นใจ ด้วยระบบ AI เสียงเรียลไทม์",
-      heroSub: "ออกแบบมาเพื่อเยาวชนไทยโดยเฉพาะ พูดได้อย่างเป็นธรรมชาติ ปรับไวยากรณ์ทันที ไม่ต้องเสียค่าเรียนแพงๆ",
-      cta: "เริ่มฝึกใช้งานฟรี",
-      pricingTeaser: "ทดลองฟรี 30 นาที จากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน",
-      viewPricing: "ดูแพ็กเกจทั้งหมด"
+export default function LandingPage({ navigateTo }) {
+  const [lang, setLang] = useState('en'); // display language of this page's copy
+  const [direction, setDirection] = useState(() => {
+    try {
+      return localStorage.getItem(TARGET_LANGUAGE_STORAGE_KEY) === 'th' ? 'th' : 'en';
+    } catch {
+      return 'en'; // localStorage can throw in some privacy modes — default, don't crash the page.
+    }
+  });
+
+  const selectDirection = (dir) => {
+    setDirection(dir);
+    try {
+      localStorage.setItem(TARGET_LANGUAGE_STORAGE_KEY, dir);
+    } catch {
+      // Privacy-mode localStorage throw — the choice just won't persist across visits.
     }
   };
 
-  const t = content[lang];
+  const goPractice = () => {
+    // Direction is already persisted by selectDirection; this just launches
+    // the app with whichever direction is currently selected.
+    navigateTo('/app');
+  };
+
+  // content[direction][displayLang] — direction is which language the student
+  // is learning (en = English, th = Thai), displayLang is which language
+  // this page's own copy is shown in. Independent axes: an English speaker
+  // learning Thai and a Thai speaker learning English both toggle `lang` to
+  // read the page comfortably regardless of which direction they picked.
+  const content = {
+    en: {
+      en: {
+        heroTitle: "Master Conversational English with Sub-300ms AI Immersion",
+        heroSub: "Speak naturally, fix grammar instantly, and build real confidence — no expensive human tutors required.",
+        cta: "Start Free Practice",
+        pricingTeaser: "Free 30-minute trial, then ฿199/week or ฿599/month.",
+        viewPricing: "View full pricing"
+      },
+      th: {
+        heroTitle: "ฝึกพูดภาษาอังกฤษอย่างมั่นใจ ด้วยระบบ AI เสียงเรียลไทม์",
+        heroSub: "พูดได้อย่างเป็นธรรมชาติ ปรับไวยากรณ์ทันที ไม่ต้องเสียค่าเรียนแพงๆ",
+        cta: "เริ่มฝึกใช้งานฟรี",
+        pricingTeaser: "ทดลองฟรี 30 นาที จากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน",
+        viewPricing: "ดูแพ็กเกจทั้งหมด"
+      }
+    },
+    th: {
+      en: {
+        heroTitle: "Master Conversational Thai with Sub-300ms AI Immersion",
+        heroSub: "Speak naturally, fix grammar instantly, and build real confidence — no expensive human tutors required.",
+        cta: "Start Free Practice",
+        pricingTeaser: "Free 30-minute trial, then ฿199/week or ฿599/month.",
+        viewPricing: "View full pricing"
+      },
+      th: {
+        heroTitle: "ฝึกพูดภาษาไทยอย่างมั่นใจ ด้วยระบบ AI เสียงเรียลไทม์",
+        heroSub: "พูดได้อย่างเป็นธรรมชาติ ปรับไวยากรณ์ทันที ไม่ต้องเสียค่าเรียนแพงๆ",
+        cta: "เริ่มฝึกใช้งานฟรี",
+        pricingTeaser: "ทดลองฟรี 30 นาที จากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน",
+        viewPricing: "ดูแพ็กเกจทั้งหมด"
+      }
+    }
+  };
+
+  const t = content[direction][lang];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col justify-between">
@@ -51,7 +102,7 @@ export default function LandingPage({ navigateTo }) {
             Pricing
           </button>
           <button
-            onClick={() => navigateTo('/app')}
+            onClick={goPractice}
             className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-bold text-sm rounded-xl transition-all shadow-lg shadow-cyan-500/20 flex items-center space-x-2"
           >
             <span>Launch App</span>
@@ -72,13 +123,34 @@ export default function LandingPage({ navigateTo }) {
         <p className="text-lg md:text-xl text-slate-400 mb-6 max-w-2xl mx-auto leading-relaxed">
           {t.heroSub}
         </p>
-        <button
-          onClick={() => navigateTo('/app')}
-          className="px-8 py-4 bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:scale-105 transition-transform text-slate-950 font-extrabold text-lg rounded-2xl shadow-xl shadow-cyan-500/25 flex items-center space-x-3 mx-auto"
-        >
-          <Mic className="w-5 h-5" />
-          <span>{t.cta}</span>
-        </button>
+
+        {/* Which language to practice — sets the tutor persona used the
+            next time a session starts. Two-way by design: English speakers
+            learning Thai and Thai speakers learning English both land here. */}
+        <div className="inline-flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 mb-6 text-sm">
+          <button
+            onClick={() => selectDirection('en')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${direction === 'en' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            Learn English
+          </button>
+          <button
+            onClick={() => selectDirection('th')}
+            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${direction === 'th' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            เรียนภาษาไทย
+          </button>
+        </div>
+
+        <div>
+          <button
+            onClick={goPractice}
+            className="px-8 py-4 bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:scale-105 transition-transform text-slate-950 font-extrabold text-lg rounded-2xl shadow-xl shadow-cyan-500/25 flex items-center space-x-3 mx-auto"
+          >
+            <Mic className="w-5 h-5" />
+            <span>{t.cta}</span>
+          </button>
+        </div>
         <div className="mt-6 flex items-center justify-center space-x-3 text-sm">
           <span className="text-slate-500">{t.pricingTeaser}</span>
           <button onClick={() => navigateTo('/pricing')} className="text-cyan-400 hover:text-cyan-300 font-medium underline underline-offset-2">

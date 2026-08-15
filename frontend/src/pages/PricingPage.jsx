@@ -115,7 +115,7 @@ export default function PricingPage({ navigateTo }) {
               <ul className="text-xs space-y-3 text-slate-300 mb-6">
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Unlimited Speaking Time</span></li>
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Full Transcript History</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Thai ESL Tuning Active</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Adaptive AI Tutor Tuning</span></li>
               </ul>
             </div>
             <button

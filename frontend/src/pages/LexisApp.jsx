@@ -10,6 +10,14 @@ import TutorAvatarPhoto from '../components/TutorAvatarPhoto';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
+// Which language the student is learning ('en' = Thai speaker learning
+// English, the original product; 'th' = English speaker learning Thai).
+// Persisted locally (not in the Supabase profile — this is a per-device
+// practice preference, not account state) so returning on the same device
+// doesn't reset it every session. backend/app.mjs defaults to 'en' for any
+// missing/unrecognized value, matching this key's absence on first visit.
+const TARGET_LANGUAGE_STORAGE_KEY = 'lexis_target_language';
+
 // Avatar priority: photo (best quality, cheapest — a real portrait, no
 // three.js) > 3D model (VITE_AVATAR_GLB_URL) > SVG placeholder. Each tier
 // only costs anything when its env var is actually set.
@@ -160,6 +168,13 @@ export default function LexisApp({ navigateTo }) {
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [upgradeMessage, setUpgradeMessage] = useState('');
+  const [targetLanguage, setTargetLanguage] = useState(() => {
+    try {
+      return localStorage.getItem(TARGET_LANGUAGE_STORAGE_KEY) === 'th' ? 'th' : 'en';
+    } catch {
+      return 'en'; // localStorage can throw in some privacy modes — default, don't crash the page over a preference.
+    }
+  });
   // Mobile browsers can silently block autoplay on the remote <audio>
   // element — its srcObject is set inside pc.ontrack, which fires
   // asynchronously well after the click that started the session, outside
@@ -349,7 +364,8 @@ export default function LexisApp({ navigateTo }) {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
-        }
+        },
+        body: JSON.stringify({ direction: targetLanguage })
       });
 
       if (!tokenRes.ok) {
@@ -586,6 +602,20 @@ export default function LexisApp({ navigateTo }) {
     }
   };
 
+  // Only meaningful before a session starts — the running session's system
+  // prompt was already picked when it connected, so this only affects the
+  // *next* "INITIATE LEXIS" click. Disabled in the UI while connected for
+  // exactly that reason, rather than implying a live language switch.
+  const selectTargetLanguage = (lang) => {
+    setTargetLanguage(lang);
+    try {
+      localStorage.setItem(TARGET_LANGUAGE_STORAGE_KEY, lang);
+    } catch {
+      // Privacy-mode localStorage throw — the choice just won't persist
+      // across visits; not worth surfacing an error for.
+    }
+  };
+
   // finalStatus lets a caller that already knows *why* the session is
   // ending say so — endSession used to unconditionally stamp 'Disconnected'
   // over whatever specific status a caller had just set (e.g. a real error
@@ -653,6 +683,26 @@ export default function LexisApp({ navigateTo }) {
               <Clock className="w-3.5 h-3.5" />
               <span>{formatUsageLabel(profile)}</span>
             </span>
+          )}
+          {/* Which language to practice next session. Locked once connected
+              — the running session's persona was already picked when it
+              started, so changing this mid-call wouldn't do anything, and
+              showing it as live-editable would be misleading. */}
+          {!isConnected && !isConnecting && (
+            <div className="hidden sm:flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs" title="Language to practice">
+              <button
+                onClick={() => selectTargetLanguage('en')}
+                className={`px-2.5 py-1 rounded-md transition-colors ${targetLanguage === 'en' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                Learn English
+              </button>
+              <button
+                onClick={() => selectTargetLanguage('th')}
+                className={`px-2.5 py-1 rounded-md transition-colors ${targetLanguage === 'th' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                เรียนไทย
+              </button>
+            </div>
           )}
           <button onClick={() => navigateTo('/pricing')} className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-lg text-xs hover:bg-cyan-500/20">
             Upgrade Pass
