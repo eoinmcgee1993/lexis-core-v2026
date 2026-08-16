@@ -133,13 +133,29 @@ export default function LiveStage({
   onEnableAudio
 }) {
   return (
-    <div className="min-h-screen bg-lexis-navy text-white font-sans flex flex-col items-center p-4 md:p-8">
+    <div className="relative min-h-screen bg-lexis-navy text-white font-sans flex flex-col items-center p-4 md:p-8 overflow-hidden">
+      {/* Ambient life for the dark canvas — before the mic/analyser data
+          exists to drive the canvas waveform (canvasRef below), a plain
+          lexis-navy fill reads as a dead black screen, especially through
+          "Getting things ready..." while still connecting. This is a
+          large, slow-pulsing teal glow centered behind everything, always
+          present at low opacity and independent of isConnected — it gets
+          brighter once the ring's own gradient kicks in, but the room
+          never goes fully flat before that. Two small floating dots use
+          the .animate-float keyframe (defined in tailwind.config.js,
+          previously unused anywhere) for a touch of ambient motion. */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-[28rem] h-[28rem] bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow" />
+      </div>
+      <div className="absolute top-1/4 left-1/5 w-3 h-3 bg-teal-400/30 rounded-full blur-sm pointer-events-none animate-float" />
+      <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-lexis-action/30 rounded-full blur-sm pointer-events-none animate-float" style={{ animationDelay: '2s' }} />
+
       {/* Minimal top bar — per the v2026.4 design review, Live Conversation
           should stay out of the way: no logo, no nav, just a way out.
           Mirrors the "End Session" control in the action bar below (kept
           for its visible label / mute-adjacent grouping) so there are two
           equally obvious ways to leave, matching common chat-app patterns. */}
-      <div className="w-full max-w-4xl flex justify-end">
+      <div className="relative z-10 w-full max-w-4xl flex justify-end">
         <button
           onClick={onEndCall}
           title="End session"
@@ -150,7 +166,7 @@ export default function LiveStage({
       </div>
 
       {audioBlocked && (
-        <div className="w-full max-w-4xl mt-2 p-4 bg-lexis-action/10 border border-lexis-action/30 rounded-2xl flex items-center justify-between gap-3">
+        <div className="relative z-10 w-full max-w-4xl mt-2 p-4 bg-lexis-action/10 border border-lexis-action/30 rounded-2xl flex items-center justify-between gap-3">
           <div className="flex items-center space-x-3 text-lexis-action text-xs">
             <AlertCircle className="w-5 h-5 flex-shrink-0" />
             <span>LEXIS is talking, but your browser blocked the audio. Tap to enable it.</span>
@@ -165,13 +181,15 @@ export default function LiveStage({
         </div>
       )}
 
-      <main className="w-full max-w-4xl my-auto py-8 flex flex-col items-center">
+      <main className="relative z-10 w-full max-w-4xl my-auto py-8 flex flex-col items-center">
         <div className="relative flex items-center justify-center my-6">
           <canvas ref={canvasRef} width={320} height={320} className="absolute pointer-events-none" />
           <div
             className={`w-48 h-48 md:w-64 md:h-64 rounded-full flex items-center justify-center transition-all duration-300 ${
               isConnected
                 ? 'bg-gradient-to-tr from-teal-600/20 via-teal-500/10 to-teal-400/20 border border-teal-400/40 shadow-[0_0_60px_rgba(45,212,191,0.25)]'
+                : isConnecting
+                ? 'bg-gradient-to-tr from-teal-600/10 via-teal-500/5 to-transparent border border-teal-400/20 motion-safe:animate-pulse-slow'
                 : 'bg-lexis-navy-2 border border-white/10'
             } ${voiceState === 'reconnecting' ? 'border-lexis-action/50 motion-safe:animate-pulse' : ''}`}
             style={{ transform: isConnected ? `scale(${1 + audioLevel / 350})` : 'scale(1)' }}

@@ -41,13 +41,13 @@ export default function LandingPage({ navigateTo }) {
     en: {
       en: {
         heroTitle: "Speak English with Confidence — Practice Out Loud with LEXIS",
-        heroSub: "A friendly AI conversation partner who listens, replies, and gently corrects you in real time — practice as much as you want, whenever you want.",
+        heroSub: "A friendly conversation partner who listens, replies, and gently corrects you in real time — practice as much as you want, whenever you want.",
         cta: "Try It Free",
         pricingTeaser: "Free 30-minute trial, then ฿199/week or ฿599/month.",
         viewPricing: "View full pricing"
       },
       th: {
-        heroTitle: "ฝึกพูดภาษาอังกฤษอย่างมั่นใจ กับเพื่อนคู่ซ้อม AI",
+        heroTitle: "ฝึกพูดภาษาอังกฤษอย่างมั่นใจ กับเพื่อนคู่ซ้อม LEXIS",
         heroSub: "LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้",
         cta: "ลองใช้ฟรี",
         pricingTeaser: "ทดลองฟรี 30 นาที จากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน",
@@ -57,13 +57,13 @@ export default function LandingPage({ navigateTo }) {
     th: {
       en: {
         heroTitle: "Speak Thai with Confidence — Practice Out Loud with LEXIS",
-        heroSub: "A friendly AI conversation partner who listens, replies, and gently corrects you in real time — practice as much as you want, whenever you want.",
+        heroSub: "A friendly conversation partner who listens, replies, and gently corrects you in real time — practice as much as you want, whenever you want.",
         cta: "Try It Free",
         pricingTeaser: "Free 30-minute trial, then ฿199/week or ฿599/month.",
         viewPricing: "View full pricing"
       },
       th: {
-        heroTitle: "ฝึกพูดภาษาไทยอย่างมั่นใจ กับเพื่อนคู่ซ้อม AI",
+        heroTitle: "ฝึกพูดภาษาไทยอย่างมั่นใจ กับเพื่อนคู่ซ้อม LEXIS",
         heroSub: "LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้",
         cta: "ลองใช้ฟรี",
         pricingTeaser: "ทดลองฟรี 30 นาที จากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน",
