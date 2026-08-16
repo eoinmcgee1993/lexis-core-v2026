@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, ArrowLeft, Check, Loader2, AlertCircle } from 'lucide-react';
+import { Sparkles, ArrowLeft, Check, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
@@ -50,7 +50,7 @@ export default function PricingPage({ navigateTo }) {
   };
 
   return (
-    <div className="min-h-screen bg-lexis-canvas text-lexis-ink font-sans">
+    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <header className="w-full max-w-6xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10">
         <button
           onClick={() => navigateTo('/')}
@@ -70,7 +70,7 @@ export default function PricingPage({ navigateTo }) {
         <div className="w-16" />
       </header>
 
-      <section className="w-full max-w-5xl mx-auto px-6 py-12">
+      <section className="flex-1 w-full max-w-5xl mx-auto px-6 py-12">
         <h1 className="font-display font-semibold text-2xl text-center mb-2 text-lexis-ink">Simple, Transparent Pricing</h1>
         <p className="text-center text-sm text-lexis-ink/50 mb-10">Cancel anytime. Prices in Thai Baht.</p>
 
@@ -155,6 +155,14 @@ export default function PricingPage({ navigateTo }) {
           </p>
         )}
       </section>
+
+      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex items-center justify-between text-xs text-lexis-ink/40">
+        <div className="flex items-center space-x-2">
+          <ShieldCheck className="w-4 h-4 text-teal-600" />
+          <span>Private &amp; secure • Payments handled by Stripe</span>
+        </div>
+        <div>© 2026 LEXIS</div>
+      </footer>
     </div>
   );
 }
