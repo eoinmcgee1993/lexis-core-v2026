@@ -82,12 +82,7 @@ function HistoryCard({ entry }) {
 
 export default function HistoryStage({ history, historyLoading, historyError, onBack }) {
   return (
-    <div className="relative min-h-screen bg-lexis-canvas text-lexis-ink font-sans flex flex-col overflow-hidden lexis-grain">
-      {/* Same ambient treatment as WelcomeStage/TopicStage/FeedbackStage — see WelcomeStage's comment. */}
-      <div className="absolute -top-24 -right-24 w-72 h-72 md:w-96 md:h-96 bg-lexis-action/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
-      <div className="absolute -bottom-32 -left-24 w-80 h-80 md:w-[28rem] md:h-[28rem] bg-lexis-ink/5 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col flex-1">
+    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <div className="w-full max-w-2xl mx-auto flex items-center p-4 md:p-6">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors">
           <ArrowLeft className="w-4 h-4" />
@@ -117,7 +112,6 @@ export default function HistoryStage({ history, historyLoading, historyError, on
             {history.map((entry) => <HistoryCard key={entry.id} entry={entry} />)}
           </div>
         )}
-      </div>
       </div>
     </div>
   );

@@ -36,18 +36,7 @@ export default function WelcomeStage({
   onGoHome
 }) {
   return (
-    <div className="relative min-h-screen bg-lexis-canvas text-lexis-ink font-sans flex flex-col overflow-hidden lexis-grain">
-      {/* Ambient warmth — flat lexis-canvas read as bland/empty on its own;
-          these two soft blurred blobs (amber = the CTA's own color,
-          radiating; lexis-ink at ~5% for a little depth in the opposite
-          corner) plus .lexis-grain's paper-like noise give the "warm
-          editorial" tone from the visual-system doc some actual presence
-          instead of a flat fill. Decorative only — pointer-events-none,
-          and everything real content sits in the z-10 layer below. */}
-      <div className="absolute -top-24 -right-24 w-72 h-72 md:w-96 md:h-96 bg-lexis-action/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
-      <div className="absolute -bottom-32 -left-24 w-80 h-80 md:w-[28rem] md:h-[28rem] bg-lexis-ink/5 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col flex-1">
+    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <div className="w-full max-w-4xl mx-auto flex items-center justify-between p-4 md:p-6">
         <button onClick={onGoHome} className="text-sm font-display font-semibold text-lexis-ink/80 hover:text-lexis-ink transition-colors">
           LEXIS
@@ -138,7 +127,6 @@ export default function WelcomeStage({
       <footer className="w-full max-w-4xl mx-auto px-6 py-6 text-xs text-lexis-ink/40 text-center">
         © 2026 LEXIS · Private &amp; secure — only you and LEXIS are on the call
       </footer>
-      </div>
     </div>
   );
 }

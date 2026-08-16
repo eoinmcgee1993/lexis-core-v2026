@@ -6,6 +6,18 @@ import PricingPage from './pages/PricingPage';
 import AuthPage from './pages/AuthPage';
 import LexisApp from './pages/LexisApp';
 
+// Per-route <title> — index.html's static title only ever matches the
+// landing page; every other route was silently keeping that same title
+// forever (no react-helmet-style head management in this app). A crawler
+// that actually executes JS (Google, and most answer-engine crawlers do)
+// sees whichever title was last set here, so this is a real SEO/AEO win
+// for the cost of one lookup table, not just a browser-tab nicety.
+const ROUTE_TITLES = {
+  '/pricing': 'Pricing | LEXIS',
+  '/auth': 'Sign In | LEXIS',
+  '/app': 'LEXIS'
+};
+
 // Four routes don't warrant a full router dependency. Every page receives
 // navigateTo(path). Auth-gating for /app lives here, once, rather than each
 // page re-deriving "am I allowed to render?" from useAuth() itself.
@@ -23,6 +35,10 @@ function RouteController() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    document.title = ROUTE_TITLES[currentPath] || 'LEXIS | Practice Speaking English & Thai Out Loud';
+  }, [currentPath]);
 
   // Only /app needs a definitive signed-in/out answer before it can decide
   // what to render. Gating every route (including the public landing page)

@@ -3,8 +3,137 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LEXIS OS v2026.3</title>
-    <meta name="description" content="LEXIS Real-Time English Tutor for Thai Youth" />
+
+    <title>LEXIS | Practice Speaking English & Thai Out Loud</title>
+    <meta name="description" content="LEXIS is a voice conversation partner for Thai speakers practicing English and English speakers practicing Thai. Talk out loud, get gentle real-time corrections, and see what to work on next. Free 30-minute trial." />
+    <link rel="canonical" href="https://lexis-core-v2026.vercel.app/" />
+
+    <!-- Geo signals — primary audience is Thailand (see backend/app.mjs's
+         buildTutorInstructions and README for the product's Thai-youth
+         framing). Doesn't replace real local SEO (backlinks, local
+         listings) but costs nothing to include and is a legitimate,
+         long-standing signal search engines do read. -->
+    <meta name="geo.region" content="TH" />
+    <meta name="geo.placename" content="Thailand" />
+    <meta name="language" content="English, Thai" />
+
+    <!-- Both language directions render from this one URL via an in-page
+         toggle (frontend/src/pages/LandingPage.jsx's `lang` state) rather
+         than separate /en and /th routes, so this is a self-referencing
+         hreflang cluster rather than the usual "point at the other URL"
+         pattern — still a legitimate signal that the page serves both
+         languages, just weaker than true per-locale URLs would be. -->
+    <link rel="alternate" hreflang="en" href="https://lexis-core-v2026.vercel.app/" />
+    <link rel="alternate" hreflang="th" href="https://lexis-core-v2026.vercel.app/" />
+    <link rel="alternate" hreflang="x-default" href="https://lexis-core-v2026.vercel.app/" />
+
+    <!-- Open Graph / Twitter card — og:image is the same full-body hero
+         photo used on the landing page itself (see LandingPage.jsx and
+         scripts/avatar/lexis-tutor-photo-notes.md's "Marketing hero
+         photo" section for provenance), so a shared link actually shows
+         who/what LEXIS is instead of a blank preview card. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="LEXIS" />
+    <meta property="og:title" content="LEXIS | Practice Speaking English & Thai Out Loud" />
+    <meta property="og:description" content="A voice conversation partner that listens, replies, and gently corrects you in real time. Practice as much as you want, whenever you want." />
+    <meta property="og:url" content="https://lexis-core-v2026.vercel.app/" />
+    <meta property="og:image" content="https://lexis-core-v2026.vercel.app/marketing/lexis-tutor-hero.jpg" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="th_TH" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="LEXIS | Practice Speaking English & Thai Out Loud" />
+    <meta name="twitter:description" content="A voice conversation partner that listens, replies, and gently corrects you in real time. Practice as much as you want, whenever you want." />
+    <meta name="twitter:image" content="https://lexis-core-v2026.vercel.app/marketing/lexis-tutor-hero.jpg" />
+
+    <!-- Structured data for answer engines (ChatGPT search, Perplexity,
+         Google's AI overviews) as much as classic search — a
+         SoftwareApplication block with real pricing/offer data, plus an
+         FAQPage block that mirrors LandingPage.jsx's FAQS_EN array
+         verbatim. Keep these two in sync by hand if either changes; there
+         isn't a build step here that generates one from the other. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "LEXIS",
+      "applicationCategory": "EducationApplication",
+      "operatingSystem": "Web",
+      "url": "https://lexis-core-v2026.vercel.app/",
+      "description": "A voice conversation partner for practicing spoken English and Thai in real time.",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Free trial",
+          "price": "0",
+          "priceCurrency": "THB",
+          "description": "30-minute free trial, no card required to start."
+        },
+        {
+          "@type": "Offer",
+          "name": "Weekly pass",
+          "price": "199",
+          "priceCurrency": "THB",
+          "priceValidUntil": "2027-12-31"
+        },
+        {
+          "@type": "Offer",
+          "name": "Monthly pass",
+          "price": "599",
+          "priceCurrency": "THB",
+          "priceValidUntil": "2027-12-31"
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is LEXIS?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "LEXIS is a voice-based speaking practice tool for English and Thai. You have a real, spoken conversation with it over your microphone, and it replies in real time, the way a conversation partner would — not a chatbot you type into."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Who is LEXIS for?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Thai speakers who want to practice spoken English, and English speakers who want to practice spoken Thai — students, young professionals, and anyone preparing for interviews, travel, or work who wants low-pressure speaking practice without needing another person available."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is LEXIS free to try?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. New accounts get a free 30-minute trial. After that, LEXIS is ฿199/week or ฿599/month."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is this different from a language exchange app?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "There's no waiting for a partner to be online, no scheduling, and no awkwardness about correcting a stranger. LEXIS is available any time you are, and its whole job is to help you practice — not make small talk."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I interrupt LEXIS mid-sentence?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes — real conversations involve talking over each other sometimes, so you can jump in and interrupt LEXIS at any point, the same as you would with a person."
+          }
+        }
+      ]
+    }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">

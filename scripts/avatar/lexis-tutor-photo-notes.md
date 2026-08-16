@@ -140,6 +140,32 @@ higher-resolution tier is wanted again later — ideally only after
 confirming the target devices can actually composite that smoothly, not
 just that they can download it.
 
+## Marketing hero photo (full-body, `frontend/public/marketing/lexis-tutor-hero.jpg`)
+
+Requested: the landing page hero read as bland/generic ("ai slop"), and
+should instead show LEXIS as a full-body HD tutor visual rather than just
+copy.
+
+Generated the same way as the "Real second/third/fourth photos" identity
+edits above — `media_import_url` on the live base headshot
+(`lexis-tutor-photo.jpg`) for a `media_id`, then `generate_image` with
+`nano_banana_pro` (billed by Higgsfield as `nano_banana_2`), that media as
+an `image`-role reference, `aspect_ratio: "3:4"`, prompted for the same
+identity/clothing/lighting/background as the reference but full-body,
+standing, warm welcoming posture (one hand gesturing outward, as if
+greeting a student). `resolution: "4k"` was requested first but rejected
+("Requires plus plan or higher" — the account is on Basic); `"2k"` (4
+credits at 4k would have been vs. 2 at 2k) worked and is what shipped —
+1792x2400 as generated.
+
+Resized to 1200px wide (proportional height ~1607px) and saved as JPEG
+quality 87 — ~161KB, in line with this project's existing avatar-image
+size discipline (see the 2K-rollback section above for why: more
+pixels composited per frame is real, measurable cost, though this image
+is a static `<img>` on the landing page, not something recomposited every
+animation frame the way the in-session avatar is, so the size ceiling
+here is about page-weight/LCP rather than runtime jank).
+
 ## Second character (Thai-presenting) — banked, not wired in
 
 At the same time, a second character portrait was generated on request

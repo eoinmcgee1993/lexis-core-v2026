@@ -25,23 +25,27 @@
 }
 
 @layer utilities {
-  /* Warm/editorial texture for the lexis-canvas stages (Welcome, Topics,
-     Feedback, History) — a very fine noise grain over the flat cream
-     background, the way paper/print has micro-texture a flat digital fill
-     doesn't. Self-contained SVG data-URI (fractalNoise filter), no image
-     asset. Paired with .lexis-ambient's blurred color blobs — see those
-     stage components for the two working together. Needs a `relative`
-     ancestor with `overflow-hidden` (the stage root already has it via
-     .lexis-ambient) since this paints via an absolutely-positioned
-     pseudo-element covering the whole page. */
-  .lexis-grain::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.035;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* Warm/editorial background for the lexis-canvas stages (Welcome, Topics,
+     Feedback, History). A flat `bg-lexis-canvas` fill read as bland/dead —
+     baking the "ambient warmth" directly into the background (rather than
+     separate absolutely-positioned blob divs, tried first and reverted —
+     they needed extra relative/z-index wrapper plumbing on every stage
+     just to keep real content painting above them) is simpler and avoids
+     that whole class of stacking bugs. Two soft radial washes: amber
+     (the CTA's own color, top-left) and lexis-ink (a little weight,
+     bottom-right) over the base cream fill. Colors stay inside the
+     existing semantic system — see scripts/design/lexis-visual-system.md
+     — nothing new introduced, teal still reserved for the live screen.
+     A flat `bg-lexis-canvas` fallback (no gradient) applies first — safe
+     if this rule is ever pruned or overridden — then the gradients apply
+     with slightly higher opacity than a "just barely there" treatment,
+     since imperceptibly subtle was exactly the complaint that started
+     this: reads as genuinely warm at a glance, not as noise. */
+  .lexis-canvas-gradient {
+    background-color: #FAFAF7;
+    background-image:
+      radial-gradient(ellipse 60% 50% at 12% -8%, rgba(255, 158, 0, 0.16), transparent 65%),
+      radial-gradient(ellipse 55% 45% at 105% 108%, rgba(30, 41, 59, 0.08), transparent 65%);
   }
 
   .scrollbar-thin {
