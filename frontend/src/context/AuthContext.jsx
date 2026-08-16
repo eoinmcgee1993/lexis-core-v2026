@@ -48,7 +48,24 @@ export function AuthProvider({ children }) {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } }
+      options: {
+        data: { full_name: fullName },
+        // Without this, Supabase falls back to whatever "Site URL" is set
+        // in the project's Auth settings — on this project that's still
+        // the default http://localhost:3000, so every confirmation email
+        // sent a link that only ever worked on a laptop with a local dev
+        // server running (reported live: a phone browser hitting
+        // localhost:3000 got ERR_CONNECTION_REFUSED, blocking sign-up
+        // entirely). window.location.origin is whatever this page is
+        // actually running on — production, a Vercel preview, or
+        // localhost in local dev — so this stays correct without
+        // hardcoding a domain. NOTE: Supabase also requires this exact
+        // origin to be present in Authentication → URL Configuration →
+        // Redirect URLs in the dashboard, or it silently ignores this and
+        // falls back to Site URL anyway — that allowlist entry can't be
+        // set from application code, only the dashboard.
+        emailRedirectTo: `${window.location.origin}/auth`
+      }
     });
     if (error) throw error;
   };
