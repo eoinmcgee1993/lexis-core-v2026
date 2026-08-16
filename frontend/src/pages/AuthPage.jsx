@@ -40,7 +40,7 @@ export default function AuthPage({ navigateTo }) {
   };
 
   return (
-    <div className="min-h-screen bg-lexis-canvas text-lexis-ink font-sans flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col items-center justify-center p-4">
       <button
         onClick={() => navigateTo('/')}
         className="absolute top-6 left-6 flex items-center space-x-2 text-xs text-lexis-ink/50 hover:text-lexis-ink transition-colors"
