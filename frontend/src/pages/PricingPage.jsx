@@ -50,20 +50,20 @@ export default function PricingPage({ navigateTo }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-      <header className="w-full max-w-6xl mx-auto p-6 flex items-center justify-between border-b border-slate-800/80">
+    <div className="min-h-screen bg-lexis-canvas text-lexis-ink font-sans">
+      <header className="w-full max-w-6xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10">
         <button
           onClick={() => navigateTo('/')}
-          className="flex items-center space-x-2 text-sm text-slate-400 hover:text-cyan-400 transition-colors"
+          className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Home</span>
         </button>
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400">
+          <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700">
             <Sparkles className="w-5 h-5" />
           </div>
-          <span className="text-lg font-extrabold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+          <span className="text-lg font-display font-semibold text-lexis-ink">
             LEXIS
           </span>
         </div>
@@ -71,16 +71,16 @@ export default function PricingPage({ navigateTo }) {
       </header>
 
       <section className="w-full max-w-5xl mx-auto px-6 py-12">
-        <h1 className="text-2xl font-bold text-center mb-2 text-slate-100">Simple, Transparent Pricing</h1>
-        <p className="text-center text-sm text-slate-500 mb-10">Cancel anytime. Prices in Thai Baht.</p>
+        <h1 className="font-display font-semibold text-2xl text-center mb-2 text-lexis-ink">Simple, Transparent Pricing</h1>
+        <p className="text-center text-sm text-lexis-ink/50 mb-10">Cancel anytime. Prices in Thai Baht.</p>
 
         {cancelled && (
-          <div className="mb-6 px-4 py-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-sm text-center">
+          <div className="mb-6 px-4 py-3 bg-lexis-action/10 border border-lexis-action/30 rounded-xl text-lexis-action-dark text-sm text-center">
             Checkout was cancelled — no charge was made.
           </div>
         )}
         {error && (
-          <div className="mb-6 px-4 py-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-sm flex items-center justify-center space-x-2">
+          <div className="mb-6 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm flex items-center justify-center space-x-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
@@ -88,61 +88,61 @@ export default function PricingPage({ navigateTo }) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Free Tier */}
-          <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
+          <div className="bg-white border border-lexis-ink/10 p-6 rounded-2xl flex flex-col justify-between">
             <div>
-              <h3 className="text-lg font-bold text-cyan-400 mb-2">Free Trial</h3>
-              <p className="text-xs text-slate-400 mb-4">3 Practice Sessions (30 Mins)</p>
-              <div className="text-3xl font-extrabold text-slate-100 mb-6">฿0</div>
-              <ul className="text-xs space-y-3 text-slate-300 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>30 minutes of practice time</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Real-time feedback as you speak</span></li>
+              <h3 className="text-lg font-bold text-teal-700 mb-2">Free Trial</h3>
+              <p className="text-xs text-lexis-ink/50 mb-4">3 Practice Sessions (30 Mins)</p>
+              <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿0</div>
+              <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>30 minutes of practice time</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Real-time feedback as you speak</span></li>
               </ul>
             </div>
-            <button onClick={() => navigateTo('/app')} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition-all">
+            <button onClick={() => navigateTo('/app')} className="w-full py-3 bg-lexis-canvas hover:bg-lexis-ink/5 border border-lexis-ink/10 text-lexis-ink font-bold rounded-xl text-xs transition-all">
               Try Free
             </button>
           </div>
 
           {/* Weekly Pass (Featured) */}
-          <div className="bg-slate-900 border-2 border-cyan-500 p-6 rounded-2xl flex flex-col justify-between relative shadow-2xl shadow-cyan-500/10">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold text-[10px] uppercase px-3 py-0.5 rounded-full">
+          <div className="bg-white border-2 border-lexis-action p-6 rounded-2xl flex flex-col justify-between relative shadow-2xl shadow-lexis-action/10">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lexis-action text-white font-bold text-[10px] uppercase px-3 py-0.5 rounded-full">
               Most Popular
             </span>
             <div>
-              <h3 className="text-lg font-bold text-cyan-300 mb-2">Weekly Pass</h3>
-              <p className="text-xs text-slate-400 mb-4">Unlimited Practice for 7 Days</p>
-              <div className="text-3xl font-extrabold text-slate-100 mb-6">฿199 <span className="text-xs font-normal text-slate-500">/ week</span></div>
-              <ul className="text-xs space-y-3 text-slate-300 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Talk as much as you want</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Full conversation history</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>LEXIS adjusts to your level as you go</span></li>
+              <h3 className="text-lg font-bold text-lexis-action-dark mb-2">Weekly Pass</h3>
+              <p className="text-xs text-lexis-ink/50 mb-4">Unlimited Practice for 7 Days</p>
+              <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿199 <span className="text-xs font-normal text-lexis-ink/40">/ week</span></div>
+              <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Talk as much as you want</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Full conversation history</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>LEXIS adjusts to your level as you go</span></li>
               </ul>
             </div>
             <button
               onClick={() => startCheckout('weekly', STRIPE_PRICES.weekly)}
               disabled={loadingTier === 'weekly'}
-              className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-60 text-slate-950 font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center space-x-2"
+              className="w-full py-3 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-60 text-white font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center space-x-2"
             >
               {loadingTier === 'weekly' ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Get Started Now</span>}
             </button>
           </div>
 
           {/* Monthly Pass */}
-          <div className="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
+          <div className="bg-white border border-lexis-ink/10 p-6 rounded-2xl flex flex-col justify-between">
             <div>
-              <h3 className="text-lg font-bold text-emerald-400 mb-2">Monthly Immersion</h3>
-              <p className="text-xs text-slate-400 mb-4">Unlimited Practice for 30 Days</p>
-              <div className="text-3xl font-extrabold text-slate-100 mb-6">฿599 <span className="text-xs font-normal text-slate-500">/ month</span></div>
-              <ul className="text-xs space-y-3 text-slate-300 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Best value — save 25% vs. weekly</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Talk as much as you want</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-emerald-400" /><span>Great for building a daily habit</span></li>
+              <h3 className="text-lg font-bold text-teal-700 mb-2">Monthly Immersion</h3>
+              <p className="text-xs text-lexis-ink/50 mb-4">Unlimited Practice for 30 Days</p>
+              <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿599 <span className="text-xs font-normal text-lexis-ink/40">/ month</span></div>
+              <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Best value — save 25% vs. weekly</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Talk as much as you want</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Great for building a daily habit</span></li>
               </ul>
             </div>
             <button
               onClick={() => startCheckout('monthly', STRIPE_PRICES.monthly)}
               disabled={loadingTier === 'monthly'}
-              className="w-full py-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-60 text-slate-200 font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center space-x-2"
+              className="w-full py-3 bg-lexis-canvas hover:bg-lexis-ink/5 disabled:opacity-60 border border-lexis-ink/10 text-lexis-ink font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center space-x-2"
             >
               {loadingTier === 'monthly' ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Get Started Now</span>}
             </button>
@@ -150,7 +150,7 @@ export default function PricingPage({ navigateTo }) {
         </div>
 
         {!session && (
-          <p className="text-center text-xs text-slate-500 mt-8">
+          <p className="text-center text-xs text-lexis-ink/40 mt-8">
             You'll be asked to sign in before checkout.
           </p>
         )}

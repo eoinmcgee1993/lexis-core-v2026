@@ -40,46 +40,46 @@ export default function AuthPage({ navigateTo }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-lexis-canvas text-lexis-ink font-sans flex flex-col items-center justify-center p-4">
       <button
         onClick={() => navigateTo('/')}
-        className="absolute top-6 left-6 flex items-center space-x-2 text-xs text-slate-400 hover:text-cyan-400 transition-colors"
+        className="absolute top-6 left-6 flex items-center space-x-2 text-xs text-lexis-ink/50 hover:text-lexis-ink transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Back to home</span>
       </button>
 
-      <div className="w-full max-w-sm bg-slate-900/60 border border-slate-800 rounded-2xl p-8">
+      <div className="w-full max-w-sm bg-white border border-lexis-ink/10 rounded-2xl p-8 shadow-sm">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400">
+          <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700">
             <Sparkles className="w-5 h-5" />
           </div>
-          <span className="text-lg font-extrabold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+          <span className="text-lg font-display font-semibold text-lexis-ink">
             LEXIS
           </span>
         </div>
 
-        <h1 className="text-xl font-bold mb-1">{mode === 'sign_in' ? 'Sign in' : 'Create your account'}</h1>
-        <p className="text-xs text-slate-500 mb-6">
+        <h1 className="text-xl font-bold mb-1 text-lexis-ink">{mode === 'sign_in' ? 'Sign in' : 'Create your account'}</h1>
+        <p className="text-xs text-lexis-ink/50 mb-6">
           {mode === 'sign_in' ? 'Continue practicing with LEXIS.' : 'Start your free 30-minute trial.'}
         </p>
 
         <form onSubmit={submit} className="space-y-4">
           {mode === 'sign_up' && (
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Full name</label>
+              <label className="text-xs text-lexis-ink/50 mb-1 block">Full name</label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500/60"
+                className="w-full bg-lexis-canvas border border-lexis-ink/10 rounded-xl px-3 py-2.5 text-sm text-lexis-ink focus:outline-none focus:border-teal-600/60"
                 placeholder="Somchai P."
               />
             </div>
           )}
 
           <div>
-            <label className="text-xs text-slate-400 mb-1 flex items-center space-x-1.5">
+            <label className="text-xs text-lexis-ink/50 mb-1 flex items-center space-x-1.5">
               <Mail className="w-3 h-3" /><span>Email</span>
             </label>
             <input
@@ -87,13 +87,13 @@ export default function AuthPage({ navigateTo }) {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500/60"
+              className="w-full bg-lexis-canvas border border-lexis-ink/10 rounded-xl px-3 py-2.5 text-sm text-lexis-ink focus:outline-none focus:border-teal-600/60"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="text-xs text-slate-400 mb-1 flex items-center space-x-1.5">
+            <label className="text-xs text-lexis-ink/50 mb-1 flex items-center space-x-1.5">
               <Lock className="w-3 h-3" /><span>Password</span>
             </label>
             <input
@@ -102,18 +102,18 @@ export default function AuthPage({ navigateTo }) {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500/60"
+              className="w-full bg-lexis-canvas border border-lexis-ink/10 rounded-xl px-3 py-2.5 text-sm text-lexis-ink focus:outline-none focus:border-teal-600/60"
               placeholder="••••••••"
             />
           </div>
 
-          {error && <p className="text-xs text-rose-400">{error}</p>}
-          {notice && <p className="text-xs text-emerald-400">{notice}</p>}
+          {error && <p className="text-xs text-rose-600">{error}</p>}
+          {notice && <p className="text-xs text-teal-700">{notice}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 disabled:opacity-50 text-slate-950 font-bold text-sm rounded-xl transition-all flex items-center justify-center space-x-2"
+            className="w-full py-3 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-50 text-white font-bold text-sm rounded-xl transition-all flex items-center justify-center space-x-2"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -127,7 +127,7 @@ export default function AuthPage({ navigateTo }) {
 
         <button
           onClick={() => { setMode(mode === 'sign_in' ? 'sign_up' : 'sign_in'); setError(''); setNotice(''); }}
-          className="w-full text-center text-xs text-slate-400 hover:text-cyan-400 mt-5 transition-colors"
+          className="w-full text-center text-xs text-lexis-ink/50 hover:text-teal-700 mt-5 transition-colors"
         >
           {mode === 'sign_in' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
         </button>

@@ -136,6 +136,11 @@ function makeRateLimiter({ windowMs, max, message }) {
 const sessionRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 10, message: 'Rate limit exceeded. Please wait one minute.' });
 // Legit clients heartbeat every 30s (~2/min); allow headroom for retries.
 const heartbeatRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 6, message: 'Heartbeat rate limit exceeded.' });
+// One translate call per completed LEXIS turn — a chatty session could
+// plausibly hit ~20-30/min at a fast conversational pace; well above that.
+const translateRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 40, message: 'Translation rate limit exceeded. Please wait a moment.' });
+// Feedback is requested once per finished session, not on a loop — tight.
+const feedbackRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 6, message: 'Feedback rate limit exceeded. Please wait a moment.' });
 
 /* ─────────────────────────────────────────────────────────────────────── */
 /* 5. AUTH MIDDLEWARE                                                      */
@@ -210,7 +215,19 @@ function requireEntitlement(req, res, next) {
 /* translated label. Defaults to 'en' for any missing/unrecognized value   */
 /* so a caller that doesn't send `direction` keeps prior behavior exactly. */
 /* ─────────────────────────────────────────────────────────────────────── */
-function buildTutorInstructions(direction) {
+// The v2026.4 Topics stage (frontend/src/components/stages/TopicStage.jsx)
+// lets the student pick a real focus before the call connects, rather than
+// always leaving it to LEXIS's own rotation. Keyed to match the `topic`
+// value LexisApp.jsx sends in POST /api/session's body; an unrecognized or
+// missing key (e.g. "Just Talk") falls through to the original open
+// rotation in buildTutorInstructions, unchanged from pre-Topics behavior.
+const TOPIC_CURRICULA = {
+  everyday: 'everyday conversation — daily routine, family and friends, hobbies and interests, food, weather and plans',
+  work: 'work and business — meetings, emails, small talk with colleagues, describing your job, job interviews',
+  travel: 'travel — hotels, asking for directions, ordering food, getting help, airports and transport'
+};
+
+function buildTutorInstructions(direction, topic) {
   const learningThai = direction === 'th';
 
   const role = learningThai
@@ -257,6 +274,11 @@ In BOTH phases: if the student seems confused — asks you to repeat, goes quiet
 3. Once you know their level and topic (or they've picked one of your examples, or stayed quiet and you've defaulted to the easiest one), begin the lesson itself — this is where Phase 2 starts. A stated beginner gets single words and very short 2-3 word phrases, heavy repetition, and a slow pace with no grammar talk yet. Anyone with some experience starts at the normal pace described below.
 Keep every onboarding turn short and conversational — this is a spoken exchange, not a menu being read aloud.`;
 
+  const chosenCurriculum = TOPIC_CURRICULA[topic];
+  const curriculum = chosenCurriculum
+    ? `Curriculum: the student specifically chose to focus on ${chosenCurriculum}. Spend most of the session there — don't force it back rigidly if the conversation naturally drifts, but keep returning to it as the anchor rather than rotating through unrelated topics.`
+    : `Curriculum: guide the conversation through everyday topics, rotating naturally across a session — greetings & daily routine, family & friends, school life, hobbies & interests, food & ordering, shopping, travel & directions, weather & plans, technology & social media, future dreams. Don't announce the topic; just steer toward it.`;
+
   return `${role}
 Speak clearly, naturally, warmly, and at a measured pace.
 Keep each response short (15-25 words max) to maximize student speaking time.
@@ -269,7 +291,7 @@ ${onboarding}
 
 CRITICAL: Always speak every word of your reply out loud — in English and in Thai alike. Never go silent, mute, or skip the audio for Thai words or phrases; the student needs to actually hear the Thai pronunciation, not just read it. If a sentence mixes English and Thai, voice both parts audibly with no gaps.
 
-Curriculum: guide the conversation through everyday topics, rotating naturally across a session — greetings & daily routine, family & friends, school life, hobbies & interests, food & ordering, shopping, travel & directions, weather & plans, technology & social media, future dreams. Don't announce the topic; just steer toward it. Start with simple present-tense, everyday ${curriculumTarget} vocabulary. If the student is doing well, introduce more complex grammar (past/future tense, connecting ideas, opinions). If they're struggling, simplify and slow down. Adjust level continuously based on how they're actually doing, not on a fixed schedule.`;
+${curriculum} Start with simple present-tense, everyday ${curriculumTarget} vocabulary. If the student is doing well, introduce more complex grammar (past/future tense, connecting ideas, opinions). If they're struggling, simplify and slow down. Adjust level continuously based on how they're actually doing, not on a fixed schedule.`;
 }
 
 /* ─────────────────────────────────────────────────────────────────────── */
@@ -296,6 +318,11 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
       .update(req.user.id + (process.env.LEXIS_SALT || 'lexis_salt'))
       .digest('hex').substring(0, 32);
     const direction = req.body?.direction === 'th' ? 'th' : 'en';
+    // Optional — set by the Topics stage (frontend/src/components/stages/
+    // TopicStage.jsx). Anything not a recognized key (including "Just
+    // Talk"'s undefined/null) falls through TOPIC_CURRICULA to LEXIS's
+    // original open topic rotation inside buildTutorInstructions.
+    const topic = ['everyday', 'work', 'travel'].includes(req.body?.topic) ? req.body.topic : undefined;
 
     const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
       method: 'POST',
@@ -351,7 +378,7 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
               }
             }
           },
-          instructions: buildTutorInstructions(direction)
+          instructions: buildTutorInstructions(direction, topic)
         }
       }),
     });
@@ -408,6 +435,226 @@ app.post('/api/heartbeat', heartbeatRateLimiter, authenticate, requireEntitlemen
   } catch (err) {
     console.error('[LEXIS Heartbeat Error]', err);
     res.status(500).json({ error: 'Failed to record usage telemetry.' });
+  }
+});
+
+// Live-translation subtitles for the Live Conversation stage
+// (frontend/src/components/stages/LiveStage.jsx). Deliberately a separate,
+// async, non-blocking call rather than asking the realtime session itself
+// to produce a translation inline — a realtime turn's audio must not wait
+// on a second model call before it starts playing, and the Realtime API
+// has no clean way to attach a silent text-only translation to a spoken
+// turn without touching turn-taking. The frontend fires this once a
+// LEXIS turn's transcript is complete (`response.done`) and shows the
+// translation as a second subtitle line whenever it resolves — the audio
+// has typically already been playing for a beat by then, same as real
+// closed captions lagging slightly behind speech.
+app.post('/api/translate', translateRateLimiter, authenticate, requireEntitlement, async (req, res) => {
+  try {
+    const text = typeof req.body?.text === 'string' ? req.body.text.trim() : '';
+    if (!text) return res.json({ translation: '' });
+    // buildTutorInstructions() already caps LEXIS's own turns at 15-25
+    // words; anything wildly past that isn't a real turn from this app and
+    // isn't worth spending a model call on.
+    if (text.length > 600) return res.status(400).json({ error: 'Text too long to translate.' });
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    const model = process.env.OPENAI_TEXT_MODEL || 'gpt-4o-mini';
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.2,
+        max_tokens: 200,
+        messages: [
+          {
+            role: 'system',
+            content: 'You translate short spoken tutoring utterances between English and Thai. If the given text is in English, translate it to Thai. If it is in Thai (or a mix of English and Thai), translate the whole thing to English. Reply with ONLY the translation — no quotes, no explanation, no repeating the original.'
+          },
+          { role: 'user', content: text }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[LEXIS Translate Error]', response.status, errorText);
+      return res.status(502).json({ error: 'Translation failed.' });
+    }
+
+    const data = await response.json();
+    const translation = data.choices?.[0]?.message?.content?.trim();
+    if (!translation) {
+      console.error('[LEXIS Translate Error] Empty completion:', JSON.stringify(data));
+      return res.status(502).json({ error: 'Translation returned no content.' });
+    }
+
+    res.json({ translation });
+  } catch (err) {
+    console.error('[LEXIS Translate Error]', err);
+    res.status(500).json({ error: 'Internal server error during translation.' });
+  }
+});
+
+// A floor below which there just isn't enough material to evaluate
+// honestly — see the guard in /api/feedback below.
+const MIN_FEEDBACK_WORDS = 12;
+const MIN_FEEDBACK_TURNS = 2;
+// Bounds how much transcript gets sent to the model — a long session
+// shouldn't balloon this call's cost/latency. Keeps the first couple of
+// lines (onboarding — name, level) plus as many of the MOST RECENT lines as
+// fit in what's left of the budget, since sustained/current performance is
+// more representative of "how are they doing" than the first minute of
+// warming up.
+const MAX_FEEDBACK_TRANSCRIPT_CHARS = 8000;
+
+function summarizeTranscriptForFeedback(transcripts) {
+  const lines = transcripts.map((t) => `${t.speaker === 'user' ? 'Student' : 'LEXIS'}: ${t.text}`);
+  const joined = lines.join('\n');
+  if (joined.length <= MAX_FEEDBACK_TRANSCRIPT_CHARS) return joined;
+
+  const head = lines.slice(0, 2);
+  const headText = head.join('\n');
+  const budget = MAX_FEEDBACK_TRANSCRIPT_CHARS - headText.length - 50;
+  const tail = [];
+  let used = 0;
+  for (let i = lines.length - 1; i >= 2 && used < budget; i--) {
+    tail.unshift(lines[i]);
+    used += lines[i].length + 1;
+  }
+  return `${headText}\n[... earlier turns omitted ...]\n${tail.join('\n')}`;
+}
+
+// One real LLM pass over a just-finished session's actual transcript — the
+// Feedback stage (frontend/src/components/stages/FeedbackStage.jsx). No
+// static/fabricated score: short sessions get an honest "talk a bit more"
+// message instead (see the word-count guard below), and every strength or
+// correction the model returns is required to be grounded in what the
+// student actually said, per the system prompt.
+//
+// Not gated by requireEntitlement — a user whose trial ran out mid-session
+// still deserves to see feedback on the session they just finished (same
+// reasoning as /api/stripe/checkout below). It IS rate-limited
+// (feedbackRateLimiter) since it's still a real model call.
+app.post('/api/feedback', feedbackRateLimiter, authenticate, async (req, res) => {
+  try {
+    const transcripts = Array.isArray(req.body?.transcripts) ? req.body.transcripts : [];
+    const direction = req.body?.direction === 'th' ? 'th' : 'en';
+    const targetLabel = direction === 'th' ? 'Thai' : 'English';
+
+    const studentTurns = transcripts.filter((t) => t?.speaker === 'user' && typeof t.text === 'string' && t.text.trim());
+    const studentWordCount = studentTurns.reduce((sum, t) => sum + t.text.trim().split(/\s+/).length, 0);
+
+    // Honesty guard, same standard as the fabricated "Priority Server
+    // Queue" pricing claim fixed earlier this project — a real score needs
+    // real material. Faking a number from a couple of words would be worse
+    // than showing no score at all.
+    if (studentTurns.length < MIN_FEEDBACK_TURNS || studentWordCount < MIN_FEEDBACK_WORDS) {
+      return res.json({
+        insufficient: true,
+        message: "That was a quick one! Talk a little more next time and I'll be able to show you real feedback on how you're doing."
+      });
+    }
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    const model = process.env.OPENAI_TEXT_MODEL || 'gpt-4o-mini';
+    const transcriptText = summarizeTranscriptForFeedback(transcripts);
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.4,
+        max_tokens: 600,
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'lexis_session_feedback',
+            strict: true,
+            schema: {
+              type: 'object',
+              additionalProperties: false,
+              properties: {
+                confidence: { type: 'integer', minimum: 0, maximum: 100 },
+                strengths: { type: 'array', maxItems: 3, items: { type: 'string' } },
+                improvements: {
+                  type: 'array',
+                  maxItems: 3,
+                  items: {
+                    type: 'object',
+                    additionalProperties: false,
+                    properties: {
+                      original: { type: 'string' },
+                      corrected: { type: 'string' }
+                    },
+                    required: ['original', 'corrected']
+                  }
+                }
+              },
+              required: ['confidence', 'strengths', 'improvements']
+            }
+          }
+        },
+        messages: [
+          {
+            role: 'system',
+            content: `You are an encouraging but honest ${targetLabel} speaking-practice evaluator. You will be given a transcript of a spoken tutoring session between a student and their AI tutor LEXIS. Evaluate ONLY the Student's own lines — never the tutor's.
+
+Ground every strength and correction in something the student ACTUALLY said in the transcript below — quote or closely paraphrase their real words. Never invent an example that isn't grounded in the transcript. If there isn't enough real material for 3 strengths or 3 corrections, return fewer rather than padding with filler.
+
+confidence (0-100) should reflect genuine fluency/accuracy signals — grammar, natural phrasing, vocabulary range, how well they responded to what LEXIS actually asked. A short, simple, error-free exchange is NOT automatically a high score; a longer session with some mistakes but real recovery and range can still score well. Be honest, not just encouraging.`
+          },
+          { role: 'user', content: transcriptText }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[LEXIS Feedback Error]', response.status, errorText);
+      return res.status(502).json({ error: 'Could not generate feedback for this session.' });
+    }
+
+    const data = await response.json();
+    const raw = data.choices?.[0]?.message?.content;
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      console.error('[LEXIS Feedback Error] Non-JSON completion:', raw);
+      return res.status(502).json({ error: 'Feedback response was malformed.' });
+    }
+
+    // Don't trust the model's shape blindly even with response_format set —
+    // validate before any of it reaches the client.
+    const confidence = Number.isInteger(parsed?.confidence) ? Math.max(0, Math.min(100, parsed.confidence)) : null;
+    const strengths = Array.isArray(parsed?.strengths)
+      ? parsed.strengths.filter((s) => typeof s === 'string' && s.trim()).slice(0, 3)
+      : [];
+    const improvements = Array.isArray(parsed?.improvements)
+      ? parsed.improvements
+          .filter((i) => i && typeof i.original === 'string' && typeof i.corrected === 'string')
+          .slice(0, 3)
+      : [];
+
+    if (confidence === null) {
+      console.error('[LEXIS Feedback Error] Missing/invalid confidence in parsed response:', JSON.stringify(parsed));
+      return res.status(502).json({ error: 'Feedback response was incomplete.' });
+    }
+
+    res.json({ confidence, strengths, improvements });
+  } catch (err) {
+    console.error('[LEXIS Feedback Error]', err);
+    res.status(500).json({ error: 'Internal server error while generating feedback.' });
   }
 });
 

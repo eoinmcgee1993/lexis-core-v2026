@@ -1,12 +1,19 @@
 // frontend/src/pages/LexisApp.jsx — Reconciled Commercial WebRTC Client
-import React, { Suspense, useState, useRef, useEffect, useCallback } from 'react';
+//
+// v2026.4: restructured from one always-rendered screen into an explicit
+// four-stage flow — welcome → topics → live → feedback — per
+// scripts/design/lexis-visual-system.md. This file keeps owning the WebRTC
+// session lifecycle end to end (unchanged in substance from v2026.3) and
+// the `stage` state machine that decides which of the four stage
+// components (frontend/src/components/stages/) is on screen; the stage
+// components themselves are pure presentation.
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import {
-  Mic, MicOff, Volume2, VolumeX, Sparkles, ShieldCheck,
-  AlertCircle, PhoneOff, RotateCcw, Hand, LogOut, CreditCard, Clock
-} from 'lucide-react';
-import TutorAvatarPhoto from '../components/TutorAvatarPhoto';
+import WelcomeStage from '../components/stages/WelcomeStage';
+import TopicStage from '../components/stages/TopicStage';
+import LiveStage from '../components/stages/LiveStage';
+import FeedbackStage from '../components/stages/FeedbackStage';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -17,106 +24,6 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 // doesn't reset it every session. backend/app.mjs defaults to 'en' for any
 // missing/unrecognized value, matching this key's absence on first visit.
 const TARGET_LANGUAGE_STORAGE_KEY = 'lexis_target_language';
-
-// Avatar priority: photo (best quality, cheapest — a real portrait, no
-// three.js) > 3D model (VITE_AVATAR_GLB_URL) > SVG placeholder. Each tier
-// only costs anything when its env var is actually set.
-const AVATAR_PHOTO_URL = import.meta.env.VITE_AVATAR_PHOTO_URL;
-
-// Optional 3D avatar model (MetaPerson / Ready Player Me .glb export). When
-// set, LEXIS renders a modeled 3D face instead of the SVG placeholder below,
-// still driven by the exact same tutorLevel data — see TutorAvatar3D.jsx.
-// Lazy-loaded (and three.js/@react-three only pulled into the bundle at all)
-// when this is actually configured, so an unset/still-being-made avatar
-// asset costs nothing and never blocks a session.
-const AVATAR_GLB_URL = import.meta.env.VITE_AVATAR_GLB_URL;
-const TutorAvatar3D = AVATAR_GLB_URL ? React.lazy(() => import('../components/TutorAvatar3D')) : null;
-
-// The tutor's face. A live avatar was the actual point of the product —
-// an abstract pulsing ring never was. Mouth height is driven by tutorLevel
-// (LEXIS's own voice energy specifically, not the combined mic+AI level
-// used for the ambient ring/waveform), so it opens when LEXIS talks and
-// stays shut while the student is the one speaking. No lip-sync vendor,
-// no new cost — same live analyser data the app was already computing.
-//
-// This is the fallback face, always available with zero extra deps. When
-// VITE_AVATAR_GLB_URL is set, the TutorAvatar wrapper below swaps in the
-// modeled 3D version instead (same tutorLevel signal, richer face).
-function TutorAvatarSVG({ isConnected, isConnecting, tutorLevel }) {
-  const mouthHeight = 4 + Math.min(18, (tutorLevel / 100) * 18);
-  const active = isConnected || isConnecting;
-  return (
-    <svg viewBox="0 0 100 100" className="w-20 h-20 md:w-28 md:h-28" role="img" aria-label="LEXIS tutor avatar">
-      <defs>
-        <radialGradient id="lexisFaceGradient" cx="35%" cy="30%" r="80%">
-          <stop offset="0%" stopColor={active ? '#0e7490' : '#1e293b'} />
-          <stop offset="100%" stopColor={active ? '#083344' : '#0f172a'} />
-        </radialGradient>
-      </defs>
-      <circle cx="50" cy="50" r="46" fill="url(#lexisFaceGradient)" stroke={isConnected ? '#22d3ee' : '#475569'} strokeWidth="2" />
-      <ellipse cx="34" cy="42" rx="5" ry="6" className="lexis-avatar-eye" fill={active ? '#5eead4' : '#475569'} />
-      <ellipse cx="66" cy="42" rx="5" ry="6" className="lexis-avatar-eye" fill={active ? '#5eead4' : '#475569'} />
-      <rect
-        x="35"
-        y={62 - mouthHeight / 2}
-        width="30"
-        height={mouthHeight}
-        rx={mouthHeight / 2}
-        fill={isConnected ? '#34eba0' : '#334155'}
-        style={{ transition: 'height 60ms ease-out, y 60ms ease-out' }}
-      />
-    </svg>
-  );
-}
-
-// Suspense only covers the *pending* state (the lazy import / useGLTF load
-// in flight) — it does nothing for a load that actually fails (404, CORS,
-// a corrupt/invalid .glb). Without this, a bad VITE_AVATAR_GLB_URL throws
-// past Suspense and, with no boundary to catch it, takes down the whole
-// LexisApp tree instead of just falling back to the SVG face. Caught during
-// PR review — see https://github.com/eoinmcgee1993/lexis-core-v2026/pull/13.
-class AvatarErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  componentDidCatch(error) {
-    console.warn('[LEXIS Avatar] 3D model failed to load — falling back to the SVG face.', error);
-  }
-  render() {
-    return this.state.hasError ? this.props.fallback : this.props.children;
-  }
-}
-
-function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
-  const svgFallback = <TutorAvatarSVG isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />;
-  const [photoFailed, setPhotoFailed] = useState(false);
-
-  if (AVATAR_PHOTO_URL && !photoFailed) {
-    return (
-      <TutorAvatarPhoto
-        photoUrl={AVATAR_PHOTO_URL}
-        isConnected={isConnected}
-        isConnecting={isConnecting}
-        tutorLevel={tutorLevel}
-        onError={() => setPhotoFailed(true)}
-      />
-    );
-  }
-  if (!TutorAvatar3D) {
-    return svgFallback;
-  }
-  return (
-    <AvatarErrorBoundary fallback={svgFallback}>
-      <Suspense fallback={svgFallback}>
-        <TutorAvatar3D url={AVATAR_GLB_URL} isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />
-      </Suspense>
-    </AvatarErrorBoundary>
-  );
-}
 
 // Translates getUserMedia's raw DOMException names into wording a student
 // can actually act on, instead of browser-internal phrasing like "Requested
@@ -140,22 +47,24 @@ function describeMicError(err) {
   }
 }
 
-function formatUsageLabel(profile) {
-  if (profile.subscription_status === 'active') {
-    return `${profile.subscription_tier} plan — unlimited`;
-  }
-  const remaining = Math.max(0, (profile.max_allowed_seconds || 0) - (profile.seconds_used || 0));
-  const mins = Math.floor(remaining / 60);
-  const secs = remaining % 60;
-  return `${mins}m ${secs}s left in trial`;
-}
-
 export default function LexisApp({ navigateTo }) {
   // App.jsx's router already redirects to /auth before this component ever
   // mounts when there's no session, so `session` is guaranteed here.
   const { session, profile, refreshProfile, signOut } = useAuth();
 
   const justPaid = new URLSearchParams(window.location.search).get('payment') === 'success';
+
+  // Stage machine — see the file header. 'welcome' is always the entry
+  // point; nothing auto-advances past it.
+  const [stage, setStage] = useState('welcome');
+
+  // Feedback (State 04) — result of one POST /api/feedback call, fired by
+  // the effect below whenever `stage` becomes 'feedback'. `feedback` can be
+  // { confidence, strengths, improvements } or { insufficient: true, message }
+  // — see backend/app.mjs's /api/feedback for what decides which shape.
+  const [feedback, setFeedback] = useState(null);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackError, setFeedbackError] = useState(false);
 
   // State Management
   const [isConnected, setIsConnected] = useState(false);
@@ -175,20 +84,13 @@ export default function LexisApp({ navigateTo }) {
       return 'en'; // localStorage can throw in some privacy modes — default, don't crash the page over a preference.
     }
   });
-  // Live-verified this was easy to miss: the header toggle below was
-  // 'hidden sm:flex', invisible on phone-width screens, so on mobile the
-  // direction was effectively whatever localStorage already had (silently
-  // defaulting to 'en') with no visible way to check or change it before
-  // starting. Now Start Talking always asks explicitly first via this
-  // modal, so the choice is unmissable regardless of screen size.
-  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   // Mobile browsers can silently block autoplay on the remote <audio>
   // element — its srcObject is set inside pc.ontrack, which fires
   // asynchronously well after the click that started the session, outside
   // the window some browsers associate with that user gesture. Input (mic)
   // keeps working fine either way, since that's a separate permission; only
   // LEXIS's own voice goes silent, with no error — just a transcript with
-  // nothing audible behind it. See the button below driven by this flag.
+  // nothing audible behind it. Surfaced inside LiveStage, driven by this flag.
   const [audioBlocked, setAudioBlocked] = useState(false);
 
   // References
@@ -205,6 +107,21 @@ export default function LexisApp({ navigateTo }) {
   const canvasRef = useRef(null);
   const transcriptContainerRef = useRef(null);
   const isAssistantSpeakingRef = useRef(false);
+  // True only once a session actually reaches pc.connectionState ===
+  // 'connected' this attempt — endSession() reads this (not `stage`, which
+  // would be a stale-closure read here; see the directionOverride comment
+  // on startSession below for the same class of bug elsewhere in this
+  // file) to decide whether ending the call should route to Feedback (real
+  // conversation happened) or back to Welcome (never actually connected —
+  // a mic error, an exhausted trial, a failed SDP exchange; nothing to
+  // give feedback on).
+  const wasConnectedRef = useRef(false);
+  // The direction actually used to mint *this* session's token — captured
+  // once at session start rather than read from `targetLanguage` later, so
+  // feedback/translation stay correct even in the (currently impossible,
+  // but cheap to guard) case that targetLanguage state changes between a
+  // session starting and it ending.
+  const sessionDirectionRef = useRef('en');
 
   // Reported: while LEXIS is speaking, the page kept auto-scrolling down
   // to the transcript, dragging the avatar out of view right when you'd
@@ -239,20 +156,60 @@ export default function LexisApp({ navigateTo }) {
         e.preventDefault();
         if (isConnected) {
           endSession();
-        } else if (!isConnecting) {
-          setShowLanguagePicker(true);
+        } else if (!isConnecting && stage === 'welcome') {
+          setStage('topics');
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected, isConnecting]);
+  }, [isConnected, isConnecting, stage]);
 
   useEffect(() => {
     return () => endSession();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Fires once whenever a just-ended session lands on the Feedback stage —
+  // see endSession() below for what puts `stage` here. Reads `transcripts`
+  // via closure rather than as a dependency deliberately: the session has
+  // already fully ended by the time this runs (no more events can append
+  // to it), so it's frozen, and depending on it would just needlessly
+  // re-fire this effect on every transcript update during the call.
+  useEffect(() => {
+    if (stage !== 'feedback') return;
+    let cancelled = false;
+    setFeedbackLoading(true);
+    setFeedbackError(false);
+    setFeedback(null);
+
+    (async () => {
+      try {
+        const { data: { session: freshSession } } = await supabase.auth.getSession();
+        if (!freshSession) throw new Error('Not signed in.');
+        const res = await fetch(`${BACKEND_URL}/api/feedback`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${freshSession.access_token}`
+          },
+          body: JSON.stringify({ transcripts, direction: sessionDirectionRef.current })
+        });
+        if (!res.ok) throw new Error(`Feedback request failed: ${res.status}`);
+        const data = await res.json();
+        if (!cancelled) setFeedback(data);
+      } catch (err) {
+        console.warn('[LEXIS Feedback Warning]', err);
+        if (!cancelled) setFeedbackError(true);
+      } finally {
+        if (!cancelled) setFeedbackLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
 
   const sendClientEvent = (eventObj) => {
     if (dcRef.current && dcRef.current.readyState === 'open') {
@@ -265,10 +222,42 @@ export default function LexisApp({ navigateTo }) {
     setTranscripts((prev) => {
       const last = prev[prev.length - 1];
       if (last && last.speaker === speaker && speaker === 'lexis') {
-        return [...prev.slice(0, -1), { speaker, text: last.text + text }];
+        return [...prev.slice(0, -1), { ...last, text: last.text + text }];
       }
       return [...prev, { speaker, text }];
     });
+  }, []);
+
+  // Fires once per completed LEXIS turn (see the response.done handler
+  // below) — a separate, non-blocking call rather than something the
+  // realtime session itself produces inline. See /api/translate's own
+  // comment in backend/app.mjs for why. Failures here are deliberately
+  // silent: a transcript line just renders without a translation rather
+  // than surfacing an error over something as minor as a caption.
+  const requestTranslation = useCallback(async (idx, text, direction) => {
+    try {
+      const { data: { session: freshSession } } = await supabase.auth.getSession();
+      if (!freshSession) return;
+      const res = await fetch(`${BACKEND_URL}/api/translate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${freshSession.access_token}`
+        },
+        body: JSON.stringify({ text, direction })
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.translation) return;
+      setTranscripts((prev) => {
+        if (idx >= prev.length || prev[idx]?.speaker !== 'lexis') return prev;
+        const next = [...prev];
+        next[idx] = { ...next[idx], translation: data.translation };
+        return next;
+      });
+    } catch (err) {
+      console.warn('[LEXIS Translate Warning]', err);
+    }
   }, []);
 
   const setupDualVisualizers = (localStream, remoteStream) => {
@@ -331,7 +320,9 @@ export default function LexisApp({ navigateTo }) {
           ctx.beginPath();
 
           const activeData = remoteLevel > localLevel + 8 ? remoteData : localData;
-          const strokeColor = remoteLevel > localLevel + 8 ? '#34eba0' : '#22d3ee'; // Emerald for LEXIS, Cyan for Student
+          // Teal for LEXIS, amber for the student — matches the v2026.4
+          // semantic palette (teal = "LEXIS is alive", amber = action/self).
+          const strokeColor = remoteLevel > localLevel + 8 ? '#2dd4bf' : '#FF9E00';
 
           if (activeData) {
             const points = 64;
@@ -362,13 +353,13 @@ export default function LexisApp({ navigateTo }) {
     }
   };
 
-  // directionOverride lets the language-picker modal start a session with
-  // the language the user just tapped, without a stale-closure bug: calling
-  // setTargetLanguage(lang) then startSession() in the same handler would
-  // still read the *previous* render's targetLanguage below (React batches
-  // the state update), so the picker passes the freshly-picked value in
+  // directionOverride/topicOverride let the Topics stage start a session
+  // with the values just picked, without a stale-closure bug: calling
+  // setSelectedTopic(topic) then startSession() in the same handler would
+  // still read the *previous* render's selectedTopic below (React batches
+  // the state update), so the caller passes the freshly-picked values in
   // directly instead of relying on state having already re-rendered.
-  const startSession = async (directionOverride) => {
+  const startSession = async (directionOverride, topicOverride) => {
     if (isConnecting || isConnected) return;
 
     if (!session) {
@@ -377,6 +368,8 @@ export default function LexisApp({ navigateTo }) {
     }
 
     const direction = directionOverride ?? targetLanguage;
+    sessionDirectionRef.current = direction;
+    wasConnectedRef.current = false;
 
     setIsConnecting(true);
     setStatus('Getting things ready...');
@@ -391,7 +384,7 @@ export default function LexisApp({ navigateTo }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ direction })
+        body: JSON.stringify({ direction, topic: topicOverride ?? undefined })
       });
 
       if (!tokenRes.ok) {
@@ -421,7 +414,8 @@ export default function LexisApp({ navigateTo }) {
 
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === 'connected') {
-          setStatus("LEXIS is listening");
+          wasConnectedRef.current = true;
+          setStatus('LEXIS is listening');
           setIsConnected(true);
           setIsConnecting(false);
 
@@ -479,7 +473,7 @@ export default function LexisApp({ navigateTo }) {
           // browsers block it here since this callback fires async, outside
           // the gesture window. Explicitly attempt play() and surface a
           // "tap to enable audio" prompt on rejection instead of failing
-          // silently (see the audioBlocked banner below).
+          // silently (see the audioBlocked banner in LiveStage).
           audioEl.play().then(() => setAudioBlocked(false)).catch((playErr) => {
             console.warn('[LEXIS Audio] Autoplay blocked, prompting for a tap:', playErr);
             setAudioBlocked(true);
@@ -543,11 +537,9 @@ export default function LexisApp({ navigateTo }) {
             // (even a false one from mic echo picking up LEXIS's own
             // voice) leaves every later reply in the session silent while
             // the transcript keeps working fine, since that's driven by
-            // the data channel, not audio element state. Live-verified:
-            // a stray one-word "YOU:" transcript entry appeared mid-reply,
-            // then LEXIS's next turns had text but no audio at all — this
-            // is that bug. Calling play() on an already-playing element is
-            // a harmless no-op, so this is safe to run on every response.
+            // the data channel, not audio element state. Calling play() on
+            // an already-playing element is a harmless no-op, so this is
+            // safe to run on every response.
             remoteAudioRef.current?.play().catch((playErr) => {
               console.warn('[LEXIS Audio] Resume after barge-in blocked:', playErr);
               setAudioBlocked(true);
@@ -570,7 +562,22 @@ export default function LexisApp({ navigateTo }) {
             setStatus('Listening...');
           } else if (event.type === 'response.done') {
             isAssistantSpeakingRef.current = false;
-            setStatus("LEXIS is listening");
+            setStatus('LEXIS is listening');
+            // Kick off the live-translation subtitle for the turn that just
+            // finished — see requestTranslation's own comment above for why
+            // this is a separate async call rather than blocking anything.
+            // translationRequested guards against firing twice for the same
+            // entry (response.done can, in principle, land more than once
+            // for edge-case turns).
+            setTranscripts((prev) => {
+              const idx = prev.length - 1;
+              const last = prev[idx];
+              if (last && last.speaker === 'lexis' && last.text && !last.translationRequested) {
+                requestTranslation(idx, last.text, direction);
+                return [...prev.slice(0, -1), { ...last, translationRequested: true }];
+              }
+              return prev;
+            });
           }
         } catch (err) {
           console.error('[LEXIS Event Error]', err);
@@ -645,10 +652,16 @@ export default function LexisApp({ navigateTo }) {
     }
   };
 
+  const enableAudio = () => {
+    remoteAudioRef.current?.play().then(() => setAudioBlocked(false)).catch((err) => {
+      console.warn('[LEXIS Audio] Manual play still failed:', err);
+    });
+  };
+
   // Only meaningful before a session starts — the running session's system
   // prompt was already picked when it connected, so this only affects the
-  // *next* "Start Talking" tap. Disabled in the UI while connected for
-  // exactly that reason, rather than implying a live language switch.
+  // *next* "Start Talking" tap. Only ever rendered (in WelcomeStage) while
+  // not connected/connecting, for exactly that reason.
   const selectTargetLanguage = (lang) => {
     setTargetLanguage(lang);
     try {
@@ -659,22 +672,20 @@ export default function LexisApp({ navigateTo }) {
     }
   };
 
-  // Handles the language-picker modal shown on every "Start Talking" tap.
-  // Persists the choice for next time (selectTargetLanguage) and starts the
-  // session with it immediately via startSession's directionOverride, so
-  // this doesn't need to wait a render for state to catch up.
-  const confirmLanguageAndStart = (lang) => {
-    selectTargetLanguage(lang);
-    setShowLanguagePicker(false);
-    startSession(lang);
+  // Topics stage handler — starts the session immediately with whatever
+  // was just tapped (a real topic key, or null for "Just Talk"). Moves to
+  // 'live' synchronously so LiveStage's own isConnecting UI (spinner,
+  // "Connecting..." status) covers the async gap, rather than showing any
+  // connecting state inside TopicStage itself.
+  const handlePickTopic = (topicKey) => {
+    setStage('live');
+    startSession(targetLanguage, topicKey);
   };
 
   // finalStatus lets a caller that already knows *why* the session is
-  // ending say so — endSession used to unconditionally stamp 'Disconnected'
-  // over whatever specific status a caller had just set (e.g. a real error
-  // message, or 'Connection lost'), silently discarding it before the user
-  // ever saw it. Every failure mode collapsed to the same uninformative
-  // "Disconnected", which is exactly what was reported live.
+  // ending say so, instead of this unconditionally stamping over it with a
+  // generic message — every failure mode used to collapse into the same
+  // uninformative status, which was reported live as a real complaint.
   const endSession = (finalStatus = 'Session ended — see you next time!') => {
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
@@ -706,240 +717,76 @@ export default function LexisApp({ navigateTo }) {
     setAudioLevel(0);
     setTutorLevel(0);
     setAudioBlocked(false);
+
+    // Route to the next stage based on whether a real conversation
+    // actually happened this attempt, not on `stage` itself (a stale-
+    // closure read here — see wasConnectedRef's own comment above).
+    if (wasConnectedRef.current) {
+      wasConnectedRef.current = false;
+      setStage('feedback');
+    } else {
+      setStage('welcome');
+    }
   };
 
   // Defensive fallback only — App.jsx's router guarantees a session exists
   // before this component ever mounts.
   if (!session) {
-    return <div className="min-h-screen bg-slate-950" />;
+    return <div className="min-h-screen bg-lexis-navy" />;
   }
 
+  if (stage === 'topics') {
+    return <TopicStage onBack={() => setStage('welcome')} onPickTopic={handlePickTopic} />;
+  }
+
+  if (stage === 'live') {
+    return (
+      <LiveStage
+        isConnected={isConnected}
+        isConnecting={isConnecting}
+        status={status}
+        tutorLevel={tutorLevel}
+        audioLevel={audioLevel}
+        canvasRef={canvasRef}
+        transcripts={transcripts}
+        transcriptContainerRef={transcriptContainerRef}
+        isMuted={isMuted}
+        onToggleMute={toggleMute}
+        isSpeakerMuted={isSpeakerMuted}
+        onToggleSpeakerMute={toggleSpeakerMute}
+        onInterrupt={forceInterrupt}
+        onEndCall={() => endSession()}
+        audioBlocked={audioBlocked}
+        onEnableAudio={enableAudio}
+      />
+    );
+  }
+
+  if (stage === 'feedback') {
+    return (
+      <FeedbackStage
+        feedback={feedback}
+        feedbackLoading={feedbackLoading}
+        feedbackError={feedbackError}
+        onPracticeAgain={() => setStage('topics')}
+        onDone={() => setStage('welcome')}
+      />
+    );
+  }
+
+  // stage === 'welcome'
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col items-center justify-between p-4 md:p-8">
-      {/* Header */}
-      <header className="w-full max-w-4xl flex items-center justify-between border-b border-slate-800 pb-4">
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigateTo('/')}>
-          <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400">
-            <Sparkles className="w-5 h-5 animate-pulse" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-              LEXIS
-            </h1>
-            <p className="text-[10px] text-slate-400">Your AI conversation partner</p>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-3">
-          {profile && (
-            <span className="hidden sm:flex items-center space-x-1.5 text-xs text-slate-400">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{formatUsageLabel(profile)}</span>
-            </span>
-          )}
-          {/* Which language to practice next session. Locked once connected
-              — the running session's persona was already picked when it
-              started, so changing this mid-call wouldn't do anything, and
-              showing it as live-editable would be misleading. Visible on
-              all screen sizes (was 'hidden sm:flex' — invisible on phones,
-              which meant mobile users had no visible way to check or set
-              this before Start Talking now also asks explicitly). */}
-          {!isConnected && !isConnecting && (
-            <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs" title="Language to practice">
-              <button
-                onClick={() => selectTargetLanguage('en')}
-                className={`px-2.5 py-1 rounded-md transition-colors ${targetLanguage === 'en' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                Learn English
-              </button>
-              <button
-                onClick={() => selectTargetLanguage('th')}
-                className={`px-2.5 py-1 rounded-md transition-colors ${targetLanguage === 'th' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                เรียนไทย
-              </button>
-            </div>
-          )}
-          <button onClick={() => navigateTo('/pricing')} className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-lg text-xs hover:bg-cyan-500/20">
-            Upgrade Pass
-          </button>
-          <button onClick={() => { endSession(); signOut(); }} className="p-2 text-slate-400 hover:text-slate-200" title="Sign Out">
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
-      </header>
-
-      {justPaid && (
-        <div className="w-full max-w-4xl mt-4 px-4 py-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-300 text-xs text-center">
-          Payment confirmed — your pass is now active. Thank you!
-        </div>
-      )}
-
-      {/* Upgrade Notice */}
-      {upgradeRequired && (
-        <div className="w-full max-w-4xl my-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-between">
-          <div className="flex items-center space-x-3 text-amber-400 text-xs">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <span>{upgradeMessage || 'Free trial limit reached. Upgrade your pass to continue practicing.'}</span>
-          </div>
-          <button onClick={() => navigateTo('/pricing')} className="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1">
-            <CreditCard className="w-4 h-4" />
-            <span>View Pricing</span>
-          </button>
-        </div>
-      )}
-
-      {/* Audio Blocked Notice — mobile browsers can silently block the
-          remote <audio> element's autoplay; this is a real click, so
-          play() from here isn't subject to the same restriction. */}
-      {audioBlocked && (
-        <div className="w-full max-w-4xl my-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-between">
-          <div className="flex items-center space-x-3 text-amber-400 text-xs">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <span>LEXIS is talking, but your browser blocked the audio. Tap to enable it.</span>
-          </div>
-          <button
-            onClick={() => {
-              remoteAudioRef.current?.play().then(() => setAudioBlocked(false)).catch((err) => {
-                console.warn('[LEXIS Audio] Manual play still failed:', err);
-              });
-            }}
-            className="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1"
-          >
-            <Volume2 className="w-4 h-4" />
-            <span>Enable Audio</span>
-          </button>
-        </div>
-      )}
-
-      {/* Visualizer */}
-      <main className="w-full max-w-4xl my-auto py-8 flex flex-col items-center">
-        <div className="relative flex items-center justify-center my-6">
-          <canvas ref={canvasRef} width={320} height={320} className="absolute pointer-events-none" />
-          <div
-            className={`w-48 h-48 md:w-64 md:h-64 rounded-full flex items-center justify-center transition-all duration-300 ${
-              isConnected
-                ? 'bg-gradient-to-tr from-cyan-600/20 via-teal-500/10 to-emerald-500/20 border border-cyan-500/40 shadow-[0_0_60px_rgba(6,182,212,0.25)]'
-                : 'bg-slate-900 border border-slate-800'
-            }`}
-            style={{ transform: isConnected ? `scale(${1 + audioLevel / 350})` : 'scale(1)' }}
-          >
-            <div className={`w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden flex items-center justify-center border ${
-              isConnected ? 'bg-cyan-950/40 border-cyan-400/50 shadow-inner' : 'bg-slate-800/50 border-slate-700'
-            }`}>
-              <TutorAvatar isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />
-            </div>
-          </div>
-          <div className="absolute -bottom-8 text-center">
-            <p className="text-sm text-cyan-300/90">{status}</p>
-          </div>
-        </div>
-
-        {/* Action Bar */}
-        <div className="flex items-center space-x-4 mt-8">
-          {!isConnected ? (
-            <button
-              onClick={() => setShowLanguagePicker(true)}
-              disabled={isConnecting}
-              className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold text-base rounded-2xl shadow-lg shadow-cyan-500/20 transition-all hover:scale-105 active:scale-95 flex items-center space-x-3"
-            >
-              {isConnecting ? <RotateCcw className="w-5 h-5 animate-spin" /> : <Mic className="w-5 h-5" />}
-              <span>{isConnecting ? 'Connecting…' : 'Start Talking'}</span>
-            </button>
-          ) : (
-            <div className="flex items-center space-x-3 bg-slate-900/80 border border-slate-800 p-2 rounded-2xl shadow-xl">
-              <button
-                onClick={toggleMute}
-                title={isMuted ? 'Unmute your mic' : 'Mute your mic'}
-                className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border text-[10px] font-medium ${isMuted ? 'bg-rose-500/20 border-rose-500/50 text-rose-400' : 'bg-slate-800 border-slate-700 text-slate-200'}`}
-              >
-                {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                <span>{isMuted ? 'Muted' : 'Mic on'}</span>
-              </button>
-              <button
-                onClick={toggleSpeakerMute}
-                title={isSpeakerMuted ? 'Unmute LEXIS' : 'Mute LEXIS'}
-                className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border text-[10px] font-medium ${isSpeakerMuted ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' : 'bg-slate-800 border-slate-700 text-slate-200'}`}
-              >
-                {isSpeakerMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                <span>{isSpeakerMuted ? 'Silenced' : 'Sound on'}</span>
-              </button>
-              <button
-                onClick={forceInterrupt}
-                title="Jump in and interrupt LEXIS"
-                className="flex flex-col items-center gap-1 px-3 py-2.5 bg-slate-800 border border-slate-700 text-slate-200 rounded-xl hover:bg-slate-700 text-[10px] font-medium"
-              >
-                <Hand className="w-5 h-5 text-amber-400" />
-                <span>Interrupt</span>
-              </button>
-              <button
-                onClick={() => endSession()}
-                className="flex flex-col items-center gap-1 px-4 py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-semibold rounded-xl text-[10px]"
-              >
-                <PhoneOff className="w-5 h-5" />
-                <span>End Session</span>
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Transcripts */}
-        {transcripts.length > 0 && (
-          <div ref={transcriptContainerRef} className="w-full mt-10 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 max-h-60 overflow-y-auto space-y-3">
-            <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Conversation</div>
-            {transcripts.map((item, idx) => (
-              <div key={idx} className={`text-xs p-3 rounded-xl ${item.speaker === 'lexis' ? 'bg-cyan-950/30 border border-cyan-800/30 text-cyan-200 ml-4' : 'bg-slate-800/50 border border-slate-700 text-slate-300 mr-4'}`}>
-                <span className="font-bold uppercase mr-2 opacity-60">{item.speaker === 'lexis' ? 'LEXIS:' : 'You:'}</span>
-                {item.text}
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
-
-      <footer className="w-full max-w-4xl flex items-center justify-between border-t border-slate-800 pt-4 text-xs text-slate-600">
-        <div className="flex items-center space-x-2">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Private &amp; secure — only you and LEXIS are on the call</span>
-        </div>
-        <div>© 2026 LEXIS</div>
-      </footer>
-
-      {/* Language picker — asked explicitly on every "Start Talking" tap
-          rather than silently reusing whatever was last stored. The tutor
-          was live-verified drifting between teaching English and Thai
-          mid-session when the target wasn't pinned down clearly, and the
-          old header toggle this replaced as the primary path was hidden on
-          phone-width screens — so this is now the one unmissable, always-
-          asked choice, on every device, before every session. */}
-      {showLanguagePicker && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6">
-          <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-            <h2 className="text-lg font-bold text-slate-100 mb-1">What do you want to practice?</h2>
-            <p className="text-xs text-slate-400 mb-6">Choose a language to start this session.</p>
-            <div className="space-y-3">
-              <button
-                onClick={() => confirmLanguageAndStart('en')}
-                className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold rounded-xl text-sm hover:scale-[1.02] transition-transform"
-              >
-                Learn English
-              </button>
-              <button
-                onClick={() => confirmLanguageAndStart('th')}
-                className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold rounded-xl text-sm hover:scale-[1.02] transition-transform"
-              >
-                เรียนภาษาไทย
-              </button>
-            </div>
-            <button
-              onClick={() => setShowLanguagePicker(false)}
-              className="w-full mt-4 py-2 text-xs text-slate-500 hover:text-slate-300"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    <WelcomeStage
+      targetLanguage={targetLanguage}
+      onSelectLanguage={selectTargetLanguage}
+      onStartTalking={() => setStage('topics')}
+      profile={profile}
+      justPaid={justPaid}
+      upgradeRequired={upgradeRequired}
+      upgradeMessage={upgradeMessage}
+      onViewPricing={() => navigateTo('/pricing')}
+      onSignOut={() => { endSession(); signOut(); }}
+      onGoHome={() => navigateTo('/')}
+    />
   );
 }
