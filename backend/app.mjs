@@ -141,6 +141,9 @@ const heartbeatRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 6, message
 const translateRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 40, message: 'Translation rate limit exceeded. Please wait a moment.' });
 // Feedback is requested once per finished session, not on a loop — tight.
 const feedbackRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 6, message: 'Feedback rate limit exceeded. Please wait a moment.' });
+// Just a read of the student's own history — generous, since a page of
+// results could plausibly re-fetch on every visit to the History screen.
+const historyRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 20, message: 'History rate limit exceeded. Please wait a moment.' });
 
 /* ─────────────────────────────────────────────────────────────────────── */
 /* 5. AUTH MIDDLEWARE                                                      */
@@ -397,7 +400,35 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
                 // not doubled — to give that real thinking-pause room
                 // without making the conversation feel laggy for students
                 // who don't need it.
-                silence_duration_ms: 1000
+                silence_duration_ms: 1000,
+                // Explicit rather than relying on undocumented defaults —
+                // OpenAI's reference doesn't state a default for either.
+                //
+                // create_response: auto-generate a reply once VAD decides
+                // the student's turn ended. Was already happening in
+                // practice (this app has never sent a manual
+                // response.create), so this makes existing behavior
+                // explicit rather than changing anything.
+                //
+                // interrupt_response: have the SERVER also auto-cancel
+                // LEXIS's in-progress response the moment VAD detects the
+                // student started talking — verified against OpenAI's
+                // reference docs (quoted verbatim): "Whether or not to
+                // automatically interrupt (cancel) any ongoing response...
+                // when a VAD start event occurs." That's exactly what
+                // LexisApp.jsx's client-side barge-in already does by hand
+                // (pause the <audio> element, send response.cancel and
+                // output_audio_buffer.clear on input_audio_buffer.speech_started
+                // — see the dc.onmessage handler there). Added here as a
+                // second, server-side layer alongside that existing client
+                // logic, not a replacement for it — the client-side path
+                // fixed a real "audio goes silent after any interruption"
+                // bug before (see PR #29's history) and is left completely
+                // unchanged; a redundant response.cancel from the client
+                // after the server already cancelled it is a documented
+                // no-op, not a conflict.
+                create_response: true,
+                interrupt_response: true
               }
             }
           },
@@ -553,6 +584,23 @@ function summarizeTranscriptForFeedback(transcripts) {
   return `${headText}\n[... earlier turns omitted ...]\n${tail.join('\n')}`;
 }
 
+// Persists a feedback result to session_history (see backend/supabase-schema.sql)
+// so it's viewable later via GET /api/history — non-fatal on failure. A
+// student who was just given their feedback on screen shouldn't get an
+// error over the *history record* of it failing to save; log and move on.
+async function saveSessionHistory({ userId, direction, topic, insufficient, confidence, strengths, improvements }) {
+  const { error } = await supabase.from('session_history').insert({
+    user_id: userId,
+    direction,
+    topic,
+    insufficient,
+    confidence: confidence ?? null,
+    strengths: strengths ?? [],
+    improvements: improvements ?? []
+  });
+  if (error) console.error('[LEXIS History Error] Failed to save session_history row (non-fatal):', error);
+}
+
 // One real LLM pass over a just-finished session's actual transcript — the
 // Feedback stage (frontend/src/components/stages/FeedbackStage.jsx). No
 // static/fabricated score: short sessions get an honest "talk a bit more"
@@ -568,6 +616,9 @@ app.post('/api/feedback', feedbackRateLimiter, authenticate, async (req, res) =>
   try {
     const transcripts = Array.isArray(req.body?.transcripts) ? req.body.transcripts : [];
     const direction = req.body?.direction === 'th' ? 'th' : 'en';
+    // Purely for session_history's own record — doesn't affect grading.
+    // Same validation as /api/session's topic param.
+    const topic = ['everyday', 'work', 'travel'].includes(req.body?.topic) ? req.body.topic : null;
     const targetLabel = direction === 'th' ? 'Thai' : 'English';
     // Same convention as buildTutorInstructions above — the language the
     // student is comfortable in, i.e. NOT the one they're learning.
@@ -588,6 +639,7 @@ app.post('/api/feedback', feedbackRateLimiter, authenticate, async (req, res) =>
       const insufficientMessage = direction === 'en'
         ? 'ครั้งนี้พูดสั้นไปหน่อยนะ! คุยให้นานขึ้นอีกนิดในครั้งหน้า แล้วฉันจะสรุปผลจริงๆ ให้ดูว่าคุณทำได้ดีแค่ไหน'
         : "That was a quick one! Talk a little more next time and I'll be able to show you real feedback on how you're doing.";
+      await saveSessionHistory({ userId: req.user.id, direction, topic, insufficient: true, confidence: null, strengths: [], improvements: [] });
       return res.json({ insufficient: true, message: insufficientMessage });
     }
 
@@ -687,10 +739,32 @@ confidence (0-100) should reflect genuine fluency/accuracy signals — grammar, 
       return res.status(502).json({ error: 'Feedback response was incomplete.' });
     }
 
+    await saveSessionHistory({ userId: req.user.id, direction, topic, insufficient: false, confidence, strengths, improvements });
     res.json({ confidence, strengths, improvements });
   } catch (err) {
     console.error('[LEXIS Feedback Error]', err);
     res.status(500).json({ error: 'Internal server error while generating feedback.' });
+  }
+});
+
+// Past-session feedback history (frontend/src/components/stages/HistoryStage.jsx)
+// — most recent first, capped at 30. Not entitlement-gated: viewing your
+// own past feedback isn't consuming a new session, same reasoning as
+// /api/feedback and /api/stripe/checkout.
+app.get('/api/history', historyRateLimiter, authenticate, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('session_history')
+      .select('id, direction, topic, insufficient, confidence, strengths, improvements, created_at')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    if (error) throw error;
+    res.json({ history: data || [] });
+  } catch (err) {
+    console.error('[LEXIS History Error]', err);
+    res.status(500).json({ error: 'Failed to load session history.' });
   }
 });
 

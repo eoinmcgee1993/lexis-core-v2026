@@ -14,6 +14,7 @@ import WelcomeStage from '../components/stages/WelcomeStage';
 import TopicStage from '../components/stages/TopicStage';
 import LiveStage from '../components/stages/LiveStage';
 import FeedbackStage from '../components/stages/FeedbackStage';
+import HistoryStage from '../components/stages/HistoryStage';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -97,6 +98,14 @@ export default function LexisApp({ navigateTo }) {
   const [feedback, setFeedback] = useState(null);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [feedbackError, setFeedbackError] = useState(false);
+
+  // History screen (reachable from Welcome, not one of the four core
+  // session-flow stages — see HistoryStage.jsx's own header comment).
+  // Fetched fresh from GET /api/history every time `stage` becomes
+  // 'history', same pattern as the feedback effect below.
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(false);
 
   // State Management
   const [voiceState, setVoiceState] = useState('idle'); // see VOICE_STATES doc above
@@ -252,6 +261,37 @@ export default function LexisApp({ navigateTo }) {
         if (!cancelled) setFeedbackError(true);
       } finally {
         if (!cancelled) setFeedbackLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
+
+  // Fires whenever `stage` becomes 'history' — always a fresh fetch rather
+  // than caching, since a new session's feedback could have just been
+  // added since the last visit.
+  useEffect(() => {
+    if (stage !== 'history') return;
+    let cancelled = false;
+    setHistoryLoading(true);
+    setHistoryError(false);
+
+    (async () => {
+      try {
+        const { data: { session: freshSession } } = await supabase.auth.getSession();
+        if (!freshSession) throw new Error('Not signed in.');
+        const res = await fetch(`${BACKEND_URL}/api/history`, {
+          headers: { 'Authorization': `Bearer ${freshSession.access_token}` }
+        });
+        if (!res.ok) throw new Error(`History request failed: ${res.status}`);
+        const data = await res.json();
+        if (!cancelled) setHistory(Array.isArray(data.history) ? data.history : []);
+      } catch (err) {
+        console.warn('[LEXIS History Warning]', err);
+        if (!cancelled) setHistoryError(true);
+      } finally {
+        if (!cancelled) setHistoryLoading(false);
       }
     })();
 
@@ -916,6 +956,17 @@ export default function LexisApp({ navigateTo }) {
     );
   }
 
+  if (stage === 'history') {
+    return (
+      <HistoryStage
+        history={history}
+        historyLoading={historyLoading}
+        historyError={historyError}
+        onBack={() => setStage('welcome')}
+      />
+    );
+  }
+
   // stage === 'welcome'
   return (
     <WelcomeStage
@@ -929,6 +980,7 @@ export default function LexisApp({ navigateTo }) {
       sessionError={sessionError}
       onDismissSessionError={() => setSessionError('')}
       onViewPricing={() => navigateTo('/pricing')}
+      onViewHistory={() => setStage('history')}
       onSignOut={() => { endSession(); signOut(); }}
       onGoHome={() => navigateTo('/')}
     />
