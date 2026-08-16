@@ -38,9 +38,38 @@ CREATE TABLE IF NOT EXISTS public.usage_logs (
 -- that doesn't degrade as usage_logs grows.
 CREATE INDEX IF NOT EXISTS usage_logs_user_id_idx ON public.usage_logs(user_id);
 
+-- 3b. Session History — past-session feedback summaries, viewable in-app
+-- (frontend/src/components/stages/HistoryStage.jsx). Deliberately stores
+-- only the FEEDBACK RESULT (confidence/strengths/improvements), never the
+-- raw transcript — smaller footprint, and avoids retaining a full log of
+-- everything a student said. Written only by POST /api/feedback, right
+-- after it computes a result for a session that actually connected (see
+-- LexisApp.jsx's wasConnectedRef for when that endpoint gets called at all).
+CREATE TABLE IF NOT EXISTS public.session_history (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  direction TEXT NOT NULL CHECK (direction IN ('en', 'th')),
+  topic TEXT, -- 'everyday' | 'work' | 'travel' | NULL ("Just Talk")
+  -- insufficient=true for a real session too short to grade honestly (see
+  -- MIN_FEEDBACK_WORDS/MIN_FEEDBACK_TURNS in backend/app.mjs) — confidence
+  -- and the two JSONB arrays stay empty/null in that case rather than
+  -- faking a score, same honesty standard as the live feedback endpoint.
+  insufficient BOOLEAN NOT NULL DEFAULT false,
+  confidence INT CHECK (confidence IS NULL OR (confidence >= 0 AND confidence <= 100)),
+  strengths JSONB NOT NULL DEFAULT '[]'::jsonb,
+  improvements JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Every read is "give me this user's history, newest first" — composite
+-- index matches that access pattern directly.
+CREATE INDEX IF NOT EXISTS session_history_user_id_created_at_idx
+  ON public.session_history(user_id, created_at DESC);
+
 -- 4. Enable Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.usage_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.session_history ENABLE ROW LEVEL SECURITY;
 
 -- 5. RLS Policies
 -- auth.uid() is wrapped in a scalar subquery — (select auth.uid()) — per
@@ -64,6 +93,14 @@ DROP POLICY IF EXISTS "Users can update own non-billing profile data" ON public.
 
 DROP POLICY IF EXISTS "Users can view own usage logs" ON public.usage_logs;
 CREATE POLICY "Users can view own usage logs" ON public.usage_logs
+  FOR SELECT USING ((select auth.uid()) = user_id);
+
+-- Same read-only-for-clients shape as usage_logs — the client never
+-- writes this table directly, only the backend via the service-role key
+-- (which bypasses RLS entirely), so there's no INSERT/UPDATE policy to
+-- define, only SELECT.
+DROP POLICY IF EXISTS "Users can read own session history" ON public.session_history;
+CREATE POLICY "Users can read own session history" ON public.session_history
   FOR SELECT USING ((select auth.uid()) = user_id);
 
 -- 6. Trigger: Auto-Create Profile on Signup

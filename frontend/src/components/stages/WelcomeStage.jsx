@@ -8,7 +8,7 @@
 // a full always-visible screen satisfies that even more directly than a
 // modal did, so the modal was removed rather than kept alongside this).
 import React from 'react';
-import { Mic, LogOut, AlertCircle, CreditCard, Clock, X } from 'lucide-react';
+import { Mic, LogOut, AlertCircle, CreditCard, Clock, X, History } from 'lucide-react';
 
 function formatUsageLabel(profile) {
   if (profile.subscription_status === 'active') {
@@ -31,6 +31,7 @@ export default function WelcomeStage({
   sessionError,
   onDismissSessionError,
   onViewPricing,
+  onViewHistory,
   onSignOut,
   onGoHome
 }) {
@@ -47,6 +48,9 @@ export default function WelcomeStage({
               <span>{formatUsageLabel(profile)}</span>
             </span>
           )}
+          <button onClick={onViewHistory} className="p-2 text-lexis-ink/40 hover:text-lexis-ink transition-colors" title="Practice history">
+            <History className="w-4 h-4" />
+          </button>
           <button onClick={onSignOut} className="p-2 text-lexis-ink/40 hover:text-lexis-ink transition-colors" title="Sign out">
             <LogOut className="w-4 h-4" />
           </button>
