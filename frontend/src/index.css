@@ -2,10 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Self-hosted (frontend/public/fonts/) rather than a Google Fonts <link> —
+   no extra DNS/connection round-trip, and it keeps working if that host is
+   ever blocked. Latin subset only, one weight (600) — the only place this
+   typeface is used is short display headlines (see tailwind.config.js's
+   `font-display`), not body copy, so the full family isn't needed. */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/fraunces-600.woff2') format('woff2');
+}
+
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    /* Page-level default; individual routes override per their own stage
+       (e.g. the warm lexis-canvas background on Welcome/Topics/Feedback,
+       lexis-navy on the Live Conversation screen). */
+    @apply bg-slate-950 text-slate-100 antialiased font-sans;
   }
 }
 
