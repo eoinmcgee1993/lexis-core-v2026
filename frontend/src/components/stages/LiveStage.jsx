@@ -98,7 +98,23 @@ function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
   );
 }
 
+// Status text color per voiceState — see LexisApp.jsx's voiceState doc for
+// what each value means. isConnected/isConnecting (still passed
+// separately) already gate the avatar's binary active/inactive look;
+// this is the finer-grained per-state color on top of that.
+const STATUS_COLOR = {
+  idle: 'text-slate-400',
+  connecting: 'text-lexis-action',
+  listening: 'text-teal-300/90',
+  processing: 'text-lexis-action',
+  speaking: 'text-teal-100',
+  interrupted: 'text-teal-300/90',
+  reconnecting: 'text-lexis-action',
+  error: 'text-rose-400'
+};
+
 export default function LiveStage({
+  voiceState,
   isConnected,
   isConnecting,
   status,
@@ -157,7 +173,7 @@ export default function LiveStage({
               isConnected
                 ? 'bg-gradient-to-tr from-teal-600/20 via-teal-500/10 to-teal-400/20 border border-teal-400/40 shadow-[0_0_60px_rgba(45,212,191,0.25)]'
                 : 'bg-lexis-navy-2 border border-white/10'
-            }`}
+            } ${voiceState === 'reconnecting' ? 'border-lexis-action/50 motion-safe:animate-pulse' : ''}`}
             style={{ transform: isConnected ? `scale(${1 + audioLevel / 350})` : 'scale(1)' }}
           >
             <div className={`w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden flex items-center justify-center border ${
@@ -167,7 +183,7 @@ export default function LiveStage({
             </div>
           </div>
           <div className="absolute -bottom-8 text-center">
-            <p className="text-sm text-teal-300/90">{status}</p>
+            <p className={`text-sm ${STATUS_COLOR[voiceState] || 'text-teal-300/90'}`}>{status}</p>
           </div>
         </div>
 
@@ -190,8 +206,9 @@ export default function LiveStage({
           </button>
           <button
             onClick={onInterrupt}
-            title="Jump in and interrupt LEXIS"
-            className="flex flex-col items-center gap-1 px-3 py-2.5 bg-white/5 border border-white/10 text-slate-200 rounded-xl hover:bg-white/10 text-[10px] font-medium"
+            disabled={voiceState !== 'speaking'}
+            title={voiceState === 'speaking' ? 'Jump in and interrupt LEXIS' : 'Nothing to interrupt right now'}
+            className="flex flex-col items-center gap-1 px-3 py-2.5 bg-white/5 border border-white/10 text-slate-200 rounded-xl hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none text-[10px] font-medium transition-opacity"
           >
             <Hand className="w-5 h-5 text-lexis-action" />
             <span>Interrupt</span>
