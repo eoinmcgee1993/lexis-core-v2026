@@ -906,6 +906,10 @@ export default function LexisApp({ navigateTo }) {
         feedback={feedback}
         feedbackLoading={feedbackLoading}
         feedbackError={feedbackError}
+        // Safe to read directly here (not via state): frozen at session
+        // start and only ever changes on the *next* startSession() call,
+        // which can't happen again until this stage is left.
+        direction={sessionDirectionRef.current}
         onPracticeAgain={() => setStage('topics')}
         onDone={() => setStage('welcome')}
       />
