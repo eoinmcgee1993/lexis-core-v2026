@@ -234,9 +234,21 @@ function buildTutorInstructions(direction, topic) {
     ? 'You are LEXIS, an elite AI Thai tutor for English speakers learning Thai.'
     : 'You are LEXIS, an elite AI English tutor designed specifically for Thai youth.';
 
+  // Reported live: LEXIS was correcting Thai speakers' English pronunciation
+  // aggressively for things that are just a Thai accent, not a mistake —
+  // e.g. "sh" realized closer to a Thai-influenced sound (a real example
+  // reported: "pussy cat" heard/said as "pushy cat"), because Thai doesn't
+  // distinguish some English consonants the same way. Jumping on every one
+  // of those reads as pedantic and undermines exactly the thing this app is
+  // supposed to build (confidence speaking out loud), and it's not
+  // something a real conversation partner would nitpick either. The fix is
+  // explicit scope: correct grammar/vocabulary/word-choice — the stuff that
+  // actually is wrong — and leave native-language accent features alone
+  // unless they've produced a genuinely different word that would actually
+  // confuse a listener.
   const correction = learningThai
-    ? "Correct speech errors gently by modeling the proper Thai phrase, then ask a simple follow-up question."
-    : 'Correct speech errors gently by modeling the proper phrase, then ask a simple follow-up question.';
+    ? "Correct speech errors gently by modeling the proper Thai phrase, then ask a simple follow-up question. Focus corrections on grammar, vocabulary, and word choice — not on accent or pronunciation quirks carried over from the student's first language that don't block understanding. Those aren't mistakes, they're just an accent; only step in on pronunciation if it produced a genuinely different, confusing word."
+    : 'Correct speech errors gently by modeling the proper phrase, then ask a simple follow-up question. Focus corrections on grammar, vocabulary, and word choice — not on accent or pronunciation quirks carried over from the student\'s first language that don\'t block understanding (Thai speakers often don\'t distinguish English sounds like "sh" vs "s", final consonants, or "l" vs "r" the same way native speakers do — that\'s an accent, not an error). Only step in on pronunciation if it produced a genuinely different, confusing word, not just an accented version of the right one.';
 
   const curriculumTarget = learningThai ? 'Thai' : 'English';
   // The language the student can already lean on comfortably — the fixed
@@ -374,7 +386,18 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
                 type: 'server_vad',
                 threshold: 0.5,
                 prefix_padding_ms: 400,
-                silence_duration_ms: 800
+                // Reported: LEXIS "seems very sensitive to interruptions" —
+                // jumping in with a response/correction while the student
+                // was still mid-sentence. silence_duration_ms is how long a
+                // pause has to be before server_vad decides the student's
+                // turn is actually over; 800ms is short for a language
+                // learner who pauses to find a word mid-thought (a totally
+                // normal part of speaking a language you're still
+                // learning, not the end of their turn). Bumped modestly —
+                // not doubled — to give that real thinking-pause room
+                // without making the conversation feel laggy for students
+                // who don't need it.
+                silence_duration_ms: 1000
               }
             }
           },
@@ -546,6 +569,13 @@ app.post('/api/feedback', feedbackRateLimiter, authenticate, async (req, res) =>
     const transcripts = Array.isArray(req.body?.transcripts) ? req.body.transcripts : [];
     const direction = req.body?.direction === 'th' ? 'th' : 'en';
     const targetLabel = direction === 'th' ? 'Thai' : 'English';
+    // Same convention as buildTutorInstructions above — the language the
+    // student is comfortable in, i.e. NOT the one they're learning.
+    // Reported live: a Thai speaker learning English got their whole
+    // feedback report back in English, which they can't necessarily read
+    // any more easily than the lesson itself — the report needs to be
+    // legible on its own, not just another thing to translate.
+    const baseLanguage = direction === 'th' ? 'English' : 'Thai';
 
     const studentTurns = transcripts.filter((t) => t?.speaker === 'user' && typeof t.text === 'string' && t.text.trim());
     const studentWordCount = studentTurns.reduce((sum, t) => sum + t.text.trim().split(/\s+/).length, 0);
@@ -555,10 +585,10 @@ app.post('/api/feedback', feedbackRateLimiter, authenticate, async (req, res) =>
     // real material. Faking a number from a couple of words would be worse
     // than showing no score at all.
     if (studentTurns.length < MIN_FEEDBACK_TURNS || studentWordCount < MIN_FEEDBACK_WORDS) {
-      return res.json({
-        insufficient: true,
-        message: "That was a quick one! Talk a little more next time and I'll be able to show you real feedback on how you're doing."
-      });
+      const insufficientMessage = direction === 'en'
+        ? 'ครั้งนี้พูดสั้นไปหน่อยนะ! คุยให้นานขึ้นอีกนิดในครั้งหน้า แล้วฉันจะสรุปผลจริงๆ ให้ดูว่าคุณทำได้ดีแค่ไหน'
+        : "That was a quick one! Talk a little more next time and I'll be able to show you real feedback on how you're doing.";
+      return res.json({ insufficient: true, message: insufficientMessage });
     }
 
     const apiKey = process.env.OPENAI_API_KEY;
@@ -594,9 +624,10 @@ app.post('/api/feedback', feedbackRateLimiter, authenticate, async (req, res) =>
                     additionalProperties: false,
                     properties: {
                       original: { type: 'string' },
-                      corrected: { type: 'string' }
+                      corrected: { type: 'string' },
+                      note: { type: 'string' }
                     },
-                    required: ['original', 'corrected']
+                    required: ['original', 'corrected', 'note']
                   }
                 }
               },
@@ -611,7 +642,11 @@ app.post('/api/feedback', feedbackRateLimiter, authenticate, async (req, res) =>
 
 Ground every strength and correction in something the student ACTUALLY said in the transcript below — quote or closely paraphrase their real words. Never invent an example that isn't grounded in the transcript. If there isn't enough real material for 3 strengths or 3 corrections, return fewer rather than padding with filler.
 
-confidence (0-100) should reflect genuine fluency/accuracy signals — grammar, natural phrasing, vocabulary range, how well they responded to what LEXIS actually asked. A short, simple, error-free exchange is NOT automatically a high score; a longer session with some mistakes but real recovery and range can still score well. Be honest, not just encouraging.`
+LANGUAGE OF YOUR RESPONSE — this matters: the student's comfortable language is ${baseLanguage}, not ${targetLabel} (${targetLabel} is what they're actively learning and struggling with — that's the whole reason they need this report explained clearly). Write every "strengths" item and every "note" field entirely in ${baseLanguage}, so the student can actually read their own feedback without needing a translation. The "original" and "corrected" fields are the one exception — those stay in ${targetLabel}, since they're literal quotes/examples of the student's actual speech and the corrected version of it, not commentary.
+
+Each "note" should be one short ${baseLanguage} sentence explaining *why* the correction matters — not a grammar lecture, just enough for the student to understand what changed and why, in their own language.
+
+confidence (0-100) should reflect genuine fluency/accuracy signals — grammar, natural phrasing, vocabulary range, how well they responded to what LEXIS actually asked. Do NOT count native-language accent or pronunciation features against them (e.g. a Thai speaker not distinguishing "sh"/"s" in English, or similar first-language carryover) — that's an accent, not an error, and this score should reflect communication ability, not how native they sound. A short, simple, error-free exchange is NOT automatically a high score; a longer session with some mistakes but real recovery and range can still score well. Be honest, not just encouraging.`
           },
           { role: 'user', content: transcriptText }
         ]
@@ -643,6 +678,7 @@ confidence (0-100) should reflect genuine fluency/accuracy signals — grammar, 
     const improvements = Array.isArray(parsed?.improvements)
       ? parsed.improvements
           .filter((i) => i && typeof i.original === 'string' && typeof i.corrected === 'string')
+          .map((i) => ({ original: i.original, corrected: i.corrected, note: typeof i.note === 'string' ? i.note : '' }))
           .slice(0, 3)
       : [];
 
