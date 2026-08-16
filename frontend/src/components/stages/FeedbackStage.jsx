@@ -71,8 +71,12 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
   const t = UI_STRINGS[direction] || UI_STRINGS.en;
 
   return (
-    <div className="min-h-screen bg-lexis-canvas text-lexis-ink font-sans flex flex-col items-center justify-center px-6 py-12">
-      <div className="w-full max-w-md text-center">
+    <div className="relative min-h-screen bg-lexis-canvas text-lexis-ink font-sans flex flex-col items-center justify-center px-6 py-12 overflow-hidden lexis-grain">
+      {/* Same ambient treatment as WelcomeStage/TopicStage — see WelcomeStage's comment. */}
+      <div className="absolute -top-24 -right-24 w-72 h-72 md:w-96 md:h-96 bg-lexis-action/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
+      <div className="absolute -bottom-32 -left-24 w-80 h-80 md:w-[28rem] md:h-[28rem] bg-lexis-ink/5 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10 w-full max-w-md text-center">
         <h1 className="font-display font-semibold text-2xl mb-8">{t.title}</h1>
 
         {feedbackLoading && (

@@ -16,7 +16,15 @@ const TOPICS = [
 
 export default function TopicStage({ onBack, onPickTopic }) {
   return (
-    <div className="min-h-screen bg-lexis-canvas text-lexis-ink font-sans flex flex-col">
+    <div className="relative min-h-screen bg-lexis-canvas text-lexis-ink font-sans flex flex-col overflow-hidden lexis-grain">
+      {/* Same ambient treatment as WelcomeStage — see its comment. Kept
+          identical across every lexis-canvas stage so the warmth reads as
+          one system, not a one-off fix to whichever screen got complained
+          about. */}
+      <div className="absolute -top-24 -right-24 w-72 h-72 md:w-96 md:h-96 bg-lexis-action/10 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
+      <div className="absolute -bottom-32 -left-24 w-80 h-80 md:w-[28rem] md:h-[28rem] bg-lexis-ink/5 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col flex-1">
       <div className="w-full max-w-4xl mx-auto flex items-center p-4 md:p-6">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors">
           <ArrowLeft className="w-4 h-4" />
@@ -28,15 +36,18 @@ export default function TopicStage({ onBack, onPickTopic }) {
         <h1 className="font-display font-semibold text-2xl md:text-3xl text-center text-balance">
           What do you want to practice today?
         </h1>
+        <p className="mt-2 text-sm text-lexis-ink/50 text-center">
+          Pick a topic to steer today's conversation, or skip straight in.
+        </p>
 
         <div className="mt-8 w-full max-w-sm flex flex-col gap-3">
           {TOPICS.map(({ key, label, desc, icon: Icon }) => (
             <button
               key={key}
               onClick={() => onPickTopic(key)}
-              className="flex items-center gap-4 text-left bg-white border border-lexis-ink/10 rounded-2xl p-4 hover:border-teal-500/50 hover:shadow-md transition-all"
+              className="group flex items-center gap-4 text-left bg-white border border-lexis-ink/10 rounded-2xl p-4 shadow-sm hover:border-teal-500/50 hover:shadow-lg hover:-translate-y-0.5 transition-all"
             >
-              <div className="p-2.5 bg-teal-600/10 text-teal-700 rounded-xl flex-shrink-0">
+              <div className="p-2.5 bg-teal-600/10 text-teal-700 rounded-xl flex-shrink-0 transition-colors group-hover:bg-teal-600/15">
                 <Icon className="w-5 h-5" />
               </div>
               <div>
@@ -53,6 +64,7 @@ export default function TopicStage({ onBack, onPickTopic }) {
         >
           Just Talk
         </button>
+      </div>
       </div>
     </div>
   );
