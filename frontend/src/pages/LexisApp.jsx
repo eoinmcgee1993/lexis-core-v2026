@@ -25,6 +25,38 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 // missing/unrecognized value, matching this key's absence on first visit.
 const TARGET_LANGUAGE_STORAGE_KEY = 'lexis_target_language';
 
+// A dropped WebRTC connection reports connectionState 'disconnected' before
+// (if ever) reaching 'failed' — and 'disconnected' is often transient, a
+// few seconds of a wifi handoff or a cell tower switch that recovers on its
+// own with the *same* peer connection and the *same* OpenAI realtime
+// session still intact. Previously any 'disconnected' immediately tore the
+// whole session down — but ending the session means the next attempt mints
+// a brand new OpenAI realtime session with zero memory of the conversation
+// so far (LEXIS would restart onboarding mid-conversation), which reads as
+// far more broken than a few seconds of "Reconnecting...". This grace
+// window lets a real recovery happen quietly; only if the connection is
+// still down when it expires does this become a real, user-visible failure.
+const RECONNECT_GRACE_MS = 8000;
+
+// The single source of truth for what the live session is doing right now
+// — see scripts/design/lexis-visual-system.md's Live Conversation section.
+// Previously `isConnected`/`isConnecting` were independent booleans that
+// had to be kept in sync by hand at every call site; a state this file
+// forgot to flip in lockstep would leave e.g. the avatar showing "active"
+// while the action bar still showed "not connected". Replacing both with
+// one enum removes that whole class of drift — everything UI-facing
+// (avatar activity, status color, button enabled-state) derives from this
+// one value instead of from multiple flags that could disagree.
+//
+//   idle          — no session, nothing in flight
+//   connecting    — token fetch / WebRTC handshake in progress
+//   listening     — connected, it's the student's turn (or a lull between turns)
+//   processing    — student just stopped talking; waiting on LEXIS's reply
+//   speaking      — LEXIS's response is playing
+//   interrupted   — brief flash right after a barge-in, before settling to 'listening'
+//   reconnecting  — connectionState dropped to 'disconnected'; inside the grace window above
+//   error         — a real, terminal failure (see sessionError for the message)
+
 // Translates getUserMedia's raw DOMException names into wording a student
 // can actually act on, instead of browser-internal phrasing like "Requested
 // device not found". Falls back to the browser's own message for anything
@@ -67,9 +99,16 @@ export default function LexisApp({ navigateTo }) {
   const [feedbackError, setFeedbackError] = useState(false);
 
   // State Management
-  const [isConnected, setIsConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [status, setStatus] = useState('Ready when you are');
+  const [voiceState, setVoiceState] = useState('idle'); // see VOICE_STATES doc above
+  const [status, setStatus] = useState('Ready when you are'); // human-readable line shown in LiveStage, updated in lockstep with voiceState
+  // Surfaces a session that failed before ever connecting (mic denied, SDP
+  // exchange failure, token broker error, etc.) — set in startSession's
+  // catch block, shown as a banner on WelcomeStage since that's exactly
+  // where endSession() routes a never-connected attempt back to. Distinct
+  // from `upgradeMessage` below (a specific, expected 403 case with its own
+  // "View Pricing" CTA) — this is the generic catch-all. Cleared at the
+  // start of every new attempt.
+  const [sessionError, setSessionError] = useState('');
   const [transcripts, setTranscripts] = useState([]);
   const [audioLevel, setAudioLevel] = useState(0);
   const [tutorLevel, setTutorLevel] = useState(0); // LEXIS's own voice energy, drives the avatar's mouth
@@ -122,6 +161,15 @@ export default function LexisApp({ navigateTo }) {
   // but cheap to guard) case that targetLanguage state changes between a
   // session starting and it ending.
   const sessionDirectionRef = useRef('en');
+  // Pending grace-window timer for a 'disconnected' connectionState — see
+  // RECONNECT_GRACE_MS's comment above.
+  const reconnectTimeoutRef = useRef(null);
+
+  // Derived, never independently settable — see voiceState's own comment
+  // above for why this replaced two separate booleans that used to have
+  // to be kept in sync by hand at every call site.
+  const isConnected = ['listening', 'processing', 'speaking', 'interrupted'].includes(voiceState);
+  const isConnecting = voiceState === 'connecting' || voiceState === 'reconnecting';
 
   // Reported: while LEXIS is speaking, the page kept auto-scrolling down
   // to the transcript, dragging the avatar out of view right when you'd
@@ -164,7 +212,7 @@ export default function LexisApp({ navigateTo }) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected, isConnecting, stage]);
+  }, [isConnected, isConnecting, stage, voiceState]);
 
   useEffect(() => {
     return () => endSession();
@@ -371,10 +419,22 @@ export default function LexisApp({ navigateTo }) {
     sessionDirectionRef.current = direction;
     wasConnectedRef.current = false;
 
-    setIsConnecting(true);
+    setVoiceState('connecting');
     setStatus('Getting things ready...');
     setUpgradeRequired(false);
+    setSessionError('');
     setAudioBlocked(false);
+
+    // Local, not React state: the catch block below needs to know whether
+    // *this* attempt already surfaced the trial-exhausted banner (which has
+    // its own message + "View Pricing" CTA) so it doesn't also stack the
+    // generic sessionError banner on top. Reading the `upgradeRequired`
+    // React state there would hit the same stale-closure problem
+    // documented on startSession's directionOverride param above —
+    // setUpgradeRequired(true) a few lines up doesn't change what
+    // `upgradeRequired` evaluates to later in this same synchronous
+    // function run, only what it'll be on the *next* render.
+    let isUpgradeError = false;
 
     try {
       // 1. Fetch Ephemeral Token with User JWT
@@ -390,6 +450,7 @@ export default function LexisApp({ navigateTo }) {
       if (!tokenRes.ok) {
         const err = await tokenRes.json().catch(() => ({}));
         if (tokenRes.status === 403 && err.error === 'TRIAL_EXHAUSTED') {
+          isUpgradeError = true;
           setUpgradeRequired(true);
           setUpgradeMessage(err.message || 'Free trial limit reached. Please upgrade your pass.');
           throw new Error(err.message || 'Free trial limit reached. Please upgrade your pass.');
@@ -414,17 +475,25 @@ export default function LexisApp({ navigateTo }) {
 
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === 'connected') {
+          // Cancels a pending reconnect-grace timeout if this is a recovery
+          // from a 'disconnected' blip, not just the initial connect — a
+          // harmless no-op via the ref-null guard when it's the latter.
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+            reconnectTimeoutRef.current = null;
+          }
           wasConnectedRef.current = true;
           setStatus('LEXIS is listening');
-          setIsConnected(true);
-          setIsConnecting(false);
+          setVoiceState('listening');
 
           // Trigger 30-second Telemetry Heartbeat. Re-fetch the session on
           // every tick rather than closing over the token from session
           // start — supabase-js auto-rotates the JWT roughly hourly, and a
           // long practice session would otherwise start sending a stale
           // token, fail every heartbeat with 401, and silently stop
-          // recording usage with no error surfaced to the user.
+          // recording usage with no error surfaced to the user. Re-running
+          // this on a reconnect recovery too is harmless — it just clears
+          // and restarts the same 30s interval.
           if (heartbeatIntervalRef.current) clearInterval(heartbeatIntervalRef.current);
           heartbeatIntervalRef.current = setInterval(async () => {
             try {
@@ -453,8 +522,36 @@ export default function LexisApp({ navigateTo }) {
             }
           }, 30000);
 
-        } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+        } else if (pc.connectionState === 'failed') {
+          // Unlike 'disconnected' below, the browser only reports 'failed'
+          // once it's given up on the ICE negotiation entirely — not
+          // something a short grace window can recover from. End for real.
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+            reconnectTimeoutRef.current = null;
+          }
           endSession('Connection lost — tap Start to try again.');
+
+        } else if (pc.connectionState === 'disconnected') {
+          // See RECONNECT_GRACE_MS's comment above — give a real recovery a
+          // few seconds before treating this as a failure. Only arm one
+          // timer at a time (repeated flapping between disconnected states
+          // shouldn't stack up timeouts).
+          setVoiceState('reconnecting');
+          setStatus('Reconnecting...');
+          if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+          reconnectTimeoutRef.current = setTimeout(() => {
+            reconnectTimeoutRef.current = null;
+            // Guard against a stale timeout from *this* pc outliving it —
+            // if the student already ended this session and started a
+            // fresh one in the meantime, pcRef.current now points at that
+            // new attempt's connection, not this one, and a still-
+            // connecting new session must not get killed by an old timer
+            // that was only ever watching the previous one.
+            if (pcRef.current === pc && pc.connectionState !== 'connected') {
+              endSession('Connection lost — tap Start to try again.');
+            }
+          }, RECONNECT_GRACE_MS);
         }
       };
 
@@ -528,6 +625,7 @@ export default function LexisApp({ navigateTo }) {
 
           if (event.type === 'response.created') {
             isAssistantSpeakingRef.current = true;
+            setVoiceState('speaking');
             setStatus('LEXIS is speaking...');
             // Every barge-in below (auto via VAD, or the manual hand
             // button) explicitly pauses the <audio> element — and pause()
@@ -550,7 +648,8 @@ export default function LexisApp({ navigateTo }) {
             appendTranscript('user', event.transcript);
           } else if (event.type === 'input_audio_buffer.speech_started') {
             // Synchronized Client Barge-In
-            if (isAssistantSpeakingRef.current) {
+            const wasBargeIn = isAssistantSpeakingRef.current;
+            if (wasBargeIn) {
               if (remoteAudioRef.current) {
                 remoteAudioRef.current.pause();
                 remoteAudioRef.current.currentTime = 0;
@@ -560,8 +659,31 @@ export default function LexisApp({ navigateTo }) {
               isAssistantSpeakingRef.current = false;
             }
             setStatus('Listening...');
+            if (wasBargeIn) {
+              // A real interruption — flash 'interrupted' briefly ("Your
+              // turn") before settling into the ordinary listening state,
+              // rather than jumping straight there. Purely a UI moment;
+              // the actual barge-in (stopping playback, cancelling the
+              // response) already happened synchronously above.
+              setVoiceState('interrupted');
+              window.setTimeout(() => setVoiceState((current) => (current === 'interrupted' ? 'listening' : current)), 180);
+            } else {
+              // The student just started talking normally — LEXIS wasn't
+              // speaking, so there was nothing to interrupt.
+              setVoiceState('listening');
+            }
+          } else if (event.type === 'input_audio_buffer.speech_stopped') {
+            // The student just stopped talking, but LEXIS hasn't started
+            // responding yet — server_vad's silence_duration_ms plus
+            // whatever the model takes to start generating a reply is a
+            // real, sometimes-noticeable gap. Previously the UI just kept
+            // saying "Listening..." through that whole gap, which reads as
+            // stalled rather than working.
+            setVoiceState('processing');
+            setStatus('Thinking...');
           } else if (event.type === 'response.done') {
             isAssistantSpeakingRef.current = false;
+            setVoiceState('listening');
             setStatus('LEXIS is listening');
             // Kick off the live-translation subtitle for the turn that just
             // finished — see requestTranslation's own comment above for why
@@ -621,6 +743,17 @@ export default function LexisApp({ navigateTo }) {
 
     } catch (err) {
       console.error('[LEXIS Session Error]', err);
+      // A session that fails before ever connecting routes back to
+      // Welcome (see endSession's wasConnectedRef check below) — without
+      // this, the error text only ever lived in `status`, which is only
+      // rendered inside LiveStage. That's a real bug: any pre-connection
+      // failure (mic denied, SDP exchange failure, a generic token-broker
+      // error) became completely invisible the moment the student landed
+      // back on Welcome, with nothing telling them what went wrong or that
+      // anything went wrong at all. upgradeRequired already covers the
+      // specific 403 case with its own message/CTA; this is the catch-all
+      // for everything else.
+      if (!isUpgradeError) setSessionError(err.message);
       endSession(`Error: ${err.message}`);
     }
   };
@@ -691,6 +824,10 @@ export default function LexisApp({ navigateTo }) {
       clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
     }
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     if (localAudioContextRef.current) localAudioContextRef.current.close().catch(() => {});
     if (remoteAudioContextRef.current) remoteAudioContextRef.current.close().catch(() => {});
@@ -711,8 +848,8 @@ export default function LexisApp({ navigateTo }) {
     localAnalyserRef.current = null;
     remoteAnalyserRef.current = null;
     remoteAudioRef.current = null;
-    setIsConnected(false);
-    setIsConnecting(false);
+    isAssistantSpeakingRef.current = false;
+    setVoiceState('idle');
     setStatus(finalStatus);
     setAudioLevel(0);
     setTutorLevel(0);
@@ -742,6 +879,7 @@ export default function LexisApp({ navigateTo }) {
   if (stage === 'live') {
     return (
       <LiveStage
+        voiceState={voiceState}
         isConnected={isConnected}
         isConnecting={isConnecting}
         status={status}
@@ -784,6 +922,8 @@ export default function LexisApp({ navigateTo }) {
       justPaid={justPaid}
       upgradeRequired={upgradeRequired}
       upgradeMessage={upgradeMessage}
+      sessionError={sessionError}
+      onDismissSessionError={() => setSessionError('')}
       onViewPricing={() => navigateTo('/pricing')}
       onSignOut={() => { endSession(); signOut(); }}
       onGoHome={() => navigateTo('/')}

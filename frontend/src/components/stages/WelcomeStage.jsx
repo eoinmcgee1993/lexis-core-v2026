@@ -8,7 +8,7 @@
 // a full always-visible screen satisfies that even more directly than a
 // modal did, so the modal was removed rather than kept alongside this).
 import React from 'react';
-import { Mic, LogOut, AlertCircle, CreditCard, Clock } from 'lucide-react';
+import { Mic, LogOut, AlertCircle, CreditCard, Clock, X } from 'lucide-react';
 
 function formatUsageLabel(profile) {
   if (profile.subscription_status === 'active') {
@@ -28,6 +28,8 @@ export default function WelcomeStage({
   justPaid,
   upgradeRequired,
   upgradeMessage,
+  sessionError,
+  onDismissSessionError,
   onViewPricing,
   onSignOut,
   onGoHome
@@ -67,6 +69,22 @@ export default function WelcomeStage({
             <button onClick={onViewPricing} className="px-4 py-1.5 bg-lexis-action text-white font-bold text-xs rounded-xl flex items-center gap-1.5">
               <CreditCard className="w-4 h-4" />
               <span>View Pricing</span>
+            </button>
+          </div>
+        )}
+
+        {/* A session that failed before ever connecting (mic denied, a
+            dropped SDP exchange, a token-broker error) lands back here —
+            this is the one place that failure is visible at all, since
+            LiveStage (where the equivalent status text used to always be
+            on screen pre-v2026.4) never mounts for an attempt that never
+            connected. */}
+        {sessionError && (
+          <div className="mb-6 w-full max-w-sm p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-left">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-500 mt-0.5" />
+            <p className="flex-1 text-xs text-rose-700">{sessionError}</p>
+            <button onClick={onDismissSessionError} className="text-rose-400 hover:text-rose-600 flex-shrink-0" title="Dismiss">
+              <X className="w-4 h-4" />
             </button>
           </div>
         )}
