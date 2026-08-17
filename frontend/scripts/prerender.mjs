@@ -44,7 +44,13 @@ const ROUTES = [
   { path: '/pricing', outFile: 'pricing/index.html' },
   { path: '/terms', outFile: 'terms/index.html' },
   { path: '/privacy', outFile: 'privacy/index.html' },
-  { path: '/refund', outFile: 'refund/index.html' }
+  { path: '/refund', outFile: 'refund/index.html' },
+  // Real Thai routes (Stage 4) — same directory-style output rule as
+  // every other route here: dist/th/index.html and dist/th/pricing/
+  // index.html get served directly by Vercel's filesystem check for
+  // requests to /th and /th/pricing, ahead of vercel.json's SPA rewrite.
+  { path: '/th', outFile: 'th/index.html' },
+  { path: '/th/pricing', outFile: 'th/pricing/index.html' }
 ];
 
 const MIME_TYPES = {

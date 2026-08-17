@@ -13,17 +13,30 @@ import RefundPage from './pages/RefundPage';
 // receives navigateTo(path). Auth-gating for /app lives here, once,
 // rather than each page re-deriving "am I allowed to render?" from
 // useAuth() itself.
+
+// The switch below matches currentPath exactly, and dist/th/index.html
+// (a real directory, per prerender.mjs's output layout — same as every
+// other route) is what a static host serves for BOTH /th and /th/.
+// Caught while verifying Stage 4: a request/bookmark/crawler hit on the
+// trailing-slash form fell through to the English default because '/th/'
+// !== '/th'. Not new to /th specifically — /pricing/, /terms/, etc. had
+// the same gap since Stage 1 — fixed once here for every route rather
+// than only the two this PR adds.
+function normalizePath(path) {
+  return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
+}
+
 function RouteController() {
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [currentPath, setCurrentPath] = useState(normalizePath(window.location.pathname));
   const { user, loading } = useAuth();
 
   const navigateTo = (path) => {
     window.history.pushState({}, '', path);
-    setCurrentPath(path);
+    setCurrentPath(normalizePath(path));
   };
 
   useEffect(() => {
-    const handlePopState = () => setCurrentPath(window.location.pathname);
+    const handlePopState = () => setCurrentPath(normalizePath(window.location.pathname));
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
@@ -53,6 +66,15 @@ function RouteController() {
   switch (currentPath) {
     case '/pricing':
       return <PricingPage navigateTo={navigateTo} />;
+    // Real Thai-language routes (Stage 4 of the remediation brief) — not
+    // a client-side toggle over '/' and '/pricing', separate indexable
+    // URLs with their own <html lang>, canonical, and reciprocal hreflang
+    // (see LandingPage.jsx/PricingPage.jsx's useSeo calls). Same
+    // components, `lang="th"` prop drives which copy renders.
+    case '/th':
+      return <LandingPage navigateTo={navigateTo} lang="th" />;
+    case '/th/pricing':
+      return <PricingPage navigateTo={navigateTo} lang="th" />;
     case '/auth':
       return <AuthPage navigateTo={navigateTo} />;
     case '/terms':
