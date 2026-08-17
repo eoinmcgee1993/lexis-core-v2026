@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Sparkles, Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp } from 'lucide-react';
 import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
-import { FAQS, LANDING_DESCRIPTION_EN, PRICING_TEASER_EN, PRICING_TEASER_TH } from '../content/facts';
+import { FAQS, LANDING_DESCRIPTION_EN, LANDING_DESCRIPTION_TH, PRICING_TEASER_EN, PRICING_TEASER_TH } from '../content/facts';
 
 // Same key LexisApp.jsx reads on session start ('en' = practicing English,
 // 'th' = practicing Thai). Setting it here before navigating to /app means
@@ -17,14 +17,73 @@ const TARGET_LANGUAGE_STORAGE_KEY = 'lexis_target_language';
 // floating in empty space.
 const HERO_PHOTO_URL = '/marketing/lexis-tutor-hero.jpg';
 
-const HOW_IT_WORKS = [
-  { icon: Mic, title: 'Start talking', desc: 'Tap one button and start speaking — no typing, no scripts to read from.' },
-  { icon: MessageCircle, title: 'LEXIS responds live', desc: "It listens, replies, and corrects you gently mid-conversation, the way a patient tutor would." },
-  { icon: TrendingUp, title: 'See what to work on', desc: 'After each session, get a plain-language summary of what you did well and what to practice next.' }
-];
+// Keyed by display language (Stage 4: /th is a real page now, not just a
+// client-side toggle) rather than one hardcoded English array.
+const HOW_IT_WORKS = {
+  en: [
+    { icon: Mic, title: 'Start talking', desc: 'Tap one button and start speaking — no typing, no scripts to read from.' },
+    { icon: MessageCircle, title: 'LEXIS responds live', desc: "It listens, replies, and corrects you gently mid-conversation, the way a patient tutor would." },
+    { icon: TrendingUp, title: 'See what to work on', desc: 'After each session, get a plain-language summary of what you did well and what to practice next.' }
+  ],
+  th: [
+    { icon: Mic, title: 'เริ่มพูด', desc: 'แตะปุ่มเดียวแล้วเริ่มพูดได้เลย ไม่ต้องพิมพ์ ไม่ต้องท่องสคริปต์' },
+    { icon: MessageCircle, title: 'LEXIS ตอบกลับสด ๆ', desc: 'ฟัง ตอบกลับ และช่วยแก้ไขให้อย่างอ่อนโยนระหว่างสนทนา เหมือนติวเตอร์ใจเย็น' },
+    { icon: TrendingUp, title: 'ดูว่าควรฝึกอะไรต่อ', desc: 'หลังจบแต่ละเซสชัน จะได้สรุปผลแบบเข้าใจง่ายว่าทำได้ดีตรงไหน และควรฝึกอะไรต่อ' }
+  ]
+};
 
-export default function LandingPage({ navigateTo }) {
-  const [lang, setLang] = useState('en'); // display language of this page's copy
+// Sitewide chrome strings (header, badge, section headings, trust strip,
+// footer) that aren't part of the direction/display content matrix above
+// — these don't depend on which language a visitor is learning, only on
+// which language the page itself is displayed in.
+const CHROME = {
+  en: {
+    pricing: 'Pricing',
+    getStarted: 'Get Started',
+    heroBadge: 'Talk in real time — no awkward pauses, no typing',
+    howItWorks: 'How it works',
+    trust: [
+      'Gentle, real-time grammar correction',
+      'Jump in and interrupt LEXIS anytime',
+      'Review what you practiced, anytime (paid plans)'
+    ],
+    faqHeading: 'Frequently asked questions',
+    liveVoice: 'Live voice — ready when you are',
+    photoDisclosure: "LEXIS's pictured persona is an AI-generated image, not a real person.",
+    heroAlt: 'LEXIS, your voice conversation partner, ready to start a practice session (AI-generated image)',
+    footerTrust: 'Private & secure • Payments handled by Stripe',
+    privacy: 'Privacy',
+    terms: 'Terms',
+    refunds: 'Refunds'
+  },
+  th: {
+    pricing: 'ราคา',
+    getStarted: 'เริ่มเลย',
+    heroBadge: 'พูดคุยแบบเรียลไทม์ — ไม่ต้องพิมพ์ ไม่ต้องรอ',
+    howItWorks: 'วิธีใช้งาน',
+    trust: [
+      'แก้ไขไวยากรณ์แบบเรียลไทม์อย่างอ่อนโยน',
+      'พูดแทรก LEXIS ได้ทุกเมื่อ',
+      'ทบทวนสิ่งที่ฝึกได้ทุกเมื่อ (แพ็กเกจแบบเสียเงิน)'
+    ],
+    faqHeading: 'คำถามที่พบบ่อย',
+    liveVoice: 'พูดคุยสด — พร้อมเมื่อคุณพร้อม',
+    photoDisclosure: 'ภาพของ LEXIS ที่แสดงนี้สร้างขึ้นด้วย AI ไม่ใช่บุคคลจริง',
+    heroAlt: 'LEXIS คู่สนทนาฝึกพูดของคุณ พร้อมเริ่มฝึกได้ทุกเมื่อ (ภาพสร้างขึ้นด้วย AI)',
+    footerTrust: 'ปลอดภัยและเป็นส่วนตัว • ชำระเงินผ่าน Stripe',
+    privacy: 'นโยบายความเป็นส่วนตัว',
+    terms: 'ข้อกำหนดการใช้งาน',
+    refunds: 'การคืนเงิน'
+  }
+};
+
+export default function LandingPage({ navigateTo, lang = 'en' }) {
+  // Display language is now which route you're on ('/' = en, '/th' = th —
+  // Stage 4), not local component state — a crawler or a visitor who
+  // shares a link needs a real, indexable URL per language, not a client-
+  // side toggle invisible to anything that doesn't run JS. The toggle
+  // button below now navigates instead of calling a setter.
+  const c = CHROME[lang];
   const [direction, setDirection] = useState(() => {
     try {
       return localStorage.getItem(TARGET_LANGUAGE_STORAGE_KEY) === 'th' ? 'th' : 'en';
@@ -89,19 +148,27 @@ export default function LandingPage({ navigateTo }) {
   };
 
   const t = content[direction][lang];
+  const enUrl = `${SITE_URL}/`;
+  const thUrl = `${SITE_URL}/th`;
 
-  // FAQ JSON-LD only injected when lang === 'en' — the rendered FAQ
-  // section below is gated the same way (no Thai translation yet; see
-  // frontend/src/content/facts.js's FAQS). Structured data claiming a FAQ exists
-  // that isn't actually visible in that language was exactly the
-  // mismatch a re-audit flagged (N2) — keeping both gated on the same
-  // condition is the fix, not a footnote.
-  const faqJsonLd = useMemo(() => (lang === 'en' ? buildFaqJsonLd() : null), [lang]);
+  // FAQ JSON-LD now mirrors whichever language's FAQ text is actually
+  // visible below (FAQS.en or FAQS.th, both real content since Stage 4) —
+  // no longer gated to English only.
+  const faqJsonLd = useMemo(() => buildFaqJsonLd(lang), [lang]);
 
   useSeo({
-    title: 'LEXIS | Practice Speaking English & Thai Out Loud',
-    description: LANDING_DESCRIPTION_EN,
-    canonical: `${SITE_URL}/`,
+    title: lang === 'th' ? 'LEXIS | ฝึกพูดภาษาอังกฤษและภาษาไทยออกเสียงจริง' : 'LEXIS | Practice Speaking English & Thai Out Loud',
+    description: lang === 'th' ? LANDING_DESCRIPTION_TH : LANDING_DESCRIPTION_EN,
+    canonical: lang === 'th' ? thUrl : enUrl,
+    htmlLang: lang,
+    // Reciprocal per Google's hreflang requirement — each language version
+    // lists every version including itself. x-default points at the
+    // English page (the site's language-neutral fallback).
+    hreflang: [
+      { hrefLang: 'en', href: enUrl },
+      { hrefLang: 'th', href: thUrl },
+      { hrefLang: 'x-default', href: enUrl }
+    ],
     jsonLd: { 'jsonld-faq': faqJsonLd }
   });
 
@@ -127,7 +194,7 @@ export default function LandingPage({ navigateTo }) {
             rather than hide the thing that didn't fit. */}
         <div className="flex items-center gap-1.5 sm:gap-4 flex-shrink-0">
           <button
-            onClick={() => setLang(lang === 'en' ? 'th' : 'en')}
+            onClick={() => navigateTo(lang === 'en' ? '/th' : '/')}
             aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
             className="flex items-center justify-center sm:justify-start gap-2 bg-white border border-lexis-ink/10 rounded-xl text-xs text-lexis-ink/70 hover:border-teal-600/40 transition-all min-h-[44px] min-w-[44px] px-2.5 sm:px-3"
           >
@@ -135,16 +202,16 @@ export default function LandingPage({ navigateTo }) {
             <span className="hidden sm:inline">{lang === 'en' ? 'ไทย' : 'English'}</span>
           </button>
           <button
-            onClick={() => navigateTo('/pricing')}
+            onClick={() => navigateTo(lang === 'th' ? '/th/pricing' : '/pricing')}
             className="text-xs sm:text-sm text-lexis-ink/70 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
           >
-            Pricing
+            {c.pricing}
           </button>
           <button
             onClick={goPractice}
             className="px-3 sm:px-5 py-2.5 bg-lexis-action hover:bg-lexis-action-dark text-white font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-lexis-action/20 flex items-center gap-1.5 sm:gap-2 min-h-[44px] whitespace-nowrap"
           >
-            <span>Get Started</span>
+            <span>{c.getStarted}</span>
             <ArrowRight className="w-4 h-4 flex-shrink-0" />
           </button>
         </div>
@@ -159,7 +226,7 @@ export default function LandingPage({ navigateTo }) {
         <div className="text-center md:text-left">
           <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-6">
             <Zap className="w-3.5 h-3.5" />
-            <span>Talk in real time — no awkward pauses, no typing</span>
+            <span>{c.heroBadge}</span>
           </div>
           <h1 className="font-display font-semibold text-4xl md:text-5xl tracking-tight mb-6 text-lexis-ink leading-tight text-balance">
             {t.heroTitle}
@@ -226,7 +293,7 @@ export default function LandingPage({ navigateTo }) {
           <div className="relative w-64 sm:w-80 md:w-full md:max-w-sm aspect-[3/4] rounded-[2rem] overflow-hidden border border-white shadow-2xl shadow-teal-900/10">
             <img
               src={HERO_PHOTO_URL}
-              alt="LEXIS, your voice conversation partner, ready to start a practice session (AI-generated image)"
+              alt={c.heroAlt}
               className="w-full h-full object-cover"
               width="1200"
               height="1607"
@@ -236,11 +303,11 @@ export default function LandingPage({ navigateTo }) {
           </div>
           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 bg-white border border-lexis-ink/10 rounded-2xl shadow-lg px-4 py-2.5 flex items-center gap-2 text-xs font-medium text-lexis-ink whitespace-nowrap">
             <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-            <span>Live voice — ready when you are</span>
+            <span>{c.liveVoice}</span>
           </div>
         </div>
         <p className="md:col-span-2 text-center text-[11px] text-lexis-ink/30 mt-8 md:mt-2">
-          LEXIS's pictured persona is an AI-generated image, not a real person.
+          {c.photoDisclosure}
         </p>
       </section>
 
@@ -248,9 +315,9 @@ export default function LandingPage({ navigateTo }) {
           copy. Short, literal sentences here also read cleanly to search
           crawlers and answer engines, not just human visitors. */}
       <section className="w-full max-w-5xl mx-auto px-6 py-10">
-        <h2 className="font-display font-semibold text-2xl text-center mb-10">How it works</h2>
+        <h2 className="font-display font-semibold text-2xl text-center mb-10">{c.howItWorks}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {HOW_IT_WORKS.map(({ icon: Icon, title, desc }, i) => (
+          {HOW_IT_WORKS[lang].map(({ icon: Icon, title, desc }, i) => (
             <div key={title} className="bg-white border border-lexis-ink/10 rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-8 h-8 flex items-center justify-center rounded-full bg-lexis-action/10 text-lexis-action-dark font-display font-semibold text-sm flex-shrink-0">
@@ -270,15 +337,15 @@ export default function LandingPage({ navigateTo }) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-lexis-ink/60">
           <div className="flex items-center space-x-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3">
             <Check className="w-4 h-4 text-teal-600 flex-shrink-0" />
-            <span>Gentle, real-time grammar correction</span>
+            <span>{c.trust[0]}</span>
           </div>
           <div className="flex items-center space-x-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3">
             <Repeat className="w-4 h-4 text-teal-600 flex-shrink-0" />
-            <span>Jump in and interrupt LEXIS anytime</span>
+            <span>{c.trust[1]}</span>
           </div>
           <div className="flex items-center space-x-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3">
             <Check className="w-4 h-4 text-teal-600 flex-shrink-0" />
-            <span>Review what you practiced, anytime (paid plans)</span>
+            <span>{c.trust[2]}</span>
           </div>
         </div>
       </section>
@@ -289,22 +356,20 @@ export default function LandingPage({ navigateTo }) {
           engines (ChatGPT search, Perplexity, Google's AI overviews) as
           much as human visitors — clear, self-contained Q&A is exactly
           the shape those tools quote from. */}
-      {lang === 'en' && (
-        <section className="w-full max-w-3xl mx-auto px-6 py-14">
-          <h2 className="font-display font-semibold text-2xl text-center mb-8">Frequently asked questions</h2>
-          <div className="space-y-3">
-            {FAQS.en.map(({ q, a }) => (
-              <details key={q} className="group bg-white border border-lexis-ink/10 rounded-2xl p-4 open:shadow-sm">
-                <summary className="cursor-pointer list-none flex items-center justify-between gap-3 font-semibold text-sm text-lexis-ink">
-                  <span>{q}</span>
-                  <ArrowRight className="w-4 h-4 text-lexis-ink/30 flex-shrink-0 transition-transform group-open:rotate-90" />
-                </summary>
-                <p className="mt-3 text-sm text-lexis-ink/60 leading-relaxed">{a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-      )}
+      <section className="w-full max-w-3xl mx-auto px-6 py-14">
+        <h2 className="font-display font-semibold text-2xl text-center mb-8">{c.faqHeading}</h2>
+        <div className="space-y-3">
+          {FAQS[lang].map(({ q, a }) => (
+            <details key={q} className="group bg-white border border-lexis-ink/10 rounded-2xl p-4 open:shadow-sm">
+              <summary className="cursor-pointer list-none flex items-center justify-between gap-3 font-semibold text-sm text-lexis-ink">
+                <span>{q}</span>
+                <ArrowRight className="w-4 h-4 text-lexis-ink/30 flex-shrink-0 transition-transform group-open:rotate-90" />
+              </summary>
+              <p className="mt-3 text-sm text-lexis-ink/60 leading-relaxed">{a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
 
       {/* Footer — the "Private & secure" claim used to have nothing
           behind it (flagged in a re-audit: U6). Now links to the actual
@@ -312,12 +377,15 @@ export default function LandingPage({ navigateTo }) {
       <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/40">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-teal-600" />
-          <span>Private &amp; secure • Payments handled by Stripe</span>
+          <span>{c.footerTrust}</span>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={() => navigateTo('/privacy')} className="hover:text-lexis-ink transition-colors">Privacy</button>
-          <button onClick={() => navigateTo('/terms')} className="hover:text-lexis-ink transition-colors">Terms</button>
-          <button onClick={() => navigateTo('/refund')} className="hover:text-lexis-ink transition-colors">Refunds</button>
+          {/* Terms/Privacy/Refund only exist in English so far (Stage 4
+              scoped /th to the landing + pricing pages) — link labels
+              follow the page's display language, the destination doesn't. */}
+          <button onClick={() => navigateTo('/privacy')} className="hover:text-lexis-ink transition-colors">{c.privacy}</button>
+          <button onClick={() => navigateTo('/terms')} className="hover:text-lexis-ink transition-colors">{c.terms}</button>
+          <button onClick={() => navigateTo('/refund')} className="hover:text-lexis-ink transition-colors">{c.refunds}</button>
           <span>© 2026 LEXIS</span>
         </div>
       </footer>

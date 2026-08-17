@@ -36,11 +36,33 @@ export const APP_ID = `${SITE_URL}/#software`;
 // {"price": "199"} with only a priceValidUntil reads to an answer engine
 // as "LEXIS costs ฿199, full stop," which understates what a subscriber
 // actually pays over time.
-export function buildOffersJsonLd() {
+// lang defaults to 'en'; '/th/pricing' passes 'th' (Stage 4) so the
+// offer names/description read naturally in Thai rather than mixing an
+// English label into an otherwise-Thai page's structured data. The
+// price/currency/duration fields are language-independent, so only the
+// human-readable strings below branch on lang.
+const OFFER_TEXT = {
+  en: {
+    freeTrial: 'Free trial',
+    freeTrialDesc: (minutes) => `${minutes} minutes of free practice, no card required to start.`,
+    weekly: 'Weekly pass',
+    monthly: 'Monthly pass'
+  },
+  th: {
+    freeTrial: 'ทดลองใช้ฟรี',
+    freeTrialDesc: (minutes) => `ฝึกฝนฟรี ${minutes} นาที ไม่ต้องผูกบัตรเพื่อเริ่มต้น`,
+    weekly: 'แพ็กเกจรายสัปดาห์',
+    monthly: 'แพ็กเกจรายเดือน'
+  }
+};
+
+export function buildOffersJsonLd(lang = 'en') {
+  const text = OFFER_TEXT[lang];
+  const pricingUrl = `${SITE_URL}${lang === 'th' ? '/th/pricing' : '/pricing'}`;
   const recurringOffer = (name, tier) => ({
     '@type': 'Offer',
     name,
-    url: `${SITE_URL}/pricing`,
+    url: pricingUrl,
     availability: 'https://schema.org/InStock',
     priceSpecification: {
       '@type': 'UnitPriceSpecification',
@@ -60,29 +82,31 @@ export function buildOffersJsonLd() {
     offers: [
       {
         '@type': 'Offer',
-        name: 'Free trial',
-        url: `${SITE_URL}/pricing`,
+        name: text.freeTrial,
+        url: pricingUrl,
         availability: 'https://schema.org/InStock',
         price: '0',
         priceCurrency: CURRENCY,
-        description: `${TRIAL.minutes} minutes of free practice, no card required to start.`
+        description: text.freeTrialDesc(TRIAL.minutes)
       },
-      recurringOffer('Weekly pass', PRICING.weekly),
-      recurringOffer('Monthly pass', PRICING.monthly)
+      recurringOffer(text.weekly, PRICING.weekly),
+      recurringOffer(text.monthly, PRICING.monthly)
     ]
   };
 }
 
-// '/' only, injected by LandingPage.jsx via useSeo. Sourced from
-// facts.js's FAQS.en — previously hand-duplicated between the rendered
+// '/' and '/th' only, injected by LandingPage.jsx via useSeo. Sourced from
+// facts.js's FAQS[lang] — previously hand-duplicated between the rendered
 // page and this JSON-LD, which a re-audit flagged as a drift risk
 // (mismatched visible text vs structured data is exactly what
-// invalidates FAQ rich results).
-export function buildFaqJsonLd() {
+// invalidates FAQ rich results). lang defaults to 'en'; /th passes 'th'
+// (Stage 4) so the structured data matches whichever FAQ text is actually
+// visible on that page, never the other language's.
+export function buildFaqJsonLd(lang = 'en') {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: FAQS.en.map(({ q, a }) => ({
+    mainEntity: FAQS[lang].map(({ q, a }) => ({
       '@type': 'Question',
       name: q,
       acceptedAnswer: { '@type': 'Answer', text: a }

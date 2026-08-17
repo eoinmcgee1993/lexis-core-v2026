@@ -51,6 +51,25 @@ function upsertCanonical(href) {
   el.setAttribute('href', href);
 }
 
+// One <link rel="alternate" hreflang="..."> per language, including
+// "x-default". Stage 4 of the remediation brief: index.html previously had
+// a self-referencing hreflang cluster with no actual /th pages behind it
+// (removed in Stage 1 rather than shipped as a broken signal) — now that
+// real /th and /th/pricing routes exist, each language version of a page
+// declares every version of itself, itself included, per Google's own
+// reciprocal-hreflang requirement (a one-way link is ignored).
+function upsertHreflang(alternates) {
+  document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove());
+  if (!alternates) return;
+  alternates.forEach(({ hrefLang, href }) => {
+    const el = document.createElement('link');
+    el.setAttribute('rel', 'alternate');
+    el.setAttribute('hreflang', hrefLang);
+    el.setAttribute('href', href);
+    document.head.appendChild(el);
+  });
+}
+
 // One <script type="application/ld+json"> per id, so a page can carry
 // more than one JSON-LD block (e.g. FAQPage) without them colliding, and
 // so switching routes cleanly removes a block that doesn't apply anymore
@@ -78,9 +97,11 @@ function upsertJsonLd(id, data) {
  * @param {string} seo.description
  * @param {string} seo.canonical - full absolute URL, self-referencing
  * @param {string} [seo.robots] - e.g. 'noindex, nofollow' for /auth, /app
+ * @param {string} [seo.htmlLang] - sets <html lang="..."> (defaults to 'en' if omitted)
+ * @param {Array<{hrefLang: string, href: string}>} [seo.hreflang] - reciprocal alternate-language links, this page's own version included
  * @param {Record<string, object>} [seo.jsonLd] - { [scriptId]: jsonLdObject }
  */
-export function useSeo({ title, description, canonical, robots, jsonLd }) {
+export function useSeo({ title, description, canonical, robots, htmlLang, hreflang, jsonLd }) {
   useEffect(() => {
     if (title) {
       document.title = title;
@@ -95,6 +116,9 @@ export function useSeo({ title, description, canonical, robots, jsonLd }) {
     upsertMeta('robots', robots || null);
     upsertCanonical(canonical);
     if (canonical) upsertProperty('og:url', canonical);
+    document.documentElement.lang = htmlLang || 'en';
+    upsertProperty('og:locale', htmlLang === 'th' ? 'th_TH' : 'en_US');
+    upsertHreflang(hreflang);
 
     if (jsonLd) {
       Object.entries(jsonLd).forEach(([id, data]) => upsertJsonLd(id, data));
@@ -104,5 +128,5 @@ export function useSeo({ title, description, canonical, robots, jsonLd }) {
     // overwrites/removes what it needs to on its own mount. Removing tags
     // on unmount would leave a route-less flash of no title/description
     // during the transition, which is worse.
-  }, [title, description, canonical, robots, jsonLd]);
+  }, [title, description, canonical, robots, htmlLang, hreflang, jsonLd]);
 }
