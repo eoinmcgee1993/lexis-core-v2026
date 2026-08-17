@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Mail, Lock, LogIn, UserPlus, ArrowLeft, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useSeo } from '../lib/useSeo';
 
 export default function AuthPage({ navigateTo }) {
   const { session, signIn, signUp } = useAuth();
+
+  // This one component renders at two different URLs — the explicit
+  // /auth route, and as the signed-out fallback for /app (see
+  // App.jsx's RouteController) — neither is content a search engine
+  // should index, so noindex applies unconditionally rather than
+  // branching on which URL actually mounted it.
+  useSeo({
+    title: 'Sign In | LEXIS',
+    description: 'Sign in to LEXIS to continue practicing spoken English or Thai.',
+    robots: 'noindex, nofollow'
+  });
   const [mode, setMode] = useState('sign_in'); // 'sign_in' | 'sign_up'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
