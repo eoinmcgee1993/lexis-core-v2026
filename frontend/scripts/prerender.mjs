@@ -1,7 +1,8 @@
 // frontend/scripts/prerender.mjs
 //
-// Post-build pre-render step for the two marketing routes ('/' and
-// '/pricing'). Run after `vite build` (see package.json's "build"
+// Post-build pre-render step for the public marketing/legal routes ('/',
+// '/pricing', '/terms', '/privacy', '/refund'). Run after `vite build`
+// (see package.json's "build"
 // script) — serves the freshly-built dist/ on a local port, drives a
 // real headless Chromium to each route, waits for React to mount and
 // each page's useSeo() call to finish writing <head> tags (see
@@ -13,10 +14,10 @@
 // crawler that doesn't execute JavaScript, which includes most of the
 // retrieval crawlers behind AI answer engines, saw accurate <head> tags
 // on a completely empty page: no product description, no price, no FAQ.
-// A router-aware static-site-generator would be a poor fit for a 4-route
+// A router-aware static-site-generator would be a poor fit for a
 // hand-rolled switch statement (App.jsx) — this is deliberately the
-// smaller, more surgical fix: snapshot the two pages worth indexing,
-// leave /app and /auth exactly as they were (pure client-rendered, and
+// smaller, more surgical fix: snapshot the pages worth indexing, leave
+// /app and /auth exactly as they were (pure client-rendered, and
 // robots-noindexed via useSeo — see AuthPage.jsx/LexisApp.jsx).
 //
 // Directory-style output matters: writing dist/pricing/index.html (not
@@ -40,7 +41,10 @@ const PORT = 4321;
 
 const ROUTES = [
   { path: '/', outFile: 'index.html' },
-  { path: '/pricing', outFile: 'pricing/index.html' }
+  { path: '/pricing', outFile: 'pricing/index.html' },
+  { path: '/terms', outFile: 'terms/index.html' },
+  { path: '/privacy', outFile: 'privacy/index.html' },
+  { path: '/refund', outFile: 'refund/index.html' }
 ];
 
 const MIME_TYPES = {

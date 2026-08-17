@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- /app and /auth deliberately excluded — session UI and auth flows, not
-     indexable content. Only the two real marketing pages are listed.
+     indexable content. Only the real public pages are listed.
 
      lastmod is a static date, updated by hand for now — the remediation
      brief's own suggestion (generate it at build time from a route list)
-     depends on frontend/src/content/facts.js, which doesn't exist yet
-     (that's Stage 2 of the same brief). Revisit once that module exists
-     rather than building generation machinery for a file this small
-     ahead of it. -->
+     depends on frontend/src/content/facts.js's route data existing in a
+     structured form, which it doesn't yet. Revisit rather than building
+     generation machinery for a file this small ahead of that. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://lexis-core-v2026.vercel.app/</loc>
@@ -20,5 +19,23 @@
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://lexis-core-v2026.vercel.app/terms</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://lexis-core-v2026.vercel.app/privacy</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://lexis-core-v2026.vercel.app/refund</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>
