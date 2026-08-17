@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Sparkles, Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp } from 'lucide-react';
+import { Sparkles, Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp, Info } from 'lucide-react';
+import { FAQS_EN } from '../data/faq';
 
 // Same key LexisApp.jsx reads on session start ('en' = practicing English,
 // 'th' = practicing Thai). Setting it here before navigating to /app means
@@ -18,29 +19,6 @@ const HOW_IT_WORKS = [
   { icon: Mic, title: 'Start talking', desc: 'Tap one button and start speaking — no typing, no scripts to read from.' },
   { icon: MessageCircle, title: 'LEXIS responds live', desc: "It listens, replies, and corrects you gently mid-conversation, the way a patient tutor would." },
   { icon: TrendingUp, title: 'See what to work on', desc: 'After each session, get a plain-language summary of what you did well and what to practice next.' }
-];
-
-const FAQS_EN = [
-  {
-    q: 'What is LEXIS?',
-    a: 'LEXIS is a voice-based speaking practice tool for English and Thai. You have a real, spoken conversation with it over your microphone, and it replies in real time, the way a conversation partner would — not a chatbot you type into.'
-  },
-  {
-    q: 'Who is LEXIS for?',
-    a: 'Thai speakers who want to practice spoken English, and English speakers who want to practice spoken Thai — students, young professionals, and anyone preparing for interviews, travel, or work who wants low-pressure speaking practice without needing another person available.'
-  },
-  {
-    q: 'Is LEXIS free to try?',
-    a: 'Yes. New accounts get a free 30-minute trial. After that, LEXIS is ฿199/week or ฿599/month.'
-  },
-  {
-    q: 'How is this different from a language exchange app?',
-    a: "There's no waiting for a partner to be online, no scheduling, and no awkwardness about correcting a stranger. LEXIS is available any time you are, and its whole job is to help you practice — not make small talk."
-  },
-  {
-    q: 'Can I interrupt LEXIS mid-sentence?',
-    a: "Yes — real conversations involve talking over each other sometimes, so you can jump in and interrupt LEXIS at any point, the same as you would with a person."
-  }
 ];
 
 export default function LandingPage({ navigateTo }) {
@@ -113,36 +91,44 @@ export default function LandingPage({ navigateTo }) {
   return (
     <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans">
       {/* Header */}
-      <header className="w-full max-w-6xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700">
+      <header className="w-full max-w-6xl mx-auto p-4 sm:p-6 flex items-center justify-between border-b border-lexis-ink/10 gap-2">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+          <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700 flex-shrink-0">
             <Sparkles className="w-6 h-6" />
           </div>
-          <span className="text-xl font-display font-semibold text-lexis-ink">
+          <span className="text-lg sm:text-xl font-display font-semibold text-lexis-ink whitespace-nowrap">
             LEXIS
           </span>
         </div>
 
-        <div className="flex items-center space-x-4">
+        {/* Four interactive elements (language, pricing, CTA) genuinely
+            don't fit a 375px-wide header with full labels on everything —
+            an earlier pass just hid Pricing below `sm`, which a re-audit
+            correctly called out (a mobile visitor literally cannot find
+            pricing). The fix here is to actually make everything fit —
+            icon-only language toggle and a tighter CTA on small screens —
+            rather than hide the thing that didn't fit. */}
+        <div className="flex items-center gap-1.5 sm:gap-4 flex-shrink-0">
           <button
             onClick={() => setLang(lang === 'en' ? 'th' : 'en')}
-            className="flex items-center space-x-2 bg-white border border-lexis-ink/10 px-3 py-1.5 rounded-xl text-xs text-lexis-ink/70 hover:border-teal-600/40 transition-all"
+            aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
+            className="flex items-center justify-center sm:justify-start gap-2 bg-white border border-lexis-ink/10 rounded-xl text-xs text-lexis-ink/70 hover:border-teal-600/40 transition-all min-h-[44px] min-w-[44px] px-2.5 sm:px-3"
           >
-            <Globe className="w-4 h-4 text-teal-700" />
-            <span>{lang === 'en' ? 'ไทย' : 'English'}</span>
+            <Globe className="w-4 h-4 text-teal-700 flex-shrink-0" />
+            <span className="hidden sm:inline">{lang === 'en' ? 'ไทย' : 'English'}</span>
           </button>
           <button
             onClick={() => navigateTo('/pricing')}
-            className="hidden sm:inline text-sm text-lexis-ink/70 hover:text-lexis-ink transition-colors"
+            className="text-xs sm:text-sm text-lexis-ink/70 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
           >
             Pricing
           </button>
           <button
             onClick={goPractice}
-            className="px-5 py-2.5 bg-lexis-action hover:bg-lexis-action-dark text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-lexis-action/20 flex items-center space-x-2"
+            className="px-3 sm:px-5 py-2.5 bg-lexis-action hover:bg-lexis-action-dark text-white font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-lexis-action/20 flex items-center gap-1.5 sm:gap-2 min-h-[44px] whitespace-nowrap"
           >
             <span>Get Started</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 flex-shrink-0" />
           </button>
         </div>
       </header>
@@ -171,13 +157,15 @@ export default function LandingPage({ navigateTo }) {
           <div className="inline-flex items-center bg-white border border-lexis-ink/10 rounded-full p-1 mb-6 text-sm shadow-sm">
             <button
               onClick={() => selectDirection('en')}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors ${direction === 'en' ? 'bg-teal-600 text-white' : 'text-lexis-ink/50 hover:text-lexis-ink'}`}
+              aria-pressed={direction === 'en'}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'en' ? 'bg-teal-600 text-white' : 'text-lexis-ink/50 hover:text-lexis-ink'}`}
             >
               Learn English
             </button>
             <button
               onClick={() => selectDirection('th')}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors ${direction === 'th' ? 'bg-teal-600 text-white' : 'text-lexis-ink/50 hover:text-lexis-ink'}`}
+              aria-pressed={direction === 'th'}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'th' ? 'bg-teal-600 text-white' : 'text-lexis-ink/50 hover:text-lexis-ink'}`}
             >
               เรียนภาษาไทย
             </button>
@@ -204,13 +192,24 @@ export default function LandingPage({ navigateTo }) {
             live-session avatar treatment elsewhere in the app, without
             reusing lexis-navy as a background here (this page stays on the
             warm canvas per the visual-system doc's "marketing pages kept
-            their existing IA" note). */}
+            their existing IA" note).
+
+            The photo is AI-generated (see scripts/avatar/lexis-tutor-photo-notes.md)
+            — a photorealistic image of a person who doesn't exist, presented
+            as LEXIS's face. A re-audit flagged that showing this with zero
+            disclosure is a real trust risk specifically for this audience
+            (parents deciding whether to trust a voice product with their
+            kid) — discovering later that the "tutor" was synthetic is worse
+            than never implying a real person in the first place. The caption
+            below is the minimum honest fix; whether to replace the photo
+            entirely (illustrated persona, or a real photo of whoever's
+            behind LEXIS) is a bigger call left to Eoin. */}
         <div className="relative flex justify-center md:justify-end">
           <div className="absolute w-72 h-72 md:w-96 md:h-96 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
           <div className="relative w-64 sm:w-80 md:w-full md:max-w-sm aspect-[3/4] rounded-[2rem] overflow-hidden border border-white shadow-2xl shadow-teal-900/10">
             <img
               src={HERO_PHOTO_URL}
-              alt="LEXIS, your voice conversation partner, ready to start a practice session"
+              alt="LEXIS, your voice conversation partner, ready to start a practice session (AI-generated image)"
               className="w-full h-full object-cover"
               width="1200"
               height="1607"
@@ -223,6 +222,9 @@ export default function LandingPage({ navigateTo }) {
             <span>Live voice — ready when you are</span>
           </div>
         </div>
+        <p className="md:col-span-2 text-center text-[11px] text-lexis-ink/30 mt-8 md:mt-2">
+          LEXIS's pictured persona is an AI-generated image, not a real person.
+        </p>
       </section>
 
       {/* How it works — three concrete steps instead of adjective-heavy
