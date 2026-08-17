@@ -9,7 +9,11 @@
 // markup it has no business making. That's exactly the kind of
 // markup/page mismatch that gets a site's structured data stopped being
 // trusted generally, not just the offending block ignored.
-import { FAQS_EN } from './faq';
+//
+// Every number/string below is sourced from frontend/src/content/facts.js
+// — the "one fact, one source" rule from the same remediation brief.
+// Nothing here hardcodes a price or trial term independently.
+import { CURRENCY, FAQS, PRICING, TRIAL } from '../content/facts';
 
 export const SITE_URL = 'https://lexis-core-v2026.vercel.app';
 export const ORG_ID = `${SITE_URL}/#organization`;
@@ -33,18 +37,18 @@ export const APP_ID = `${SITE_URL}/#software`;
 // as "LEXIS costs ฿199, full stop," which understates what a subscriber
 // actually pays over time.
 export function buildOffersJsonLd() {
-  const recurringOffer = (name, price, unitCode) => ({
+  const recurringOffer = (name, tier) => ({
     '@type': 'Offer',
     name,
     url: `${SITE_URL}/pricing`,
     availability: 'https://schema.org/InStock',
     priceSpecification: {
       '@type': 'UnitPriceSpecification',
-      price,
-      priceCurrency: 'THB',
+      price: String(tier.thb),
+      priceCurrency: CURRENCY,
       billingDuration: 1,
       billingIncrement: 1,
-      unitCode
+      unitCode: tier.unitCode
     }
   });
   return {
@@ -60,25 +64,25 @@ export function buildOffersJsonLd() {
         url: `${SITE_URL}/pricing`,
         availability: 'https://schema.org/InStock',
         price: '0',
-        priceCurrency: 'THB',
-        description: '30 minutes of free practice, no card required to start.'
+        priceCurrency: CURRENCY,
+        description: `${TRIAL.minutes} minutes of free practice, no card required to start.`
       },
-      recurringOffer('Weekly pass', '199', 'WEE'),
-      recurringOffer('Monthly pass', '599', 'MON')
+      recurringOffer('Weekly pass', PRICING.weekly),
+      recurringOffer('Monthly pass', PRICING.monthly)
     ]
   };
 }
 
-// '/' only, injected by LandingPage.jsx via useSeo. Sourced from the
-// same FAQS_EN array LandingPage.jsx renders — previously hand-
-// duplicated between the two, which a re-audit flagged as a drift risk
+// '/' only, injected by LandingPage.jsx via useSeo. Sourced from
+// facts.js's FAQS.en — previously hand-duplicated between the rendered
+// page and this JSON-LD, which a re-audit flagged as a drift risk
 // (mismatched visible text vs structured data is exactly what
 // invalidates FAQ rich results).
 export function buildFaqJsonLd() {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: FAQS_EN.map(({ q, a }) => ({
+    mainEntity: FAQS.en.map(({ q, a }) => ({
       '@type': 'Question',
       name: q,
       acceptedAnswer: { '@type': 'Answer', text: a }

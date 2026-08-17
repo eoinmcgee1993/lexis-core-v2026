@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, Mail, Lock, LogIn, UserPlus, ArrowLeft, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSeo } from '../lib/useSeo';
+import { TRIAL } from '../content/facts';
 
 export default function AuthPage({ navigateTo }) {
   const { session, signIn, signUp } = useAuth();
@@ -73,7 +74,7 @@ export default function AuthPage({ navigateTo }) {
 
         <h1 className="text-xl font-bold mb-1 text-lexis-ink">{mode === 'sign_in' ? 'Sign in' : 'Create your account'}</h1>
         <p className="text-xs text-lexis-ink/50 mb-6">
-          {mode === 'sign_in' ? 'Continue practicing with LEXIS.' : 'Start your free 30-minute trial.'}
+          {mode === 'sign_in' ? 'Continue practicing with LEXIS.' : `Start your free ${TRIAL.minutes}-minute trial.`}
         </p>
 
         <form onSubmit={submit} className="space-y-4">
