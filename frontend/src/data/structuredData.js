@@ -15,7 +15,13 @@
 // Nothing here hardcodes a price or trial term independently.
 import { CURRENCY, FAQS, PRICING, TRIAL } from '../content/facts';
 
-export const SITE_URL = 'https://lexis-core-v2026.vercel.app';
+// learnwithlexis.com is the canonical domain (confirmed by Eoin,
+// 17 Aug 2026) — every canonical/hreflang/JSON-LD URL in the app derives
+// from this one constant. The .vercel.app URL still resolves (Vercel
+// serves the same deployment on it) but is no longer what search
+// engines/social unfurlers should treat as the real address; see
+// vercel.json's redirect rule, which sends the old domain here.
+export const SITE_URL = 'https://learnwithlexis.com';
 export const ORG_ID = `${SITE_URL}/#organization`;
 export const APP_ID = `${SITE_URL}/#software`;
 

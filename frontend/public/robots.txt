@@ -37,4 +37,4 @@ Allow: /
 Disallow: /app
 Disallow: /auth
 
-Sitemap: https://lexis-core-v2026.vercel.app/sitemap.xml
+Sitemap: https://learnwithlexis.com/sitemap.xml
