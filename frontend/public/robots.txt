@@ -1,4 +1,38 @@
+# Per robots.txt's actual matching rule (RFC 9309): a crawler that
+# matches a specific User-agent group uses ONLY that group's directives
+# — it does NOT also inherit the wildcard (*) group's rules. So every
+# named group below repeats the Disallow lines explicitly; leaving them
+# out would have silently allowed these crawlers into /app and /auth.
 User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /auth
+
+# AI/answer-engine crawlers, explicitly allowed rather than left to
+# whatever each one's default behavior toward an unlisted site is —
+# Google-Extended specifically governs eligibility for Google's AI
+# Overviews. Confirmed with Eoin before adding (remediation brief §7.6).
+User-agent: Google-Extended
+Allow: /
+Disallow: /app
+Disallow: /auth
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /app
+Disallow: /auth
+
+User-agent: GPTBot
+Allow: /
+Disallow: /app
+Disallow: /auth
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /app
+Disallow: /auth
+
+User-agent: ClaudeBot
 Allow: /
 Disallow: /app
 Disallow: /auth

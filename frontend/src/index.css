@@ -22,6 +22,20 @@
        lexis-navy on the Live Conversation screen). */
     @apply bg-slate-950 text-slate-100 antialiased font-sans;
   }
+
+  /* One deliberate, brand-consistent keyboard-focus ring for every
+     interactive element site-wide, instead of the browser default
+     (inconsistent color/shape against this app's rounded, custom-styled
+     buttons and cards — flagged in a re-audit as worth a real answer).
+     :focus-visible rather than :focus — a mouse click still shouldn't
+     show a ring, only actual keyboard/assistive-tech navigation should.
+     AuthPage.jsx's form inputs additionally swap border color on focus
+     (focus:border-teal-600/60); this ring stacks on top of that rather
+     than replacing it. */
+  :focus-visible {
+    outline: 2px solid #0D9488;
+    outline-offset: 2px;
+  }
 }
 
 @layer utilities {
