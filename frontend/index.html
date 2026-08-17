@@ -49,14 +49,14 @@
     <meta property="og:site_name" content="LEXIS" />
     <meta property="og:title" content="LEXIS | Practice Speaking English & Thai Out Loud" />
     <meta property="og:description" content="A voice conversation partner that listens, replies, and gently corrects you in real time. Practice as much as you want, whenever you want." />
-    <meta property="og:url" content="https://lexis-core-v2026.vercel.app/" />
-    <meta property="og:image" content="https://lexis-core-v2026.vercel.app/marketing/lexis-tutor-hero.jpg" />
+    <meta property="og:url" content="https://learnwithlexis.com/" />
+    <meta property="og:image" content="https://learnwithlexis.com/marketing/lexis-tutor-hero.jpg" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:locale:alternate" content="th_TH" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="LEXIS | Practice Speaking English & Thai Out Loud" />
     <meta name="twitter:description" content="A voice conversation partner that listens, replies, and gently corrects you in real time. Practice as much as you want, whenever you want." />
-    <meta name="twitter:image" content="https://lexis-core-v2026.vercel.app/marketing/lexis-tutor-hero.jpg" />
+    <meta name="twitter:image" content="https://learnwithlexis.com/marketing/lexis-tutor-hero.jpg" />
 
     <!-- Organization + SoftwareApplication — the one JSON-LD block that's
          genuinely sitewide-appropriate (per the re-audit: "can stay"),
@@ -68,28 +68,34 @@
          calls. ORG_ID/APP_ID here must match structuredData.js's
          exported constants if either ever changes — no build step
          generates one from the other yet. No `sameAs` — omitted rather
-         than fabricated; add LINE/TikTok/Instagram URLs once they exist. -->
+         than fabricated; add LINE/TikTok/Instagram URLs once they exist.
+
+         URLs below use learnwithlexis.com — the canonical domain
+         (confirmed by Eoin, 17 Aug 2026), matching structuredData.js's
+         SITE_URL. This file is static HTML with no build-time
+         templating, so the domain is hand-typed here rather than
+         imported; if it ever changes again, update both places. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@graph": [
         {
           "@type": "Organization",
-          "@id": "https://lexis-core-v2026.vercel.app/#organization",
+          "@id": "https://learnwithlexis.com/#organization",
           "name": "LEXIS",
-          "url": "https://lexis-core-v2026.vercel.app/",
+          "url": "https://learnwithlexis.com/",
           "areaServed": { "@type": "Country", "name": "Thailand" },
           "knowsLanguage": ["en", "th"]
         },
         {
           "@type": "SoftwareApplication",
-          "@id": "https://lexis-core-v2026.vercel.app/#software",
+          "@id": "https://learnwithlexis.com/#software",
           "name": "LEXIS",
           "applicationCategory": "EducationApplication",
           "operatingSystem": "Web",
-          "url": "https://lexis-core-v2026.vercel.app/",
+          "url": "https://learnwithlexis.com/",
           "description": "A voice conversation partner for practicing spoken English and Thai in real time.",
-          "publisher": { "@id": "https://lexis-core-v2026.vercel.app/#organization" }
+          "publisher": { "@id": "https://learnwithlexis.com/#organization" }
         }
       ]
     }

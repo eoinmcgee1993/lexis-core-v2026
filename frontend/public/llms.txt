@@ -28,10 +28,10 @@ with a person.
 
 ## Pages
 
-- https://lexis-core-v2026.vercel.app/ — home, how it works, FAQ (English)
-- https://lexis-core-v2026.vercel.app/pricing — full pricing (English)
-- https://lexis-core-v2026.vercel.app/th — home, how it works, FAQ (Thai)
-- https://lexis-core-v2026.vercel.app/th/pricing — full pricing (Thai)
+- https://learnwithlexis.com/ — home, how it works, FAQ (English)
+- https://learnwithlexis.com/pricing — full pricing (English)
+- https://learnwithlexis.com/th — home, how it works, FAQ (Thai)
+- https://learnwithlexis.com/th/pricing — full pricing (Thai)
 
 ## Notes for automated systems
 
