@@ -3,13 +3,18 @@ import { Sparkles, ArrowLeft, Check, Loader2, AlertCircle, ShieldCheck } from 'l
 import { useAuth } from '../context/AuthContext';
 import { buildOffersJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
+import { MONTHLY_SAVINGS_VS_WEEKLY_PCT, PRICING, PRICING_DESCRIPTION_EN, TRIAL, VAT } from '../content/facts';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 // Stripe recurring Price IDs — live mode, Clearmark account (acct_1T1zS9F1FdEsYK5E).
+// The actual THB amounts these correspond to live in content/facts.js
+// (PRICING.weekly.thb / PRICING.monthly.thb) — not repeated here, since a
+// mismatch between a comment and the real Stripe-side price would be
+// worse than no comment at all.
 const STRIPE_PRICES = {
-  weekly: 'price_1U1hdLF1FdEsYK5EOSheNGGS',   // LEXIS Weekly Pass — ฿199.00/week
-  monthly: 'price_1U1hdOF1FdEsYK5Ec6DgUlil'   // LEXIS Monthly Immersion — ฿599.00/month
+  weekly: 'price_1U1hdLF1FdEsYK5EOSheNGGS',   // LEXIS Weekly Pass
+  monthly: 'price_1U1hdOF1FdEsYK5Ec6DgUlil'   // LEXIS Monthly Immersion
 };
 
 export default function PricingPage({ navigateTo }) {
@@ -22,7 +27,7 @@ export default function PricingPage({ navigateTo }) {
   const offersJsonLd = useMemo(() => buildOffersJsonLd(), []);
   useSeo({
     title: 'Pricing | LEXIS',
-    description: 'LEXIS pricing: a free 30-minute trial, then ฿199/week or ฿599/month for unlimited voice practice in English or Thai. No VAT, cancel anytime.',
+    description: PRICING_DESCRIPTION_EN,
     canonical: `${SITE_URL}/pricing`,
     jsonLd: { 'jsonld-offers': offersJsonLd }
   });
@@ -83,7 +88,9 @@ export default function PricingPage({ navigateTo }) {
       <section className="flex-1 w-full max-w-5xl mx-auto px-6 py-12">
         <h1 className="font-display font-semibold text-2xl text-center mb-2 text-lexis-ink">Simple, Transparent Pricing</h1>
         <p className="text-center text-sm text-lexis-ink/50">Cancel anytime. Prices in Thai Baht.</p>
-        <p className="text-center text-xs text-lexis-ink/30 mb-10">No VAT applies — not a VAT-registered business.</p>
+        <p className="text-center text-xs text-lexis-ink/30 mb-10">
+          {VAT.registered ? 'Prices include VAT.' : 'No VAT applies — not a VAT-registered business.'}
+        </p>
 
         {cancelled && (
           <div className="mb-6 px-4 py-3 bg-lexis-action/10 border border-lexis-action/30 rounded-xl text-lexis-action-dark text-sm text-center">
@@ -102,10 +109,10 @@ export default function PricingPage({ navigateTo }) {
           <div className="bg-white border border-lexis-ink/10 p-6 rounded-2xl flex flex-col justify-between">
             <div>
               <h3 className="text-lg font-bold text-teal-700 mb-2">Free Trial</h3>
-              <p className="text-xs text-lexis-ink/50 mb-4">30 Minutes of Free Practice</p>
+              <p className="text-xs text-lexis-ink/50 mb-4">{TRIAL.minutes} Minutes of Free Practice</p>
               <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿0</div>
               <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>30 minutes of practice time</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{TRIAL.minutes} minutes of practice time</span></li>
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Real-time feedback as you speak</span></li>
               </ul>
             </div>
@@ -122,7 +129,7 @@ export default function PricingPage({ navigateTo }) {
             <div>
               <h3 className="text-lg font-bold text-lexis-action-dark mb-2">Weekly Pass</h3>
               <p className="text-xs text-lexis-ink/50 mb-4">Unlimited Practice for 7 Days</p>
-              <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿199 <span className="text-xs font-normal text-lexis-ink/40">/ week</span></div>
+              <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿{PRICING.weekly.thb} <span className="text-xs font-normal text-lexis-ink/40">/ week</span></div>
               <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Talk as much as you want</span></li>
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Full conversation history</span></li>
@@ -143,9 +150,9 @@ export default function PricingPage({ navigateTo }) {
             <div>
               <h3 className="text-lg font-bold text-teal-700 mb-2">Monthly Immersion</h3>
               <p className="text-xs text-lexis-ink/50 mb-4">Unlimited Practice for 30 Days</p>
-              <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿599 <span className="text-xs font-normal text-lexis-ink/40">/ month</span></div>
+              <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿{PRICING.monthly.thb} <span className="text-xs font-normal text-lexis-ink/40">/ month</span></div>
               <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Best value — about 25% less than 4 weeks at the weekly rate</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Best value — about {MONTHLY_SAVINGS_VS_WEEKLY_PCT}% less than 4 weeks at the weekly rate</span></li>
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Talk as much as you want</span></li>
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Great for building a daily habit</span></li>
               </ul>

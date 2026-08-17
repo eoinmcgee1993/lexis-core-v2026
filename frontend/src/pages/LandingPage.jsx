@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Sparkles, Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp } from 'lucide-react';
-import { FAQS_EN } from '../data/faq';
 import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
+import { FAQS, LANDING_DESCRIPTION_EN, PRICING_TEASER_EN, PRICING_TEASER_TH } from '../content/facts';
 
 // Same key LexisApp.jsx reads on session start ('en' = practicing English,
 // 'th' = practicing Thai). Setting it here before navigating to /app means
@@ -59,14 +59,14 @@ export default function LandingPage({ navigateTo }) {
         heroTitle: 'Practice Speaking English Out Loud with LEXIS',
         heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time. Practice as much as you want, whenever you want.',
         cta: 'Try It Free',
-        pricingTeaser: 'Free 30-minute trial, then ฿199/week or ฿599/month.',
+        pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
         heroTitle: 'ฝึกพูดภาษาอังกฤษออกเสียงจริงกับ LEXIS',
         heroSub: 'LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้',
         cta: 'ลองใช้ฟรี',
-        pricingTeaser: 'ทดลองฟรี 30 นาที จากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน',
+        pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
       }
     },
@@ -75,14 +75,14 @@ export default function LandingPage({ navigateTo }) {
         heroTitle: 'Practice Speaking Thai Out Loud with LEXIS',
         heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time. Practice as much as you want, whenever you want.',
         cta: 'Try It Free',
-        pricingTeaser: 'Free 30-minute trial, then ฿199/week or ฿599/month.',
+        pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
         heroTitle: 'ฝึกพูดภาษาไทยออกเสียงจริงกับ LEXIS',
         heroSub: 'LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้',
         cta: 'ลองใช้ฟรี',
-        pricingTeaser: 'ทดลองฟรี 30 นาที จากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน',
+        pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
       }
     }
@@ -92,7 +92,7 @@ export default function LandingPage({ navigateTo }) {
 
   // FAQ JSON-LD only injected when lang === 'en' — the rendered FAQ
   // section below is gated the same way (no Thai translation yet; see
-  // frontend/src/data/faq.js). Structured data claiming a FAQ exists
+  // frontend/src/content/facts.js's FAQS). Structured data claiming a FAQ exists
   // that isn't actually visible in that language was exactly the
   // mismatch a re-audit flagged (N2) — keeping both gated on the same
   // condition is the fix, not a footnote.
@@ -100,7 +100,7 @@ export default function LandingPage({ navigateTo }) {
 
   useSeo({
     title: 'LEXIS | Practice Speaking English & Thai Out Loud',
-    description: 'LEXIS is a voice conversation partner for Thai speakers practicing English and English speakers practicing Thai. Talk out loud, get gentle real-time corrections, and see what to work on next. Free 30-minute trial.',
+    description: LANDING_DESCRIPTION_EN,
     canonical: `${SITE_URL}/`,
     jsonLd: { 'jsonld-faq': faqJsonLd }
   });
@@ -293,7 +293,7 @@ export default function LandingPage({ navigateTo }) {
         <section className="w-full max-w-3xl mx-auto px-6 py-14">
           <h2 className="font-display font-semibold text-2xl text-center mb-8">Frequently asked questions</h2>
           <div className="space-y-3">
-            {FAQS_EN.map(({ q, a }) => (
+            {FAQS.en.map(({ q, a }) => (
               <details key={q} className="group bg-white border border-lexis-ink/10 rounded-2xl p-4 open:shadow-sm">
                 <summary className="cursor-pointer list-none flex items-center justify-between gap-3 font-semibold text-sm text-lexis-ink">
                   <span>{q}</span>
