@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="LEXIS">
+  <!-- Rounded-square teal-600 (#0D9488, the app's existing "live" accent —
+       see scripts/design/lexis-visual-system.md) background with a white
+       4-point sparkle, echoing the Sparkles icon already used as the
+       header/logo mark (Sparkles, Mic, etc. in LandingPage.jsx). A real
+       standalone logo file would replace this — see the re-audit's "still
+       outstanding" list — but a favicon is cheap to have regardless of
+       whether the sparkles mark itself eventually gets retired. -->
+  <rect width="24" height="24" rx="6" fill="#0D9488" />
+  <polygon
+    points="12,2 14.3,9.7 22,12 14.3,14.3 12,22 9.7,14.3 2,12 9.7,9.7"
+    fill="#FFFFFF"
+  />
+</svg>

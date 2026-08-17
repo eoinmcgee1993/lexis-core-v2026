@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Sparkles, ArrowLeft, Check, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { buildOffersJsonLd, SITE_URL } from '../data/structuredData';
+import { useSeo } from '../lib/useSeo';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -16,6 +18,14 @@ export default function PricingPage({ navigateTo }) {
   const [error, setError] = useState('');
 
   const cancelled = new URLSearchParams(window.location.search).get('payment') === 'cancelled';
+
+  const offersJsonLd = useMemo(() => buildOffersJsonLd(), []);
+  useSeo({
+    title: 'Pricing | LEXIS',
+    description: 'LEXIS pricing: a free 30-minute trial, then ฿199/week or ฿599/month for unlimited voice practice in English or Thai. No VAT, cancel anytime.',
+    canonical: `${SITE_URL}/pricing`,
+    jsonLd: { 'jsonld-offers': offersJsonLd }
+  });
 
   const startCheckout = async (planTier, priceId) => {
     setError('');
@@ -72,7 +82,8 @@ export default function PricingPage({ navigateTo }) {
 
       <section className="flex-1 w-full max-w-5xl mx-auto px-6 py-12">
         <h1 className="font-display font-semibold text-2xl text-center mb-2 text-lexis-ink">Simple, Transparent Pricing</h1>
-        <p className="text-center text-sm text-lexis-ink/50 mb-10">Cancel anytime. Prices in Thai Baht.</p>
+        <p className="text-center text-sm text-lexis-ink/50">Cancel anytime. Prices in Thai Baht.</p>
+        <p className="text-center text-xs text-lexis-ink/30 mb-10">No VAT applies — not a VAT-registered business.</p>
 
         {cancelled && (
           <div className="mb-6 px-4 py-3 bg-lexis-action/10 border border-lexis-action/30 rounded-xl text-lexis-action-dark text-sm text-center">
@@ -91,7 +102,7 @@ export default function PricingPage({ navigateTo }) {
           <div className="bg-white border border-lexis-ink/10 p-6 rounded-2xl flex flex-col justify-between">
             <div>
               <h3 className="text-lg font-bold text-teal-700 mb-2">Free Trial</h3>
-              <p className="text-xs text-lexis-ink/50 mb-4">3 Practice Sessions (30 Mins)</p>
+              <p className="text-xs text-lexis-ink/50 mb-4">30 Minutes of Free Practice</p>
               <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿0</div>
               <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>30 minutes of practice time</span></li>
@@ -134,7 +145,7 @@ export default function PricingPage({ navigateTo }) {
               <p className="text-xs text-lexis-ink/50 mb-4">Unlimited Practice for 30 Days</p>
               <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿599 <span className="text-xs font-normal text-lexis-ink/40">/ month</span></div>
               <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Best value — save 25% vs. weekly</span></li>
+                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Best value — about 25% less than 4 weeks at the weekly rate</span></li>
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Talk as much as you want</span></li>
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>Great for building a daily habit</span></li>
               </ul>

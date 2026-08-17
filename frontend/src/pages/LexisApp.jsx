@@ -15,6 +15,7 @@ import TopicStage from '../components/stages/TopicStage';
 import LiveStage from '../components/stages/LiveStage';
 import FeedbackStage from '../components/stages/FeedbackStage';
 import HistoryStage from '../components/stages/HistoryStage';
+import { useSeo } from '../lib/useSeo';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -84,6 +85,13 @@ export default function LexisApp({ navigateTo }) {
   // App.jsx's router already redirects to /auth before this component ever
   // mounts when there's no session, so `session` is guaranteed here.
   const { session, profile, refreshProfile, signOut } = useAuth();
+
+  // Authenticated session UI, not marketing content — same noindex
+  // treatment as AuthPage.jsx, both belonging to /app.
+  useSeo({
+    title: 'LEXIS',
+    robots: 'noindex, nofollow'
+  });
 
   const justPaid = new URLSearchParams(window.location.search).get('payment') === 'success';
 

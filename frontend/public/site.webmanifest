@@ -1,0 +1,12 @@
+{
+  "name": "LEXIS",
+  "short_name": "LEXIS",
+  "description": "Practice speaking English or Thai out loud with a real-time voice conversation partner.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#0D9488",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

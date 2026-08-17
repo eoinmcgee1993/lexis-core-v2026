@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { Sparkles, Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp, Info } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Sparkles, Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp } from 'lucide-react';
 import { FAQS_EN } from '../data/faq';
+import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
+import { useSeo } from '../lib/useSeo';
 
 // Same key LexisApp.jsx reads on session start ('en' = practicing English,
 // 'th' = practicing Thai). Setting it here before navigating to /app means
@@ -87,6 +89,21 @@ export default function LandingPage({ navigateTo }) {
   };
 
   const t = content[direction][lang];
+
+  // FAQ JSON-LD only injected when lang === 'en' — the rendered FAQ
+  // section below is gated the same way (no Thai translation yet; see
+  // frontend/src/data/faq.js). Structured data claiming a FAQ exists
+  // that isn't actually visible in that language was exactly the
+  // mismatch a re-audit flagged (N2) — keeping both gated on the same
+  // condition is the fix, not a footnote.
+  const faqJsonLd = useMemo(() => (lang === 'en' ? buildFaqJsonLd() : null), [lang]);
+
+  useSeo({
+    title: 'LEXIS | Practice Speaking English & Thai Out Loud',
+    description: 'LEXIS is a voice conversation partner for Thai speakers practicing English and English speakers practicing Thai. Talk out loud, get gentle real-time corrections, and see what to work on next. Free 30-minute trial.',
+    canonical: `${SITE_URL}/`,
+    jsonLd: { 'jsonld-faq': faqJsonLd }
+  });
 
   return (
     <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans">
