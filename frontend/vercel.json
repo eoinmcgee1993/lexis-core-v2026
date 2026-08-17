@@ -1,9 +1,9 @@
 {
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "has": [{ "type": "host", "value": "lexis-core-v2026.vercel.app" }],
-      "destination": "https://learnwithlexis.com/:path*",
+      "destination": "https://learnwithlexis.com/$1",
       "permanent": true
     }
   ],
