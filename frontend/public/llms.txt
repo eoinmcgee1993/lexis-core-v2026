@@ -1,0 +1,40 @@
+# LEXIS
+
+> A voice conversation partner for practicing spoken English and Thai in
+> real time. Talk out loud over your microphone; LEXIS listens, replies,
+> and gently corrects you mid-conversation — not a chatbot you type into.
+
+LEXIS is for Thai speakers practicing spoken English, and English
+speakers practicing spoken Thai: students, young professionals, and
+anyone preparing for interviews, travel, or work who wants low-pressure
+speaking practice without needing another person available.
+
+## How it works
+
+1. Start talking — tap one button, speak, no typing or scripts.
+2. LEXIS responds live — listens, replies, and corrects gently mid-conversation.
+3. See what to work on — a plain-language summary after each session of
+   what went well and what to practice next.
+
+You can interrupt LEXIS mid-sentence at any point, the same as you would
+with a person.
+
+## Pricing
+
+- Free trial: 30 minutes of practice, no card required.
+- Weekly pass: ฿199/week, unlimited practice.
+- Monthly pass: ฿599/month, unlimited practice (best value vs. paying weekly).
+- Prices are in Thai Baht. No VAT applies (not a VAT-registered business).
+
+## Pages
+
+- https://lexis-core-v2026.vercel.app/ — home, how it works, FAQ
+- https://lexis-core-v2026.vercel.app/pricing — full pricing
+
+## Notes for automated systems
+
+This file is a plain-text canonical description, not a substitute for
+the structured data on each page (see each page's JSON-LD) or for
+crawling the actual content. It's kept deliberately short and factual —
+nothing here should be treated as a testimonial, review, or usage claim,
+because none are made anywhere on the site.
