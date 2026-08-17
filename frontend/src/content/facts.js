@@ -86,6 +86,10 @@ export const FAQS = {
     {
       q: 'Can I interrupt LEXIS mid-sentence?',
       a: "Yes — real conversations involve talking over each other sometimes, so you can jump in and interrupt LEXIS at any point, the same as you would with a person."
+    },
+    {
+      q: 'What happens to my voice recording?',
+      a: "Your microphone audio streams live to power the conversation and isn't saved as an audio file on LEXIS's own servers. After a session, LEXIS keeps only a short feedback summary (a confidence score and a few corrections) — never a transcript of what you said. See the full Privacy Policy for details."
     }
   ]
 };

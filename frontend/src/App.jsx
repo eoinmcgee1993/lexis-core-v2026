@@ -5,10 +5,14 @@ import LandingPage from './pages/LandingPage';
 import PricingPage from './pages/PricingPage';
 import AuthPage from './pages/AuthPage';
 import LexisApp from './pages/LexisApp';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import RefundPage from './pages/RefundPage';
 
-// Four routes don't warrant a full router dependency. Every page receives
-// navigateTo(path). Auth-gating for /app lives here, once, rather than each
-// page re-deriving "am I allowed to render?" from useAuth() itself.
+// Seven routes still don't warrant a full router dependency. Every page
+// receives navigateTo(path). Auth-gating for /app lives here, once,
+// rather than each page re-deriving "am I allowed to render?" from
+// useAuth() itself.
 function RouteController() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const { user, loading } = useAuth();
@@ -51,6 +55,12 @@ function RouteController() {
       return <PricingPage navigateTo={navigateTo} />;
     case '/auth':
       return <AuthPage navigateTo={navigateTo} />;
+    case '/terms':
+      return <TermsPage navigateTo={navigateTo} />;
+    case '/privacy':
+      return <PrivacyPage navigateTo={navigateTo} />;
+    case '/refund':
+      return <RefundPage navigateTo={navigateTo} />;
     default:
       return <LandingPage navigateTo={navigateTo} />;
   }

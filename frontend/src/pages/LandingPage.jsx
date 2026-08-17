@@ -306,13 +306,20 @@ export default function LandingPage({ navigateTo }) {
         </section>
       )}
 
-      {/* Footer */}
-      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex items-center justify-between text-xs text-lexis-ink/40">
+      {/* Footer — the "Private & secure" claim used to have nothing
+          behind it (flagged in a re-audit: U6). Now links to the actual
+          Privacy Policy that explains what that claim means. */}
+      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/40">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-teal-600" />
           <span>Private &amp; secure • Payments handled by Stripe</span>
         </div>
-        <div>© 2026 LEXIS</div>
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigateTo('/privacy')} className="hover:text-lexis-ink transition-colors">Privacy</button>
+          <button onClick={() => navigateTo('/terms')} className="hover:text-lexis-ink transition-colors">Terms</button>
+          <button onClick={() => navigateTo('/refund')} className="hover:text-lexis-ink transition-colors">Refunds</button>
+          <span>© 2026 LEXIS</span>
+        </div>
       </footer>
     </div>
   );
