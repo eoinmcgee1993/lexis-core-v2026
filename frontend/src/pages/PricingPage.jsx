@@ -6,7 +6,7 @@ import { buildOffersJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
 import { reportError } from '../lib/errorReporting';
-import { MONTHLY_SAVINGS_VS_WEEKLY_PCT, PRICING, PRICING_DESCRIPTION_EN, PRICING_DESCRIPTION_TH, TRIAL, VAT } from '../content/facts';
+import { MONTHLY_SAVINGS_VS_WEEKLY_PCT, PRICING, PRICING_DESCRIPTION_EN, PRICING_DESCRIPTION_TH, SPONSOR_ADDON_THB, TRIAL, VAT } from '../content/facts';
 
 // Display-language chrome strings for this page — Stage 4 (real /th and
 // /th/pricing routes, not a client-side toggle). Mirrors the same
@@ -38,10 +38,13 @@ const TEXT = {
     monthlyFeature2: 'Talk as much as you want',
     monthlyFeature3: 'Great for building a daily habit',
     signInNote: "You'll be asked to sign in before checkout.",
+    sponsorLabel: (thb) => `Add ฿${thb} to sponsor a student's practice time through LEXIS Community`,
+    sponsorLearnMore: 'Learn more',
     footerTrust: 'Private & secure • Payments handled by Stripe',
     privacy: 'Privacy',
     terms: 'Terms',
-    refunds: 'Refunds'
+    refunds: 'Refunds',
+    community: 'Community'
   },
   th: {
     home: 'หน้าแรก',
@@ -69,10 +72,13 @@ const TEXT = {
     monthlyFeature2: 'พูดได้เท่าที่อยากพูด',
     monthlyFeature3: 'เหมาะสำหรับสร้างนิสัยฝึกทุกวัน',
     signInNote: 'คุณจะต้องเข้าสู่ระบบก่อนชำระเงิน',
+    sponsorLabel: (thb) => `เพิ่ม ฿${thb} เพื่อสนับสนุนเวลาฝึกพูดให้นักเรียนผ่าน LEXIS Community`,
+    sponsorLearnMore: 'อ่านเพิ่มเติม',
     footerTrust: 'ปลอดภัยและเป็นส่วนตัว • ชำระเงินผ่าน Stripe',
     privacy: 'นโยบายความเป็นส่วนตัว',
     terms: 'ข้อกำหนดการใช้งาน',
-    refunds: 'การคืนเงิน'
+    refunds: 'การคืนเงิน',
+    community: 'Community'
   }
 };
 
@@ -92,6 +98,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
   const { session } = useAuth();
   const [loadingTier, setLoadingTier] = useState(null); // 'weekly' | 'monthly' | null
   const [error, setError] = useState('');
+  const [sponsorAdd, setSponsorAdd] = useState(false);
   const t = TEXT[lang];
 
   const cancelled = new URLSearchParams(window.location.search).get('payment') === 'cancelled';
@@ -133,12 +140,12 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ priceId, planTier })
+        body: JSON.stringify({ priceId, planTier, sponsorAdd })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Checkout error: ${res.status}`);
       if (!data.url) throw new Error('Checkout session did not return a redirect URL.');
-      trackEvent('checkout_started', { metadata: { planTier } });
+      trackEvent('checkout_started', { metadata: { planTier, sponsorAdd } });
       window.location.href = data.url;
     } catch (err) {
       setError(err.message || 'Could not start checkout. Please try again.');
@@ -259,8 +266,31 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           </div>
         </div>
 
+        {/* LEXIS Community pay-it-forward add-on — one flat amount, rides
+            whichever plan's billing cycle (see backend/app.mjs's
+            /api/stripe/checkout: price_data.recurring.interval matches
+            planTier). Deliberately plan-agnostic here since the checkbox
+            is above all three cards, not inside one — the actual amount
+            gets added to whichever paid plan the visitor clicks next. */}
+        <label className="flex items-center justify-center gap-2 mt-8 text-xs text-lexis-ink/60 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={sponsorAdd}
+            onChange={(e) => setSponsorAdd(e.target.checked)}
+            className="rounded border-lexis-ink/20 text-teal-600 focus:ring-teal-600"
+          />
+          <span>{t.sponsorLabel(SPONSOR_ADDON_THB)}</span>
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); navigateTo('/community'); }}
+            className="text-teal-700 hover:text-teal-800 underline underline-offset-2"
+          >
+            {t.sponsorLearnMore}
+          </button>
+        </label>
+
         {!session && (
-          <p className="text-center text-xs text-lexis-ink/40 mt-8">
+          <p className="text-center text-xs text-lexis-ink/40 mt-4">
             {t.signInNote}
           </p>
         )}
@@ -272,6 +302,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           <span>{t.footerTrust}</span>
         </div>
         <div className="flex items-center gap-4">
+          <button onClick={() => navigateTo('/community')} className="hover:text-lexis-ink transition-colors">{t.community}</button>
           <button onClick={() => navigateTo('/privacy')} className="hover:text-lexis-ink transition-colors">{t.privacy}</button>
           <button onClick={() => navigateTo('/terms')} className="hover:text-lexis-ink transition-colors">{t.terms}</button>
           <button onClick={() => navigateTo('/refund')} className="hover:text-lexis-ink transition-colors">{t.refunds}</button>

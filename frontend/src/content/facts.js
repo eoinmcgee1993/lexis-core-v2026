@@ -31,6 +31,13 @@ export const PRICING = {
   monthly: { thb: 599, period: 'month', unitCode: 'MON' }
 };
 
+// LEXIS Community's pay-it-forward checkout add-on (PricingPage.jsx,
+// CommunityPage.jsx). Kept in sync by hand with the identical constant in
+// backend/app.mjs (SPONSOR_ADDON_THB) — the two can't share an import
+// across the frontend/backend deploy boundary, same situation as
+// STRIPE_PRICES' comment above about the Stripe-side amounts.
+export const SPONSOR_ADDON_THB = 50;
+
 // Confirmed directly by Eoin (remediation brief §7.3) — no VAT applies
 // because the business isn't VAT-registered. Distinct from "VAT is
 // included in the displayed price," which would be a different claim.

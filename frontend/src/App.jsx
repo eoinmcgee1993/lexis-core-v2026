@@ -8,6 +8,7 @@ import LexisApp from './pages/LexisApp';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import RefundPage from './pages/RefundPage';
+import CommunityPage from './pages/CommunityPage';
 
 // Seven routes still don't warrant a full router dependency. Every page
 // receives navigateTo(path). Auth-gating for /app lives here, once,
@@ -83,6 +84,8 @@ function RouteController() {
       return <PrivacyPage navigateTo={navigateTo} />;
     case '/refund':
       return <RefundPage navigateTo={navigateTo} />;
+    case '/community':
+      return <CommunityPage navigateTo={navigateTo} />;
     default:
       return <LandingPage navigateTo={navigateTo} />;
   }

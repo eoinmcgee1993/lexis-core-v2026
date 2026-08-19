@@ -45,6 +45,7 @@ const ROUTES = [
   { path: '/terms', outFile: 'terms/index.html' },
   { path: '/privacy', outFile: 'privacy/index.html' },
   { path: '/refund', outFile: 'refund/index.html' },
+  { path: '/community', outFile: 'community/index.html' },
   // Real Thai routes (Stage 4) — same directory-style output rule as
   // every other route here: dist/th/index.html and dist/th/pricing/
   // index.html get served directly by Vercel's filesystem check for

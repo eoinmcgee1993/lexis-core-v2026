@@ -67,7 +67,8 @@ const CHROME = {
     footerTrust: 'Private & secure • Payments handled by Stripe',
     privacy: 'Privacy',
     terms: 'Terms',
-    refunds: 'Refunds'
+    refunds: 'Refunds',
+    community: 'Community'
   },
   th: {
     pricing: 'ราคา',
@@ -87,7 +88,8 @@ const CHROME = {
     footerTrust: 'ปลอดภัยและเป็นส่วนตัว • ชำระเงินผ่าน Stripe',
     privacy: 'นโยบายความเป็นส่วนตัว',
     terms: 'ข้อกำหนดการใช้งาน',
-    refunds: 'การคืนเงิน'
+    refunds: 'การคืนเงิน',
+    community: 'Community'
   }
 };
 
@@ -409,9 +411,11 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <span>{c.footerTrust}</span>
         </div>
         <div className="flex items-center gap-4">
-          {/* Terms/Privacy/Refund only exist in English so far (Stage 4
-              scoped /th to the landing + pricing pages) — link labels
-              follow the page's display language, the destination doesn't. */}
+          {/* Terms/Privacy/Refund/Community only exist in English so far
+              (Stage 4 scoped /th to the landing + pricing pages) — link
+              labels follow the page's display language, the destination
+              doesn't. */}
+          <button onClick={() => navigateTo('/community')} className="hover:text-lexis-ink transition-colors">{c.community}</button>
           <button onClick={() => navigateTo('/privacy')} className="hover:text-lexis-ink transition-colors">{c.privacy}</button>
           <button onClick={() => navigateTo('/terms')} className="hover:text-lexis-ink transition-colors">{c.terms}</button>
           <button onClick={() => navigateTo('/refund')} className="hover:text-lexis-ink transition-colors">{c.refunds}</button>

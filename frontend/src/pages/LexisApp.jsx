@@ -96,6 +96,9 @@ export default function LexisApp({ navigateTo }) {
   });
 
   const justPaid = new URLSearchParams(window.location.search).get('payment') === 'success';
+  // LEXIS Community pay-it-forward add-on (PricingPage.jsx) — only
+  // meaningful alongside justPaid, never read on its own.
+  const justSponsored = justPaid && new URLSearchParams(window.location.search).get('sponsor') === '1';
 
   // Stage machine — see the file header. 'welcome' is always the entry
   // point; nothing auto-advances past it.
@@ -220,7 +223,7 @@ export default function LexisApp({ navigateTo }) {
   // later doesn't keep re-showing "payment confirmed" indefinitely.
   useEffect(() => {
     if (justPaid) {
-      trackEvent('checkout_completed', { metadata: { planTier: profile?.subscription_tier } });
+      trackEvent('checkout_completed', { metadata: { planTier: profile?.subscription_tier, sponsorAdd: justSponsored } });
       window.history.replaceState({}, '', '/app');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1025,6 +1028,7 @@ export default function LexisApp({ navigateTo }) {
       onStartTalking={() => setStage('topics')}
       profile={profile}
       justPaid={justPaid}
+      justSponsored={justSponsored}
       upgradeRequired={upgradeRequired}
       upgradeMessage={upgradeMessage}
       sessionError={sessionError}
