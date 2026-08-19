@@ -91,14 +91,37 @@ CREATE INDEX IF NOT EXISTS analytics_events_event_name_created_at_idx
 CREATE INDEX IF NOT EXISTS analytics_events_session_id_idx
   ON public.analytics_events(session_id);
 
+-- 3d. Error Logs — backend error monitoring, no third-party service
+-- (Sentry etc.). Written by backend/app.mjs's logError() helper, called
+-- from each route handler's own outer catch block — every route already
+-- catches its own errors and responds directly rather than calling
+-- next(err), so this is the actual visibility layer, not the Express
+-- error-handling middleware (which only ever sees CorsOriginError in
+-- practice). Same zero-client-access shape as analytics_events below.
+CREATE TABLE IF NOT EXISTS public.error_logs (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  context TEXT NOT NULL,
+  message TEXT,
+  stack TEXT,
+  extra JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS error_logs_created_at_idx
+  ON public.error_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS error_logs_context_idx
+  ON public.error_logs(context);
+
 -- 4. Enable Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.usage_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.session_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.analytics_events ENABLE ROW LEVEL SECURITY;
--- No policies for analytics_events — RLS enabled with zero policies means
--- even authenticated/anon clients get nothing at all; only the backend's
--- service-role key (which bypasses RLS) can read or write this table.
+ALTER TABLE public.error_logs ENABLE ROW LEVEL SECURITY;
+-- No policies for analytics_events or error_logs — RLS enabled with zero
+-- policies means even authenticated/anon clients get nothing at all;
+-- only the backend's service-role key (which bypasses RLS) can read or
+-- write either table.
 
 -- 5. RLS Policies
 -- auth.uid() is wrapped in a scalar subquery — (select auth.uid()) — per

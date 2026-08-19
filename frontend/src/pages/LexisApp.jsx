@@ -17,6 +17,7 @@ import FeedbackStage from '../components/stages/FeedbackStage';
 import HistoryStage from '../components/stages/HistoryStage';
 import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
+import { reportError } from '../lib/errorReporting';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -815,7 +816,10 @@ export default function LexisApp({ navigateTo }) {
       // anything went wrong at all. upgradeRequired already covers the
       // specific 403 case with its own message/CTA; this is the catch-all
       // for everything else.
-      if (!isUpgradeError) setSessionError(err.message);
+      if (!isUpgradeError) {
+        setSessionError(err.message);
+        reportError('Session Start Failed', err, { direction });
+      }
       endSession(`Error: ${err.message}`);
     }
   };
@@ -885,6 +889,7 @@ export default function LexisApp({ navigateTo }) {
       setCancelPeriodEnd(data.currentPeriodEnd || null);
     } catch (err) {
       setCancelError(err.message || 'Could not cancel your plan. Please try again.');
+      reportError('Cancel Plan Failed', err);
     } finally {
       setCancelLoading(false);
     }

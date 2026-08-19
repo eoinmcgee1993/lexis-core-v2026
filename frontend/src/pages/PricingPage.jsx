@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { buildOffersJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
+import { reportError } from '../lib/errorReporting';
 import { MONTHLY_SAVINGS_VS_WEEKLY_PCT, PRICING, PRICING_DESCRIPTION_EN, PRICING_DESCRIPTION_TH, TRIAL, VAT } from '../content/facts';
 
 // Display-language chrome strings for this page — Stage 4 (real /th and
@@ -140,6 +141,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
       window.location.href = data.url;
     } catch (err) {
       setError(err.message || 'Could not start checkout. Please try again.');
+      reportError('Checkout Start Failed', err, { planTier });
       setLoadingTier(null);
     }
   };
