@@ -66,10 +66,39 @@ CREATE TABLE IF NOT EXISTS public.session_history (
 CREATE INDEX IF NOT EXISTS session_history_user_id_created_at_idx
   ON public.session_history(user_id, created_at DESC);
 
+-- 3c. Analytics Events — first-party, privacy-respecting event log (no
+-- third-party tracker, no cookies, no PII beyond an anonymous per-browser-
+-- session id and, for authenticated events, the user's own id). Written
+-- only via POST /api/analytics/event (rate-limited, allowlisted event
+-- names — see backend/app.mjs's ANALYTICS_EVENTS) using the backend's
+-- service-role key — same "client never writes directly" shape as
+-- usage_logs/session_history above, so no INSERT policy is needed either.
+-- No SELECT policy: queried directly via the SQL editor for your own
+-- reporting, not read back into the app for any user.
+CREATE TABLE IF NOT EXISTS public.analytics_events (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  event_name TEXT NOT NULL,
+  path TEXT,
+  lang TEXT,
+  session_id TEXT NOT NULL,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS analytics_events_event_name_created_at_idx
+  ON public.analytics_events(event_name, created_at DESC);
+CREATE INDEX IF NOT EXISTS analytics_events_session_id_idx
+  ON public.analytics_events(session_id);
+
 -- 4. Enable Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.usage_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.session_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.analytics_events ENABLE ROW LEVEL SECURITY;
+-- No policies for analytics_events — RLS enabled with zero policies means
+-- even authenticated/anon clients get nothing at all; only the backend's
+-- service-role key (which bypasses RLS) can read or write this table.
 
 -- 5. RLS Policies
 -- auth.uid() is wrapped in a scalar subquery — (select auth.uid()) — per

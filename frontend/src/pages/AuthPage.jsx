@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, Mail, Lock, LogIn, UserPlus, ArrowLeft, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSeo } from '../lib/useSeo';
+import { trackEvent } from '../lib/analytics';
 import { TRIAL } from '../content/facts';
 
 export default function AuthPage({ navigateTo }) {
@@ -43,6 +44,7 @@ export default function AuthPage({ navigateTo }) {
     try {
       if (mode === 'sign_up') {
         await signUp(email, password, fullName);
+        trackEvent('signup_completed');
         setNotice('Account created. Check your email to confirm, then sign in.');
         setMode('sign_in');
       } else {

@@ -3,6 +3,7 @@ import { Sparkles, ArrowLeft, Check, Loader2, AlertCircle, ShieldCheck, Globe } 
 import { useAuth } from '../context/AuthContext';
 import { buildOffersJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
+import { trackEvent } from '../lib/analytics';
 import { MONTHLY_SAVINGS_VS_WEEKLY_PCT, PRICING, PRICING_DESCRIPTION_EN, PRICING_DESCRIPTION_TH, TRIAL, VAT } from '../content/facts';
 
 // Display-language chrome strings for this page — Stage 4 (real /th and
@@ -135,6 +136,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Checkout error: ${res.status}`);
       if (!data.url) throw new Error('Checkout session did not return a redirect URL.');
+      trackEvent('checkout_started', { metadata: { planTier } });
       window.location.href = data.url;
     } catch (err) {
       setError(err.message || 'Could not start checkout. Please try again.');

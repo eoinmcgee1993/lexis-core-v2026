@@ -17,6 +17,7 @@
 // /pricing was a duplicate. This hook is the fix: every route sets its
 // own head tags on mount.
 import { useEffect } from 'react';
+import { trackEvent } from './analytics';
 
 function upsertMeta(name, content) {
   if (content == null) return;
@@ -129,4 +130,21 @@ export function useSeo({ title, description, canonical, robots, htmlLang, hrefla
     // on unmount would leave a route-less flash of no title/description
     // during the transition, which is worse.
   }, [title, description, canonical, robots, htmlLang, hreflang, jsonLd]);
+
+  // Pageview — a separate effect, deliberately scoped to `title` alone
+  // rather than folded into the head-tags effect above. Several callers
+  // pass a fresh jsonLd object literal on every render (PricingPage.jsx's
+  // `{ 'jsonld-offers': offersJsonLd }`, for one), so that effect's full
+  // dependency list re-fires on unrelated re-renders (a loading spinner,
+  // an error message) — piggybacking on it would inflate pageview counts
+  // with duplicates that aren't real navigation. `title` is a plain
+  // string on every caller (compared by value, not reference) and — unlike
+  // `canonical` — every route sets it, including the noindexed /app and
+  // /auth, which don't pass a canonical at all.
+  useEffect(() => {
+    if (title) {
+      trackEvent('pageview', { path: window.location.pathname, lang: htmlLang || 'en' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title]);
 }

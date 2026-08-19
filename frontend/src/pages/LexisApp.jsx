@@ -16,6 +16,7 @@ import LiveStage from '../components/stages/LiveStage';
 import FeedbackStage from '../components/stages/FeedbackStage';
 import HistoryStage from '../components/stages/HistoryStage';
 import { useSeo } from '../lib/useSeo';
+import { trackEvent } from '../lib/analytics';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -218,6 +219,7 @@ export default function LexisApp({ navigateTo }) {
   // later doesn't keep re-showing "payment confirmed" indefinitely.
   useEffect(() => {
     if (justPaid) {
+      trackEvent('checkout_completed', { metadata: { planTier: profile?.subscription_tier } });
       window.history.replaceState({}, '', '/app');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -799,6 +801,7 @@ export default function LexisApp({ navigateTo }) {
 
       const answerSdp = await sdpResponse.text();
       await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
+      trackEvent('session_connected', { metadata: { direction, subscriptionStatus: profile?.subscription_status } });
 
     } catch (err) {
       console.error('[LEXIS Session Error]', err);
@@ -877,6 +880,7 @@ export default function LexisApp({ navigateTo }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Cancel error: ${res.status}`);
+      trackEvent('plan_cancelled', { metadata: { planTier: profile?.subscription_tier } });
       setCancelAtPeriodEnd(true);
       setCancelPeriodEnd(data.currentPeriodEnd || null);
     } catch (err) {
