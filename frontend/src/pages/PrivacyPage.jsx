@@ -7,11 +7,14 @@
 // their kid would have. Every factual claim below is checked directly
 // against this repo's actual code (backend/app.mjs, supabase-schema.sql)
 // rather than assumed — see the inline comments next to each one.
-// Anything requiring a real business/legal decision (not a code fact) is
-// a loud <Todo> marker, not a guess — see LegalPageShell.jsx's Todo
-// component and the remediation brief's "Placeholders must be loud" rule.
+// Every business/legal decision (OpenAI data-policy link, retention
+// period, deletion process, age/parental consent, legal entity) was
+// confirmed directly by Eoin on 19 Aug 2026 — no more <Todo> markers on
+// this page. The OpenAI Realtime API retention specifics were verified
+// directly against https://developers.openai.com/api/docs/guides/your-data
+// on that date, not assumed.
 import React from 'react';
-import LegalPageShell, { Todo } from '../components/LegalPageShell';
+import LegalPageShell from '../components/LegalPageShell';
 import { useSeo } from '../lib/useSeo';
 import { SITE_URL } from '../data/structuredData';
 
@@ -23,12 +26,10 @@ export default function PrivacyPage({ navigateTo }) {
   });
 
   return (
-    <LegalPageShell navigateTo={navigateTo} title="Privacy Policy" lastUpdated="17 August 2026">
+    <LegalPageShell navigateTo={navigateTo} title="Privacy Policy" lastUpdated="19 August 2026">
       <p>
         This page describes what LEXIS actually does with your data, based
-        on how the product is built today. It is not a substitute for
-        legal review — sections marked <Todo>—</Todo> need an answer from
-        LEXIS before this page is a complete policy.
+        on how the product is built today.
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">What happens to your voice</h2>
@@ -38,9 +39,15 @@ export default function PrivacyPage({ navigateTo }) {
         microphone audio is streamed for the duration of the
         conversation and is not saved as an audio file on LEXIS's own
         servers. What OpenAI itself retains or uses that audio for is
-        governed by OpenAI's own API terms, not LEXIS's — <Todo>link to
-        the specific OpenAI API data-usage policy LEXIS relies on, and
-        confirm it still reflects OpenAI's current terms</Todo>.
+        governed by OpenAI's own data policy for the Realtime API, not
+        LEXIS's — see{' '}
+        <a href="https://developers.openai.com/api/docs/guides/your-data" target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:text-teal-800 underline underline-offset-2">
+          OpenAI's API data usage policy
+        </a>{' '}
+        for the current terms. As of this policy's last update, OpenAI
+        states the Realtime API retains audio for up to 30 days for
+        abuse-monitoring purposes only, and does not retain it as
+        "application state" beyond that.
       </p>
       <p>
         After a session ends, LEXIS generates a feedback summary — a
@@ -62,36 +69,41 @@ export default function PrivacyPage({ navigateTo }) {
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">How long data is kept</h2>
       <p>
-        <Todo>Confirm and state a real retention period for account data
-        and session history — nothing in the product currently enforces
-        automatic deletion after a fixed period.</Todo>
+        Account data and session history are kept for up to 2 years
+        from your last activity on LEXIS, after which they're deleted.
+        You can also ask for earlier deletion at any time — see below.
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Deleting your data</h2>
       <p>
         There is currently no self-serve "delete my account" option in
-        the app itself. <Todo>Provide a real contact address for data
-        deletion/access requests, and confirm the actual process and
-        timeline for honoring one.</Todo>
+        the app itself. Email{' '}
+        <a href="mailto:privacy@learnwithlexis.com" className="text-teal-700 hover:text-teal-800 underline underline-offset-2">privacy@learnwithlexis.com</a>{' '}
+        to request deletion or a copy of your data, and we'll action it
+        directly.
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Age and parental consent</h2>
       <p>
         LEXIS is positioned for Thai youth learning English (and English
-        speakers learning Thai), but there is currently no age
-        verification or parental-consent step anywhere in sign-up.
-        <Todo>This needs an actual decision, not just copy: a minimum
-        age, and/or a parental-consent flow, consistent with Thailand's
-        PDPA and wherever else LEXIS operates. Flagged as a real product
-        gap, not only a missing policy sentence.</Todo>
+        speakers learning Thai). Under Thailand's Personal Data
+        Protection Act, anyone under 20 is legally a minor: under-10s
+        need a parent or guardian's consent to use LEXIS, and those
+        aged 10–19 need both their own consent and a parent or
+        guardian's. At sign-up, LEXIS asks you to confirm you're 20 or
+        older, or that you have your parent or legal guardian's
+        permission to use LEXIS if you're younger — this is a
+        self-attestation, not verified age-check technology.
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Who operates LEXIS</h2>
       <p>
-        Payments are processed under the Clearmark Stripe account.
-        <Todo>Confirm the full legal entity name, registered address,
-        and a real contact email for privacy questions, and state the
-        governing law / jurisdiction for this policy.</Todo>
+        LEXIS is operated by Eoin McGee, trading as Lexis (a sole
+        trader), registered at 154 Moo 5, Suthep, Mueang, Chiang Mai
+        50200, Thailand. Payments are processed under the Clearmark
+        Stripe account. For privacy questions or requests, contact{' '}
+        <a href="mailto:privacy@learnwithlexis.com" className="text-teal-700 hover:text-teal-800 underline underline-offset-2">privacy@learnwithlexis.com</a>.
+        This policy is governed by the laws of Thailand.
       </p>
     </LegalPageShell>
   );
