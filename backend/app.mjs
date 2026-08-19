@@ -10,6 +10,11 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
 const app = express();
+// Removes the "X-Powered-By: Express" response header — harmless on its
+// own, but it's exactly the kind of implementation detail an error
+// response shouldn't be volunteering to a caller (see the CORS error
+// handler at the bottom of this file, which this same instinct led to).
+app.disable('x-powered-by');
 
 /* ─────────────────────────────────────────────────────────────────────── */
 /* 1. ENV CHECK                                                            */
@@ -72,12 +77,25 @@ function resolveFrontendOrigin(req) {
   return allowedOrigins.find(o => o.startsWith('https://')) || allowedOrigins[0];
 }
 
+// Tagged with .status so the error handler at the bottom of this file can
+// tell a rejected origin apart from a genuine server fault — previously
+// this fell through to Express's default error handler, which returns a
+// generic HTML page (stack trace included outside production) and an
+// unconditional 500 for an outcome that's neither a real error nor a
+// server fault, just a disallowed caller.
+class CorsOriginError extends Error {
+  constructor(origin) {
+    super(`[LEXIS Security] CORS blocked request from origin: ${origin}`);
+    this.status = 403;
+  }
+}
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(`[LEXIS Security] CORS blocked request from origin: ${origin}`));
+      callback(new CorsOriginError(origin));
     }
   },
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -877,6 +895,25 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
     // A 500 makes Stripe retry — appropriate if our own DB write failed.
     res.status(500).json({ error: 'Webhook handler failed.' });
   }
+});
+
+// Final error handler — catches anything that reached here via next(err)
+// rather than a route's own try/catch (in practice, today, that's just
+// CorsOriginError from the cors() middleware above, since every route
+// handler in this file catches its own errors). Always responds with the
+// same shape as every other error in this API (JSON, { error: message })
+// instead of falling through to Express's default HTML error page, which
+// leaks a stack trace outside production and returns an unconditional 500
+// even for an outcome — a disallowed CORS origin — that isn't a server
+// fault at all. Four-argument signature is what makes Express treat this
+// as an error handler rather than a normal middleware; it must stay last.
+app.use((err, req, res, next) => {
+  if (err instanceof CorsOriginError) {
+    console.warn(err.message);
+    return res.status(err.status).json({ error: 'Origin not allowed.' });
+  }
+  console.error('[LEXIS Unhandled Error]', err);
+  res.status(err.status || 500).json({ error: 'Internal server error.' });
 });
 
 export default app;
