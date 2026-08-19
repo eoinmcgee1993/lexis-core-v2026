@@ -5,6 +5,12 @@
       "has": [{ "type": "host", "value": "lexis-core-v2026.vercel.app" }],
       "destination": "https://learnwithlexis.com/$1",
       "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.learnwithlexis.com" }],
+      "destination": "https://learnwithlexis.com/$1",
+      "permanent": true
     }
   ],
   "rewrites": [
