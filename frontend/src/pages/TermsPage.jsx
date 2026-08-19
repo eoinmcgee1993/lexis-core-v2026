@@ -1,11 +1,13 @@
 // frontend/src/pages/TermsPage.jsx
 //
 // Scaffolded per the remediation brief's U6 finding (no terms page
-// existed at all). Same rule as PrivacyPage.jsx: real product facts are
-// stated plainly; anything requiring an actual business/legal decision
-// is a loud <Todo> marker, not a guess.
+// existed at all). Every business/legal decision this page needed
+// (abuse definition, change-notification process, governing law/entity)
+// was confirmed directly by Eoin on 19 Aug 2026 — no more <Todo> markers
+// on this page. See PrivacyPage.jsx for the shared entity/jurisdiction
+// facts (same underlying answer, stated in both places).
 import React from 'react';
-import LegalPageShell, { Todo } from '../components/LegalPageShell';
+import LegalPageShell from '../components/LegalPageShell';
 import { useSeo } from '../lib/useSeo';
 import { SITE_URL } from '../data/structuredData';
 import { PRICING, TRIAL, VAT } from '../content/facts';
@@ -18,13 +20,7 @@ export default function TermsPage({ navigateTo }) {
   });
 
   return (
-    <LegalPageShell navigateTo={navigateTo} title="Terms of Service" lastUpdated="17 August 2026">
-      <p>
-        Sections marked <Todo>—</Todo> below need a real decision from
-        LEXIS before this page is a complete, enforceable terms document
-        — treat it as a scaffold, not finished legal copy.
-      </p>
-
+    <LegalPageShell navigateTo={navigateTo} title="Terms of Service" lastUpdated="19 August 2026">
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">What LEXIS is</h2>
       <p>
         LEXIS is a voice conversation practice tool for spoken English
@@ -40,11 +36,11 @@ export default function TermsPage({ navigateTo }) {
       <p>
         You're responsible for keeping your login credentials to
         yourself and for activity on your account. LEXIS reserves the
-        right to suspend an account for abuse of the service —
-        <Todo>define "abuse" concretely (e.g. sharing one paid account
-        across many people, attempting to extract the underlying AI
-        model's system prompt, automated/bot usage) rather than leaving
-        it undefined.</Todo>
+        right to suspend an account for abuse of the service, which
+        means: sharing one paid account across multiple people,
+        attempting to extract the underlying AI model's system prompt
+        or otherwise interfere with how it's instructed, and
+        automated or bot usage of the service.
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Cancelling</h2>
@@ -65,17 +61,18 @@ export default function TermsPage({ navigateTo }) {
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Changes to these terms</h2>
       <p>
-        <Todo>Define the actual process for notifying users of material
-        changes (e.g. email, in-app notice) rather than a generic "we
-        may update this page" statement with no real mechanism behind
-        it.</Todo>
+        If these terms change in a material way, we'll show an in-app
+        notice the next time you sign in — there's no separate email
+        or SMS notification, so the in-app notice is the one place to
+        check.
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Governing law</h2>
       <p>
-        <Todo>State the governing law / jurisdiction and the legal
-        entity these terms are with — see PrivacyPage.jsx's equivalent
-        section, same underlying gap.</Todo>
+        LEXIS is operated by Eoin McGee, trading as Lexis (a sole
+        trader), registered at 154 Moo 5, Suthep, Mueang, Chiang Mai
+        50200, Thailand. These terms are governed by the laws of
+        Thailand.
       </p>
     </LegalPageShell>
   );

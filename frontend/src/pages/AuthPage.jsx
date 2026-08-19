@@ -21,6 +21,10 @@ export default function AuthPage({ navigateTo }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  // Self-attestation, not verified age-check technology — see
+  // PrivacyPage.jsx's "Age and parental consent" section for why the
+  // threshold is 20 (Thailand's PDPA minor definition) rather than 13/18.
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -120,6 +124,23 @@ export default function AuthPage({ navigateTo }) {
             />
           </div>
 
+          {mode === 'sign_up' && (
+            <label className="flex items-start gap-2 text-xs text-lexis-ink/60 cursor-pointer">
+              <input
+                type="checkbox"
+                required
+                checked={ageConfirmed}
+                onChange={(e) => setAgeConfirmed(e.target.checked)}
+                className="mt-0.5 flex-shrink-0"
+              />
+              <span>
+                I confirm I'm 20 or older, or — if I'm younger — that I
+                have my parent or legal guardian's permission to use
+                LEXIS.
+              </span>
+            </label>
+          )}
+
           {error && <p className="text-xs text-rose-600">{error}</p>}
           {notice && <p className="text-xs text-teal-700">{notice}</p>}
 
@@ -139,7 +160,7 @@ export default function AuthPage({ navigateTo }) {
         </form>
 
         <button
-          onClick={() => { setMode(mode === 'sign_in' ? 'sign_up' : 'sign_in'); setError(''); setNotice(''); }}
+          onClick={() => { setMode(mode === 'sign_in' ? 'sign_up' : 'sign_in'); setError(''); setNotice(''); setAgeConfirmed(false); }}
           className="w-full text-center text-xs text-lexis-ink/50 hover:text-teal-700 mt-5 transition-colors"
         >
           {mode === 'sign_in' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}

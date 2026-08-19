@@ -133,6 +133,17 @@ export default function LexisApp({ navigateTo }) {
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [upgradeMessage, setUpgradeMessage] = useState('');
+  // Cancel Plan (WelcomeStage's header control, per RefundPage.jsx's
+  // "Cancelling a plan" section) — POST /api/stripe/cancel sets Stripe's
+  // cancel_at_period_end flag, which leaves profile.subscription_status as
+  // 'active' until the period actually ends (the webhook only flips it to
+  // 'canceled' once Stripe fires customer.subscription.deleted). So the
+  // "won't renew" state has to be tracked locally here rather than read
+  // off `profile`, which won't reflect it until the period is over.
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState('');
+  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
+  const [cancelPeriodEnd, setCancelPeriodEnd] = useState(null);
   const [targetLanguage, setTargetLanguage] = useState(() => {
     try {
       return localStorage.getItem(TARGET_LANGUAGE_STORAGE_KEY) === 'th' ? 'th' : 'en';
@@ -853,6 +864,28 @@ export default function LexisApp({ navigateTo }) {
     }
   };
 
+  // WelcomeStage's "Cancel plan" control, after its own two-step confirm.
+  // See the cancel* state declarations above for why cancelAtPeriodEnd is
+  // tracked here rather than read off `profile`.
+  const handleCancelPlan = useCallback(async () => {
+    setCancelLoading(true);
+    setCancelError('');
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/stripe/cancel`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Cancel error: ${res.status}`);
+      setCancelAtPeriodEnd(true);
+      setCancelPeriodEnd(data.currentPeriodEnd || null);
+    } catch (err) {
+      setCancelError(err.message || 'Could not cancel your plan. Please try again.');
+    } finally {
+      setCancelLoading(false);
+    }
+  }, [session]);
+
   // Topics stage handler — starts the session immediately with whatever
   // was just tapped (a real topic key, or null for "Just Talk"). Moves to
   // 'live' synchronously so LiveStage's own isConnecting UI (spinner,
@@ -991,6 +1024,11 @@ export default function LexisApp({ navigateTo }) {
       onViewHistory={() => setStage('history')}
       onSignOut={() => { endSession(); signOut(); }}
       onGoHome={() => navigateTo('/')}
+      onCancelPlan={handleCancelPlan}
+      cancelLoading={cancelLoading}
+      cancelError={cancelError}
+      cancelAtPeriodEnd={cancelAtPeriodEnd}
+      cancelPeriodEnd={cancelPeriodEnd}
     />
   );
 }

@@ -145,6 +145,8 @@ const feedbackRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 6, message:
 // results could plausibly re-fetch on every visit to the History screen.
 const historyRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 20, message: 'History rate limit exceeded. Please wait a moment.' });
 
+const cancelRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 5, message: 'Rate limit exceeded. Please wait a moment.' });
+
 /* ─────────────────────────────────────────────────────────────────────── */
 /* 5. AUTH MIDDLEWARE                                                      */
 /*                                                                          */
@@ -794,6 +796,28 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
   } catch (err) {
     console.error('[LEXIS Stripe Checkout Error]', err);
     res.status(500).json({ error: 'Failed to create payment checkout session.' });
+  }
+});
+
+// Cancel a subscription — self-serve, per the Refund & Cancellation Policy
+// (RefundPage.jsx): stops future renewal but leaves access in place for the
+// rest of the period already paid for. cancel_at_period_end leaves Stripe's
+// subscription.status as 'active' until the period naturally ends, at which
+// point Stripe fires customer.subscription.deleted — already handled by the
+// webhook below (sets subscription_status: 'canceled', subscription_tier:
+// 'free') with no further changes needed here.
+app.post('/api/stripe/cancel', cancelRateLimiter, authenticate, async (req, res) => {
+  try {
+    const subscriptionId = req.profile.stripe_subscription_id;
+    if (!subscriptionId || req.profile.subscription_status !== 'active') {
+      return res.status(400).json({ error: 'No active paid subscription to cancel.' });
+    }
+
+    const subscription = await stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
+    res.json({ cancelAtPeriodEnd: true, currentPeriodEnd: subscription.current_period_end });
+  } catch (err) {
+    console.error('[LEXIS Stripe Cancel Error]', err);
+    res.status(500).json({ error: 'Failed to cancel subscription. Please try again or contact support.' });
   }
 });
 
