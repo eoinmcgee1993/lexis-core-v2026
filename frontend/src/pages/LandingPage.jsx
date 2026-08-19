@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Sparkles, Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp } from 'lucide-react';
+import { Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp } from 'lucide-react';
+import LexisMark from '../components/LexisMark';
 import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
 import { FAQS, LANDING_DESCRIPTION_EN, LANDING_DESCRIPTION_TH, PRICING_TEASER_EN, PRICING_TEASER_TH } from '../content/facts';
@@ -56,7 +57,8 @@ const CHROME = {
     trust: [
       'Gentle, real-time grammar correction',
       'Jump in and interrupt LEXIS anytime',
-      'Review what you practiced, anytime (paid plans)'
+      'Review what you practiced, anytime (paid plans)',
+      'No waiting, no scheduling — practice the moment you want to'
     ],
     faqHeading: 'Frequently asked questions',
     liveVoice: 'Live voice — ready when you are',
@@ -75,7 +77,8 @@ const CHROME = {
     trust: [
       'แก้ไขไวยากรณ์แบบเรียลไทม์อย่างอ่อนโยน',
       'พูดแทรก LEXIS ได้ทุกเมื่อ',
-      'ทบทวนสิ่งที่ฝึกได้ทุกเมื่อ (แพ็กเกจแบบเสียเงิน)'
+      'ทบทวนสิ่งที่ฝึกได้ทุกเมื่อ (แพ็กเกจแบบเสียเงิน)',
+      'ไม่ต้องรอ ไม่ต้องนัดเวลา — ฝึกได้ทันทีที่อยากฝึก'
     ],
     faqHeading: 'คำถามที่พบบ่อย',
     liveVoice: 'พูดคุยสด — พร้อมเมื่อคุณพร้อม',
@@ -127,14 +130,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     en: {
       en: {
         heroTitle: 'Practice Speaking English Out Loud with LEXIS',
-        heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time. Practice as much as you want, whenever you want.',
+        heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time — built for students, professionals, and anyone prepping for interviews, travel, or work. Practice as much as you want, whenever you want.',
         cta: 'Try It Free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
         heroTitle: 'ฝึกพูดภาษาอังกฤษออกเสียงจริงกับ LEXIS',
-        heroSub: 'LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้',
+        heroSub: 'LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ เหมาะกับนักเรียน คนทำงาน และใครก็ตามที่กำลังเตรียมสัมภาษณ์งาน เดินทาง หรือทำงาน ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้',
         cta: 'ลองใช้ฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
@@ -143,14 +146,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     th: {
       en: {
         heroTitle: 'Practice Speaking Thai Out Loud with LEXIS',
-        heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time. Practice as much as you want, whenever you want.',
+        heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time — built for students, professionals, and anyone prepping for interviews, travel, or work. Practice as much as you want, whenever you want.',
         cta: 'Try It Free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
         heroTitle: 'ฝึกพูดภาษาไทยออกเสียงจริงกับ LEXIS',
-        heroSub: 'LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้',
+        heroSub: 'LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ เหมาะกับนักเรียน คนทำงาน และใครก็ตามที่กำลังเตรียมสัมภาษณ์งาน เดินทาง หรือทำงาน ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้',
         cta: 'ลองใช้ฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
@@ -189,7 +192,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
       <header className="w-full max-w-6xl mx-auto p-4 sm:p-6 flex items-center justify-between border-b border-lexis-ink/10 gap-2">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
           <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700 flex-shrink-0">
-            <Sparkles className="w-6 h-6" />
+            <LexisMark className="w-6 h-6" />
           </div>
           <span className="text-lg sm:text-xl font-display font-semibold text-lexis-ink whitespace-nowrap">
             LEXIS
@@ -349,9 +352,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
         </div>
       </section>
 
-      {/* Trust strip */}
+      {/* Trust strip — four short bullets, not three. The fourth
+          ("No waiting, no scheduling...") is where "How is this different
+          from a language exchange app?" moved to when the FAQ list below
+          got trimmed (19 Aug 2026) — a punchy differentiator fits a bullet
+          better than a whole FAQ block, and this is the section that
+          already exists for exactly this kind of claim. */}
       <section className="w-full max-w-5xl mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-lexis-ink/60">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs text-lexis-ink/60">
           <div className="flex items-center space-x-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3">
             <Check className="w-4 h-4 text-teal-600 flex-shrink-0" />
             <span>{c.trust[0]}</span>
@@ -363,6 +371,10 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <div className="flex items-center space-x-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3">
             <Check className="w-4 h-4 text-teal-600 flex-shrink-0" />
             <span>{c.trust[2]}</span>
+          </div>
+          <div className="flex items-center space-x-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3">
+            <Zap className="w-4 h-4 text-teal-600 flex-shrink-0" />
+            <span>{c.trust[3]}</span>
           </div>
         </div>
       </section>

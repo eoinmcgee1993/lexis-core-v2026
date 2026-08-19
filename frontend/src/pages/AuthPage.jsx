@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Mail, Lock, LogIn, UserPlus, ArrowLeft, Loader2 } from 'lucide-react';
+import { Mail, Lock, LogIn, UserPlus, ArrowLeft, Loader2 } from 'lucide-react';
+import LexisMark from '../components/LexisMark';
 import { useAuth } from '../context/AuthContext';
 import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
@@ -71,7 +72,7 @@ export default function AuthPage({ navigateTo }) {
       <div className="w-full max-w-sm bg-white border border-lexis-ink/10 rounded-2xl p-8 shadow-sm">
         <div className="flex items-center space-x-3 mb-6">
           <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700">
-            <Sparkles className="w-5 h-5" />
+            <LexisMark className="w-5 h-5" />
           </div>
           <span className="text-lg font-display font-semibold text-lexis-ink">
             LEXIS

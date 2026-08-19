@@ -68,6 +68,21 @@ export const PRICING_DESCRIPTION_TH = `ราคา LEXIS: ทดลองฟร
 // Previously hand-duplicated between those two, which a re-audit flagged
 // as a drift risk (mismatched visible text vs structured data is exactly
 // what invalidates FAQ rich results) — both now read this array.
+//
+// Trimmed from six questions to three (19 Aug 2026) — cognitive load on
+// a landing page's own conversion, not a content-quality problem with the
+// three that got cut. Their content still exists, just not as a separate
+// FAQ block each:
+//   - "Who is LEXIS for?" — folded into the hero subheadline instead
+//     (LandingPage.jsx's heroSub), so it's read on the way in rather than
+//     requiring a scroll + click to expand.
+//   - "How is this different from a language exchange app?" — condensed
+//     into a trust-strip bullet ("No waiting, no scheduling — practice
+//     the moment you want to").
+//   - "What happens to my voice recording?" — this is a real, detailed
+//     answer that deserves more than an FAQ-box sentence; it now lives
+//     only in PrivacyPage.jsx's "What happens to your voice" section,
+//     which the footer already links to right below this FAQ block.
 export const FAQS = {
   en: [
     {
@@ -75,56 +90,32 @@ export const FAQS = {
       a: 'LEXIS is a voice-based speaking practice tool for English and Thai. You have a real, spoken conversation with it over your microphone, and it replies in real time, the way a conversation partner would — not a chatbot you type into.'
     },
     {
-      q: 'Who is LEXIS for?',
-      a: 'Thai speakers who want to practice spoken English, and English speakers who want to practice spoken Thai — students, young professionals, and anyone preparing for interviews, travel, or work who wants low-pressure speaking practice without needing another person available.'
-    },
-    {
       q: 'Is LEXIS free to try?',
       a: `Yes. New accounts get a free ${TRIAL.minutes}-minute trial — no card required. After that, LEXIS is ฿${PRICING.weekly.thb}/week or ฿${PRICING.monthly.thb}/month.`
     },
     {
-      q: 'How is this different from a language exchange app?',
-      a: "There's no waiting for a partner to be online, no scheduling, and no awkwardness about correcting a stranger. LEXIS is available any time you are, and its whole job is to help you practice — not make small talk."
-    },
-    {
       q: 'Can I interrupt LEXIS mid-sentence?',
       a: "Yes — real conversations involve talking over each other sometimes, so you can jump in and interrupt LEXIS at any point, the same as you would with a person."
-    },
-    {
-      q: 'What happens to my voice recording?',
-      a: "Your microphone audio streams live to power the conversation and isn't saved as an audio file on LEXIS's own servers. After a session, LEXIS keeps only a short feedback summary (a confidence score and a few corrections) — never a transcript of what you said. See the full Privacy Policy for details."
     }
   ],
-  // Real Thai translations, not machine-generated placeholders — same six
-  // questions as FAQS.en, same facts (TRIAL.minutes/PRICING interpolated
-  // the same way), written for the /th and /th/pricing routes (Stage 4).
-  // Kept exactly parallel in length/order to FAQS.en so buildFaqJsonLd's
-  // structured data and the visible <details> list never drift between
-  // languages the way the old hand-duplicated copy did.
+  // Real Thai translations, not machine-generated placeholders — same
+  // three questions as FAQS.en, same facts (TRIAL.minutes/PRICING
+  // interpolated the same way), written for the /th and /th/pricing
+  // routes (Stage 4). Kept exactly parallel in length/order to FAQS.en so
+  // buildFaqJsonLd's structured data and the visible <details> list never
+  // drift between languages the way the old hand-duplicated copy did.
   th: [
     {
       q: 'LEXIS คืออะไร',
       a: 'LEXIS คือเครื่องมือฝึกพูดด้วยเสียงสำหรับภาษาอังกฤษและภาษาไทย คุณจะได้สนทนาจริงผ่านไมโครโฟน และ LEXIS จะตอบกลับแบบเรียลไทม์เหมือนคู่สนทนาจริง ๆ ไม่ใช่แชทบอทที่ต้องพิมพ์คุย'
     },
     {
-      q: 'LEXIS เหมาะกับใคร',
-      a: 'เหมาะกับคนไทยที่อยากฝึกพูดภาษาอังกฤษ และคนที่อยากฝึกพูดภาษาไทย ไม่ว่าจะเป็นนักเรียน คนทำงาน หรือใครก็ตามที่กำลังเตรียมตัวสัมภาษณ์งาน เดินทาง หรือทำงาน และต้องการฝึกพูดแบบไม่กดดัน โดยไม่ต้องรอให้มีคนอื่นว่าง'
-    },
-    {
       q: 'ทดลองใช้ LEXIS ฟรีได้ไหม',
       a: `ได้ บัญชีใหม่ทุกบัญชีจะได้ทดลองใช้ฟรี ${TRIAL.minutes} นาที ไม่ต้องผูกบัตร หลังจากนั้น LEXIS มีราคา ฿${PRICING.weekly.thb}/สัปดาห์ หรือ ฿${PRICING.monthly.thb}/เดือน`
     },
     {
-      q: 'ต่างจากแอปแลกเปลี่ยนภาษาอย่างไร',
-      a: 'ไม่ต้องรอคู่สนทนาออนไลน์ ไม่ต้องนัดเวลา และไม่ต้องเขินที่จะแก้คำพูดให้คนแปลกหน้า LEXIS พร้อมให้ฝึกทุกเมื่อที่คุณสะดวก และหน้าที่หลักของมันคือช่วยให้คุณฝึกพูด ไม่ใช่แค่พูดคุยเล่น ๆ'
-    },
-    {
       q: 'พูดแทรก LEXIS กลางประโยคได้ไหม',
       a: 'ได้ — การสนทนาจริงบางครั้งก็มีการพูดแทรกกัน คุณจึงสามารถพูดแทรก LEXIS ได้ทุกเมื่อ เหมือนที่ทำได้กับคนจริง ๆ'
-    },
-    {
-      q: 'เสียงที่ฉันพูดถูกเก็บไว้อย่างไร',
-      a: 'เสียงจากไมโครโฟนของคุณจะสตรีมสดเพื่อใช้ในการสนทนาเท่านั้น และไม่ถูกบันทึกเป็นไฟล์เสียงไว้บนเซิร์ฟเวอร์ของ LEXIS หลังจบเซสชัน LEXIS จะเก็บไว้เพียงสรุปผลป้อนกลับสั้น ๆ (คะแนนความมั่นใจและคำแนะนำบางส่วน) ไม่ใช่บทสนทนาที่คุณพูด ดูรายละเอียดเพิ่มเติมได้ที่นโยบายความเป็นส่วนตัว'
     }
   ]
 };

@@ -6,7 +6,8 @@
 // JSX across three files. Content-only children; each page brings its
 // own <h1>/<h2>/<p> structure.
 import React from 'react';
-import { ArrowLeft, Sparkles, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import LexisMark from './LexisMark';
 
 // Loud, visible placeholder for any claim this page can't honestly make
 // yet (specific data-retention period, refund window, registered
@@ -37,7 +38,7 @@ export default function LegalPageShell({ navigateTo, title, lastUpdated, childre
         </button>
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700">
-            <Sparkles className="w-5 h-5" />
+            <LexisMark className="w-5 h-5" />
           </div>
           <span className="text-lg font-display font-semibold text-lexis-ink">LEXIS</span>
         </div>
