@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Sparkles, ArrowLeft, Check, Loader2, AlertCircle, ShieldCheck, Globe } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, AlertCircle, ShieldCheck, Globe } from 'lucide-react';
+import LexisMark from '../components/LexisMark';
 import { useAuth } from '../context/AuthContext';
 import { buildOffersJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
@@ -158,7 +159,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
         </button>
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700">
-            <Sparkles className="w-5 h-5" />
+            <LexisMark className="w-5 h-5" />
           </div>
           <span className="text-lg font-display font-semibold text-lexis-ink">
             LEXIS
