@@ -33,6 +33,7 @@ export default function WelcomeStage({
   onStartTalking,
   profile,
   justPaid,
+  justSponsored,
   upgradeRequired,
   upgradeMessage,
   sessionError,
@@ -115,6 +116,7 @@ export default function WelcomeStage({
         {justPaid && (
           <div className="mb-6 px-4 py-3 bg-teal-600/10 border border-teal-600/30 rounded-2xl text-teal-700 text-xs">
             Payment confirmed — your pass is now active. Thank you!
+            {justSponsored && ' Thank you for adding a LEXIS Community sponsorship — it means a lot.'}
           </div>
         )}
 

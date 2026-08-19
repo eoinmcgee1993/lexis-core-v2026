@@ -843,14 +843,41 @@ app.get('/api/history', historyRateLimiter, authenticate, async (req, res) => {
   }
 });
 
+// LEXIS Community — the pay-it-forward checkout add-on (see
+// frontend's CommunityPage.jsx for the full framing). A flat amount per
+// billing cycle, not a percentage, so it's a predictable, easy-to-explain
+// line item rather than a surprise. Deliberately a single named constant
+// so the one number is easy to find and change — not scattered across
+// checkout logic and copy separately.
+const SPONSOR_ADDON_THB = 50;
+
 // Stripe Checkout — auth required, but NOT entitlement-gated: a user whose
 // trial just expired is exactly who needs to reach this endpoint.
 app.post('/api/stripe/checkout', authenticate, async (req, res) => {
   try {
-    const { priceId, planTier } = req.body || {};
+    const { priceId, planTier, sponsorAdd } = req.body || {};
     if (!priceId) return res.status(400).json({ error: 'Missing priceId parameter.' });
     if (planTier && !['weekly', 'monthly'].includes(planTier)) {
       return res.status(400).json({ error: 'Invalid planTier — expected "weekly" or "monthly".' });
+    }
+
+    const lineItems = [{ price: priceId, quantity: 1 }];
+    if (sponsorAdd) {
+      // price_data with an inline `recurring` block creates the Price
+      // object on the fly, scoped to this one Checkout Session — no
+      // pre-created Stripe Price ID needed (unlike priceId above, which
+      // does require one). Matches the main plan's own billing interval
+      // so it rides the same subscription/invoice cycle rather than
+      // becoming a second, separately-timed charge.
+      lineItems.push({
+        price_data: {
+          currency: 'thb',
+          product_data: { name: 'LEXIS Community — sponsor a student' },
+          unit_amount: SPONSOR_ADDON_THB * 100, // satang
+          recurring: { interval: planTier === 'monthly' ? 'month' : 'week' }
+        },
+        quantity: 1
+      });
     }
 
     const frontendOrigin = resolveFrontendOrigin(req);
@@ -858,9 +885,9 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
       payment_method_types: ['card'],
       mode: 'subscription',
       customer_email: req.user.email,
-      line_items: [{ price: priceId, quantity: 1 }],
-      metadata: { user_id: req.user.id, plan_tier: planTier || 'weekly' },
-      success_url: `${frontendOrigin}/app?payment=success`,
+      line_items: lineItems,
+      metadata: { user_id: req.user.id, plan_tier: planTier || 'weekly', sponsor_add: sponsorAdd ? 'true' : 'false' },
+      success_url: `${frontendOrigin}/app?payment=success${sponsorAdd ? '&sponsor=1' : ''}`,
       cancel_url: `${frontendOrigin}/pricing?payment=cancelled`,
       allow_promotion_codes: true
     });
