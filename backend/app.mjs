@@ -122,6 +122,36 @@ app.use((req, res, next) => {
 });
 
 /* ─────────────────────────────────────────────────────────────────────── */
+/* ERROR MONITORING (no third-party service — Sentry etc.)                 */
+/*                                                                          */
+/* Every route handler below catches its own errors and responds directly */
+/* (res.status(500)...) rather than calling next(err), so the CORS error-  */
+/* handling middleware at the bottom of this file only ever actually sees */
+/* CorsOriginError in practice — it is NOT the real visibility layer for   */
+/* genuine failures. This is: called from each route's own outer catch    */
+/* block, right where it already did console.error (Vercel's own Runtime  */
+/* Logs still capture that regardless), plus a best-effort row in          */
+/* error_logs — "what broke, how often, for whom" becomes a query instead  */
+/* of grepping platform logs by hand. Fire-and-forget by design: a failure */
+/* to log an error must never throw a second error on top of the first.   */
+/* ─────────────────────────────────────────────────────────────────────── */
+function logError(context, err, extra = {}) {
+  console.error(`[LEXIS ${context}]`, err);
+  try {
+    supabase?.from('error_logs').insert({
+      context,
+      message: err?.message || String(err),
+      stack: err?.stack || null,
+      extra
+    }).then(({ error }) => {
+      if (error) console.error('[LEXIS Error Logging Failed]', error);
+    });
+  } catch (loggingErr) {
+    console.error('[LEXIS Error Logging Failed]', loggingErr);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────── */
 /* 4. RATE LIMITING (per-IP, separate buckets per route)                  */
 /*                                                                          */
 /* In-memory — works as intended on a long-running process (Railway/local).*/
@@ -169,6 +199,11 @@ const cancelRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 5, message: '
 // not just a deliberate user action, so a normal browsing session can
 // legitimately produce many more of these than, say, cancel attempts.
 const analyticsRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 60, message: 'Rate limit exceeded.' });
+
+// A single buggy render loop could otherwise flood this endpoint (a React
+// error boundary re-throwing, an unhandledrejection firing repeatedly) —
+// capped tighter than analytics for exactly that reason.
+const errorReportRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 20, message: 'Rate limit exceeded.' });
 
 // First-party analytics — see backend/supabase-schema.sql's
 // analytics_events table and frontend/src/lib/analytics.js for the full
@@ -229,7 +264,7 @@ async function authenticate(req, res, next) {
     req.profile = profile;
     next();
   } catch (err) {
-    console.error('[LEXIS Auth Middleware Error]', err);
+    logError('Auth Middleware Error', err);
     res.status(500).json({ error: 'Internal security authentication failure.' });
   }
 }
@@ -512,7 +547,7 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
     });
 
   } catch (err) {
-    console.error('[LEXIS Session Error]', err);
+    logError('Session Error', err);
     res.status(500).json({ error: 'Internal server error during session initialization.' });
   }
 });
@@ -527,7 +562,7 @@ app.post('/api/heartbeat', heartbeatRateLimiter, authenticate, requireEntitlemen
     if (error) throw error;
     res.json({ status: 'ack', telemetry: data });
   } catch (err) {
-    console.error('[LEXIS Heartbeat Error]', err);
+    logError('Heartbeat Error', err);
     res.status(500).json({ error: 'Failed to record usage telemetry.' });
   }
 });
@@ -590,7 +625,7 @@ app.post('/api/translate', translateRateLimiter, authenticate, requireEntitlemen
 
     res.json({ translation });
   } catch (err) {
-    console.error('[LEXIS Translate Error]', err);
+    logError('Translate Error', err);
     res.status(500).json({ error: 'Internal server error during translation.' });
   }
 });
@@ -782,7 +817,7 @@ confidence (0-100) should reflect genuine fluency/accuracy signals — grammar, 
     await saveSessionHistory({ userId: req.user.id, direction, topic, insufficient: false, confidence, strengths, improvements });
     res.json({ confidence, strengths, improvements });
   } catch (err) {
-    console.error('[LEXIS Feedback Error]', err);
+    logError('Feedback Error', err);
     res.status(500).json({ error: 'Internal server error while generating feedback.' });
   }
 });
@@ -803,7 +838,7 @@ app.get('/api/history', historyRateLimiter, authenticate, async (req, res) => {
     if (error) throw error;
     res.json({ history: data || [] });
   } catch (err) {
-    console.error('[LEXIS History Error]', err);
+    logError('History Error', err);
     res.status(500).json({ error: 'Failed to load session history.' });
   }
 });
@@ -832,7 +867,7 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
 
     res.json({ url: session.url });
   } catch (err) {
-    console.error('[LEXIS Stripe Checkout Error]', err);
+    logError('Stripe Checkout Error', err);
     res.status(500).json({ error: 'Failed to create payment checkout session.' });
   }
 });
@@ -854,7 +889,7 @@ app.post('/api/stripe/cancel', cancelRateLimiter, authenticate, async (req, res)
     const subscription = await stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
     res.json({ cancelAtPeriodEnd: true, currentPeriodEnd: subscription.current_period_end });
   } catch (err) {
-    console.error('[LEXIS Stripe Cancel Error]', err);
+    logError('Stripe Cancel Error', err);
     res.status(500).json({ error: 'Failed to cancel subscription. Please try again or contact support.' });
   }
 });
@@ -900,6 +935,45 @@ app.post('/api/analytics/event', analyticsRateLimiter, async (req, res) => {
   }
 });
 
+// Frontend error reporting — see frontend/src/lib/errorReporting.js for
+// the three real sources (window 'error', 'unhandledrejection', and the
+// app-wide React ErrorBoundary in main.jsx). Same shape as the analytics
+// endpoint above: unauthenticated (a crash can happen on any page, signed
+// in or not), best-effort user_id from a bearer token if present, tightly
+// bounded input sizes so one huge stack trace or message can't bloat a row.
+app.post('/api/errors/log', errorReportRateLimiter, async (req, res) => {
+  try {
+    const { context, message, stack, url, extra } = req.body || {};
+    if (typeof context !== 'string' || !context) {
+      return res.status(400).json({ error: 'Missing context.' });
+    }
+
+    let userId = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const { data } = await supabase.auth.getUser(authHeader.split(' ')[1]);
+      if (data?.user) userId = data.user.id;
+    }
+
+    const { error } = await supabase.from('error_logs').insert({
+      context: `Frontend: ${context.slice(0, 100)}`,
+      message: typeof message === 'string' ? message.slice(0, 2000) : null,
+      stack: typeof stack === 'string' ? stack.slice(0, 8000) : null,
+      extra: {
+        url: typeof url === 'string' ? url.slice(0, 500) : null,
+        userId,
+        ...(extra && typeof extra === 'object' ? extra : {})
+      }
+    });
+    if (error) throw error;
+
+    res.status(204).end();
+  } catch (err) {
+    console.error('[LEXIS Error Reporting Error]', err);
+    res.status(500).json({ error: 'Failed to record error report.' });
+  }
+});
+
 // Stripe Webhook Listener
 app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -925,7 +999,12 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
           updated_at: new Date().toISOString()
         })
         .eq('id', session.metadata?.user_id);
-      if (error) console.error('[LEXIS Webhook] Failed to activate subscription:', error);
+      // A silent DB-write failure here is worse than most: Stripe already
+      // has the customer's money, and res.json({received:true}) below
+      // tells Stripe not to retry — so this doesn't self-heal the way a
+      // 500 + Stripe retry would. logError (not a plain console.error)
+      // specifically so this shows up in error_logs, not just platform logs.
+      if (error) logError('Webhook Failed to Activate Subscription', error);
 
     } else if (event.type === 'customer.subscription.updated') {
       // Covers payment failures / recoveries mid-cycle (Stripe status:
@@ -938,7 +1017,7 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
           .from('profiles')
           .update({ subscription_status: mapped, updated_at: new Date().toISOString() })
           .eq('stripe_subscription_id', subscription.id);
-        if (error) console.error('[LEXIS Webhook] Failed to update subscription status:', error);
+        if (error) logError('Webhook Failed to Update Subscription Status', error);
       }
 
     } else if (event.type === 'customer.subscription.deleted') {
@@ -947,12 +1026,12 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
         .from('profiles')
         .update({ subscription_status: 'canceled', subscription_tier: 'free', updated_at: new Date().toISOString() })
         .eq('stripe_subscription_id', subscription.id);
-      if (error) console.error('[LEXIS Webhook] Failed to cancel subscription:', error);
+      if (error) logError('Webhook Failed to Cancel Subscription', error);
     }
 
     res.json({ received: true });
   } catch (err) {
-    console.error('[LEXIS Webhook Handler Error]', err);
+    logError('Webhook Handler Error', err);
     // A 500 makes Stripe retry — appropriate if our own DB write failed.
     res.status(500).json({ error: 'Webhook handler failed.' });
   }
