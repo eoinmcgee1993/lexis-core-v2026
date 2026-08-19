@@ -165,6 +165,26 @@ const historyRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 20, message:
 
 const cancelRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 5, message: 'Rate limit exceeded. Please wait a moment.' });
 
+// Generous relative to the others — pageviews fire on every route change,
+// not just a deliberate user action, so a normal browsing session can
+// legitimately produce many more of these than, say, cancel attempts.
+const analyticsRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 60, message: 'Rate limit exceeded.' });
+
+// First-party analytics — see backend/supabase-schema.sql's
+// analytics_events table and frontend/src/lib/analytics.js for the full
+// picture. Allowlisted event names only, so this can't become an
+// arbitrary write-anything-you-want endpoint just because it's
+// unauthenticated (it has to be: pageviews happen on marketing pages
+// before anyone signs in).
+const ANALYTICS_EVENTS = new Set([
+  'pageview',
+  'signup_completed',
+  'session_connected',
+  'checkout_started',
+  'checkout_completed',
+  'plan_cancelled'
+]);
+
 /* ─────────────────────────────────────────────────────────────────────── */
 /* 5. AUTH MIDDLEWARE                                                      */
 /*                                                                          */
@@ -836,6 +856,47 @@ app.post('/api/stripe/cancel', cancelRateLimiter, authenticate, async (req, res)
   } catch (err) {
     console.error('[LEXIS Stripe Cancel Error]', err);
     res.status(500).json({ error: 'Failed to cancel subscription. Please try again or contact support.' });
+  }
+});
+
+// First-party analytics — deliberately NOT gated behind authenticate:
+// pageviews and signup happen before anyone has a session. When a bearer
+// token IS present (post-login events like checkout/cancel), it's used
+// on a best-effort basis to attach user_id — an invalid/expired token
+// just means the event is recorded without one, not a rejected request,
+// since losing a data point is a much smaller problem than an analytics
+// call breaking whatever real action the user just took.
+app.post('/api/analytics/event', analyticsRateLimiter, async (req, res) => {
+  try {
+    const { event, path, lang, sessionId, metadata } = req.body || {};
+    if (!event || !ANALYTICS_EVENTS.has(event)) {
+      return res.status(400).json({ error: 'Unknown or missing event name.' });
+    }
+    if (!sessionId || typeof sessionId !== 'string' || sessionId.length > 100) {
+      return res.status(400).json({ error: 'Missing or invalid sessionId.' });
+    }
+
+    let userId = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const { data } = await supabase.auth.getUser(authHeader.split(' ')[1]);
+      if (data?.user) userId = data.user.id;
+    }
+
+    const { error } = await supabase.from('analytics_events').insert({
+      event_name: event,
+      path: typeof path === 'string' ? path.slice(0, 200) : null,
+      lang: typeof lang === 'string' ? lang.slice(0, 10) : null,
+      session_id: sessionId,
+      user_id: userId,
+      metadata: metadata && typeof metadata === 'object' ? metadata : {}
+    });
+    if (error) throw error;
+
+    res.status(204).end();
+  } catch (err) {
+    console.error('[LEXIS Analytics Error]', err);
+    res.status(500).json({ error: 'Failed to record event.' });
   }
 });
 

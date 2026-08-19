@@ -65,6 +65,7 @@ export default function PrivacyPage({ navigateTo }) {
         <li>Session feedback summaries, as described above (confidence score, strengths, suggested corrections) — not transcripts or audio.</li>
         <li>Usage totals: how many seconds of practice you've used, to enforce the free trial and track your plan.</li>
         <li>Payment details are handled entirely by Stripe — LEXIS does not receive or store your card number.</li>
+        <li>Basic first-party analytics — which page you visited, and whether you signed up, started a practice session, checked out, or cancelled a plan — kept only against an anonymous per-visit identifier, not sold or shared with any third party. No third-party analytics or advertising trackers are used anywhere on LEXIS.</li>
       </ul>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">How long data is kept</h2>
