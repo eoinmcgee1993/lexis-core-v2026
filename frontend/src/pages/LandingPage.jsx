@@ -33,7 +33,7 @@ const HERO_SIZES = '(min-width: 768px) 384px, (min-width: 640px) 320px, 256px';
 // client-side toggle) rather than one hardcoded English array.
 const HOW_IT_WORKS = {
   en: [
-    { icon: Mic, title: 'Start talking', desc: 'Tap one button and start speaking — no typing, no scripts to read from.' },
+    { icon: Mic, title: 'Start talking', desc: 'Tap one button and start speaking: no typing, no scripts to read from.' },
     { icon: MessageCircle, title: 'LEXIS responds live', desc: "It listens, replies, and corrects you gently mid-conversation, the way a patient tutor would." },
     { icon: TrendingUp, title: 'See what to work on', desc: 'After each session, get a plain-language summary of what you did well and what to practice next.' }
   ],
@@ -52,16 +52,16 @@ const CHROME = {
   en: {
     pricing: 'Pricing',
     getStarted: 'Get Started',
-    heroBadge: 'Talk in real time — no awkward pauses, no typing',
+    heroBadge: 'Talk in real time: no awkward pauses, no typing',
     howItWorks: 'How it works',
     trust: [
       'Gentle, real-time grammar correction',
       'Jump in and interrupt LEXIS anytime',
       'Review what you practiced, anytime (paid plans)',
-      'No waiting, no scheduling — practice the moment you want to'
+      'No waiting, no scheduling: practice the moment you want to'
     ],
     faqHeading: 'Frequently asked questions',
-    liveVoice: 'Live voice — ready when you are',
+    liveVoice: 'Live voice, ready when you are',
     photoDisclosure: "LEXIS's pictured persona is an AI-generated image, not a real person.",
     heroAlt: 'LEXIS, your voice conversation partner, ready to start a practice session (AI-generated image)',
     footerTrust: 'Private & secure • Payments handled by Stripe',
@@ -73,16 +73,16 @@ const CHROME = {
   th: {
     pricing: 'ราคา',
     getStarted: 'เริ่มเลย',
-    heroBadge: 'พูดคุยแบบเรียลไทม์ — ไม่ต้องพิมพ์ ไม่ต้องรอ',
+    heroBadge: 'พูดคุยแบบเรียลไทม์ ไม่ต้องพิมพ์ ไม่ต้องรอ',
     howItWorks: 'วิธีใช้งาน',
     trust: [
       'แก้ไขไวยากรณ์แบบเรียลไทม์อย่างอ่อนโยน',
       'พูดแทรก LEXIS ได้ทุกเมื่อ',
       'ทบทวนสิ่งที่ฝึกได้ทุกเมื่อ (แพ็กเกจแบบเสียเงิน)',
-      'ไม่ต้องรอ ไม่ต้องนัดเวลา — ฝึกได้ทันทีที่อยากฝึก'
+      'ไม่ต้องรอ ไม่ต้องนัดเวลา ฝึกได้ทันทีที่อยากฝึก'
     ],
     faqHeading: 'คำถามที่พบบ่อย',
-    liveVoice: 'พูดคุยสด — พร้อมเมื่อคุณพร้อม',
+    liveVoice: 'พูดคุยสด พร้อมเมื่อคุณพร้อม',
     photoDisclosure: 'ภาพของ LEXIS ที่แสดงนี้สร้างขึ้นด้วย AI ไม่ใช่บุคคลจริง',
     heroAlt: 'LEXIS คู่สนทนาฝึกพูดของคุณ พร้อมเริ่มฝึกได้ทุกเมื่อ (ภาพสร้างขึ้นด้วย AI)',
     footerTrust: 'ปลอดภัยและเป็นส่วนตัว • ชำระเงินผ่าน Stripe',
@@ -132,7 +132,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     en: {
       en: {
         heroTitle: 'Practice Speaking English Out Loud with LEXIS',
-        heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time — built for students, professionals, and anyone prepping for interviews, travel, or work. Practice as much as you want, whenever you want.',
+        heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time. Built for students, professionals, and anyone prepping for interviews, travel, or work. Practice as much as you want, whenever you want.',
         cta: 'Try It Free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
@@ -148,7 +148,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     th: {
       en: {
         heroTitle: 'Practice Speaking Thai Out Loud with LEXIS',
-        heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time — built for students, professionals, and anyone prepping for interviews, travel, or work. Practice as much as you want, whenever you want.',
+        heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time. Built for students, professionals, and anyone prepping for interviews, travel, or work. Practice as much as you want, whenever you want.',
         cta: 'Try It Free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'

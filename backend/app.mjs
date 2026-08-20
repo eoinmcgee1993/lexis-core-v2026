@@ -116,7 +116,7 @@ app.use((req, res, next) => {
 // stripe/supabase client.
 app.use((req, res, next) => {
   if (missingEnv.length && req.path !== '/health') {
-    return res.status(503).json({ error: `Server misconfigured — missing environment variable(s): ${missingEnv.join(', ')}` });
+    return res.status(503).json({ error: `Server misconfigured: missing environment variable(s): ${missingEnv.join(', ')}` });
   }
   next();
 });
@@ -858,7 +858,7 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
     const { priceId, planTier, sponsorAdd } = req.body || {};
     if (!priceId) return res.status(400).json({ error: 'Missing priceId parameter.' });
     if (planTier && !['weekly', 'monthly'].includes(planTier)) {
-      return res.status(400).json({ error: 'Invalid planTier — expected "weekly" or "monthly".' });
+      return res.status(400).json({ error: 'Invalid planTier: expected "weekly" or "monthly".' });
     }
 
     const lineItems = [{ price: priceId, quantity: 1 }];
@@ -872,7 +872,7 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
       lineItems.push({
         price_data: {
           currency: 'thb',
-          product_data: { name: 'LEXIS Community — sponsor a student' },
+          product_data: { name: 'LEXIS Community: sponsor a student' },
           unit_amount: SPONSOR_ADDON_THB * 100, // satang
           recurring: { interval: planTier === 'monthly' ? 'month' : 'week' }
         },

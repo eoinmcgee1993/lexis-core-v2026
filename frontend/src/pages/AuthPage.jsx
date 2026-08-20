@@ -137,7 +137,7 @@ export default function AuthPage({ navigateTo }) {
                 className="mt-0.5 flex-shrink-0"
               />
               <span>
-                I confirm I'm 20 or older, or — if I'm younger — that I
+                I confirm I'm 20 or older, or, if I'm younger, that I
                 have my parent or legal guardian's permission to use
                 LEXIS.
               </span>

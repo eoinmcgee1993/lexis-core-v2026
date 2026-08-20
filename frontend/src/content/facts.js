@@ -94,15 +94,15 @@ export const FAQS = {
   en: [
     {
       q: 'What is LEXIS?',
-      a: 'LEXIS is a voice-based speaking practice tool for English and Thai. You have a real, spoken conversation with it over your microphone, and it replies in real time, the way a conversation partner would — not a chatbot you type into.'
+      a: 'LEXIS is a voice-based speaking practice tool for English and Thai. You have a real, spoken conversation with it over your microphone, and it replies in real time, the way a conversation partner would, not a chatbot you type into.'
     },
     {
       q: 'Is LEXIS free to try?',
-      a: `Yes. New accounts get a free ${TRIAL.minutes}-minute trial — no card required. After that, LEXIS is ฿${PRICING.weekly.thb}/week or ฿${PRICING.monthly.thb}/month.`
+      a: `Yes. New accounts get a free ${TRIAL.minutes}-minute trial, no card required. After that, LEXIS is ฿${PRICING.weekly.thb}/week or ฿${PRICING.monthly.thb}/month.`
     },
     {
       q: 'Can I interrupt LEXIS mid-sentence?',
-      a: "Yes — real conversations involve talking over each other sometimes, so you can jump in and interrupt LEXIS at any point, the same as you would with a person."
+      a: "Yes. Real conversations involve talking over each other sometimes, so you can jump in and interrupt LEXIS at any point, the same as you would with a person."
     }
   ],
   // Real Thai translations, not machine-generated placeholders — same
@@ -122,7 +122,7 @@ export const FAQS = {
     },
     {
       q: 'พูดแทรก LEXIS กลางประโยคได้ไหม',
-      a: 'ได้ — การสนทนาจริงบางครั้งก็มีการพูดแทรกกัน คุณจึงสามารถพูดแทรก LEXIS ได้ทุกเมื่อ เหมือนที่ทำได้กับคนจริง ๆ'
+      a: 'ได้ การสนทนาจริงบางครั้งก็มีการพูดแทรกกัน คุณจึงสามารถพูดแทรก LEXIS ได้ทุกเมื่อ เหมือนที่ทำได้กับคนจริง ๆ'
     }
   ]
 };

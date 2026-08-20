@@ -9,7 +9,7 @@ import React from 'react';
 import { ArrowLeft, MessageCircle, Briefcase, Plane } from 'lucide-react';
 
 const TOPICS = [
-  { key: 'everyday', label: 'Everyday Talk', desc: 'Real conversations — daily life, friends, hobbies', icon: MessageCircle },
+  { key: 'everyday', label: 'Everyday Talk', desc: 'Real conversations: daily life, friends, hobbies', icon: MessageCircle },
   { key: 'work', label: 'Work & Business', desc: 'Meetings, emails, interviews, small talk', icon: Briefcase },
   { key: 'travel', label: 'Travel & Culture', desc: 'Hotels, directions, ordering food, getting help', icon: Plane }
 ];

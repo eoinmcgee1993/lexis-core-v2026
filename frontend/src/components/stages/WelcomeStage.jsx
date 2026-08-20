@@ -12,7 +12,7 @@ import { Mic, LogOut, AlertCircle, CreditCard, Clock, X, History } from 'lucide-
 
 function formatUsageLabel(profile) {
   if (profile.subscription_status === 'active') {
-    return `${profile.subscription_tier} plan — unlimited`;
+    return `${profile.subscription_tier} plan: unlimited`;
   }
   const remaining = Math.max(0, (profile.max_allowed_seconds || 0) - (profile.seconds_used || 0));
   const mins = Math.floor(remaining / 60);
@@ -96,7 +96,7 @@ export default function WelcomeStage({
           )}
           {cancelAtPeriodEnd && (
             <span className="hidden sm:block text-xs text-lexis-ink/50">
-              Won't renew{cancelPeriodEnd ? ` — access until ${formatPeriodEnd(cancelPeriodEnd)}` : ''}
+              Won't renew{cancelPeriodEnd ? ` (access until ${formatPeriodEnd(cancelPeriodEnd)})` : ''}
             </span>
           )}
           {cancelError && (
@@ -115,8 +115,8 @@ export default function WelcomeStage({
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
         {justPaid && (
           <div className="mb-6 px-4 py-3 bg-teal-600/10 border border-teal-600/30 rounded-2xl text-teal-700 text-xs">
-            Payment confirmed — your pass is now active. Thank you!
-            {justSponsored && ' Thank you for adding a LEXIS Community sponsorship — it means a lot.'}
+            Payment confirmed. Your pass is now active. Thank you!
+            {justSponsored && ' Thank you for adding a LEXIS Community sponsorship, it means a lot.'}
           </div>
         )}
 
@@ -181,7 +181,7 @@ export default function WelcomeStage({
       </div>
 
       <footer className="w-full max-w-4xl mx-auto px-6 py-6 text-xs text-lexis-ink/40 text-center">
-        © 2026 LEXIS · Private &amp; secure — only you and LEXIS are on the call
+        © 2026 LEXIS · Private &amp; secure: only you and LEXIS are on the call
       </footer>
     </div>
   );

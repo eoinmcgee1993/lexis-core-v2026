@@ -35,12 +35,12 @@ export default function PrivacyPage({ navigateTo }) {
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">What happens to your voice</h2>
       <p>
         A live LEXIS session is a real-time voice connection (WebRTC)
-        directly between your device and OpenAI's Realtime API — your
+        directly between your device and OpenAI's Realtime API. Your
         microphone audio is streamed for the duration of the
         conversation and is not saved as an audio file on LEXIS's own
         servers. What OpenAI itself retains or uses that audio for is
         governed by OpenAI's own data policy for the Realtime API, not
-        LEXIS's — see{' '}
+        LEXIS's; see{' '}
         <a href="https://developers.openai.com/api/docs/guides/your-data" target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:text-teal-800 underline underline-offset-2">
           OpenAI's API data usage policy
         </a>{' '}
@@ -50,8 +50,8 @@ export default function PrivacyPage({ navigateTo }) {
         "application state" beyond that.
       </p>
       <p>
-        After a session ends, LEXIS generates a feedback summary — a
-        confidence score, a few strengths, and a few corrections — and
+        After a session ends, LEXIS generates a feedback summary (a
+        confidence score, a few strengths, and a few corrections) and
         saves <em>only that summary</em>, not a transcript of what you
         said. This is a deliberate choice in how the database is built,
         not just a policy statement: the table that stores this
@@ -62,18 +62,18 @@ export default function PrivacyPage({ navigateTo }) {
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">What else is stored</h2>
       <ul className="list-disc pl-5 space-y-1">
         <li>Account info: your email, name, and subscription status.</li>
-        <li>Session feedback summaries, as described above (confidence score, strengths, suggested corrections) — not transcripts or audio.</li>
+        <li>Session feedback summaries, as described above (confidence score, strengths, suggested corrections), not transcripts or audio.</li>
         <li>Usage totals: how many seconds of practice you've used, to enforce the free trial and track your plan.</li>
-        <li>Payment details are handled entirely by Stripe — LEXIS does not receive or store your card number.</li>
-        <li>Basic first-party analytics — which page you visited, and whether you signed up, started a practice session, checked out, or cancelled a plan — kept only against an anonymous per-visit identifier, not sold or shared with any third party. No third-party analytics or advertising trackers are used anywhere on LEXIS.</li>
-        <li>If something breaks, technical error details (what failed and a code-level description of why) — used only to fix bugs, not tied to anything you said or did in a session.</li>
+        <li>Payment details are handled entirely by Stripe; LEXIS does not receive or store your card number.</li>
+        <li>Basic first-party analytics (which page you visited, and whether you signed up, started a practice session, checked out, or cancelled a plan), kept only against an anonymous per-visit identifier, not sold or shared with any third party. No third-party analytics or advertising trackers are used anywhere on LEXIS.</li>
+        <li>If something breaks, technical error details (what failed and a code-level description of why), used only to fix bugs, not tied to anything you said or did in a session.</li>
       </ul>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">How long data is kept</h2>
       <p>
         Account data and session history are kept for up to 2 years
         from your last activity on LEXIS, after which they're deleted.
-        You can also ask for earlier deletion at any time — see below.
+        You can also ask for earlier deletion at any time; see below.
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Deleting your data</h2>
@@ -94,7 +94,7 @@ export default function PrivacyPage({ navigateTo }) {
         aged 10–19 need both their own consent and a parent or
         guardian's. At sign-up, LEXIS asks you to confirm you're 20 or
         older, or that you have your parent or legal guardian's
-        permission to use LEXIS if you're younger — this is a
+        permission to use LEXIS if you're younger. This is a
         self-attestation, not verified age-check technology.
       </p>
 

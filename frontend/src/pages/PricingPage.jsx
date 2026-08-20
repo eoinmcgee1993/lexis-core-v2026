@@ -16,8 +16,8 @@ const TEXT = {
     home: 'Home',
     heading: 'Simple, Transparent Pricing',
     sub: 'Cancel anytime. Prices in Thai Baht.',
-    vat: VAT.registered ? 'Prices include VAT.' : 'No VAT applies — not a VAT-registered business.',
-    cancelled: 'Checkout was cancelled — no charge was made.',
+    vat: VAT.registered ? 'Prices include VAT.' : 'No VAT applies: not a VAT-registered business.',
+    cancelled: 'Checkout was cancelled. No charge was made.',
     freeTrialTitle: 'Free Trial',
     freeTrialSub: (minutes) => `${minutes} Minutes of Free Practice`,
     freeTrialFeature1: (minutes) => `${minutes} minutes of practice time`,
@@ -34,7 +34,7 @@ const TEXT = {
     monthlyTitle: 'Monthly Immersion',
     monthlySub: 'Unlimited Practice for 30 Days',
     perMonth: '/ month',
-    monthlyFeature1: (pct) => `Best value — about ${pct}% less than 4 weeks at the weekly rate`,
+    monthlyFeature1: (pct) => `Best value: about ${pct}% less than 4 weeks at the weekly rate`,
     monthlyFeature2: 'Talk as much as you want',
     monthlyFeature3: 'Great for building a daily habit',
     signInNote: "You'll be asked to sign in before checkout.",
@@ -51,7 +51,7 @@ const TEXT = {
     heading: 'ราคาที่เรียบง่ายและโปร่งใส',
     sub: 'ยกเลิกได้ทุกเมื่อ ราคาคิดเป็นเงินบาท',
     vat: VAT.registered ? 'ราคานี้รวมภาษีมูลค่าเพิ่มแล้ว' : 'ไม่มีภาษีมูลค่าเพิ่ม เนื่องจากธุรกิจนี้ไม่ได้จดทะเบียน VAT',
-    cancelled: 'การชำระเงินถูกยกเลิก — ไม่มีการเรียกเก็บเงิน',
+    cancelled: 'การชำระเงินถูกยกเลิก ไม่มีการเรียกเก็บเงิน',
     freeTrialTitle: 'ทดลองใช้ฟรี',
     freeTrialSub: (minutes) => `ฝึกฝนฟรี ${minutes} นาที`,
     freeTrialFeature1: (minutes) => `เวลาฝึกฝน ${minutes} นาที`,
@@ -68,7 +68,7 @@ const TEXT = {
     monthlyTitle: 'แพ็กเกจรายเดือน',
     monthlySub: 'ฝึกได้ไม่จำกัดนาน 30 วัน',
     perMonth: '/ เดือน',
-    monthlyFeature1: (pct) => `คุ้มค่าที่สุด — ถูกกว่าจ่ายรายสัปดาห์ 4 สัปดาห์ประมาณ ${pct}%`,
+    monthlyFeature1: (pct) => `คุ้มค่าที่สุด ถูกกว่าจ่ายรายสัปดาห์ 4 สัปดาห์ประมาณ ${pct}%`,
     monthlyFeature2: 'พูดได้เท่าที่อยากพูด',
     monthlyFeature3: 'เหมาะสำหรับสร้างนิสัยฝึกทุกวัน',
     signInNote: 'คุณจะต้องเข้าสู่ระบบก่อนชำระเงิน',
@@ -128,7 +128,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
       return;
     }
     if (!priceId || priceId.includes('xxxxxxxxxxxxx')) {
-      setError(`Missing Stripe price ID for the ${planTier} plan — set STRIPE_PRICES.${planTier} in PricingPage.jsx to your real Stripe price_... ID.`);
+      setError(`Missing Stripe price ID for the ${planTier} plan: set STRIPE_PRICES.${planTier} in PricingPage.jsx to your real Stripe price_... ID.`);
       return;
     }
 
