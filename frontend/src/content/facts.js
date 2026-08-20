@@ -94,7 +94,7 @@ export const FAQS = {
   en: [
     {
       q: 'What is LEXIS?',
-      a: 'LEXIS is a voice-based speaking practice tool for English and Thai. You have a real, spoken conversation with it over your microphone, and it replies in real time, the way a conversation partner would, not a chatbot you type into.'
+      a: 'LEXIS is a voice-based speaking practice tool for English and Thai. You have a real, spoken conversation with her over your microphone, and she replies in real time, the way a conversation partner would, not a chatbot you type into.'
     },
     {
       q: 'Is LEXIS free to try?',
@@ -102,7 +102,7 @@ export const FAQS = {
     },
     {
       q: 'Do I need to be fluent to start?',
-      a: 'No. LEXIS adjusts to your level as you go, so complete beginners and advanced speakers can both use it, starting from wherever you actually are.'
+      a: 'No. LEXIS adjusts to your level as you go, so complete beginners and advanced speakers alike can start practicing with her right away, from wherever you actually are.'
     }
   ],
   // Real Thai translations, not machine-generated placeholders — same

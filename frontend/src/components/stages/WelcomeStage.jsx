@@ -112,7 +112,7 @@ export default function WelcomeStage({
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
+      <div className="flex-1 flex flex-col items-center justify-start pt-8 md:pt-16 pb-12 px-6 text-center">
         {justPaid && (
           <div className="mb-6 px-4 py-3 bg-teal-600/10 border border-teal-600/30 rounded-2xl text-teal-700 text-xs">
             Payment confirmed. Your pass is now active. Thank you!
@@ -150,10 +150,10 @@ export default function WelcomeStage({
         )}
 
         <h1 className="font-display font-semibold text-4xl md:text-5xl leading-tight text-balance max-w-lg">
-          Speak {targetLanguage === 'th' ? 'Thai' : 'English'} with confidence.
+          Ready to talk {targetLanguage === 'th' ? 'Thai' : 'English'}?
         </h1>
         <p className="mt-4 text-base text-lexis-ink/60 max-w-sm">
-          Practice real conversations without the pressure of speaking to another person.
+          She's listening whenever you are. Pick a language and start talking.
         </p>
 
         <div className="mt-8 inline-flex items-center bg-white border border-lexis-ink/10 rounded-full p-1 text-sm shadow-sm">
