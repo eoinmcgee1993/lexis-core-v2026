@@ -101,8 +101,8 @@ export const FAQS = {
       a: `Yes. New accounts get a free ${TRIAL.minutes}-minute trial, no card required. After that, LEXIS is ฿${PRICING.weekly.thb}/week or ฿${PRICING.monthly.thb}/month.`
     },
     {
-      q: 'Can I interrupt LEXIS mid-sentence?',
-      a: "Yes. Real conversations involve talking over each other sometimes, so you can jump in and interrupt LEXIS at any point, the same as you would with a person."
+      q: 'Do I need to be fluent to start?',
+      a: 'No. LEXIS adjusts to your level as you go, so complete beginners and advanced speakers can both use it, starting from wherever you actually are.'
     }
   ],
   // Real Thai translations, not machine-generated placeholders — same
@@ -121,8 +121,8 @@ export const FAQS = {
       a: `ได้ บัญชีใหม่ทุกบัญชีจะได้ทดลองใช้ฟรี ${TRIAL.minutes} นาที ไม่ต้องผูกบัตร หลังจากนั้น LEXIS มีราคา ฿${PRICING.weekly.thb}/สัปดาห์ หรือ ฿${PRICING.monthly.thb}/เดือน`
     },
     {
-      q: 'พูดแทรก LEXIS กลางประโยคได้ไหม',
-      a: 'ได้ การสนทนาจริงบางครั้งก็มีการพูดแทรกกัน คุณจึงสามารถพูดแทรก LEXIS ได้ทุกเมื่อ เหมือนที่ทำได้กับคนจริง ๆ'
+      q: 'ต้องพูดคล่องก่อนถึงจะเริ่มได้ไหม',
+      a: 'ไม่ต้อง LEXIS จะปรับให้เหมาะกับระดับของคุณไปเรื่อย ๆ ทั้งมือใหม่และคนที่พูดเก่งอยู่แล้วก็ใช้ได้ เริ่มจากจุดที่คุณอยู่จริง ๆ'
     }
   ]
 };
