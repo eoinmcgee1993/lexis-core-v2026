@@ -16,7 +16,7 @@
 // this page — the program is genuinely just launching, and a fabricated
 // impact number would be worse than no number at all.
 import React from 'react';
-import { ArrowLeft, Heart, Building2, Mail } from 'lucide-react';
+import { ArrowLeft, Heart, Building2, Mail, Target, Coins } from 'lucide-react';
 import LexisMark from '../components/LexisMark';
 import { useSeo } from '../lib/useSeo';
 import { SITE_URL } from '../data/structuredData';
@@ -69,6 +69,33 @@ export default function CommunityPage({ navigateTo }) {
               same small amount every time, and it rides your regular billing cycle,
               no separate charge to think about. That pool is what funds free and
               discounted access for the students and youth groups we work with.
+            </p>
+          </div>
+
+          <div className="bg-white border border-lexis-ink/10 rounded-2xl p-5 flex items-start gap-4">
+            <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700 flex-shrink-0">
+              <Target className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="font-display font-semibold text-base text-lexis-ink">Our first goal: 100 sponsors</h2>
+              <p className="mt-1.5 text-sm text-lexis-ink/60 leading-relaxed">
+                That's enough to genuinely fund a partner school's first cohort, not just a symbolic gesture.
+                We're not there yet. We'll post an update here as we get closer, and again once we hit it.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2 flex items-center gap-2">
+              <Coins className="w-4 h-4 text-teal-600" />
+              Where the money goes
+            </h2>
+            <p className="mt-2">
+              Every sponsor contribution goes into one shared pool, not individual accounts tied to one
+              student. As that pool grows, we use it to cover the cost of LEXIS access for real students
+              through partner schools and youth organizations, discounted or free seats for a whole group,
+              not one-off case-by-case requests. There's no hidden layer to it: subscriptions in, funded
+              access out, for as many students as the pool can currently support.
             </p>
           </div>
 
