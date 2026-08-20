@@ -53,7 +53,16 @@ export default function AuthPage({ navigateTo }) {
         navigateTo('/app');
       }
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
+      if (err.code === 'already_registered') {
+        // Not a real failure, just the wrong tab: no confirmation email
+        // was ever sent for this one (see AuthContext.jsx's signUp), so
+        // pointing at "check your email" here would be a dead end.
+        // Password left as typed, in case that's genuinely what's wrong.
+        setNotice(err.message);
+        setMode('sign_in');
+      } else {
+        setError(err.message || 'Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

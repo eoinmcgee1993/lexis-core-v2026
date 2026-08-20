@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
   };
 
   const signUp = async (email, password, fullName) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -68,6 +68,22 @@ export function AuthProvider({ children }) {
       }
     });
     if (error) throw error;
+    // Anti-enumeration behavior baked into Supabase Auth: signing up with
+    // an email that's already registered and confirmed returns a 200 with
+    // no error, not a 4xx — it returns the existing user with an empty
+    // `identities` array instead of creating a new one, and (confirmed
+    // live: reported as "the confirmation email never arrives") sends no
+    // email at all, since there's nothing left to confirm. Silently
+    // treating that as ordinary success meant the UI told a user with an
+    // existing account to "check your email" for a message that was never
+    // going to come. This is the documented way to detect that case
+    // client-side without an explicit "already registered" error that
+    // would itself leak account existence to anyone probing emails.
+    if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      const err = new Error('An account already exists for this email. Try signing in instead.');
+      err.code = 'already_registered';
+      throw err;
+    }
   };
 
   const signOut = async () => {
