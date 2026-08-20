@@ -61,6 +61,8 @@ const CHROME = {
       'No waiting, no scheduling: practice the moment you want to'
     ],
     faqHeading: 'Frequently asked questions',
+    learnEnglish: 'Learn English',
+    learnThai: 'Learn Thai',
     liveVoice: 'Live voice, ready when you are',
     photoDisclosure: "LEXIS's pictured persona is an AI-generated image, not a real person.",
     heroAlt: 'LEXIS, your voice conversation partner, ready to start a practice session (AI-generated image)',
@@ -82,6 +84,8 @@ const CHROME = {
       'ไม่ต้องรอ ไม่ต้องนัดเวลา ฝึกได้ทันทีที่อยากฝึก'
     ],
     faqHeading: 'คำถามที่พบบ่อย',
+    learnEnglish: 'เรียนภาษาอังกฤษ',
+    learnThai: 'เรียนภาษาไทย',
     liveVoice: 'พูดคุยสด พร้อมเมื่อคุณพร้อม',
     photoDisclosure: 'ภาพของ LEXIS ที่แสดงนี้สร้างขึ้นด้วย AI ไม่ใช่บุคคลจริง',
     heroAlt: 'LEXIS คู่สนทนาฝึกพูดของคุณ พร้อมเริ่มฝึกได้ทุกเมื่อ (ภาพสร้างขึ้นด้วย AI)',
@@ -260,14 +264,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
               aria-pressed={direction === 'en'}
               className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'en' ? 'bg-teal-600 text-white' : 'text-lexis-ink/50 hover:text-lexis-ink'}`}
             >
-              Learn English
+              {c.learnEnglish}
             </button>
             <button
               onClick={() => selectDirection('th')}
               aria-pressed={direction === 'th'}
               className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'th' ? 'bg-teal-600 text-white' : 'text-lexis-ink/50 hover:text-lexis-ink'}`}
             >
-              เรียนภาษาไทย
+              {c.learnThai}
             </button>
           </div>
 
