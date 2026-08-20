@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp } from 'lucide-react';
+import { Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp, Heart } from 'lucide-react';
 import LexisMark from '../components/LexisMark';
 import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
@@ -34,7 +34,7 @@ const HERO_SIZES = '(min-width: 768px) 384px, (min-width: 640px) 320px, 256px';
 const HOW_IT_WORKS = {
   en: [
     { icon: Mic, title: 'Start talking', desc: 'Tap one button and start speaking: no typing, no scripts to read from.' },
-    { icon: MessageCircle, title: 'LEXIS responds live', desc: "It listens, replies, and corrects you gently mid-conversation, the way a patient tutor would." },
+    { icon: MessageCircle, title: 'LEXIS responds live', desc: "She listens, replies, and corrects you gently mid-conversation, the way a patient tutor would." },
     { icon: TrendingUp, title: 'See what to work on', desc: 'After each session, get a plain-language summary of what you did well and what to practice next.' }
   ],
   th: [
@@ -60,6 +60,9 @@ const CHROME = {
       'Review what you practiced, anytime (paid plans)',
       'No waiting, no scheduling: practice the moment you want to'
     ],
+    communityHeading: 'More than practice for yourself',
+    communityBody: "At checkout, you can add a small amount to your plan to help fund free and discounted access for students and youth groups who couldn't otherwise afford it. Learn a language, and help open the same door for someone else.",
+    communityCta: 'See how LEXIS Community works',
     faqHeading: 'Frequently asked questions',
     learnEnglish: 'Learn English',
     learnThai: 'Learn Thai',
@@ -82,6 +85,9 @@ const CHROME = {
       'ทบทวนสิ่งที่ฝึกได้ทุกเมื่อ (แพ็กเกจแบบเสียเงิน)',
       'ไม่ต้องรอ ไม่ต้องนัดเวลา ฝึกได้ทันทีที่อยากฝึก'
     ],
+    communityHeading: 'มากกว่าการฝึกเพื่อตัวเอง',
+    communityBody: 'ตอนชำระเงิน คุณสามารถเพิ่มจำนวนเงินเล็กน้อยเข้าไปในแพ็กเกจ เพื่อช่วยสนับสนุนการเข้าถึงแบบฟรีและส่วนลดให้นักเรียนและกลุ่มเยาวชนที่ไม่สามารถจ่ายได้ด้วยตัวเอง ฝึกภาษาของคุณ พร้อมช่วยเปิดโอกาสเดียวกันนี้ให้คนอื่นด้วย',
+    communityCta: 'ดูว่า LEXIS Community ทำงานอย่างไร',
     faqHeading: 'คำถามที่พบบ่อย',
     learnEnglish: 'เรียนภาษาอังกฤษ',
     learnThai: 'เรียนภาษาไทย',
@@ -134,14 +140,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     en: {
       en: {
         heroTitle: 'Practice Speaking English Out Loud with LEXIS',
-        heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time. Built for students, professionals, and anyone prepping for interviews, travel, or work. Practice as much as you want, whenever you want.',
+        heroSub: "LEXIS isn't a chatbot you type into or a course you sit through, she's a real, spoken conversation with someone who listens, replies instantly, and corrects you gently along the way. The kind of practice that turns a shaky introduction into a confident one, and opens doors: to interviews, new friendships, travel, business, even the next stage of your education. Talk as much as you want, whenever you want, and watch what changes.",
         cta: 'Try It Free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
         heroTitle: 'ฝึกพูดภาษาอังกฤษออกเสียงจริงกับ LEXIS',
-        heroSub: 'LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ เหมาะกับนักเรียน คนทำงาน และใครก็ตามที่กำลังเตรียมสัมภาษณ์งาน เดินทาง หรือทำงาน ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้',
+        heroSub: 'LEXIS ไม่ใช่แชทบอทที่ต้องพิมพ์คุย และไม่ใช่คอร์สเรียนที่ต้องนั่งฟัง แต่เป็นบทสนทนาจริงกับใครสักคนที่ฟังคุณ ตอบกลับทันที และช่วยแก้ไขให้อย่างอ่อนโยนไปพร้อมกัน การฝึกแบบนี้เปลี่ยนการแนะนำตัวที่สั่น ๆ ให้กลายเป็นความมั่นใจ และเปิดประตูสู่โอกาสใหม่ ๆ ทั้งสัมภาษณ์งาน มิตรภาพใหม่ การเดินทาง ธุรกิจ ไปจนถึงการศึกษาต่อ พูดได้เท่าที่อยากพูด เมื่อไหร่ก็ได้ แล้วดูว่าอะไรจะเปลี่ยนไป',
         cta: 'ลองใช้ฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
@@ -150,14 +156,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     th: {
       en: {
         heroTitle: 'Practice Speaking Thai Out Loud with LEXIS',
-        heroSub: 'A friendly conversation partner who listens, replies, and gently corrects you in real time. Built for students, professionals, and anyone prepping for interviews, travel, or work. Practice as much as you want, whenever you want.',
+        heroSub: "LEXIS isn't a chatbot you type into or a course you sit through, she's a real, spoken conversation with someone who listens, replies instantly, and corrects you gently along the way. The kind of practice that turns a shaky introduction into a confident one, and opens doors: to interviews, new friendships, travel, business, even the next stage of your education. Talk as much as you want, whenever you want, and watch what changes.",
         cta: 'Try It Free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
         heroTitle: 'ฝึกพูดภาษาไทยออกเสียงจริงกับ LEXIS',
-        heroSub: 'LEXIS ฟัง พูดคุย และช่วยแก้ไขให้คุณแบบเรียลไทม์ เหมาะกับนักเรียน คนทำงาน และใครก็ตามที่กำลังเตรียมสัมภาษณ์งาน เดินทาง หรือทำงาน ฝึกได้เท่าที่อยากฝึก เมื่อไหร่ก็ได้',
+        heroSub: 'LEXIS ไม่ใช่แชทบอทที่ต้องพิมพ์คุย และไม่ใช่คอร์สเรียนที่ต้องนั่งฟัง แต่เป็นบทสนทนาจริงกับใครสักคนที่ฟังคุณ ตอบกลับทันที และช่วยแก้ไขให้อย่างอ่อนโยนไปพร้อมกัน การฝึกแบบนี้เปลี่ยนการแนะนำตัวที่สั่น ๆ ให้กลายเป็นความมั่นใจ และเปิดประตูสู่โอกาสใหม่ ๆ ทั้งสัมภาษณ์งาน มิตรภาพใหม่ การเดินทาง ธุรกิจ ไปจนถึงการศึกษาต่อ พูดได้เท่าที่อยากพูด เมื่อไหร่ก็ได้ แล้วดูว่าอะไรจะเปลี่ยนไป',
         cta: 'ลองใช้ฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
@@ -375,6 +381,30 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             <Zap className="w-4 h-4 text-teal-600 flex-shrink-0" />
             <span>{c.trust[3]}</span>
           </div>
+        </div>
+      </section>
+
+      {/* LEXIS Community teaser — the real, honest version of this lives at
+          /community (CommunityPage.jsx); this is a short pointer to it, not
+          a re-statement. Deliberately doesn't claim partner schools or
+          impact numbers that don't exist yet (see CommunityPage.jsx's own
+          header comment) — only the pay-it-forward checkout add-on, which
+          is actually live today. */}
+      <section className="w-full max-w-3xl mx-auto px-6 py-4">
+        <div className="bg-white border border-lexis-ink/10 rounded-3xl px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
+          <div className="flex-shrink-0 p-3 bg-teal-600/10 border border-teal-600/20 rounded-2xl text-teal-700">
+            <Heart className="w-6 h-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="font-display font-semibold text-xl text-lexis-ink">{c.communityHeading}</h2>
+            <p className="mt-2 text-sm text-lexis-ink/60 leading-relaxed max-w-lg">{c.communityBody}</p>
+          </div>
+          <button
+            onClick={() => navigateTo('/community')}
+            className="flex-shrink-0 px-5 py-2.5 border border-teal-600/30 text-teal-700 hover:bg-teal-600/5 font-semibold text-sm rounded-xl transition-colors whitespace-nowrap md:mt-1"
+          >
+            {c.communityCta}
+          </button>
         </div>
       </section>
 
