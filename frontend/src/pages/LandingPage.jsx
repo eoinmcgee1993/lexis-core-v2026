@@ -64,8 +64,7 @@ const CHROME = {
     learnEnglish: 'Learn English',
     learnThai: 'Learn Thai',
     liveVoice: 'Live voice, ready when you are',
-    photoDisclosure: "LEXIS's pictured persona is an AI-generated image, not a real person.",
-    heroAlt: 'LEXIS, your voice conversation partner, ready to start a practice session (AI-generated image)',
+    heroAlt: 'LEXIS, your voice conversation partner, ready to start a practice session',
     footerTrust: 'Private & secure • Payments handled by Stripe',
     privacy: 'Privacy',
     terms: 'Terms',
@@ -87,8 +86,7 @@ const CHROME = {
     learnEnglish: 'เรียนภาษาอังกฤษ',
     learnThai: 'เรียนภาษาไทย',
     liveVoice: 'พูดคุยสด พร้อมเมื่อคุณพร้อม',
-    photoDisclosure: 'ภาพของ LEXIS ที่แสดงนี้สร้างขึ้นด้วย AI ไม่ใช่บุคคลจริง',
-    heroAlt: 'LEXIS คู่สนทนาฝึกพูดของคุณ พร้อมเริ่มฝึกได้ทุกเมื่อ (ภาพสร้างขึ้นด้วย AI)',
+    heroAlt: 'LEXIS คู่สนทนาฝึกพูดของคุณ พร้อมเริ่มฝึกได้ทุกเมื่อ',
     footerTrust: 'ปลอดภัยและเป็นส่วนตัว • ชำระเงินผ่าน Stripe',
     privacy: 'นโยบายความเป็นส่วนตัว',
     terms: 'ข้อกำหนดการใช้งาน',
@@ -298,16 +296,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             warm canvas per the visual-system doc's "marketing pages kept
             their existing IA" note).
 
-            The photo is AI-generated (see scripts/avatar/lexis-tutor-photo-notes.md)
-            — a photorealistic image of a person who doesn't exist, presented
-            as LEXIS's face. A re-audit flagged that showing this with zero
-            disclosure is a real trust risk specifically for this audience
-            (parents deciding whether to trust a voice product with their
-            kid) — discovering later that the "tutor" was synthetic is worse
-            than never implying a real person in the first place. The caption
-            below is the minimum honest fix; whether to replace the photo
-            entirely (illustrated persona, or a real photo of whoever's
-            behind LEXIS) is a bigger call left to Eoin. */}
+            The photo is a generated image (see
+            scripts/avatar/lexis-tutor-photo-notes.md). A previous pass here
+            added an explicit "AI-generated" disclosure caption for trust
+            reasons; reversed 20 Aug 2026 on direct product-positioning
+            instruction — the caption and any other "AI" wording in this
+            page's own copy were removed. The underlying image and its
+            generation process didn't change, only whether the marketing
+            copy calls attention to it. */}
         <div className="relative flex justify-center md:justify-end">
           <div className="absolute w-72 h-72 md:w-96 md:h-96 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
           <div className="relative w-64 sm:w-80 md:w-full md:max-w-sm aspect-[3/4] rounded-[2rem] overflow-hidden border border-white shadow-2xl shadow-teal-900/10">
@@ -332,9 +328,6 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             <span>{c.liveVoice}</span>
           </div>
         </div>
-        <p className="md:col-span-2 text-center text-[11px] text-lexis-ink/30 mt-8 md:mt-2">
-          {c.photoDisclosure}
-        </p>
       </section>
 
       {/* How it works — three concrete steps instead of adjective-heavy
