@@ -25,12 +25,12 @@ export default function RefundPage({ navigateTo }) {
       <p>
         You can stop a {PRICING.weekly.period}ly or {PRICING.monthly.period}ly
         plan from renewing at any time with the "Cancel Plan" button in
-        the app — no need to email support or wait on a reply.
+        the app, no need to email support or wait on a reply.
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">What happens to time you've already paid for</h2>
       <p>
-        Cancelling stops future renewal only — it doesn't cut off access
+        Cancelling stops future renewal only; it doesn't cut off access
         immediately. You keep full access for the rest of the{' '}
         {PRICING.weekly.period}ly or {PRICING.monthly.period}ly period
         you've already paid for, and it simply won't renew after that.
@@ -46,7 +46,7 @@ export default function RefundPage({ navigateTo }) {
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">The free trial</h2>
       <p>
         The free trial itself is not a paid purchase, so no refund
-        question applies to it — it simply ends once its practice time
+        question applies to it; it simply ends once its practice time
         is used.
       </p>
     </LegalPageShell>

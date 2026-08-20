@@ -29,7 +29,7 @@ export default function TermsPage({ navigateTo }) {
         {TRIAL.cardRequired ? '' : ', no card required'}. Paid plans are
         ฿{PRICING.weekly.thb}/week or ฿{PRICING.monthly.thb}/month for
         unlimited practice, billed on a recurring basis through Stripe
-        until cancelled. {VAT.registered ? '' : 'No VAT applies — LEXIS is not a VAT-registered business.'}
+        until cancelled. {VAT.registered ? '' : 'No VAT applies: LEXIS is not a VAT-registered business.'}
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Your account</h2>
@@ -62,7 +62,7 @@ export default function TermsPage({ navigateTo }) {
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Changes to these terms</h2>
       <p>
         If these terms change in a material way, we'll show an in-app
-        notice the next time you sign in — there's no separate email
+        notice the next time you sign in. There's no separate email
         or SMS notification, so the in-app notice is the one place to
         check.
       </p>

@@ -100,11 +100,11 @@ export default function HistoryStage({ history, historyLoading, historyError, on
         )}
 
         {!historyLoading && historyError && (
-          <p className="text-sm text-lexis-ink/60 py-8 text-center">Couldn't load your history right now — try again in a moment.</p>
+          <p className="text-sm text-lexis-ink/60 py-8 text-center">Couldn't load your history right now, try again in a moment.</p>
         )}
 
         {!historyLoading && !historyError && history.length === 0 && (
-          <p className="text-sm text-lexis-ink/50 py-8 text-center">No sessions yet — your practice history will show up here after your first conversation.</p>
+          <p className="text-sm text-lexis-ink/50 py-8 text-center">No sessions yet. Your practice history will show up here after your first conversation.</p>
         )}
 
         {!historyLoading && !historyError && history.length > 0 && (

@@ -51,7 +51,7 @@ export default function CommunityPage({ navigateTo }) {
       <section className="flex-1 w-full max-w-3xl mx-auto px-6 py-12">
         <h1 className="font-display font-semibold text-3xl mb-2 text-lexis-ink">LEXIS Community</h1>
         <p className="text-sm text-lexis-ink/60 mb-10 leading-relaxed">
-          We believe spoken language practice is a bridge to opportunity — interviews,
+          We believe spoken language practice is a bridge to opportunity: interviews,
           travel, work, further study. LEXIS Community exists to extend that practice
           to students and youth groups who couldn't otherwise access it, funded by the
           people already using LEXIS every day.
@@ -66,7 +66,7 @@ export default function CommunityPage({ navigateTo }) {
             <p className="mt-2">
               At checkout, every subscriber can choose to add ฿{SPONSOR_ADDON_THB} to
               their plan to sponsor a student's practice time. It's optional, it's the
-              same small amount every time, and it rides your regular billing cycle —
+              same small amount every time, and it rides your regular billing cycle,
               no separate charge to think about. That pool is what funds free and
               discounted access for the students and youth groups we work with.
             </p>
@@ -79,7 +79,7 @@ export default function CommunityPage({ navigateTo }) {
             </h2>
             <p className="mt-2">
               We're building out partnerships with schools, youth centers, and
-              community organizations in Thailand directly — heavily discounted
+              community organizations in Thailand directly: heavily discounted
               access for real groups of students, not individual case-by-case
               requests. This is genuinely just getting started, so if you run or know
               an organization that would want to be one of the first, we'd like to

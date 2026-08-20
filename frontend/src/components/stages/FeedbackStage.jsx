@@ -34,7 +34,7 @@ const UI_STRINGS = {
   th: {
     title: 'Your conversation',
     loading: 'Looking back at your conversation...',
-    errorFallback: "Couldn't put together feedback this time — no worries, your practice still counts!",
+    errorFallback: "Couldn't put together feedback this time, no worries, your practice still counts!",
     confidenceLabel: 'Confidence',
     strengthsHeading: 'You did well with',
     improvementsHeading: 'Try improving',

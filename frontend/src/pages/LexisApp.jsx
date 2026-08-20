@@ -75,7 +75,7 @@ function describeMicError(err) {
       return 'Microphone access denied. Please allow microphone access in your browser settings and try again.';
     case 'NotReadableError':
     case 'TrackStartError':
-      return 'Could not access your microphone — it may be in use by another application.';
+      return 'Could not access your microphone: it may be in use by another application.';
     case 'SecurityError':
       return "Microphone access is blocked by your browser's security settings.";
     default:
@@ -595,7 +595,7 @@ export default function LexisApp({ navigateTo }) {
             clearTimeout(reconnectTimeoutRef.current);
             reconnectTimeoutRef.current = null;
           }
-          endSession('Connection lost — tap Start to try again.');
+          endSession('Connection lost. Tap Start to try again.');
 
         } else if (pc.connectionState === 'disconnected') {
           // See RECONNECT_GRACE_MS's comment above — give a real recovery a
@@ -614,7 +614,7 @@ export default function LexisApp({ navigateTo }) {
             // connecting new session must not get killed by an old timer
             // that was only ever watching the previous one.
             if (pcRef.current === pc && pc.connectionState !== 'connected') {
-              endSession('Connection lost — tap Start to try again.');
+              endSession('Connection lost. Tap Start to try again.');
             }
           }, RECONNECT_GRACE_MS);
         }
