@@ -1,7 +1,12 @@
-// backend/api/index.js — Vercel serverless entrypoint. An Express app
-// instance is itself a valid (req, res) => {} handler, so exporting it
-// directly (no .listen()) is all Vercel's Node runtime needs — see
-// vercel.json for the rewrite that routes every path here.
+// backend/api/index.js — Vercel serverless entrypoint.
+// Community endpoints are handled explicitly before the main Express app so
+// their public API contract can evolve independently without disturbing the
+// existing commerce routes.
 import app from '../app.mjs';
+import { handleCommunityRequest } from '../community-routes.mjs';
 
-export default app;
+export default async function handler(req, res) {
+  const handled = await handleCommunityRequest(req, res);
+  if (handled) return;
+  return app(req, res);
+}
