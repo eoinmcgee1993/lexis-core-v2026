@@ -10,6 +10,9 @@ import PrivacyPage from './pages/PrivacyPage';
 import RefundPage from './pages/RefundPage';
 import CommunityPage from './pages/CommunityPage';
 import InterviewEnglishPage from './pages/InterviewEnglishPage';
+import EverydayEnglishPage from './pages/EverydayEnglishPage';
+import TravelEnglishPage from './pages/TravelEnglishPage';
+import BusinessEnglishPage from './pages/BusinessEnglishPage';
 
 // Seven routes still don't warrant a full router dependency. Every page
 // receives navigateTo(path). Auth-gating for /app lives here, once,
@@ -89,6 +92,12 @@ function RouteController() {
       return <CommunityPage navigateTo={navigateTo} />;
     case '/practice/interview-english':
       return <InterviewEnglishPage navigateTo={navigateTo} />;
+    case '/practice/everyday-english':
+      return <EverydayEnglishPage navigateTo={navigateTo} />;
+    case '/practice/travel-english':
+      return <TravelEnglishPage navigateTo={navigateTo} />;
+    case '/practice/business-english':
+      return <BusinessEnglishPage navigateTo={navigateTo} />;
     default:
       return <LandingPage navigateTo={navigateTo} />;
   }

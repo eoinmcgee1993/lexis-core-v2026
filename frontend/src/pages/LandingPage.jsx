@@ -188,8 +188,15 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
   // no longer gated to English only.
   const faqJsonLd = useMemo(() => buildFaqJsonLd(lang), [lang]);
 
+  // Title order flipped 21 Aug 2026 (re-audit L9): every other page on the
+  // site is already descriptive-first, brand-last ("Pricing | LEXIS",
+  // "Privacy Policy | LEXIS") — the home page was the one holdout leading
+  // with the brand instead. That matters most here specifically: this is
+  // the page most likely to be found by an unfamiliar search/answer-engine
+  // query, and both surfaces weight the first phrase in a title tag more
+  // heavily. Nobody searches "LEXIS" yet; they search what LEXIS does.
   useSeo({
-    title: lang === 'th' ? 'LEXIS | ฝึกพูดภาษาอังกฤษและภาษาไทยออกเสียงจริง' : 'LEXIS | Practice Speaking English & Thai Out Loud',
+    title: lang === 'th' ? 'ฝึกพูดภาษาอังกฤษและภาษาไทยออกเสียงจริง | LEXIS' : 'Practice Speaking English & Thai Out Loud | LEXIS',
     description: lang === 'th' ? LANDING_DESCRIPTION_TH : LANDING_DESCRIPTION_EN,
     canonical: lang === 'th' ? thUrl : enUrl,
     htmlLang: lang,
