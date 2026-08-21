@@ -15,7 +15,69 @@
   src: url('/fonts/fraunces-600.woff2') format('woff2');
 }
 
+/* Self-hosted Thai companion to the two faces above — same self-hosting
+   rationale as Fraunces (no extra DNS round-trip, keeps working if a font
+   CDN is ever blocked). Two weights (400/600, mirroring Fraunces' single
+   weight and the system sans stack's implicit "normal"), restricted to
+   the Thai unicode-range only: fonts.gstatic.com also serves Latin/
+   Cyrillic/etc. subsets of this family, but English text already renders
+   fine via the existing sans/display stacks, so only the ~12KB Thai-glyph
+   subset is downloaded per weight, not the full family.
+
+   Why this exists (Digital Renaissance interface re-audit, 21 Aug 2026):
+   Thai text had no dedicated typography at all — Fraunces has zero Thai
+   glyph coverage (silently falling through to 'Georgia'/'serif', neither
+   Thai-aware either) and the sans stack has the same gap, so every Thai
+   render fell back to whatever the visitor's OS happened to ship, at
+   English's own optical size and line-height. Thai script's tone marks
+   and stacked vowels need measurably more size and leading to clear
+   cleanly; at English's sizing it reads cramped to a native reader. See
+   the html:lang(th) rule below for how size/leading are adjusted. */
+@font-face {
+  font-family: 'IBM Plex Sans Thai';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-sans-thai-400.woff2') format('woff2');
+  unicode-range: U+02D7, U+0303, U+0331, U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Thai';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-sans-thai-600.woff2') format('woff2');
+  unicode-range: U+02D7, U+0303, U+0331, U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+
 @layer base {
+  /* :lang(th) matches <html lang="th">, which useSeo.js sets on every
+     route rendered with htmlLang: 'th' (today: /th, /th/pricing — the
+     only two Thai-display routes, per Stage 4). A root-level font-size
+     bump is deliberate rather than resizing individual elements: every
+     Tailwind text-* utility is rem-based (relative to the ROOT element's
+     font-size, not its nearest ancestor's), so this one rule scales every
+     sized element on a Thai page uniformly and correctly, the same way
+     the rest of this codebase prefers one sitewide rule over scattered
+     per-component overrides. leading-tight (1.25 — used only on this
+     page's headlines) gets a specific loosen-up too: fine for Latin
+     ascenders/descenders, too tight for Thai's taller stacked marks.
+     leading-relaxed (1.625, used everywhere else Thai renders) is already
+     generous enough as-is. */
+  html:lang(th) {
+    font-size: 1.08em;
+  }
+  :lang(th) {
+    font-family: 'IBM Plex Sans Thai', 'Noto Sans Thai', 'Segoe UI', sans-serif;
+  }
+  :lang(th) .font-display {
+    font-family: 'IBM Plex Sans Thai', 'Noto Sans Thai', 'Segoe UI', sans-serif;
+    font-weight: 600;
+  }
+  :lang(th) .leading-tight {
+    line-height: 1.4;
+  }
+
   body {
     /* Page-level default; individual routes override per their own stage
        (e.g. the warm lexis-canvas background on Welcome/Topics/Feedback,
