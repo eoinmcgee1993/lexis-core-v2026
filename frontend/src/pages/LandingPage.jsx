@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp, Heart, Gauge } from 'lucide-react';
+import { Mic, ShieldCheck, Zap, Globe, ArrowRight, MessageCircle, TrendingUp, Heart, Gauge } from 'lucide-react';
 import LexisMark from '../components/LexisMark';
 import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
@@ -148,14 +148,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     en: {
       en: {
         heroTitle: 'Practice Speaking English Out Loud with LEXIS',
-        heroSub: "LEXIS isn't a chatbot you type into or a course you sit through, she's a real, spoken conversation with someone who listens, replies instantly, and corrects you gently along the way. The kind of practice that turns a shaky introduction into a confident one, and opens doors: to interviews, new friendships, travel, business, even the next stage of your education. Talk as much as you want, whenever you want, and watch what changes.",
+        heroSub: "A real spoken conversation, not a chatbot or a course. She listens, replies instantly, and corrects you gently, live.",
         cta: 'Try It Free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
         heroTitle: 'ฝึกพูดภาษาอังกฤษออกเสียงจริงกับ LEXIS',
-        heroSub: 'LEXIS ไม่ใช่แชทบอทที่ต้องพิมพ์คุย และไม่ใช่คอร์สเรียนที่ต้องนั่งฟัง แต่เป็นบทสนทนาจริงกับใครสักคนที่ฟังคุณ ตอบกลับทันที และช่วยแก้ไขให้อย่างอ่อนโยนไปพร้อมกัน การฝึกแบบนี้เปลี่ยนการแนะนำตัวที่สั่น ๆ ให้กลายเป็นความมั่นใจ และเปิดประตูสู่โอกาสใหม่ ๆ ทั้งสัมภาษณ์งาน มิตรภาพใหม่ การเดินทาง ธุรกิจ ไปจนถึงการศึกษาต่อ พูดได้เท่าที่อยากพูด เมื่อไหร่ก็ได้ แล้วดูว่าอะไรจะเปลี่ยนไป',
+        heroSub: 'บทสนทนาจริง ไม่ใช่แชทบอทหรือคอร์สเรียน เธอฟัง ตอบกลับทันที และช่วยแก้ไขให้อย่างอ่อนโยนแบบสด ๆ',
         cta: 'ลองใช้ฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
@@ -164,14 +164,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     th: {
       en: {
         heroTitle: 'Practice Speaking Thai Out Loud with LEXIS',
-        heroSub: "LEXIS isn't a chatbot you type into or a course you sit through, she's a real, spoken conversation with someone who listens, replies instantly, and corrects you gently along the way. The kind of practice that turns a shaky introduction into a confident one, and opens doors: to interviews, new friendships, travel, business, even the next stage of your education. Talk as much as you want, whenever you want, and watch what changes.",
+        heroSub: "A real spoken conversation, not a chatbot or a course. She listens, replies instantly, and corrects you gently, live.",
         cta: 'Try It Free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
         heroTitle: 'ฝึกพูดภาษาไทยออกเสียงจริงกับ LEXIS',
-        heroSub: 'LEXIS ไม่ใช่แชทบอทที่ต้องพิมพ์คุย และไม่ใช่คอร์สเรียนที่ต้องนั่งฟัง แต่เป็นบทสนทนาจริงกับใครสักคนที่ฟังคุณ ตอบกลับทันที และช่วยแก้ไขให้อย่างอ่อนโยนไปพร้อมกัน การฝึกแบบนี้เปลี่ยนการแนะนำตัวที่สั่น ๆ ให้กลายเป็นความมั่นใจ และเปิดประตูสู่โอกาสใหม่ ๆ ทั้งสัมภาษณ์งาน มิตรภาพใหม่ การเดินทาง ธุรกิจ ไปจนถึงการศึกษาต่อ พูดได้เท่าที่อยากพูด เมื่อไหร่ก็ได้ แล้วดูว่าอะไรจะเปลี่ยนไป',
+        heroSub: 'บทสนทนาจริง ไม่ใช่แชทบอทหรือคอร์สเรียน เธอฟัง ตอบกลับทันที และช่วยแก้ไขให้อย่างอ่อนโยนแบบสด ๆ',
         cta: 'ลองใช้ฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
@@ -235,14 +235,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <button
             onClick={() => navigateTo(lang === 'en' ? '/th' : '/')}
             aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
-            className="flex items-center justify-center sm:justify-start gap-2 bg-white border border-lexis-ink/10 rounded-xl text-xs text-lexis-ink/70 hover:border-teal-600/40 transition-all min-h-[44px] min-w-[44px] px-2.5 sm:px-3"
+            className="flex items-center justify-center sm:justify-start gap-2 bg-white border border-lexis-ink/10 rounded-xl text-xs text-lexis-ink/60 hover:border-teal-600/40 transition-all min-h-[44px] min-w-[44px] px-2.5 sm:px-3"
           >
             <Globe className="w-4 h-4 text-teal-700 flex-shrink-0" />
             <span className="hidden sm:inline">{lang === 'en' ? 'ไทย' : 'English'}</span>
           </button>
           <button
             onClick={() => navigateTo(lang === 'th' ? '/th/pricing' : '/pricing')}
-            className="text-xs sm:text-sm text-lexis-ink/70 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
+            className="text-xs sm:text-sm text-lexis-ink/60 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
           >
             {c.pricing}
           </button>
@@ -281,14 +281,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             <button
               onClick={() => selectDirection('en')}
               aria-pressed={direction === 'en'}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'en' ? 'bg-teal-600 text-white' : 'text-lexis-ink/50 hover:text-lexis-ink'}`}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'en' ? 'bg-teal-600 text-white' : 'text-lexis-ink/60 hover:text-lexis-ink'}`}
             >
               {c.learnEnglish}
             </button>
             <button
               onClick={() => selectDirection('th')}
               aria-pressed={direction === 'th'}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'th' ? 'bg-teal-600 text-white' : 'text-lexis-ink/50 hover:text-lexis-ink'}`}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'th' ? 'bg-teal-600 text-white' : 'text-lexis-ink/60 hover:text-lexis-ink'}`}
             >
               {c.learnThai}
             </button>
@@ -297,37 +297,40 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <div>
             <button
               onClick={goPractice}
-              className="px-8 py-4 bg-lexis-action hover:bg-lexis-action-dark hover:scale-105 transition-transform text-white font-display font-semibold text-lg rounded-2xl shadow-xl shadow-lexis-action/25 flex items-center space-x-3 mx-auto md:mx-0"
+              className="px-8 py-4 bg-lexis-action hover:bg-lexis-action-dark transition-colors text-white font-display font-semibold text-lg rounded-2xl shadow-lg shadow-lexis-action/20 flex items-center space-x-3 mx-auto md:mx-0"
             >
               <Mic className="w-5 h-5" />
               <span>{t.cta}</span>
             </button>
           </div>
           <div className="mt-6 flex items-center justify-center md:justify-start space-x-3 text-sm">
-            <span className="text-lexis-ink/50">{t.pricingTeaser}</span>
+            <span className="text-lexis-ink/60">{t.pricingTeaser}</span>
             <button onClick={() => navigateTo('/pricing')} className="text-teal-700 hover:text-teal-800 font-medium underline underline-offset-2">
               {t.viewPricing}
             </button>
           </div>
         </div>
 
-        {/* LEXIS herself — a soft teal glow behind the photo ties it to the
-            live-session avatar treatment elsewhere in the app, without
-            reusing lexis-navy as a background here (this page stays on the
-            warm canvas per the visual-system doc's "marketing pages kept
-            their existing IA" note).
-
-            The photo is a generated image (see
+        {/* LEXIS herself. The photo is a generated image (see
             scripts/avatar/lexis-tutor-photo-notes.md). A previous pass here
             added an explicit "AI-generated" disclosure caption for trust
             reasons; reversed 20 Aug 2026 on direct product-positioning
             instruction — the caption and any other "AI" wording in this
             page's own copy were removed. The underlying image and its
             generation process didn't change, only whether the marketing
-            copy calls attention to it. */}
+            copy calls attention to it.
+
+            21 Aug 2026 (interface re-audit, "tidy the material"): dropped
+            the blurred teal glow blob behind the frame — decorative motion
+            no other element on the page has, doing work that layout should
+            do instead. Frame radius unified to rounded-2xl (was a bespoke
+            rounded-[2rem], a fifth arbitrary radius value on top of the
+            xl/2xl/full already used elsewhere on this page). Whether the
+            photo itself should eventually be replaced by a running demo of
+            the live conversation screen is a separate, bigger product
+            question, deliberately not decided here. */}
         <div className="relative flex justify-center md:justify-end">
-          <div className="absolute w-72 h-72 md:w-96 md:h-96 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="relative w-64 sm:w-80 md:w-full md:max-w-sm aspect-[3/4] rounded-[2rem] overflow-hidden border border-white shadow-2xl shadow-teal-900/10">
+          <div className="relative w-64 sm:w-80 md:w-full md:max-w-sm aspect-[3/4] rounded-2xl overflow-hidden border border-white shadow-xl shadow-teal-900/10">
             <picture>
               <source type="image/avif" srcSet={HERO_SRCSET('avif')} sizes={HERO_SIZES} />
               <source type="image/webp" srcSet={HERO_SRCSET('webp')} sizes={HERO_SIZES} />
@@ -367,32 +370,42 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <span>{c.meetHeading}</span>
         </div>
         <h2 className="font-display font-semibold text-3xl md:text-4xl leading-tight text-balance mb-5 text-lexis-ink">{c.meetTitle}</h2>
-        <p className="text-base text-lexis-ink/70 leading-relaxed max-w-3xl mb-8">{c.meetBody}</p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {c.meetSpecs.map((spec) => (
-            <div key={spec} className="flex items-center gap-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3 text-xs font-medium text-lexis-ink/80">
-              <Zap className="w-3.5 h-3.5 text-teal-600 flex-shrink-0" />
+        <p className="text-base text-lexis-ink/60 leading-relaxed max-w-3xl mb-8">{c.meetBody}</p>
+        {/* 21 Aug 2026 (interface re-audit, "delete the cards" + "icons only
+            where they carry meaning"): was four bg-white bordered chips
+            each repeating the same Zap icon — the icon carried no distinct
+            information four times over. A plain dot-separated row states
+            the same four facts without dressing each one up as an object. */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-medium text-lexis-ink/60">
+          {c.meetSpecs.map((spec, i) => (
+            <React.Fragment key={spec}>
+              {i > 0 && <span className="text-lexis-ink/20" aria-hidden="true">•</span>}
               <span>{spec}</span>
-            </div>
+            </React.Fragment>
           ))}
         </div>
       </section>
 
       {/* How it works — three concrete steps instead of adjective-heavy
           copy. Short, literal sentences here also read cleanly to search
-          crawlers and answer engines, not just human visitors. */}
-      <section className="w-full max-w-5xl mx-auto px-6 py-10">
-        <h2 className="font-display font-semibold text-2xl text-center mb-10">{c.howItWorks}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          crawlers and answer engines, not just human visitors.
+
+          21 Aug 2026 (interface re-audit, "delete the cards"): was three
+          bg-white bordered boxes, each giving a four-word step the same
+          visual weight as a full sentence. Large display numerals now
+          carry the hierarchy instead of a box — nothing bounds the
+          content, so the sequence itself (1, 2, 3) is what a visitor's
+          eye follows down the page. */}
+      <section className="w-full max-w-5xl mx-auto px-6 py-14">
+        <h2 className="font-display font-semibold text-2xl text-center mb-12">{c.howItWorks}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">
           {HOW_IT_WORKS[lang].map(({ icon: Icon, title, desc }, i) => (
-            <div key={title} className="bg-white border border-lexis-ink/10 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-lexis-action/10 text-lexis-action-dark font-display font-semibold text-sm flex-shrink-0">
-                  {i + 1}
-                </div>
+            <div key={title} className="text-center sm:text-left">
+              <div className="flex items-center gap-3 mb-3 justify-center sm:justify-start">
+                <span className="font-display font-semibold text-4xl text-lexis-action-dark leading-none">{i + 1}</span>
                 <Icon className="w-5 h-5 text-teal-700" />
               </div>
-              <div className="font-semibold text-sm mb-1.5">{title}</div>
+              <div className="font-semibold text-sm text-lexis-ink mb-1.5">{title}</div>
               <div className="text-sm text-lexis-ink/60 leading-relaxed">{desc}</div>
             </div>
           ))}
@@ -404,25 +417,20 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           from a language exchange app?" moved to when the FAQ list below
           got trimmed (19 Aug 2026) — a punchy differentiator fits a bullet
           better than a whole FAQ block, and this is the section that
-          already exists for exactly this kind of claim. */}
-      <section className="w-full max-w-5xl mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs text-lexis-ink/60">
-          <div className="flex items-center space-x-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3">
-            <Check className="w-4 h-4 text-teal-600 flex-shrink-0" />
-            <span>{c.trust[0]}</span>
-          </div>
-          <div className="flex items-center space-x-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3">
-            <Repeat className="w-4 h-4 text-teal-600 flex-shrink-0" />
-            <span>{c.trust[1]}</span>
-          </div>
-          <div className="flex items-center space-x-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3">
-            <Check className="w-4 h-4 text-teal-600 flex-shrink-0" />
-            <span>{c.trust[2]}</span>
-          </div>
-          <div className="flex items-center space-x-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3">
-            <Zap className="w-4 h-4 text-teal-600 flex-shrink-0" />
-            <span>{c.trust[3]}</span>
-          </div>
+          already exists for exactly this kind of claim.
+
+          21 Aug 2026 (interface re-audit, "delete the cards"): was four
+          bg-white bordered boxes, each carrying a Check/Repeat/Check/Zap
+          icon that illustrated nothing (two identical checkmarks next to
+          two unrelated claims). A hairline-ruled row states the same four
+          facts as text, at equal weight, without borrowed "trust badge"
+          iconography standing in for actual trust signals. */}
+      <section className="w-full max-w-4xl mx-auto px-6 py-10">
+        <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-lexis-ink/10 border-t border-b border-lexis-ink/10 text-xs text-lexis-ink/60 text-center">
+          <div className="flex-1 py-4 sm:px-4">{c.trust[0]}</div>
+          <div className="flex-1 py-4 sm:px-4">{c.trust[1]}</div>
+          <div className="flex-1 py-4 sm:px-4">{c.trust[2]}</div>
+          <div className="flex-1 py-4 sm:px-4">{c.trust[3]}</div>
         </div>
       </section>
 
@@ -432,18 +440,16 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           impact numbers that don't exist yet (see CommunityPage.jsx's own
           header comment) — only the pay-it-forward checkout add-on, which
           is actually live today. */}
-      <section className="w-full max-w-3xl mx-auto px-6 py-4">
-        <div className="bg-white border border-lexis-ink/10 rounded-3xl px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
-          <div className="flex-shrink-0 p-3 bg-teal-600/10 border border-teal-600/20 rounded-2xl text-teal-700">
-            <Heart className="w-6 h-6" />
-          </div>
+      <section className="w-full max-w-3xl mx-auto px-6 py-10 border-t border-lexis-ink/10">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-5 text-center md:text-left">
+          <Heart className="w-5 h-5 text-teal-600 flex-shrink-0 mt-1" />
           <div className="flex-1">
             <h2 className="font-display font-semibold text-xl text-lexis-ink">{c.communityHeading}</h2>
             <p className="mt-2 text-sm text-lexis-ink/60 leading-relaxed max-w-lg">{c.communityBody}</p>
           </div>
           <button
             onClick={() => navigateTo('/community')}
-            className="flex-shrink-0 px-5 py-2.5 border border-teal-600/30 text-teal-700 hover:bg-teal-600/5 font-semibold text-sm rounded-xl transition-colors whitespace-nowrap md:mt-1"
+            className="flex-shrink-0 text-teal-700 hover:text-teal-800 font-semibold text-sm underline underline-offset-2 whitespace-nowrap md:mt-1"
           >
             {c.communityCta}
           </button>
@@ -458,9 +464,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           the shape those tools quote from. */}
       <section className="w-full max-w-3xl mx-auto px-6 py-14">
         <h2 className="font-display font-semibold text-2xl text-center mb-8">{c.faqHeading}</h2>
-        <div className="space-y-3">
+        {/* 21 Aug 2026 (interface re-audit, "delete the cards"): was one
+            bg-white bordered box per question. <details>/<summary> markup
+            is unchanged (still real semantic HTML, still mirrored as
+            FAQPage JSON-LD) — only the visual container is gone, replaced
+            by hairline rules between rows, plain-list style. */}
+        <div className="divide-y divide-lexis-ink/10 border-t border-b border-lexis-ink/10">
           {FAQS[lang].map(({ q, a }) => (
-            <details key={q} className="group bg-white border border-lexis-ink/10 rounded-2xl p-4 open:shadow-sm">
+            <details key={q} className="group py-4">
               <summary className="cursor-pointer list-none flex items-center justify-between gap-3 font-semibold text-sm text-lexis-ink">
                 <span>{q}</span>
                 <ArrowRight className="w-4 h-4 text-lexis-ink/30 flex-shrink-0 transition-transform group-open:rotate-90" />
@@ -474,7 +485,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
       {/* Footer — the "Private & secure" claim used to have nothing
           behind it (flagged in a re-audit: U6). Now links to the actual
           Privacy Policy that explains what that claim means. */}
-      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/40">
+      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/60">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-teal-600" />
           <span>{c.footerTrust}</span>
