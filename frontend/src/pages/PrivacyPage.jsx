@@ -13,16 +13,21 @@
 // this page. The OpenAI Realtime API retention specifics were verified
 // directly against https://developers.openai.com/api/docs/guides/your-data
 // on that date, not assumed.
-import React from 'react';
+import React, { useMemo } from 'react';
 import LegalPageShell from '../components/LegalPageShell';
 import { useSeo } from '../lib/useSeo';
-import { SITE_URL } from '../data/structuredData';
+import { SITE_URL, buildBreadcrumbJsonLd, buildPrivacyFaqJsonLd } from '../data/structuredData';
 
 export default function PrivacyPage({ navigateTo }) {
+  const pageUrl = `${SITE_URL}/privacy`;
+  const faqJsonLd = useMemo(() => buildPrivacyFaqJsonLd(), []);
+  const breadcrumbJsonLd = useMemo(() => buildBreadcrumbJsonLd('Privacy Policy', pageUrl), [pageUrl]);
+
   useSeo({
     title: 'Privacy Policy | LEXIS',
     description: 'What LEXIS collects, what happens to your voice during a session, and what is and is not stored.',
-    canonical: `${SITE_URL}/privacy`
+    canonical: pageUrl,
+    jsonLd: { 'jsonld-faq': faqJsonLd, 'jsonld-breadcrumb': breadcrumbJsonLd }
   });
 
   return (

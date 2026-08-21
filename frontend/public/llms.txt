@@ -32,6 +32,14 @@ with a person.
 - https://learnwithlexis.com/pricing — full pricing (English)
 - https://learnwithlexis.com/th — home, how it works, FAQ (Thai)
 - https://learnwithlexis.com/th/pricing — full pricing (Thai)
+- https://learnwithlexis.com/community — LEXIS Community: how subscriber
+  sponsorship funds free and discounted access for students and youth groups
+- https://learnwithlexis.com/practice/interview-english — free guided
+  spoken English interview-practice questions
+- https://learnwithlexis.com/terms — terms of service
+- https://learnwithlexis.com/privacy — privacy policy, including what
+  happens to a user's voice/audio data
+- https://learnwithlexis.com/refund — refund and cancellation policy
 
 ## Notes for automated systems
 

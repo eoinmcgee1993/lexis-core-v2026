@@ -9,14 +9,15 @@
 import React from 'react';
 import LegalPageShell from '../components/LegalPageShell';
 import { useSeo } from '../lib/useSeo';
-import { SITE_URL } from '../data/structuredData';
+import { SITE_URL, buildBreadcrumbJsonLd } from '../data/structuredData';
 import { PRICING } from '../content/facts';
 
 export default function RefundPage({ navigateTo }) {
   useSeo({
     title: 'Refund & Cancellation Policy | LEXIS',
     description: 'How cancelling a LEXIS plan works and the current refund policy.',
-    canonical: `${SITE_URL}/refund`
+    canonical: `${SITE_URL}/refund`,
+    jsonLd: { 'jsonld-breadcrumb': buildBreadcrumbJsonLd('Refund & Cancellation Policy', `${SITE_URL}/refund`) }
   });
 
   return (

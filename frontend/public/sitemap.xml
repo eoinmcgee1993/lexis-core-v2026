@@ -6,29 +6,37 @@
      brief's own suggestion (generate it at build time from a route list)
      depends on frontend/src/content/facts.js's route data existing in a
      structured form, which it doesn't yet. Revisit rather than building
-     generation machinery for a file this small ahead of that. -->
+     generation machinery for a file this small ahead of that.
+
+     21 Aug 2026: dates below refreshed to reflect actual content changes
+     (Digital Renaissance re-audit correctly flagged these as stale) —
+     /, /th, /pricing, /th/pricing all got real copy changes since 17 Aug
+     (dash cleanup, FAQ fix, the "Meet LEXIS" section); /community's date
+     now matches its 20 Aug tone rewrite (see CommunityPage.jsx); /privacy
+     and /practice/interview-english both gained FAQPage structured data
+     today. /terms and /refund are untouched since 19 Aug, left as-is. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://learnwithlexis.com/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/pricing</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/th</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/th/pricing</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -40,7 +48,7 @@
   </url>
   <url>
     <loc>https://learnwithlexis.com/privacy</loc>
-    <lastmod>2026-08-19</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -52,13 +60,13 @@
   </url>
   <url>
     <loc>https://learnwithlexis.com/community</loc>
-    <lastmod>2026-08-19</lastmod>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/practice/interview-english</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

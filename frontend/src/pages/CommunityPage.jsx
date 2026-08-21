@@ -31,14 +31,15 @@ import React from 'react';
 import { ArrowLeft, Heart, Building2, Mail, Target, Coins, ArrowRight } from 'lucide-react';
 import LexisMark from '../components/LexisMark';
 import { useSeo } from '../lib/useSeo';
-import { SITE_URL } from '../data/structuredData';
+import { SITE_URL, buildBreadcrumbJsonLd } from '../data/structuredData';
 import { SPONSOR_ADDON_THB } from '../content/facts';
 
 export default function CommunityPage({ navigateTo }) {
   useSeo({
     title: 'LEXIS Community | Speaking Opens Doors',
     description: 'LEXIS Community: every subscription can help fund free and discounted spoken-practice access for students and youth groups who couldn’t otherwise afford it.',
-    canonical: `${SITE_URL}/community`
+    canonical: `${SITE_URL}/community`,
+    jsonLd: { 'jsonld-breadcrumb': buildBreadcrumbJsonLd('LEXIS Community', `${SITE_URL}/community`) }
   });
 
   return (

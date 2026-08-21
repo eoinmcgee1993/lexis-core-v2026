@@ -10,11 +10,11 @@
 // something built to justify the page. See PARTNER-CODES.md's sibling
 // growth work from the same day for the reasoning behind starting with
 // one real page instead of a batch of thin ones.
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ArrowLeft, Mic, MessageSquare, TrendingUp } from 'lucide-react';
 import LexisMark from '../components/LexisMark';
 import { useSeo } from '../lib/useSeo';
-import { SITE_URL } from '../data/structuredData';
+import { SITE_URL, buildBreadcrumbJsonLd, buildInterviewFaqJsonLd } from '../data/structuredData';
 import { TRIAL } from '../content/facts';
 
 const PRACTICE_PROMPTS = [
@@ -26,10 +26,18 @@ const PRACTICE_PROMPTS = [
 ];
 
 export default function InterviewEnglishPage({ navigateTo }) {
+  const pageUrl = `${SITE_URL}/practice/interview-english`;
+  // Static (no lang dependency), but built once per mount rather than
+  // inline in the useSeo call below to match how LandingPage.jsx/
+  // PricingPage.jsx build their own jsonLd objects.
+  const faqJsonLd = useMemo(() => buildInterviewFaqJsonLd(), []);
+  const breadcrumbJsonLd = useMemo(() => buildBreadcrumbJsonLd('Interview English Practice', pageUrl), [pageUrl]);
+
   useSeo({
     title: 'Practice English for Job Interviews Out Loud | LEXIS',
     description: `Practice answering real interview questions out loud in English, with gentle real-time corrections. Free ${TRIAL.minutes}-minute trial, no card required.`,
-    canonical: `${SITE_URL}/practice/interview-english`
+    canonical: pageUrl,
+    jsonLd: { 'jsonld-faq': faqJsonLd, 'jsonld-breadcrumb': breadcrumbJsonLd }
   });
 
   return (
