@@ -183,6 +183,26 @@ export function buildInterviewFaqJsonLd() {
   };
 }
 
+// Generic FAQPage builder (21 Aug 2026, re-audit L10) for the topic
+// practice pages below — takes the page's own {q,a} pairs directly rather
+// than needing a dedicated build*FaqJsonLd function per page the way
+// buildInterviewFaqJsonLd/buildPrivacyFaqJsonLd (below) do. Those two
+// predate this and are left as they are since they already shipped; the
+// new topic pages use this one directly, with their content colocated in
+// the page file itself (same place InterviewEnglishPage.jsx's
+// PRACTICE_PROMPTS already lives).
+export function buildTopicFaqJsonLd(entries) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: entries.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a }
+    }))
+  };
+}
+
 // FAQPage for /privacy (21 Aug 2026, re-audit L8) — every answer condenses
 // language already on the page itself (PrivacyPage.jsx's own section
 // prose); it introduces no new claim. A separate builder rather than
