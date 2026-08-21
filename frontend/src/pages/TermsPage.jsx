@@ -9,14 +9,15 @@
 import React from 'react';
 import LegalPageShell from '../components/LegalPageShell';
 import { useSeo } from '../lib/useSeo';
-import { SITE_URL } from '../data/structuredData';
+import { SITE_URL, buildBreadcrumbJsonLd } from '../data/structuredData';
 import { PRICING, TRIAL, VAT } from '../content/facts';
 
 export default function TermsPage({ navigateTo }) {
   useSeo({
     title: 'Terms of Service | LEXIS',
     description: 'The terms for using LEXIS and subscribing to a paid plan.',
-    canonical: `${SITE_URL}/terms`
+    canonical: `${SITE_URL}/terms`,
+    jsonLd: { 'jsonld-breadcrumb': buildBreadcrumbJsonLd('Terms of Service', `${SITE_URL}/terms`) }
   });
 
   return (

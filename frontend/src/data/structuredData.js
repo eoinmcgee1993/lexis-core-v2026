@@ -119,3 +119,120 @@ export function buildFaqJsonLd(lang = 'en') {
     }))
   };
 }
+
+// BreadcrumbList (21 Aug 2026, re-audit L7) — every page except '/' and
+// '/th' gets one; a single-level home page has no trail to show against
+// itself. One generic builder rather than a function per page, since the
+// shape is identical everywhere: Home > This Page. lang controls only the
+// "Home" crumb's label and target, matching whichever language's chrome
+// is actually visible on the page calling this.
+const HOME_LABEL = { en: 'Home', th: 'หน้าแรก' };
+
+export function buildBreadcrumbJsonLd(pageName, pageUrl, lang = 'en') {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: HOME_LABEL[lang] || HOME_LABEL.en,
+        item: lang === 'th' ? `${SITE_URL}/th` : `${SITE_URL}/`
+      },
+      { '@type': 'ListItem', position: 2, name: pageName, item: pageUrl }
+    ]
+  };
+}
+
+// FAQPage for /practice/interview-english (21 Aug 2026, re-audit L7) —
+// genuine content drawn from what's already on that page (the same
+// PRACTICE_PROMPTS list InterviewEnglishPage.jsx renders, and TRIAL from
+// facts.js), not written fresh for the structured data. Kept here rather
+// than inline in the page component to match how buildFaqJsonLd/
+// buildOffersJsonLd already work for LandingPage.jsx/PricingPage.jsx.
+export function buildInterviewFaqJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'What interview questions can I practice with LEXIS?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Common, real interview prompts that come up regardless of industry, including "Tell me about yourself," "What are your strengths and weaknesses?," "Why do you want to work here?," "Describe a time you solved a difficult problem," and "Do you have any questions for me?"'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Is interview English practice free?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `Yes. LEXIS gives every new user a free ${TRIAL.minutes} minute trial with no card required, which you can use for interview practice or any other topic.`
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'How is speaking practice different from reading interview questions online?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: "Reading a question and typing out an answer doesn't train what an interview actually tests: thinking and speaking at the same time, in a second language, under a little pressure. LEXIS replies out loud in real time and corrects grammar or word choice gently mid conversation, the same way a patient interviewer's follow up question would."
+        }
+      }
+    ]
+  };
+}
+
+// FAQPage for /privacy (21 Aug 2026, re-audit L8) — every answer condenses
+// language already on the page itself (PrivacyPage.jsx's own section
+// prose); it introduces no new claim. A separate builder rather than
+// reusing buildFaqJsonLd, since these aren't FAQS.en/th marketing
+// entries, they're this one page's own section headings in question form.
+export function buildPrivacyFaqJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'What happens to my voice when I use LEXIS?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: "A live LEXIS session is a real time voice connection (WebRTC) directly between your device and OpenAI's Realtime API. Your microphone audio is streamed for the duration of the conversation and is not saved as an audio file on LEXIS's own servers. After a session ends, LEXIS saves only a feedback summary (a confidence score, a few strengths, and a few corrections), not a transcript of what you said."
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'What other data does LEXIS store about me?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: "Account info (email, name, subscription status), session feedback summaries, usage totals to enforce the free trial and track your plan, and basic first party analytics kept against an anonymous per visit identifier. Payment details are handled entirely by Stripe; LEXIS does not receive or store your card number. No third party analytics or advertising trackers are used anywhere on LEXIS."
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'How long does LEXIS keep my data?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Account data and session history are kept for up to 2 years from your last activity on LEXIS, after which they are deleted. You can also ask for earlier deletion at any time.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I delete my data or ask what LEXIS holds about me?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'There is currently no self serve "delete my account" option in the app itself. Email privacy@learnwithlexis.com to request deletion or a copy of your data, and it will be actioned directly.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Is LEXIS suitable for someone under 18?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: "Under Thailand's Personal Data Protection Act, anyone under 20 is legally a minor: under 10s need a parent or guardian's consent to use LEXIS, and those aged 10 to 19 need both their own consent and a parent or guardian's. At sign up, LEXIS asks users to confirm they are 20 or older, or that they have permission to use LEXIS if younger."
+        }
+      }
+    ]
+  };
+}

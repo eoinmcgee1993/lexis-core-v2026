@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ArrowLeft, Check, Loader2, AlertCircle, ShieldCheck, Globe } from 'lucide-react';
 import LexisMark from '../components/LexisMark';
 import { useAuth } from '../context/AuthContext';
-import { buildOffersJsonLd, SITE_URL } from '../data/structuredData';
+import { buildBreadcrumbJsonLd, buildOffersJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
 import { reportError } from '../lib/errorReporting';
@@ -107,6 +107,10 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
   const thUrl = `${SITE_URL}/th/pricing`;
 
   const offersJsonLd = useMemo(() => buildOffersJsonLd(lang), [lang]);
+  const breadcrumbJsonLd = useMemo(
+    () => buildBreadcrumbJsonLd(lang === 'th' ? 'ราคา' : 'Pricing', lang === 'th' ? thUrl : enUrl, lang),
+    [lang, thUrl, enUrl]
+  );
   useSeo({
     title: lang === 'th' ? 'ราคา | LEXIS' : 'Pricing | LEXIS',
     description: lang === 'th' ? PRICING_DESCRIPTION_TH : PRICING_DESCRIPTION_EN,
@@ -117,7 +121,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
       { hrefLang: 'th', href: thUrl },
       { hrefLang: 'x-default', href: enUrl }
     ],
-    jsonLd: { 'jsonld-offers': offersJsonLd }
+    jsonLd: { 'jsonld-offers': offersJsonLd, 'jsonld-breadcrumb': breadcrumbJsonLd }
   });
 
   const startCheckout = async (planTier, priceId) => {

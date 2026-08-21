@@ -1,12 +1,17 @@
-# Per robots.txt's actual matching rule (RFC 9309): a crawler that
-# matches a specific User-agent group uses ONLY that group's directives
-# — it does NOT also inherit the wildcard (*) group's rules. So every
-# named group below repeats the Disallow lines explicitly; leaving them
-# out would have silently allowed these crawlers into /app and /auth.
+# /app and /auth used to be Disallow'd here as well as carrying a
+# noindex tag (AuthPage.jsx, LexisApp.jsx, via useSeo). That combination
+# is self-defeating: Google's own guidance is that a page blocked by
+# robots.txt is never fetched, so the crawler never sees the noindex tag
+# on it — meaning a Disallow'd-but-linked-to URL can still show up in
+# search results with no snippet, instead of being cleanly dropped from
+# the index the way noindex actually achieves. Fixed 21 Aug 2026 (Digital
+# Renaissance re-audit, L4): Disallow removed, noindex left to do the
+# actual job of keeping /app and /auth out of search results, with
+# crawling allowed so it can see that tag. No group-specific Disallow
+# lines are needed as a result, but the per-group repetition below is
+# kept intentionally — see the RFC 9309 note that used to sit above this.
 User-agent: *
 Allow: /
-Disallow: /app
-Disallow: /auth
 
 # AI/answer-engine crawlers, explicitly allowed rather than left to
 # whatever each one's default behavior toward an unlisted site is —
@@ -14,27 +19,17 @@ Disallow: /auth
 # Overviews. Confirmed with Eoin before adding (remediation brief §7.6).
 User-agent: Google-Extended
 Allow: /
-Disallow: /app
-Disallow: /auth
 
 User-agent: OAI-SearchBot
 Allow: /
-Disallow: /app
-Disallow: /auth
 
 User-agent: GPTBot
 Allow: /
-Disallow: /app
-Disallow: /auth
 
 User-agent: PerplexityBot
 Allow: /
-Disallow: /app
-Disallow: /auth
 
 User-agent: ClaudeBot
 Allow: /
-Disallow: /app
-Disallow: /auth
 
 Sitemap: https://learnwithlexis.com/sitemap.xml
