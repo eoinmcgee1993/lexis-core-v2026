@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp, Heart } from 'lucide-react';
+import { Mic, ShieldCheck, Zap, Globe, Check, ArrowRight, MessageCircle, Repeat, TrendingUp, Heart, Gauge } from 'lucide-react';
 import LexisMark from '../components/LexisMark';
 import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
@@ -60,6 +60,10 @@ const CHROME = {
       'Review what you practiced, anytime (paid plans)',
       'No waiting, no scheduling: practice the moment you want to'
     ],
+    meetHeading: 'Meet LEXIS',
+    meetTitle: 'Real-time voice, built to perform.',
+    meetBody: "LEXIS isn't a script or a chatbot with a microphone bolted on. The moment you stop talking, she's already replying, no lag, no waiting your turn. She listens in both English and Thai, adjusts automatically to your level, and corrects you gently mid-conversation, the way a sharp, patient tutor would. Built first for Thailand's English and Thai learners, the same real-time engine works for anyone, anywhere, learning either language out loud.",
+    meetSpecs: ['Live, real-time voice', 'Bilingual, both directions', 'Adjusts to your level automatically', 'Available any hour, no booking'],
     communityHeading: 'More than practice for yourself',
     communityBody: "At checkout, you can add a small amount to your plan to help fund free and discounted access for students and youth groups who couldn't otherwise afford it. Learn a language, and help open the same door for someone else.",
     communityCta: 'See how LEXIS Community works',
@@ -85,6 +89,10 @@ const CHROME = {
       'ทบทวนสิ่งที่ฝึกได้ทุกเมื่อ (แพ็กเกจแบบเสียเงิน)',
       'ไม่ต้องรอ ไม่ต้องนัดเวลา ฝึกได้ทันทีที่อยากฝึก'
     ],
+    meetHeading: 'รู้จัก LEXIS',
+    meetTitle: 'เสียงสนทนาแบบเรียลไทม์ สมรรถนะเต็มพิกัด',
+    meetBody: 'LEXIS ไม่ใช่สคริปต์หรือแชทบอทที่แปะไมโครโฟนไว้ ทันทีที่คุณพูดจบ เธอตอบกลับทันที ไม่มีอาการหน่วง ไม่ต้องรอคิว เธอฟังได้ทั้งภาษาอังกฤษและภาษาไทย ปรับให้เข้ากับระดับของคุณโดยอัตโนมัติ และช่วยแก้ไขให้อย่างอ่อนโยนระหว่างสนทนา เหมือนติวเตอร์ที่เก่งและใจเย็น สร้างขึ้นมาเพื่อผู้เรียนภาษาอังกฤษและภาษาไทยในไทยเป็นกลุ่มแรก แต่เครื่องยนต์เรียลไทม์ตัวเดียวกันนี้ใช้ได้กับทุกคน ทุกที่ ที่อยากฝึกพูดออกเสียงจริง',
+    meetSpecs: ['เสียงสนทนาแบบเรียลไทม์', 'สองภาษา ฝึกได้ทั้งสองทิศทาง', 'ปรับระดับให้อัตโนมัติ', 'ใช้ได้ทุกเวลา ไม่ต้องจอง'],
     communityHeading: 'มากกว่าการฝึกเพื่อตัวเอง',
     communityBody: 'ตอนชำระเงิน คุณสามารถเพิ่มจำนวนเงินเล็กน้อยเข้าไปในแพ็กเกจ เพื่อช่วยสนับสนุนการเข้าถึงแบบฟรีและส่วนลดให้นักเรียนและกลุ่มเยาวชนที่ไม่สามารถจ่ายได้ด้วยตัวเอง ฝึกภาษาของคุณ พร้อมช่วยเปิดโอกาสเดียวกันนี้ให้คนอื่นด้วย',
     communityCta: 'ดูว่า LEXIS Community ทำงานอย่างไร',
@@ -333,6 +341,33 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
             <span>{c.liveVoice}</span>
           </div>
+        </div>
+      </section>
+
+      {/* Meet LEXIS — a technical-credibility intro ahead of the 3-step
+          "How it works" breakdown, requested directly (20 Aug 2026) as a
+          "high spec" introduction to LEXIS herself. Deliberately makes no
+          "only/first/best in Thailand" claim — that's an unverifiable
+          superlative the same way the Partner Brief and PARTNER-CODES.md
+          both flag elsewhere in this codebase. Every sentence here
+          describes a real, shipped capability (live voice, bilingual both
+          directions, level-adaptive, no scheduling); the "nothing else
+          quite like this" impression comes from specificity, not from
+          asserting market uniqueness as fact. */}
+      <section className="w-full max-w-4xl mx-auto px-6 py-10">
+        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-5">
+          <Gauge className="w-3.5 h-3.5" />
+          <span>{c.meetHeading}</span>
+        </div>
+        <h2 className="font-display font-semibold text-3xl md:text-4xl leading-tight text-balance mb-5 text-lexis-ink">{c.meetTitle}</h2>
+        <p className="text-base text-lexis-ink/70 leading-relaxed max-w-3xl mb-8">{c.meetBody}</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {c.meetSpecs.map((spec) => (
+            <div key={spec} className="flex items-center gap-2 bg-white border border-lexis-ink/10 rounded-xl px-4 py-3 text-xs font-medium text-lexis-ink/80">
+              <Zap className="w-3.5 h-3.5 text-teal-600 flex-shrink-0" />
+              <span>{spec}</span>
+            </div>
+          ))}
         </div>
       </section>
 
