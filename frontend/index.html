@@ -74,7 +74,16 @@
          (confirmed by Eoin, 17 Aug 2026), matching structuredData.js's
          SITE_URL. This file is static HTML with no build-time
          templating, so the domain is hand-typed here rather than
-         imported; if it ever changes again, update both places. -->
+         imported; if it ever changes again, update both places.
+
+         alternateName (20 Aug 2026): "LEXIS" stays the actual displayed
+         brand everywhere on the site (header, page titles, copy) — a
+         full rename to "Learn with LEXIS" was considered and rejected,
+         it's a worse in-product name for no real gain. This one field
+         is the targeted fix instead: it tells Google/AI answer engines
+         that "Learn with LEXIS" (the domain's own phrasing) and "LEXIS"
+         refer to the same entity, without changing anything a visitor
+         actually reads. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -83,6 +92,7 @@
           "@type": "Organization",
           "@id": "https://learnwithlexis.com/#organization",
           "name": "LEXIS",
+          "alternateName": "Learn with LEXIS",
           "url": "https://learnwithlexis.com/",
           "areaServed": { "@type": "Country", "name": "Thailand" },
           "knowsLanguage": ["en", "th"]
@@ -91,6 +101,7 @@
           "@type": "SoftwareApplication",
           "@id": "https://learnwithlexis.com/#software",
           "name": "LEXIS",
+          "alternateName": "Learn with LEXIS",
           "applicationCategory": "EducationApplication",
           "operatingSystem": "Web",
           "url": "https://learnwithlexis.com/",
