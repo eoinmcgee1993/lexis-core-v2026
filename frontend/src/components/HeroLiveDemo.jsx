@@ -10,29 +10,39 @@
 // system (bg-lexis-navy, teal-950/teal-800/teal-100 transcript bubbles,
 // the same glow-ring treatment) rather than inventing a new one.
 //
-// What this is NOT: a real WebRTC connection. There is no live audio or
-// model call here — it's a scripted, looping animation of what a real
-// session looks like, honestly, not presented as an actual live feed.
-// The transcript lines below are illustrative (drawn from the real
-// "everyday" topic curriculum already live in the product, see
-// backend/app.mjs's TOPIC_CURRICULA.everyday and
-// EverydayEnglishPage.jsx's own practice prompts), not a real recording
-// of a real session.
+// What this is NOT: a real WebRTC connection. There is no live model call
+// here — it's a scripted, looping animation of what a real session looks
+// like, honestly, not presented as an actual live feed. The transcript
+// lines below are illustrative (drawn from the real "everyday" topic
+// curriculum already live in the product, see backend/app.mjs's
+// TOPIC_CURRICULA.everyday and EverydayEnglishPage.jsx's own practice
+// prompts), not a real recording of a real session.
 //
-// No "hear her voice" control here. First built as a link into starting
-// a real trial (reasoning: generating a canned audio clip costs real
-// ElevenLabs credits, which shouldn't be spent without asking first —
-// same rule as GROWTH-DELEGATION-BRIEF.md's ad-spend caution). Reported
-// live as exactly backwards, and correctly: /app requires signing up
-// before a visitor hears anything, so a button promising "hear her
-// voice" was actually a sign-up wall in disguise — precisely the
-// "sign-in is a wall before value" problem the newer audit's conversion
-// section calls out. Removed rather than patched with a different label,
-// since neither option here (spend money on a clip, or build anonymous
-// trial access) is this component's call to make unilaterally — both are
-// flagged as open decisions elsewhere, not solved by this preview.
+// The opening line IS real audio, though (22 Aug 2026): a one-off
+// text-to-speech render of the exact same line LEXIS's real Live
+// Conversation session uses, in the same voice. Correcting an earlier
+// mistake in this file's own history — LEXIS's actual voice engine is
+// OpenAI's Realtime API (see backend/app.mjs's POST /api/session, voice
+// 'marin'), not ElevenLabs as previously stated here; there's no
+// ElevenLabs integration anywhere in this codebase. These two clips
+// (public/audio/hero-demo-en.mp3, -th.mp3) were rendered via OpenAI's
+// standalone /v1/audio/speech endpoint with that same voice — a one-time
+// synthesis, not a live session — for exactly the opening question, in
+// both languages, so the hero and the real product sound like the same
+// person. Muted by default and gated behind a tap (browsers block
+// autoplaying audio with sound anyway, and a marketing page that starts
+// talking at you unasked is its own bad experience) — see the mute
+// toggle below.
 import React, { useEffect, useRef, useState } from 'react';
+import { Volume2, VolumeX } from 'lucide-react';
 import TutorAvatarPhoto from './TutorAvatarPhoto';
+
+// Real synthesized audio of the exact opening line, matching SCRIPTS
+// below — see this file's header comment for how these were made.
+const OPENING_LINE_AUDIO = {
+  en: '/audio/hero-demo-en.mp3',
+  th: '/audio/hero-demo-th.mp3'
+};
 
 // Same env var LiveStage.jsx/LexisApp.jsx read for the real session's
 // avatar — one source of truth for which photo identity is in use, not a
@@ -114,9 +124,15 @@ function useSimulatedTutorLevel(isTalking) {
 export default function HeroLiveDemo({ direction, caption }) {
   const script = SCRIPTS[direction] || SCRIPTS.en;
   const [step, setStep] = useState(0);
+  // Muted by default: browsers block autoplaying audio-with-sound anyway,
+  // and a marketing page that starts talking at a visitor unasked is a bad
+  // experience even where the browser would allow it. The visitor opts in.
+  const [muted, setMuted] = useState(true);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     setStep(0); // direction changed (language toggle) — restart the loop from the top
+    audioRef.current?.load(); // pick up the new-language src (see OPENING_LINE_AUDIO) before the next play()
   }, [direction]);
 
   useEffect(() => {
@@ -128,17 +144,60 @@ export default function HeroLiveDemo({ direction, caption }) {
     return () => clearTimeout(timer);
   }, [step, script.length]);
 
+  // Step 0 is the moment LEXIS's opening line first appears on its own —
+  // exactly what OPENING_LINE_AUDIO was rendered to match. Re-fires on
+  // every loop, and also whenever `muted` flips (so unmuting mid-loop
+  // doesn't have to wait for the next cycle if it happens to land on
+  // step 0 already).
+  useEffect(() => {
+    if (step !== 0 || muted) return;
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = 0;
+    audio.play().catch(() => {}); // a blocked autoplay here just means try again next loop — not worth surfacing
+  }, [step, muted]);
+
+  function toggleMute() {
+    setMuted((wasMuted) => {
+      const audio = audioRef.current;
+      if (wasMuted) {
+        // unmuting: play immediately rather than making the visitor wait
+        // for the loop to come back around to step 0
+        if (audio) {
+          audio.currentTime = 0;
+          audio.play().catch(() => {});
+        }
+      } else {
+        audio?.pause();
+      }
+      return !wasMuted;
+    });
+  }
+
   const visibleLines = script[step];
   const lexisIsTalking = visibleLines[visibleLines.length - 1]?.speaker === 'lexis';
   const simulatedTutorLevel = useSimulatedTutorLevel(lexisIsTalking);
 
   return (
     <div className="relative w-64 sm:w-80 md:w-full md:max-w-sm rounded-2xl overflow-hidden border border-white/10 shadow-xl shadow-teal-900/10 bg-lexis-navy">
+      {/* Real audio, not a stand-in — see this file's header comment. */}
+      <audio ref={audioRef} src={OPENING_LINE_AUDIO[direction] || OPENING_LINE_AUDIO.en} preload="auto" />
+
       {/* Same ambient glow LiveStage.jsx uses so this reads as the same
           screen, not a lookalike. */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-56 h-56 bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow" />
       </div>
+
+      <button
+        type="button"
+        onClick={toggleMute}
+        aria-label={muted ? "Unmute LEXIS's voice" : "Mute LEXIS's voice"}
+        aria-pressed={!muted}
+        className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+      >
+        {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+      </button>
 
       <div className="relative p-5 flex flex-col items-center">
         {/* LEXIS herself — the same TutorAvatarPhoto component and glow-
