@@ -420,13 +420,26 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
     // OpenAI's own docs for this exact flow only ever reference the
     // gpt-realtime family. Fixed once before (git log), regressed once
     // (that regression is exactly why .env.example's OPENAI_MODEL example
-    // value still named the broken snapshot until this same pass fixed
-    // it — copy that file verbatim into a real .env and this endpoint
-    // 404s). The frontend's SDP-exchange call (LexisApp.jsx) used to
-    // independently hardcode this same model name as a second literal
-    // that had to be kept in sync by hand — now it reads the value this
-    // endpoint actually used, below, instead of guessing it again.
-    const realtimeModel = process.env.OPENAI_MODEL || 'gpt-realtime';
+    // value used to name the broken snapshot — copy that file verbatim
+    // into a real .env and this endpoint 404s). The frontend's SDP-
+    // exchange call (LexisApp.jsx) used to independently hardcode this
+    // same model name as a second literal kept in sync by hand — it now
+    // reads the value this endpoint actually used, below, instead of
+    // guessing it again.
+    //
+    // gpt-realtime-2.1 (22 Aug 2026): OpenAI's newer flagship Realtime
+    // model, released 6 Jul 2026 — same price, same client_secrets/calls
+    // endpoints and session shape as the base gpt-realtime family (voice,
+    // VAD, and everything else below is unchanged), but cuts measured p95
+    // voice latency by 25%+ and improves interruption handling — directly
+    // relevant to a product whose whole pitch is "no awkward pauses."
+    // reasoning.effort: 'low' is actually already 2.1's own default (kept
+    // latency-optimized unless told otherwise), set explicitly here so
+    // that stays true even if OpenAI ever changes the silent default.
+    // Rollback if this regresses quality in real use: OPENAI_MODEL=
+    // gpt-realtime in Vercel's env vars, no code change or redeploy
+    // needed, since this already reads from that env var first.
+    const realtimeModel = process.env.OPENAI_MODEL || 'gpt-realtime-2.1';
 
     const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
       method: 'POST',
@@ -439,6 +452,7 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
         session: {
           type: 'realtime',
           model: realtimeModel,
+          reasoning: { effort: 'low' },
           audio: {
             // 'verse' reads as male; the tutor avatar (frontend) is a
             // consistently female persona, so the voice should match.
