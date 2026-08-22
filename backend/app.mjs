@@ -851,15 +851,33 @@ app.get('/api/history', historyRateLimiter, authenticate, async (req, res) => {
 // checkout logic and copy separately.
 const SPONSOR_ADDON_THB = 50;
 
+// Stripe recurring Price IDs — live mode, Clearmark account
+// (acct_1T1zS9F1FdEsYK5E). Moved here from PricingPage.jsx (21 Aug 2026,
+// re-audit B2): the client used to send its own priceId straight through
+// to stripe.checkout.sessions.create with no server-side check that it
+// matched planTier or was one of these two prices at all — meaning any
+// client could POST an arbitrary price_id from this same Stripe account
+// and get charged whatever that price says, not what the pricing page
+// displayed. The backend is now the only place planTier resolves to a
+// real price; the endpoint below no longer accepts a priceId from the
+// client at all. process.env fallback to the known-real IDs means this
+// keeps working with zero Vercel config changes, while still letting a
+// price change happen via an env var update instead of a frontend
+// deploy, if that's ever wanted.
+const STRIPE_PRICES = {
+  weekly: process.env.STRIPE_PRICE_WEEKLY || 'price_1U1hdLF1FdEsYK5EOSheNGGS',   // LEXIS Weekly Pass
+  monthly: process.env.STRIPE_PRICE_MONTHLY || 'price_1U1hdOF1FdEsYK5Ec6DgUlil'  // LEXIS Monthly Immersion
+};
+
 // Stripe Checkout — auth required, but NOT entitlement-gated: a user whose
 // trial just expired is exactly who needs to reach this endpoint.
 app.post('/api/stripe/checkout', authenticate, async (req, res) => {
   try {
-    const { priceId, planTier, sponsorAdd } = req.body || {};
-    if (!priceId) return res.status(400).json({ error: 'Missing priceId parameter.' });
-    if (planTier && !['weekly', 'monthly'].includes(planTier)) {
+    const { planTier, sponsorAdd } = req.body || {};
+    if (!planTier || !['weekly', 'monthly'].includes(planTier)) {
       return res.status(400).json({ error: 'Invalid planTier: expected "weekly" or "monthly".' });
     }
+    const priceId = STRIPE_PRICES[planTier];
 
     const lineItems = [{ price: priceId, quantity: 1 }];
     if (sponsorAdd) {

@@ -53,14 +53,7 @@ lexis-core-v2026/
 
 ## 2. Stripe Setup
 1. **Product catalog** → create a "Weekly Pass" product with a recurring ฿199/week Price, and a "Monthly Immersion" product with a recurring ฿599/month Price. Copy each Price ID (`price_...`, not the product id).
-2. Edit `frontend/src/pages/PricingPage.jsx` and set the `STRIPE_PRICES` object to your real IDs:
-   ```js
-   const STRIPE_PRICES = {
-     weekly: 'price_xxxxxxxxxxxxx',
-     monthly: 'price_xxxxxxxxxxxxx'
-   };
-   ```
-   The frontend sends the selected ID to the backend, which creates the Checkout Session server-side (no Payment Links involved).
+2. The mapping from plan tier to Price ID lives server-side, in `backend/app.mjs`'s `STRIPE_PRICES` constant (moved here from the frontend 21 Aug 2026, re-audit B2 — a client used to be able to send an arbitrary `price_id` straight through with no server-side check that it matched the tier it claimed to be). Either edit that constant directly to your real IDs, or set the `STRIPE_PRICE_WEEKLY`/`STRIPE_PRICE_MONTHLY` environment variables (both optional — they override the constant's fallback values, so a price change only needs an env var update, not a redeploy). The frontend only ever sends which tier was picked (`planTier`); it never sends a price ID.
 3. **Developers → Webhooks** → add an endpoint at `https://your-backend.up.railway.app/api/stripe/webhook`, subscribed to `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`. Copy the endpoint's **Signing secret** (`whsec_...`).
 
 ## Local Development
@@ -94,7 +87,7 @@ cp .env.example .env.local
 #   VITE_BACKEND_URL=http://localhost:3001
 #   VITE_SUPABASE_URL=...
 #   VITE_SUPABASE_ANON_KEY=...
-# (Stripe price IDs are set directly in PricingPage.jsx — see Step 2 above)
+# (Stripe price IDs are set server-side — see Step 2 above)
 
 npm install
 npm run dev
@@ -173,7 +166,7 @@ Run these against the actual deployed Railway/Vercel/Supabase/Stripe stack befor
 | `401 Unauthorized` | User isn't signed in, or the Supabase session expired — sign in again |
 | `403 TRIAL_EXHAUSTED` on `/api/session` or `/api/heartbeat` | Trial exhausted or subscription lapsed — expected; user needs to buy/renew a pass via `/pricing` |
 | `403 Profile not found` | The signup trigger didn't fire — re-run `backend/supabase-schema.sql`, or check Postgres logs for the trigger |
-| Stripe checkout 500s | `priceId` sent from the frontend doesn't match a real Stripe Price, or `STRIPE_SECRET_KEY` is for the wrong mode (test vs live) |
+| Stripe checkout 500s | `STRIPE_PRICE_WEEKLY`/`STRIPE_PRICE_MONTHLY` (if set) don't match a real Stripe Price, or `STRIPE_SECRET_KEY` is for the wrong mode (test vs live) — `planTier` → price mapping is server-side now (`backend/app.mjs`'s `STRIPE_PRICES`), the frontend no longer sends a priceId at all (21 Aug 2026, re-audit B2) |
 | Stripe webhook `signature verification failed` | `STRIPE_WEBHOOK_SECRET` doesn't match the endpoint in the Stripe Dashboard |
 | Payment succeeded but account still shows `free_trial` | The webhook endpoint isn't reachable, or isn't subscribed to `checkout.session.completed` — check Stripe's webhook delivery logs |
 | `OpenAI API Error 404` | Check `OPENAI_MODEL` is a valid Realtime model |
