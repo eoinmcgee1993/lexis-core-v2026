@@ -25,8 +25,14 @@
 // caution). It routes straight into starting a real trial instead, which
 // is arguably more honest anyway: that's actually her voice, not a demo
 // recording of it.
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Volume2 } from 'lucide-react';
+import TutorAvatarPhoto from './TutorAvatarPhoto';
+
+// Same env var LiveStage.jsx/LexisApp.jsx read for the real session's
+// avatar — one source of truth for which photo identity is in use, not a
+// second hardcoded path that could drift from it.
+const AVATAR_PHOTO_URL = import.meta.env.VITE_AVATAR_PHOTO_URL;
 
 // direction: 'en' | 'th' — which language LEXIS is teaching, same value
 // LandingPage.jsx already tracks. LEXIS speaks the target language;
@@ -73,7 +79,32 @@ const SCRIPTS = {
 const STEP_MS = 2200;
 const END_PAUSE_MS = 2400; // hold the finished exchange on screen before looping
 
-const WAVE_BARS = 5; // matches LexisMark's five-bar shape, animated instead of static
+// Simulated speech energy driving TutorAvatarPhoto's mouth — the same
+// component the real Live Conversation screen uses, fed a fake tutorLevel
+// instead of real audio-frequency data (there's no real audio here). A
+// sine wave plus a little noise reads as talking; TutorAvatarPhoto's own
+// internal easing (useSmoothed) is what turns this into a natural-looking
+// mouth open/close rather than us re-implementing that smoothing here too.
+function useSimulatedTutorLevel(isTalking) {
+  const [level, setLevel] = useState(0);
+  const rafRef = useRef(null);
+  const tRef = useRef(0);
+
+  useEffect(() => {
+    const tick = () => {
+      tRef.current += 0.09;
+      const target = isTalking
+        ? 30 + Math.abs(Math.sin(tRef.current * 2.2)) * 35 + Math.random() * 12
+        : 0;
+      setLevel(target);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [isTalking]);
+
+  return level;
+}
 
 export default function HeroLiveDemo({ direction, caption, listenLabel, onListen }) {
   const script = SCRIPTS[direction] || SCRIPTS.en;
@@ -94,6 +125,7 @@ export default function HeroLiveDemo({ direction, caption, listenLabel, onListen
 
   const visibleLines = script[step];
   const lexisIsTalking = visibleLines[visibleLines.length - 1]?.speaker === 'lexis';
+  const simulatedTutorLevel = useSimulatedTutorLevel(lexisIsTalking);
 
   return (
     <div className="relative w-64 sm:w-80 md:w-full md:max-w-sm rounded-2xl overflow-hidden border border-white/10 shadow-xl shadow-teal-900/10 bg-lexis-navy">
@@ -104,24 +136,23 @@ export default function HeroLiveDemo({ direction, caption, listenLabel, onListen
       </div>
 
       <div className="relative p-5 flex flex-col items-center">
-        {/* Waveform ring — animated, not audio-reactive (there's no real
-            audio here to react to), but intentionally busier while
-            "LEXIS" is the one talking vs. resting during the pause, so it
-            doesn't feel like decoration running on autopilot. */}
+        {/* LEXIS herself — the same TutorAvatarPhoto component and glow-
+            ring treatment the real Live Conversation screen uses
+            (LiveStage.jsx), not an abstract waveform standing in for her.
+            Reported live as "looks stupid, it's just a voice box, it
+            should be LEXIS herself speaking" — correct: a marketing hero
+            about a voice conversation partner should show the partner,
+            not an audio icon. */}
         <div className="w-28 h-28 rounded-full flex items-center justify-center bg-gradient-to-tr from-teal-600/20 via-teal-500/10 to-teal-400/20 border border-teal-400/40 shadow-[0_0_40px_rgba(45,212,191,0.2)] mb-4">
-          <div className="flex items-end gap-1 h-10">
-            {Array.from({ length: WAVE_BARS }).map((_, i) => (
-              <span
-                key={i}
-                className="w-1.5 rounded-full bg-teal-300"
-                style={{
-                  height: '100%',
-                  animation: `lexis-hero-wave 1.1s ease-in-out ${i * 0.12}s infinite`,
-                  animationPlayState: lexisIsTalking ? 'running' : 'paused',
-                  opacity: lexisIsTalking ? 1 : 0.35
-                }}
+          <div className="w-20 h-20 rounded-full overflow-hidden border border-teal-400/50 bg-teal-950/40 shadow-inner">
+            {AVATAR_PHOTO_URL && (
+              <TutorAvatarPhoto
+                photoUrl={AVATAR_PHOTO_URL}
+                tutorLevel={simulatedTutorLevel}
+                isConnected
+                isConnecting={false}
               />
-            ))}
+            )}
           </div>
         </div>
 
@@ -167,13 +198,6 @@ export default function HeroLiveDemo({ direction, caption, listenLabel, onListen
           {caption}
         </div>
       )}
-
-      <style>{`
-        @keyframes lexis-hero-wave {
-          0%, 100% { transform: scaleY(0.35); }
-          50% { transform: scaleY(1); }
-        }
-      `}</style>
     </div>
   );
 }
