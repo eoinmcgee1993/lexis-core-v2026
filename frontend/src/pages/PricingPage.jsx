@@ -279,7 +279,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           <span>{t.sponsorLabel(SPONSOR_ADDON_THB)}</span>
           <button
             type="button"
-            onClick={(e) => { e.preventDefault(); navigateTo('/community'); }}
+            onClick={(e) => { e.preventDefault(); navigateTo(lang === 'th' ? '/th/community' : '/community'); }}
             className="text-teal-700 hover:text-teal-800 underline underline-offset-2"
           >
             {t.sponsorLearnMore}
@@ -299,7 +299,10 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           <span>{t.footerTrust}</span>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={() => navigateTo('/community')} className="hover:text-lexis-ink transition-colors">{t.community}</button>
+          {/* Community now has a real /th route too (22 Aug 2026) — link
+              destination follows lang like everywhere else on this page.
+              Terms/Privacy/Refund still English-only, unchanged. */}
+          <button onClick={() => navigateTo(lang === 'th' ? '/th/community' : '/community')} className="hover:text-lexis-ink transition-colors">{t.community}</button>
           <button onClick={() => navigateTo('/privacy')} className="hover:text-lexis-ink transition-colors">{t.privacy}</button>
           <button onClick={() => navigateTo('/terms')} className="hover:text-lexis-ink transition-colors">{t.terms}</button>
           <button onClick={() => navigateTo('/refund')} className="hover:text-lexis-ink transition-colors">{t.refunds}</button>
