@@ -19,14 +19,19 @@
 // EverydayEnglishPage.jsx's own practice prompts), not a real recording
 // of a real session.
 //
-// "Hear her voice" deliberately does NOT play a canned audio clip —
-// generating one costs real ElevenLabs credits, which shouldn't be spent
-// without asking first (same rule as GROWTH-DELEGATION-BRIEF.md's ad-spend
-// caution). It routes straight into starting a real trial instead, which
-// is arguably more honest anyway: that's actually her voice, not a demo
-// recording of it.
+// No "hear her voice" control here. First built as a link into starting
+// a real trial (reasoning: generating a canned audio clip costs real
+// ElevenLabs credits, which shouldn't be spent without asking first —
+// same rule as GROWTH-DELEGATION-BRIEF.md's ad-spend caution). Reported
+// live as exactly backwards, and correctly: /app requires signing up
+// before a visitor hears anything, so a button promising "hear her
+// voice" was actually a sign-up wall in disguise — precisely the
+// "sign-in is a wall before value" problem the newer audit's conversion
+// section calls out. Removed rather than patched with a different label,
+// since neither option here (spend money on a clip, or build anonymous
+// trial access) is this component's call to make unilaterally — both are
+// flagged as open decisions elsewhere, not solved by this preview.
 import React, { useEffect, useRef, useState } from 'react';
-import { Volume2 } from 'lucide-react';
 import TutorAvatarPhoto from './TutorAvatarPhoto';
 
 // Same env var LiveStage.jsx/LexisApp.jsx read for the real session's
@@ -106,7 +111,7 @@ function useSimulatedTutorLevel(isTalking) {
   return level;
 }
 
-export default function HeroLiveDemo({ direction, caption, listenLabel, onListen }) {
+export default function HeroLiveDemo({ direction, caption }) {
   const script = SCRIPTS[direction] || SCRIPTS.en;
   const [step, setStep] = useState(0);
 
@@ -183,14 +188,6 @@ export default function HeroLiveDemo({ direction, caption, listenLabel, onListen
             </div>
           ))}
         </div>
-
-        <button
-          onClick={onListen}
-          className="mt-4 flex items-center gap-2 text-xs text-teal-200/80 hover:text-teal-100 transition-colors"
-        >
-          <Volume2 className="w-3.5 h-3.5" />
-          <span>{listenLabel}</span>
-        </button>
       </div>
 
       {caption && (

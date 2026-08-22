@@ -70,7 +70,6 @@ const CHROME = {
     liveVoice: 'Live voice, ready when you are',
     heroAlt: 'LEXIS, your voice conversation partner, ready to start a practice session',
     heroDemoCaption: 'What a real LEXIS session looks like',
-    heroDemoListen: 'Hear her voice: start a real session',
     footerTrust: 'Private & secure • Payments handled by Stripe',
     privacy: 'Privacy',
     terms: 'Terms',
@@ -101,7 +100,6 @@ const CHROME = {
     liveVoice: 'พูดคุยสด พร้อมเมื่อคุณพร้อม',
     heroAlt: 'LEXIS คู่สนทนาฝึกพูดของคุณ พร้อมเริ่มฝึกได้ทุกเมื่อ',
     heroDemoCaption: 'ตัวอย่างบทสนทนาจริงกับ LEXIS',
-    heroDemoListen: 'ฟังเสียงจริงของเธอ เริ่มฝึกจริง',
     footerTrust: 'ปลอดภัยและเป็นส่วนตัว • ชำระเงินผ่าน Stripe',
     privacy: 'นโยบายความเป็นส่วนตัว',
     terms: 'ข้อกำหนดการใช้งาน',
@@ -320,18 +318,16 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             generate a preview rather than commit to production
             unilaterally. See HeroLiveDemo.jsx's own header comment for
             what it is and, just as importantly, what it deliberately
-            isn't (no real WebRTC, no canned paid audio clip). This also
-            happens to sidestep the still-open hero-photo-disclosure
-            question, since the photo isn't in the hero at all in this
-            version — worth deciding on its own, not as a side effect of
-            this change, if this ships. */}
+            isn't (no real WebRTC, no canned paid audio clip, and — after
+            a first version got this wrong — no "hear her voice" control
+            that actually just routed an unauthenticated visitor to a
+            sign-up wall instead of anything audible). This also happens
+            to sidestep the still-open hero-photo-disclosure question,
+            since the photo isn't in the hero at all in this version —
+            worth deciding on its own, not as a side effect of this
+            change, if this ships. */}
         <div className="relative flex justify-center md:justify-end">
-          <HeroLiveDemo
-            direction={direction}
-            caption={c.heroDemoCaption}
-            listenLabel={c.heroDemoListen}
-            onListen={goPractice}
-          />
+          <HeroLiveDemo direction={direction} caption={c.heroDemoCaption} />
         </div>
       </section>
 
