@@ -84,16 +84,6 @@ const TEXT = {
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
-// Stripe recurring Price IDs — live mode, Clearmark account (acct_1T1zS9F1FdEsYK5E).
-// The actual THB amounts these correspond to live in content/facts.js
-// (PRICING.weekly.thb / PRICING.monthly.thb) — not repeated here, since a
-// mismatch between a comment and the real Stripe-side price would be
-// worse than no comment at all.
-const STRIPE_PRICES = {
-  weekly: 'price_1U1hdLF1FdEsYK5EOSheNGGS',   // LEXIS Weekly Pass
-  monthly: 'price_1U1hdOF1FdEsYK5Ec6DgUlil'   // LEXIS Monthly Immersion
-};
-
 export default function PricingPage({ navigateTo, lang = 'en' }) {
   const { session } = useAuth();
   const [loadingTier, setLoadingTier] = useState(null); // 'weekly' | 'monthly' | null
@@ -124,15 +114,18 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
     jsonLd: { 'jsonld-offers': offersJsonLd, 'jsonld-breadcrumb': breadcrumbJsonLd }
   });
 
-  const startCheckout = async (planTier, priceId) => {
+  // priceId used to be chosen client-side (STRIPE_PRICES, a hardcoded
+  // live-mode price_... pair shipped in every bundle) and sent straight
+  // through to the backend with no server-side check that it matched
+  // planTier. Re-audit B2 (21 Aug 2026): the backend now owns that
+  // mapping entirely (see backend/app.mjs's own STRIPE_PRICES) — this
+  // only ever sends which tier was picked, never a price ID, so there's
+  // nothing here for a tampered request to substitute.
+  const startCheckout = async (planTier) => {
     setError('');
 
     if (!session) {
       navigateTo('/auth');
-      return;
-    }
-    if (!priceId || priceId.includes('xxxxxxxxxxxxx')) {
-      setError(`Missing Stripe price ID for the ${planTier} plan: set STRIPE_PRICES.${planTier} in PricingPage.jsx to your real Stripe price_... ID.`);
       return;
     }
 
@@ -144,7 +137,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ priceId, planTier, sponsorAdd })
+        body: JSON.stringify({ planTier, sponsorAdd })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Checkout error: ${res.status}`);
@@ -240,7 +233,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
               </ul>
             </div>
             <button
-              onClick={() => startCheckout('weekly', STRIPE_PRICES.weekly)}
+              onClick={() => startCheckout('weekly')}
               disabled={loadingTier === 'weekly'}
               className="w-full py-3 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-60 text-white font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center space-x-2"
             >
@@ -261,7 +254,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
               </ul>
             </div>
             <button
-              onClick={() => startCheckout('monthly', STRIPE_PRICES.monthly)}
+              onClick={() => startCheckout('monthly')}
               disabled={loadingTier === 'monthly'}
               className="w-full py-3 bg-lexis-canvas hover:bg-lexis-ink/5 disabled:opacity-60 border border-lexis-ink/10 text-lexis-ink font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center space-x-2"
             >
