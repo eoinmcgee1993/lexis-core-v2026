@@ -776,12 +776,16 @@ export default function LexisApp({ navigateTo }) {
       await pc.setLocalDescription(offer);
 
       const baseUrl = 'https://api.openai.com/v1/realtime';
-      // Must match the model backend/app.mjs's /api/session uses to mint
-      // the client_secret — the SDP exchange 404s otherwise (this exact
-      // dated snapshot has 404'd before; see the comment on the backend's
-      // OPENAI_MODEL default). These are two independent hardcoded strings,
-      // not shared config, so keep them in sync by hand.
-      const model = 'gpt-realtime';
+      // Must match the model backend/app.mjs's /api/session used to mint
+      // this clientSecret — the SDP exchange 404s otherwise (this exact
+      // mismatch has broken before; see that endpoint's own comment on
+      // OPENAI_MODEL). Previously two independent hardcoded strings kept
+      // in sync by hand across two files; now /api/session returns the
+      // model it actually used (data.model, above) and this just reads
+      // that back, so there's one source of truth instead of two literals
+      // that can drift. The 'gpt-realtime' fallback only matters against
+      // an old cached backend response shape that predates this field.
+      const model = data.model || 'gpt-realtime';
 
       const sdpResponse = await fetch(`${baseUrl}/calls?model=${model}`, {
         method: 'POST',

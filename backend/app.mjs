@@ -414,6 +414,20 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
     // original open topic rotation inside buildTutorInstructions.
     const topic = ['everyday', 'work', 'travel'].includes(req.body?.topic) ? req.body.topic : undefined;
 
+    // gpt-4o-realtime-preview-2024-12-17 (an old default here) 404s on
+    // POST /v1/realtime/calls — that dated preview snapshot isn't routable
+    // through the newer WebRTC calls gateway paired with client_secrets;
+    // OpenAI's own docs for this exact flow only ever reference the
+    // gpt-realtime family. Fixed once before (git log), regressed once
+    // (that regression is exactly why .env.example's OPENAI_MODEL example
+    // value still named the broken snapshot until this same pass fixed
+    // it — copy that file verbatim into a real .env and this endpoint
+    // 404s). The frontend's SDP-exchange call (LexisApp.jsx) used to
+    // independently hardcode this same model name as a second literal
+    // that had to be kept in sync by hand — now it reads the value this
+    // endpoint actually used, below, instead of guessing it again.
+    const realtimeModel = process.env.OPENAI_MODEL || 'gpt-realtime';
+
     const response = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
       method: 'POST',
       headers: {
@@ -424,16 +438,7 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
       body: JSON.stringify({
         session: {
           type: 'realtime',
-          // gpt-4o-realtime-preview-2024-12-17 (the old default here) 404s
-          // on POST /v1/realtime/calls — that dated preview snapshot isn't
-          // routable through the newer WebRTC calls gateway paired with
-          // client_secrets; OpenAI's own docs for this exact flow only ever
-          // reference the gpt-realtime family. Fixed once before (git log),
-          // regressed; the frontend's SDP-exchange model query param
-          // (LexisApp.jsx) independently hardcodes the same name and needs
-          // to stay in sync with this one — they're two separate strings,
-          // not shared config, so a future model change means updating both.
-          model: process.env.OPENAI_MODEL || 'gpt-realtime',
+          model: realtimeModel,
           audio: {
             // 'verse' reads as male; the tutor avatar (frontend) is a
             // consistently female persona, so the voice should match.
@@ -543,7 +548,12 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
 
     res.json({
       client_secret: clientSecretValue,
-      expires_at: clientSecretExpiresAt
+      expires_at: clientSecretExpiresAt,
+      // Single source of truth for the model this client_secret was minted
+      // against — LexisApp.jsx's SDP exchange reads this instead of
+      // hardcoding a second copy of the same string (see realtimeModel
+      // above for the regression that motivated this).
+      model: realtimeModel
     });
 
   } catch (err) {
