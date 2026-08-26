@@ -150,36 +150,51 @@ export function buildBreadcrumbJsonLd(pageName, pageUrl, lang = 'en') {
 // facts.js), not written fresh for the structured data. Kept here rather
 // than inline in the page component to match how buildFaqJsonLd/
 // buildOffersJsonLd already work for LandingPage.jsx/PricingPage.jsx.
-export function buildInterviewFaqJsonLd() {
+// lang param added 22 Aug 2026 alongside /th/practice/interview-english —
+// same "structured data matches whichever language is visible" rule
+// useSeo.js documents for every other builder here; English text
+// preserved exactly as it was so the existing /practice/interview-english
+// page's JSON-LD is untouched.
+const INTERVIEW_FAQ_TEXT = {
+  en: [
+    {
+      q: 'What interview questions can I practice with LEXIS?',
+      a: 'Common, real interview prompts that come up regardless of industry, including "Tell me about yourself," "What are your strengths and weaknesses?," "Why do you want to work here?," "Describe a time you solved a difficult problem," and "Do you have any questions for me?"'
+    },
+    {
+      q: 'Is interview English practice free?',
+      a: `Yes. LEXIS gives every new user a free ${TRIAL.minutes} minute trial with no card required, which you can use for interview practice or any other topic.`
+    },
+    {
+      q: 'How is speaking practice different from reading interview questions online?',
+      a: "Reading a question and typing out an answer doesn't train what an interview actually tests: thinking and speaking at the same time, in a second language, under a little pressure. LEXIS replies out loud in real time and corrects grammar or word choice gently mid conversation, the same way a patient interviewer's follow up question would."
+    }
+  ],
+  th: [
+    {
+      q: 'ฝึกคำถามสัมภาษณ์งานแบบไหนได้บ้างกับ LEXIS',
+      a: 'คำถามสัมภาษณ์จริงที่เจอบ่อย ไม่ว่าจะสายงานไหนก็เจอได้ เช่น "Tell me about yourself" "What are your strengths and weaknesses?" "Why do you want to work here?" "Describe a time you solved a difficult problem" และ "Do you have any questions for me?"'
+    },
+    {
+      q: 'ฝึกภาษาอังกฤษสำหรับสัมภาษณ์งานฟรีไหม',
+      a: `ฟรีค่ะ ผู้ใช้ใหม่ทุกคนได้ทดลองใช้ฟรี ${TRIAL.minutes} นาที ไม่ต้องผูกบัตร ใช้ฝึกสัมภาษณ์งานหรือหัวข้ออื่นก็ได้`
+    },
+    {
+      q: 'ฝึกพูดต่างจากอ่านคำถามสัมภาษณ์ทางเว็บอย่างไร',
+      a: 'การอ่านคำถามแล้วพิมพ์คำตอบไม่ได้ฝึกสิ่งที่การสัมภาษณ์จริงต้องใช้ คือคิดและพูดพร้อมกัน เป็นภาษาที่สอง ภายใต้ความกดดันเล็กน้อย LEXIS ตอบกลับด้วยเสียงจริงแบบเรียลไทม์ และช่วยแก้ไขไวยากรณ์หรือคำศัพท์อย่างอ่อนโยนระหว่างสนทนา เหมือนคำถามต่อเนื่องจากผู้สัมภาษณ์ใจดี'
+    }
+  ]
+};
+
+export function buildInterviewFaqJsonLd(lang = 'en') {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: 'What interview questions can I practice with LEXIS?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Common, real interview prompts that come up regardless of industry, including "Tell me about yourself," "What are your strengths and weaknesses?," "Why do you want to work here?," "Describe a time you solved a difficult problem," and "Do you have any questions for me?"'
-        }
-      },
-      {
-        '@type': 'Question',
-        name: 'Is interview English practice free?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: `Yes. LEXIS gives every new user a free ${TRIAL.minutes} minute trial with no card required, which you can use for interview practice or any other topic.`
-        }
-      },
-      {
-        '@type': 'Question',
-        name: 'How is speaking practice different from reading interview questions online?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: "Reading a question and typing out an answer doesn't train what an interview actually tests: thinking and speaking at the same time, in a second language, under a little pressure. LEXIS replies out loud in real time and corrects grammar or word choice gently mid conversation, the same way a patient interviewer's follow up question would."
-        }
-      }
-    ]
+    mainEntity: (INTERVIEW_FAQ_TEXT[lang] || INTERVIEW_FAQ_TEXT.en).map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a }
+    }))
   };
 }
 

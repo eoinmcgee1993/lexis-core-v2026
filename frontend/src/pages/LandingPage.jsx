@@ -448,7 +448,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             <p className="mt-2 text-sm text-lexis-ink/60 leading-relaxed max-w-lg">{c.communityBody}</p>
           </div>
           <button
-            onClick={() => navigateTo('/community')}
+            onClick={() => navigateTo(lang === 'th' ? '/th/community' : '/community')}
             className="flex-shrink-0 text-teal-700 hover:text-teal-800 font-semibold text-sm underline underline-offset-2 whitespace-nowrap md:mt-1"
           >
             {c.communityCta}
@@ -491,11 +491,13 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <span>{c.footerTrust}</span>
         </div>
         <div className="flex items-center gap-4">
-          {/* Terms/Privacy/Refund/Community only exist in English so far
-              (Stage 4 scoped /th to the landing + pricing pages) — link
-              labels follow the page's display language, the destination
-              doesn't. */}
-          <button onClick={() => navigateTo('/community')} className="hover:text-lexis-ink transition-colors">{c.community}</button>
+          {/* Community now has a real /th route too (22 Aug 2026) — link
+              destination follows lang like every other nav link on this
+              page. Terms/Privacy/Refund are still English-only (legal
+              text held for a separate translation pass — see those
+              pages' own scope notes), so those three still point at
+              their single English URL regardless of display language. */}
+          <button onClick={() => navigateTo(lang === 'th' ? '/th/community' : '/community')} className="hover:text-lexis-ink transition-colors">{c.community}</button>
           <button onClick={() => navigateTo('/privacy')} className="hover:text-lexis-ink transition-colors">{c.privacy}</button>
           <button onClick={() => navigateTo('/terms')} className="hover:text-lexis-ink transition-colors">{c.terms}</button>
           <button onClick={() => navigateTo('/refund')} className="hover:text-lexis-ink transition-colors">{c.refunds}</button>

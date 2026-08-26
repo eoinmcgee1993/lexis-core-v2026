@@ -55,7 +55,14 @@ const ROUTES = [
   // index.html get served directly by Vercel's filesystem check for
   // requests to /th and /th/pricing, ahead of vercel.json's SPA rewrite.
   { path: '/th', outFile: 'th/index.html' },
-  { path: '/th/pricing', outFile: 'th/pricing/index.html' }
+  { path: '/th/pricing', outFile: 'th/pricing/index.html' },
+  // Five more Thai routes (22 Aug 2026, direct request — "there shoukd be
+  // a language toggle on each page too") — same directory-style rule.
+  { path: '/th/community', outFile: 'th/community/index.html' },
+  { path: '/th/practice/interview-english', outFile: 'th/practice/interview-english/index.html' },
+  { path: '/th/practice/everyday-english', outFile: 'th/practice/everyday-english/index.html' },
+  { path: '/th/practice/travel-english', outFile: 'th/practice/travel-english/index.html' },
+  { path: '/th/practice/business-english', outFile: 'th/practice/business-english/index.html' }
 ];
 
 const MIME_TYPES = {
