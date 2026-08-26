@@ -14,7 +14,13 @@
      (dash cleanup, FAQ fix, the "Meet LEXIS" section); /community's date
      now matches its 20 Aug tone rewrite (see CommunityPage.jsx); /privacy
      and /practice/interview-english both gained FAQPage structured data
-     today. /terms and /refund are untouched since 19 Aug, left as-is. -->
+     today. /terms and /refund are untouched since 19 Aug, left as-is.
+     26 Aug 2026: Community and the four practice pages gained real Thai
+     routes (/th/community, /th/practice/*), so those five URLs are added
+     here and their English counterparts' lastmod moves to today — each
+     was rewritten in the same change to take a lang prop and carry a
+     language toggle. Terms, Privacy and Refund remain English-only and
+     keep their existing dates. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://learnwithlexis.com/</loc>
@@ -60,31 +66,61 @@
   </url>
   <url>
     <loc>https://learnwithlexis.com/community</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/practice/interview-english</loc>
-    <lastmod>2026-08-21</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/practice/everyday-english</loc>
-    <lastmod>2026-08-21</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/practice/travel-english</loc>
-    <lastmod>2026-08-21</lastmod>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/practice/business-english</loc>
-    <lastmod>2026-08-21</lastmod>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://learnwithlexis.com/th/community</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://learnwithlexis.com/th/practice/interview-english</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://learnwithlexis.com/th/practice/everyday-english</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://learnwithlexis.com/th/practice/travel-english</loc>
+    <lastmod>2026-08-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://learnwithlexis.com/th/practice/business-english</loc>
+    <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

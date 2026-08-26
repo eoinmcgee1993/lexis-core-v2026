@@ -98,6 +98,22 @@ function RouteController() {
       return <TravelEnglishPage navigateTo={navigateTo} />;
     case '/practice/business-english':
       return <BusinessEnglishPage navigateTo={navigateTo} />;
+    // Five more real Thai routes (22 Aug 2026, direct request — "there
+    // shoukd be a language toggle on each page too"): same pattern as
+    // /th and /th/pricing above, same components, lang="th" prop. Terms/
+    // Privacy/Refund intentionally not included in this batch — see
+    // those pages' own scope notes for why legal-page translation is
+    // being held for a separate pass.
+    case '/th/community':
+      return <CommunityPage navigateTo={navigateTo} lang="th" />;
+    case '/th/practice/interview-english':
+      return <InterviewEnglishPage navigateTo={navigateTo} lang="th" />;
+    case '/th/practice/everyday-english':
+      return <EverydayEnglishPage navigateTo={navigateTo} lang="th" />;
+    case '/th/practice/travel-english':
+      return <TravelEnglishPage navigateTo={navigateTo} lang="th" />;
+    case '/th/practice/business-english':
+      return <BusinessEnglishPage navigateTo={navigateTo} lang="th" />;
     default:
       return <LandingPage navigateTo={navigateTo} />;
   }
