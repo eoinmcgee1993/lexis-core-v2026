@@ -1,104 +1,430 @@
 // frontend/scripts/images/generate_brand_kit_assets.mjs
 //
 // One-off asset-generation script — same pattern as
-// scripts/images/generate_hero_srcset.mjs and generate_og_card.mjs: run
-// manually, not part of `npm run build`, using the `sharp` install
-// already present in frontend/node_modules/.
+// generate_hero_srcset.mjs and generate_og_card.mjs: run manually, not
+// part of `npm run build`, using the `sharp` and `playwright-core`
+// installs already present in frontend/node_modules/.
 //
-// Why this exists (21 Aug 2026, branding-kit request): every export here
-// is a raster/resized version of the ONE brand mark that already exists
-// (public/favicon.svg's teal-600 rounded-square + white five-bar
-// waveform, matching src/components/LexisMark.jsx) — deliberately not a
-// new logo invented for this task. Social platforms all want a square
-// profile photo at their own preferred resolution; this generates a
-// correctly-sized PNG for each rather than making an account owner
-// re-export by hand every time. A single Facebook-cover-sized banner is
-// also generated, reusing the same navy canvas + mark treatment as the
-// rest of the brand system (scripts/design/lexis-visual-system.md) — the
-// one platform in this set that actually expects a separate rectangular
-// cover image, not just a square avatar.
+// Regenerates the ENTIRE brand kit in brand-kit/ from sources that
+// already exist in this repo:
 //
-// Run with: node scripts/images/generate_brand_kit_assets.mjs, invoked
-// from inside frontend/.
+//   - public/favicon.svg          the one real brand mark (five-bar waveform)
+//   - public/avatar/lexis-tutor-photo.jpg   the one real depiction of LEXIS
+//   - public/fonts/fraunces-600.woff2       the real display face
+//   - public/fonts/ibm-plex-sans-thai-*.woff2   the real Thai face
+//   - src/content/facts.js        the one source of truth for prices/trial
+//
+// Nothing here invents a second logo, a new face, a slogan nobody
+// approved, or a number that isn't in facts.js. Superseded the earlier
+// version of this script (21 Aug 2026), which produced only five square
+// mark avatars and one Facebook cover.
+//
+// Typographic lockups are rendered to PNG rather than SVG on purpose: an
+// SVG wordmark would either need the Fraunces outlines converted to paths
+// (no such tool in this repo) or would reference a font family by name and
+// silently fall back to Georgia on any machine without Fraunces installed,
+// which is worse than a raster in a brand kit. The MARK itself is pure
+// rectangles, so it ships as real, editable SVG.
+//
+// Run with: node scripts/images/generate_brand_kit_assets.mjs
 import sharp from 'sharp';
+import { chromium } from 'playwright-core';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUT_DIR = path.join(__dirname, '..', '..', '..', 'brand-kit', 'assets');
-const FAVICON_SVG_PATH = path.join(__dirname, '..', '..', 'public', 'favicon.svg');
+const FRONTEND = path.join(__dirname, '..', '..');
+const KIT = path.join(FRONTEND, '..', 'brand-kit');
+const PUBLIC = path.join(FRONTEND, 'public');
 
-// Square profile-picture sizes covering every platform this kit targets.
-// Instagram/Facebook/TikTok/LINE all display a circular crop of a square
-// upload, so a single rounded-square source (matching the existing
-// favicon treatment) works safely for all of them — no separate
-// circular-safe-zone artwork needed since the mark is already centered
-// with even padding on every side.
-const AVATAR_SIZES = [1024, 512, 192, 180, 128];
+// Palette — mirrors tailwind.config.js's lexis-* tokens exactly. Not a
+// separate "marketing palette"; the same values the live site paints with.
+const TEAL = '#0D9488';
+const AMBER = '#FF9E00';
+const NAVY = '#050B14';
+const INK = '#1E293B';
+const CANVAS = '#FAFAF7';
 
-const LEXIS_NAVY = '#050B14'; // scripts/design/lexis-visual-system.md — "deep focus canvas"
-const LEXIS_TEAL = '#0D9488'; // existing "live" accent, same as favicon.svg's background
+// Verified facts, mirrored from src/content/facts.js. Kept as literals
+// here rather than imported because facts.js is an ESM module inside the
+// Vite app; if these ever drift, facts.js is the source of truth.
+const TRIAL_MINUTES = 30;
+const WEEKLY_THB = 199;
+const MONTHLY_THB = 599;
 
-async function main() {
-  // Rasterize directly at each target resolution rather than rendering
-  // once and resizing after — sharp renders an SVG input at whatever
-  // size .resize() requests, so this stays crisp at every size. Combining
-  // an explicit `density` option with a mismatched .resize() (an earlier
-  // version of this script did that) produced visibly soft/feathered
-  // edges on the rounded-square corners — worth calling out since it's
-  // an easy mistake to reintroduce.
-  for (const size of AVATAR_SIZES) {
-    const outPath = path.join(OUT_DIR, `lexis-avatar-${size}.png`);
-    await sharp(FAVICON_SVG_PATH)
-      .resize(size, size)
-      .png()
-      .toFile(outPath);
-    console.log(`wrote ${path.basename(outPath)}`);
-  }
+const PITCH_EN = 'Voice-first speaking practice, English and Thai.';
+const PITCH_TH = 'ฝึกพูดภาษาอังกฤษและภาษาไทยด้วยเสียงจริง';
+const TERMS_EN = `Free ${TRIAL_MINUTES}-minute trial. No card required.`;
+const PRICE_EN = `฿${WEEKLY_THB}/week or ฿${MONTHLY_THB}/month after that.`;
+const SITE = 'learnwithlexis.com';
 
-  // Facebook cover photo (820x312, Facebook's own recommended desktop
-  // size) — navy canvas (the brand system's "deep focus" colour, used
-  // nowhere on the marketing site itself per the interface re-audit, but
-  // legitimate here: a social cover photo is closer in spirit to the Live
-  // Conversation screen's own navy canvas than to the warm marketing
-  // pages), the same waveform mark scaled up and recoloured teal-on-navy,
-  // plus the wordmark next to it.
-  const coverWidth = 820;
-  const coverHeight = 312;
-  const markSize = 140;
-  const markSvg = await sharp(FAVICON_SVG_PATH).resize(markSize, markSize).toBuffer();
+// --- the mark, as real SVG -------------------------------------------
+// Five bars, same geometry as public/favicon.svg and LexisMark.jsx.
+const BARS = [
+  { x: 1.5, y: 8, h: 8 },
+  { x: 6, y: 5, h: 14 },
+  { x: 10.5, y: 2, h: 20 },
+  { x: 15, y: 5, h: 14 },
+  { x: 19.5, y: 8, h: 8 }
+];
 
-  const wordmarkSvg = Buffer.from(`
-    <svg width="${coverWidth}" height="${coverHeight}" xmlns="http://www.w3.org/2000/svg">
-      <text x="${coverWidth / 2}" y="${coverHeight / 2 + markSize / 2 + 56}"
-            text-anchor="middle" font-family="Georgia, serif" font-weight="700"
-            font-size="52" fill="#FFFFFF" letter-spacing="2">LEXIS</text>
-      <text x="${coverWidth / 2}" y="${coverHeight / 2 + markSize / 2 + 88}"
-            text-anchor="middle" font-family="Arial, sans-serif"
-            font-size="17" fill="${LEXIS_TEAL}">Practice speaking English &amp; Thai, out loud</text>
-    </svg>
-  `);
-
-  await sharp({
-    create: {
-      width: coverWidth,
-      height: coverHeight,
-      channels: 4,
-      background: LEXIS_NAVY
-    }
-  })
-    .composite([
-      { input: markSvg, left: Math.round((coverWidth - markSize) / 2), top: 28 },
-      { input: wordmarkSvg, left: 0, top: 0 }
-    ])
-    .png()
-    .toFile(path.join(OUT_DIR, 'lexis-facebook-cover-820x312.png'));
-  console.log('wrote lexis-facebook-cover-820x312.png');
-
-  console.log('done.');
+function markSvg({ fill, badge = null }) {
+  const bars = BARS.map((b) =>
+    `  <rect x="${b.x}" y="${b.y}" width="3" height="${b.h}" rx="1.5" fill="${fill}" />`
+  ).join('\n');
+  const bg = badge ? `  <rect width="24" height="24" rx="6" fill="${badge}" />\n` : '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="LEXIS">
+${bg}${bars}
+</svg>
+`;
 }
 
-main().catch((err) => {
-  console.error('generate_brand_kit_assets failed:', err);
-  process.exit(1);
-});
+// --- HTML canvas rendering -------------------------------------------
+let fontCss = '';
+async function loadFontCss() {
+  const [fraunces, thai400, thai600] = await Promise.all([
+    fs.readFile(path.join(PUBLIC, 'fonts', 'fraunces-600.woff2')),
+    fs.readFile(path.join(PUBLIC, 'fonts', 'ibm-plex-sans-thai-400.woff2')),
+    fs.readFile(path.join(PUBLIC, 'fonts', 'ibm-plex-sans-thai-600.woff2'))
+  ]);
+  const face = (family, weight, buf) =>
+    `@font-face{font-family:'${family}';font-weight:${weight};font-style:normal;font-display:block;` +
+    `src:url(data:font/woff2;base64,${buf.toString('base64')}) format('woff2');}`;
+  fontCss = [
+    face('Fraunces', 600, fraunces),
+    face('IBMPlexThai', 400, thai400),
+    face('IBMPlexThai', 600, thai600)
+  ].join('');
+}
+
+function page({ w, h, body, bg = 'transparent', pad = 0 }) {
+  return `<!doctype html><html><head><meta charset="utf-8"><style>
+${fontCss}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:${w}px;height:${h}px}
+body{background:${bg};display:flex;align-items:center;justify-content:center;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  color:${INK};padding:${pad}px;-webkit-font-smoothing:antialiased}
+.display{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-0.02em}
+.thai{font-family:'IBMPlexThai',sans-serif}
+.mark{display:block}
+</style></head><body>${body}</body></html>`;
+}
+
+// Inline mark for use inside rendered HTML.
+function inlineMark(size, fill, badge = null, radius = null) {
+  const bars = BARS.map((b) =>
+    `<rect x="${b.x}" y="${b.y}" width="3" height="${b.h}" rx="1.5" fill="${fill}"/>`
+  ).join('');
+  const bg = badge
+    ? `<rect width="24" height="24" rx="${radius ?? 6}" fill="${badge}"/>`
+    : '';
+  return `<svg class="mark" width="${size}" height="${size}" viewBox="0 0 24 24">${bg}${bars}</svg>`;
+}
+
+let browser;
+async function shot(file, { w, h, body, bg = 'transparent', scale = 1, pad = 0 }) {
+  const p = await browser.newPage({
+    viewport: { width: w, height: h },
+    deviceScaleFactor: scale
+  });
+  await p.setContent(page({ w, h, body, bg, pad }), { waitUntil: 'load' });
+  await p.evaluate(() => document.fonts.ready);
+  const out = path.join(KIT, file);
+  await fs.mkdir(path.dirname(out), { recursive: true });
+  await p.screenshot({ path: out, omitBackground: bg === 'transparent' });
+  await p.close();
+  console.log('  ' + file);
+}
+
+async function writeSvg(file, svg) {
+  const out = path.join(KIT, file);
+  await fs.mkdir(path.dirname(out), { recursive: true });
+  await fs.writeFile(out, svg, 'utf8');
+  console.log('  ' + file);
+}
+
+async function pngFromSvg(file, svg, size) {
+  const out = path.join(KIT, file);
+  await fs.mkdir(path.dirname(out), { recursive: true });
+  await sharp(Buffer.from(svg)).resize(size, size).png().toFile(out);
+  console.log('  ' + file);
+}
+
+async function main() {
+  await loadFontCss();
+  browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+
+  // ================================================================
+  console.log('\nlogo/ — the mark');
+  // ================================================================
+  const badgeSvg = markSvg({ fill: '#FFFFFF', badge: TEAL });
+  await writeSvg('logo/lexis-mark-badge.svg', badgeSvg);
+  await writeSvg('logo/lexis-mark-teal.svg', markSvg({ fill: TEAL }));
+  await writeSvg('logo/lexis-mark-white.svg', markSvg({ fill: '#FFFFFF' }));
+  await writeSvg('logo/lexis-mark-black.svg', markSvg({ fill: INK }));
+  await writeSvg('logo/lexis-mark-badge-navy.svg', markSvg({ fill: '#FFFFFF', badge: NAVY }));
+
+  for (const s of [1024, 512, 256, 192, 180, 128, 64, 32]) {
+    await pngFromSvg(`logo/lexis-mark-badge-${s}.png`, badgeSvg, s);
+  }
+  await pngFromSvg('logo/lexis-mark-teal-1024.png', markSvg({ fill: TEAL }), 1024);
+  await pngFromSvg('logo/lexis-mark-white-1024.png', markSvg({ fill: '#FFFFFF' }), 1024);
+  await pngFromSvg('logo/lexis-mark-black-1024.png', markSvg({ fill: INK }), 1024);
+
+  // ================================================================
+  console.log('\nwordmark/ — text logos and lockups');
+  // ================================================================
+  const word = (color, size = 220) =>
+    `<div class="display" style="font-size:${size}px;color:${color};line-height:1">LEXIS</div>`;
+
+  for (const [name, color] of [['ink', INK], ['white', '#FFFFFF'], ['teal', TEAL]]) {
+    await shot(`wordmark/lexis-wordmark-${name}.png`, {
+      w: 900, h: 300, body: word(color), scale: 2
+    });
+  }
+
+  // Horizontal lockup: mark + wordmark.
+  const hLockup = (color, markFill, badge) => `
+    <div style="display:flex;align-items:center;gap:44px">
+      ${inlineMark(180, markFill, badge)}
+      <div class="display" style="font-size:190px;color:${color};line-height:1">LEXIS</div>
+    </div>`;
+  await shot('wordmark/lexis-lockup-horizontal-light.png', {
+    w: 1200, h: 320, body: hLockup(INK, '#FFFFFF', TEAL), scale: 2
+  });
+  await shot('wordmark/lexis-lockup-horizontal-dark.png', {
+    w: 1200, h: 320, body: hLockup('#FFFFFF', '#FFFFFF', TEAL), scale: 2
+  });
+
+  // Stacked lockup with the verified one-line pitch.
+  const vLockup = (color, sub) => `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:34px;text-align:center">
+      ${inlineMark(200, '#FFFFFF', TEAL)}
+      <div class="display" style="font-size:170px;color:${color};line-height:1">LEXIS</div>
+      <div style="font-size:40px;color:${color};opacity:.62;letter-spacing:.01em">${sub}</div>
+    </div>`;
+  await shot('wordmark/lexis-lockup-stacked-light.png', {
+    w: 1200, h: 900, body: vLockup(INK, PITCH_EN), scale: 2
+  });
+  await shot('wordmark/lexis-lockup-stacked-dark.png', {
+    w: 1200, h: 900, body: vLockup('#FFFFFF', PITCH_EN), scale: 2
+  });
+  await shot('wordmark/lexis-lockup-stacked-th.png', {
+    w: 1200, h: 900,
+    body: `<div style="display:flex;flex-direction:column;align-items:center;gap:34px;text-align:center">
+      ${inlineMark(200, '#FFFFFF', TEAL)}
+      <div class="display" style="font-size:170px;color:${INK};line-height:1">LEXIS</div>
+      <div class="thai" style="font-size:38px;color:${INK};opacity:.62">${PITCH_TH}</div>
+    </div>`,
+    scale: 2
+  });
+
+  // ================================================================
+  console.log('\navatars/ — LEXIS herself, and the mark');
+  // ================================================================
+  // The source (public/avatar/lexis-tutor-photo.jpg) is already a
+  // circular crop sitting on white corners. Rebuild those corners
+  // properly instead of shipping the white ones: transparent for
+  // platforms that mask to a circle, navy for anywhere it shows square.
+  const PHOTO = path.join(PUBLIC, 'avatar', 'lexis-tutor-photo.jpg');
+  const S = 1024;
+  const circleMask = Buffer.from(
+    `<svg width="${S}" height="${S}"><circle cx="${S / 2}" cy="${S / 2}" r="${S / 2}" fill="#fff"/></svg>`
+  );
+  const photoCircle = await sharp(PHOTO)
+    .resize(S, S)
+    .composite([{ input: circleMask, blend: 'dest-in' }])
+    .png()
+    .toBuffer();
+
+  async function writeAvatar(file, buf, size) {
+    const out = path.join(KIT, file);
+    await fs.mkdir(path.dirname(out), { recursive: true });
+    await sharp(buf).resize(size, size).png().toFile(out);
+    console.log('  ' + file);
+  }
+
+  // Transparent corners.
+  for (const size of [1024, 512, 400, 180, 128]) {
+    await writeAvatar(`avatars/lexis-photo-circle-${size}.png`, photoCircle, size);
+  }
+
+  // Navy square, for anywhere the platform does not mask to a circle.
+  const photoNavy = await sharp({
+    create: { width: S, height: S, channels: 4, background: NAVY }
+  })
+    .composite([{ input: photoCircle }])
+    .png()
+    .toBuffer();
+  for (const size of [1024, 512, 400]) {
+    await writeAvatar(`avatars/lexis-photo-navy-${size}.png`, photoNavy, size);
+  }
+
+  // Teal ring, matching the treatment the live conversation screen uses.
+  const RING = 26;
+  const ringInner = await sharp(photoCircle).resize(S - RING * 2, S - RING * 2).toBuffer();
+  const photoRing = await sharp({
+    create: { width: S, height: S, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } }
+  })
+    .composite([
+      {
+        input: Buffer.from(
+          `<svg width="${S}" height="${S}"><circle cx="${S / 2}" cy="${S / 2}" r="${S / 2 - 2}" fill="${TEAL}"/></svg>`
+        )
+      },
+      { input: ringInner, top: RING, left: RING }
+    ])
+    .png()
+    .toBuffer();
+  for (const size of [1024, 512, 400]) {
+    await writeAvatar(`avatars/lexis-photo-ring-${size}.png`, photoRing, size);
+  }
+
+  // The mark as an avatar, for a brand-voice account rather than a
+  // persona account. See the README on choosing between the two.
+  for (const size of [1024, 512, 400, 180, 128]) {
+    await pngFromSvg(`avatars/lexis-mark-avatar-${size}.png`, badgeSvg, size);
+  }
+
+  // ================================================================
+  console.log('\ncovers/ — one per platform that asks for a banner');
+  // ================================================================
+  const coverDark = (opts) => `
+    <div style="width:100%;height:100%;background:${NAVY};display:flex;
+      align-items:center;justify-content:center;padding:${opts.pad}px">
+      <div style="display:flex;flex-direction:column;align-items:${opts.align};
+        gap:${opts.gap}px;text-align:${opts.align === 'flex-start' ? 'left' : 'center'};
+        max-width:${opts.maxw}px">
+        <div style="display:flex;align-items:center;gap:${opts.markGap}px">
+          ${inlineMark(opts.mark, '#FFFFFF', TEAL)}
+          <div class="display" style="font-size:${opts.word}px;color:#fff;line-height:1">LEXIS</div>
+        </div>
+        <div style="font-size:${opts.sub}px;color:#fff;opacity:.68;line-height:1.45">${opts.text}</div>
+        ${opts.foot ? `<div style="font-size:${opts.foot}px;color:${TEAL};letter-spacing:.06em">${SITE}</div>` : ''}
+      </div>
+    </div>`;
+
+  await shot('covers/x-header-1500x500.png', {
+    w: 1500, h: 500, bg: NAVY,
+    body: coverDark({ pad: 0, align: 'center', gap: 26, maxw: 980, mark: 84, word: 92, markGap: 26, sub: 30, foot: 22, text: `${PITCH_EN}<br>${TERMS_EN}` })
+  });
+
+  // YouTube crops hard: everything must sit inside the 1546x423 centre.
+  await shot('covers/youtube-channel-2560x1440.png', {
+    w: 2560, h: 1440, bg: NAVY,
+    body: coverDark({ pad: 0, align: 'center', gap: 34, maxw: 1400, mark: 130, word: 150, markGap: 40, sub: 46, foot: 32, text: `${PITCH_EN}<br>${TERMS_EN}` })
+  });
+
+  await shot('covers/linkedin-page-1128x191.png', {
+    w: 1128, h: 191, bg: NAVY,
+    body: coverDark({ pad: 54, align: 'flex-start', gap: 12, maxw: 1020, mark: 46, word: 50, markGap: 16, sub: 19, foot: 0, text: PITCH_EN })
+  });
+
+  await shot('covers/facebook-cover-820x312.png', {
+    w: 820, h: 312, bg: NAVY,
+    body: coverDark({ pad: 0, align: 'center', gap: 18, maxw: 700, mark: 58, word: 64, markGap: 20, sub: 22, foot: 16, text: `${PITCH_EN}<br>${TERMS_EN}` })
+  });
+
+  await shot('covers/line-oa-cover-1080x878.png', {
+    w: 1080, h: 878, bg: NAVY,
+    body: `<div style="width:100%;height:100%;background:${NAVY};display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:44px;text-align:center;padding:80px">
+        ${inlineMark(150, '#FFFFFF', TEAL)}
+        <div class="display" style="font-size:130px;color:#fff;line-height:1">LEXIS</div>
+        <div class="thai" style="font-size:40px;color:#fff;opacity:.7;line-height:1.5">${PITCH_TH}</div>
+        <div class="thai" style="font-size:32px;color:${TEAL}">ทดลองฟรี ${TRIAL_MINUTES} นาที</div>
+      </div>`
+  });
+
+  await shot('covers/og-share-card-1200x630.png', {
+    w: 1200, h: 630, bg: CANVAS,
+    body: `<div style="width:100%;height:100%;background:${CANVAS};display:flex;
+        align-items:center;gap:70px;padding:90px">
+        <img src="data:image/png;base64,${photoRing.toString('base64')}" width="330" height="330" style="flex-shrink:0"/>
+        <div style="display:flex;flex-direction:column;gap:26px">
+          <div style="display:flex;align-items:center;gap:18px">
+            ${inlineMark(46, '#FFFFFF', TEAL)}
+            <div class="display" style="font-size:50px;color:${INK};line-height:1">LEXIS</div>
+          </div>
+          <div class="display" style="font-size:56px;color:${INK};line-height:1.15">${PITCH_EN}</div>
+          <div style="font-size:27px;color:${INK};opacity:.6">${TERMS_EN}</div>
+        </div>
+      </div>`
+  });
+
+  // ================================================================
+  console.log('\ntemplates/ — ready-to-post, all copy verified');
+  // ================================================================
+  const squareLight = (headline, sub) => `
+    <div style="width:100%;height:100%;background:${CANVAS};display:flex;flex-direction:column;
+      justify-content:space-between;padding:96px">
+      <div style="display:flex;align-items:center;gap:20px">
+        ${inlineMark(56, '#FFFFFF', TEAL)}
+        <div class="display" style="font-size:58px;color:${INK};line-height:1">LEXIS</div>
+      </div>
+      <div class="display" style="font-size:80px;color:${INK};line-height:1.2">${headline}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:30px;color:${INK};opacity:.6;line-height:1.45">${sub}</div>
+        <div style="font-size:26px;color:${TEAL};letter-spacing:.05em">${SITE}</div>
+      </div>
+    </div>`;
+
+  await shot('templates/post-square-1080-speak.png', {
+    w: 1080, h: 1080, bg: CANVAS,
+    body: squareLight('Practice speaking English out loud, not typing.', TERMS_EN)
+  });
+  await shot('templates/post-square-1080-partner.png', {
+    w: 1080, h: 1080, bg: CANVAS,
+    body: squareLight('A real conversation partner, not a course.', `${TERMS_EN}<br>${PRICE_EN}`)
+  });
+  await shot('templates/post-square-1080-th.png', {
+    w: 1080, h: 1080, bg: CANVAS,
+    body: `<div style="width:100%;height:100%;background:${CANVAS};display:flex;flex-direction:column;
+        justify-content:space-between;padding:96px">
+        <div style="display:flex;align-items:center;gap:20px">
+          ${inlineMark(56, '#FFFFFF', TEAL)}
+          <div class="display" style="font-size:58px;color:${INK};line-height:1">LEXIS</div>
+        </div>
+        <div class="thai" style="font-size:66px;font-weight:600;color:${INK};line-height:1.35">${PITCH_TH}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end">
+          <div class="thai" style="font-size:30px;color:${INK};opacity:.6">ทดลองฟรี ${TRIAL_MINUTES} นาที ไม่ต้องผูกบัตร</div>
+          <div style="font-size:26px;color:${TEAL};letter-spacing:.05em">${SITE}</div>
+        </div>
+      </div>`
+  });
+
+  const story = (headlineHtml, subHtml, ctaText) => `
+    <div style="width:100%;height:100%;background:${NAVY};display:flex;flex-direction:column;
+      justify-content:center;align-items:center;gap:60px;padding:120px 90px;text-align:center">
+      <img src="data:image/png;base64,${photoRing.toString('base64')}" width="420" height="420"/>
+      ${headlineHtml}
+      ${subHtml}
+      <div style="background:${AMBER};color:#fff;font-size:40px;font-weight:700;
+        padding:30px 62px;border-radius:24px">${ctaText}</div>
+      <div style="font-size:30px;color:#fff;opacity:.5;letter-spacing:.06em">${SITE}</div>
+    </div>`;
+
+  await shot('templates/story-1080x1920-en.png', {
+    w: 1080, h: 1920, bg: NAVY,
+    body: story(
+      `<div class="display" style="font-size:84px;color:#fff;line-height:1.2">Talk. She listens,<br>and corrects you<br>gently.</div>`,
+      `<div style="font-size:36px;color:#fff;opacity:.65;line-height:1.5">${TERMS_EN}</div>`,
+      'Try It Free'
+    )
+  });
+  await shot('templates/story-1080x1920-th.png', {
+    w: 1080, h: 1920, bg: NAVY,
+    body: story(
+      `<div class="thai" style="font-size:72px;font-weight:600;color:#fff;line-height:1.45">${PITCH_TH}</div>`,
+      `<div class="thai" style="font-size:34px;color:#fff;opacity:.65;line-height:1.6">ทดลองฟรี ${TRIAL_MINUTES} นาที ไม่ต้องผูกบัตร</div>`,
+      'ลองใช้ฟรี'
+    )
+  });
+
+  await browser.close();
+  console.log('\nBrand kit regenerated.');
+}
+
+main().catch((e) => { console.error(e); process.exit(1); });
