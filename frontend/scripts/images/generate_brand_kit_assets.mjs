@@ -10,7 +10,7 @@
 //
 //   - public/favicon.svg          the one real brand mark (five-bar waveform)
 //   - public/avatar/lexis-tutor-photo.jpg   the one real depiction of LEXIS
-//   - public/fonts/fraunces-600.woff2       the real display face
+//   - public/fonts/fraunces-600-var.woff2       the real display face (variable, optical size live)
 //   - public/fonts/ibm-plex-sans-thai-*.woff2   the real Thai face
 //   - src/content/facts.js        the one source of truth for prices/trial
 //
@@ -84,7 +84,7 @@ ${bg}${bars}
 let fontCss = '';
 async function loadFontCss() {
   const [fraunces, thai400, thai600] = await Promise.all([
-    fs.readFile(path.join(PUBLIC, 'fonts', 'fraunces-600.woff2')),
+    fs.readFile(path.join(PUBLIC, 'fonts', 'fraunces-600-var.woff2')),
     fs.readFile(path.join(PUBLIC, 'fonts', 'ibm-plex-sans-thai-400.woff2')),
     fs.readFile(path.join(PUBLIC, 'fonts', 'ibm-plex-sans-thai-600.woff2'))
   ]);

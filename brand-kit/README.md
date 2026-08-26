@@ -166,8 +166,26 @@ the same values the live site uses, not a separate "marketing palette."
 
 ## 3. Typography
 
-- **Display/headlines (Latin):** Fraunces, weight 600 only, self-hosted
-  (`frontend/public/fonts/fraunces-600.woff2`). Falls back to Georgia/serif.
+- **Display/headlines (Latin):** Fraunces, weight 600, self-hosted
+  (`frontend/public/fonts/fraunces-600-var.woff2`). Falls back to
+  Georgia/serif.
+
+  **This is a variable font on the `opsz` (optical size) axis, and that
+  matters.** Fraunces is an optical-size family: its small cuts have
+  exaggerated stroke contrast and chunky serifs so they hold up at 14px,
+  and those same compensations look distorted blown up to a headline. The
+  file shipping here until 26 Aug 2026 was a static small-optical-size cut,
+  which is exactly why display type across the site and the first version
+  of this kit looked wrong. Browsers apply `font-optical-sizing: auto` by
+  default, so with the axis left live every size now gets the cut it was
+  drawn for, with no per-size CSS.
+
+  If you ever hand this font to a designer or a print shop, tell them the
+  same thing: set the optical size to match the size they are setting at.
+  And if you rebuild the file, use
+  `frontend/scripts/fonts/build_fraunces_subset.py`, never a hand-picked
+  static download. Two axes in this family default to values you do not
+  want (`opsz` to 9, the smallest cut; `WONK` to 1, wonky alternates ON).
 - **Body (Latin):** system sans stack (no webfont — see
   `tailwind.config.js`'s comment on why: a named-but-never-loaded font is
   worse than an honest system-font fallback).
