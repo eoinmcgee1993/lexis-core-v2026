@@ -55,6 +55,16 @@ const MONTHLY_THB = 599;
 
 const PITCH_EN = 'Voice-first speaking practice, English and Thai.';
 const PITCH_TH = 'ฝึกพูดภาษาอังกฤษและภาษาไทยด้วยเสียงจริง';
+// Same sentence with the line break authored in. Thai has no spaces between
+// words, and this Chromium does not apply dictionary-based Thai breaking
+// even with lang="th" set, so left to wrap on its own it splits ภาษาไทย
+// ("Thai language") straight down the middle, which a Thai reader sees
+// immediately. The break below falls between clauses instead:
+//   ฝึกพูดภาษาอังกฤษ      practice speaking English
+//   และภาษาไทยด้วยเสียงจริง   and Thai, with real voice
+// Any headline-sized Thai here uses this version; small single-line Thai
+// (which never wraps) uses PITCH_TH above.
+const PITCH_TH_LINES = 'ฝึกพูดภาษาอังกฤษ<br>และภาษาไทยด้วยเสียงจริง';
 const TERMS_EN = `Free ${TRIAL_MINUTES}-minute trial. No card required.`;
 const PRICE_EN = `฿${WEEKLY_THB}/week or ฿${MONTHLY_THB}/month after that.`;
 const SITE = 'learnwithlexis.com';
@@ -98,8 +108,14 @@ async function loadFontCss() {
   ].join('');
 }
 
+// Thai has no spaces between words, so a browser with no locale hint
+// breaks Thai lines at arbitrary character boundaries. The first version of
+// this kit shipped a story and a square post that split ภาษาไทย ("Thai
+// language") across two lines, which a Thai reader spots immediately.
+// Every Thai element below carries lang="th" so Chromium uses ICU's
+// dictionary-based Thai line breaking instead of guessing.
 function page({ w, h, body, bg = 'transparent', pad = 0 }) {
-  return `<!doctype html><html><head><meta charset="utf-8"><style>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><style>
 ${fontCss}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:${w}px;height:${h}px}
@@ -216,7 +232,7 @@ async function main() {
     body: `<div style="display:flex;flex-direction:column;align-items:center;gap:34px;text-align:center">
       ${inlineMark(200, '#FFFFFF', TEAL)}
       <div class="display" style="font-size:170px;color:${INK};line-height:1">LEXIS</div>
-      <div class="thai" style="font-size:38px;color:${INK};opacity:.62">${PITCH_TH}</div>
+      <div class="thai" lang="th" style="font-size:38px;color:${INK};opacity:.62">${PITCH_TH}</div>
     </div>`,
     scale: 2
   });
@@ -333,8 +349,8 @@ async function main() {
         align-items:center;justify-content:center;gap:44px;text-align:center;padding:80px">
         ${inlineMark(150, '#FFFFFF', TEAL)}
         <div class="display" style="font-size:130px;color:#fff;line-height:1">LEXIS</div>
-        <div class="thai" style="font-size:40px;color:#fff;opacity:.7;line-height:1.5">${PITCH_TH}</div>
-        <div class="thai" style="font-size:32px;color:${TEAL}">ทดลองฟรี ${TRIAL_MINUTES} นาที</div>
+        <div class="thai" lang="th" style="font-size:40px;color:#fff;opacity:.7;line-height:1.5">${PITCH_TH_LINES}</div>
+        <div class="thai" lang="th" style="font-size:32px;color:${TEAL}">ทดลองฟรี ${TRIAL_MINUTES} นาที</div>
       </div>`
   });
 
@@ -387,9 +403,9 @@ async function main() {
           ${inlineMark(56, '#FFFFFF', TEAL)}
           <div class="display" style="font-size:58px;color:${INK};line-height:1">LEXIS</div>
         </div>
-        <div class="thai" style="font-size:66px;font-weight:600;color:${INK};line-height:1.35">${PITCH_TH}</div>
+        <div class="thai" lang="th" style="font-size:66px;font-weight:600;color:${INK};line-height:1.35">${PITCH_TH_LINES}</div>
         <div style="display:flex;justify-content:space-between;align-items:flex-end">
-          <div class="thai" style="font-size:30px;color:${INK};opacity:.6">ทดลองฟรี ${TRIAL_MINUTES} นาที ไม่ต้องผูกบัตร</div>
+          <div class="thai" lang="th" style="font-size:30px;color:${INK};opacity:.6">ทดลองฟรี ${TRIAL_MINUTES} นาที ไม่ต้องผูกบัตร</div>
           <div style="font-size:26px;color:${TEAL};letter-spacing:.05em">${SITE}</div>
         </div>
       </div>`
@@ -417,8 +433,8 @@ async function main() {
   await shot('templates/story-1080x1920-th.png', {
     w: 1080, h: 1920, bg: NAVY,
     body: story(
-      `<div class="thai" style="font-size:72px;font-weight:600;color:#fff;line-height:1.45">${PITCH_TH}</div>`,
-      `<div class="thai" style="font-size:34px;color:#fff;opacity:.65;line-height:1.6">ทดลองฟรี ${TRIAL_MINUTES} นาที ไม่ต้องผูกบัตร</div>`,
+      `<div class="thai" lang="th" style="font-size:72px;font-weight:600;color:#fff;line-height:1.45">${PITCH_TH_LINES}</div>`,
+      `<div class="thai" lang="th" style="font-size:34px;color:#fff;opacity:.65;line-height:1.6">ทดลองฟรี ${TRIAL_MINUTES} นาที ไม่ต้องผูกบัตร</div>`,
       'ลองใช้ฟรี'
     )
   });
