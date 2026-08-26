@@ -54,13 +54,13 @@ export default function WelcomeStage({
   const [confirmingCancel, setConfirmingCancel] = useState(false);
   return (
     <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
-      <div className="w-full max-w-4xl mx-auto flex items-center justify-between p-4 md:p-6">
+      <div className="w-full max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-y-2 p-4 md:p-6">
         <button onClick={onGoHome} className="text-sm font-display font-semibold text-lexis-ink/80 hover:text-lexis-ink transition-colors">
           LEXIS
         </button>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2">
           {profile && (
-            <span className="hidden sm:flex items-center gap-1.5 text-xs text-lexis-ink/50">
+            <span className="flex items-center gap-1.5 text-xs text-lexis-ink/50">
               <Clock className="w-3.5 h-3.5" />
               <span>{formatUsageLabel(profile)}</span>
             </span>
@@ -68,7 +68,7 @@ export default function WelcomeStage({
 
           {profile?.subscription_status === 'active' && !cancelAtPeriodEnd && (
             confirmingCancel ? (
-              <span className="hidden sm:flex items-center gap-1.5 text-xs">
+              <span className="flex items-center gap-1.5 text-xs">
                 <span className="text-lexis-ink/50">Cancel plan?</span>
                 <button
                   onClick={onCancelPlan}
@@ -88,19 +88,19 @@ export default function WelcomeStage({
             ) : (
               <button
                 onClick={() => setConfirmingCancel(true)}
-                className="hidden sm:block text-xs text-lexis-ink/40 hover:text-rose-600 underline underline-offset-2"
+                className="block text-xs text-lexis-ink/40 hover:text-rose-600 underline underline-offset-2"
               >
                 Cancel plan
               </button>
             )
           )}
           {cancelAtPeriodEnd && (
-            <span className="hidden sm:block text-xs text-lexis-ink/50">
+            <span className="block text-xs text-lexis-ink/50">
               Won't renew{cancelPeriodEnd ? ` (access until ${formatPeriodEnd(cancelPeriodEnd)})` : ''}
             </span>
           )}
           {cancelError && (
-            <span className="hidden sm:block text-xs text-rose-600">{cancelError}</span>
+            <span className="block text-xs text-rose-600" role="alert">{cancelError}</span>
           )}
 
           <button onClick={onViewHistory} className="p-2 text-lexis-ink/40 hover:text-lexis-ink transition-colors" title="Practice history">
@@ -181,7 +181,7 @@ export default function WelcomeStage({
       </div>
 
       <footer className="w-full max-w-4xl mx-auto px-6 py-6 text-xs text-lexis-ink/40 text-center">
-        © 2026 LEXIS · Private &amp; secure: only you and LEXIS are on the call
+        © 2026 LEXIS · Your audio is never saved on our servers, and we store no transcripts
       </footer>
     </div>
   );
