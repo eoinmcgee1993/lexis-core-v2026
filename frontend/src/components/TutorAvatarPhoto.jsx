@@ -35,7 +35,13 @@ const BLINK_MAX_GAP_S = 5;
 // Idle blink timer — a local rAF loop, independent of tutorLevel. Same
 // cadence/shape as TutorAvatar3D.jsx's blink morph target: a quick sine
 // pulse every 2-5s. Returns a 0 (open) to 1 (closed) value.
-function useBlink() {
+//
+// `enabled` exists for the marketing hero (HeroLiveDemo.jsx), which renders
+// this avatar on a page that stays open for as long as the visitor is
+// reading, and pauses it once the hero scrolls out of view or the visitor
+// has asked for reduced motion. It defaults to true, so the in-app Live
+// Conversation screen behaves exactly as before.
+function useBlink(enabled = true) {
   const [closeAmount, setCloseAmount] = useState(0);
   const clockRef = useRef(0);
   const nextBlinkAtRef = useRef(BLINK_MIN_GAP_S + Math.random() * (BLINK_MAX_GAP_S - BLINK_MIN_GAP_S));
@@ -43,6 +49,11 @@ function useBlink() {
   const rafRef = useRef(null);
 
   useEffect(() => {
+    if (!enabled) {
+      setCloseAmount(0); // eyes open, and no loop running
+      lastTsRef.current = null; // don't bank a huge delta while paused
+      return;
+    }
     const tick = (ts) => {
       if (lastTsRef.current == null) lastTsRef.current = ts;
       const delta = (ts - lastTsRef.current) / 1000;
@@ -63,7 +74,7 @@ function useBlink() {
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, []);
+  }, [enabled]);
 
   return closeAmount;
 }
@@ -79,7 +90,7 @@ function useBlink() {
 // instead of to tutorLevel itself, so it stays local to this component
 // rather than changing the shared audio-analysis signal every other avatar
 // tier also reads.
-function useSmoothed(target, rate = 10) {
+function useSmoothed(target, rate = 10, enabled = true) {
   const [value, setValue] = useState(target);
   const valueRef = useRef(target);
   const lastTsRef = useRef(null);
@@ -88,6 +99,14 @@ function useSmoothed(target, rate = 10) {
   targetRef.current = target;
 
   useEffect(() => {
+    if (!enabled) {
+      // Snap to wherever the target is and stop: no easing to watch when
+      // nothing is being watched. See useBlink's note on `enabled`.
+      valueRef.current = targetRef.current;
+      setValue(targetRef.current);
+      lastTsRef.current = null;
+      return;
+    }
     const tick = (ts) => {
       if (lastTsRef.current == null) lastTsRef.current = ts;
       const delta = (ts - lastTsRef.current) / 1000;
@@ -100,7 +119,7 @@ function useSmoothed(target, rate = 10) {
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [enabled]);
 
   return value;
 }
@@ -119,7 +138,7 @@ function deriveVariantUrls(photoUrl) {
   };
 }
 
-export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, isConnecting, onError }) {
+export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, isConnecting, onError, paused = false }) {
   const active = isConnected || isConnecting;
   const [failed, setFailed] = useState(false);
   // Each overlay variant fails independently of the base photo and of each
@@ -148,8 +167,8 @@ export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, is
   //    over-reacting to every small change in level.
   const normalizedLevel = Math.min(1, tutorLevel / 65);
   const rawOpenAmount = Math.pow(normalizedLevel, 0.75); // 0 = mouth closed, 1 = fully open
-  const openAmount = useSmoothed(rawOpenAmount, 10); // eased — see useSmoothed above for why
-  const blinkAmount = useBlink(); // 0 = eyes open, 1 = fully closed
+  const openAmount = useSmoothed(rawOpenAmount, 10, !paused); // eased — see useSmoothed above for why
+  const blinkAmount = useBlink(!paused); // 0 = eyes open, 1 = fully closed
 
   if (failed) return null;
 
