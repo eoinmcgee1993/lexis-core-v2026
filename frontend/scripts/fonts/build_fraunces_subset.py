@@ -30,6 +30,7 @@ than the static file did.
 Requires: pip install fonttools brotli
 Run from frontend/:  python3 scripts/fonts/build_fraunces_subset.py
 """
+import hashlib
 import io
 import os
 import sys
@@ -39,8 +40,20 @@ from fontTools.ttLib import TTFont
 from fontTools.varLib.instancer import instantiateVariableFont
 from fontTools import subset
 
+# Pinned to a commit, not to `main`, and checked against a known digest.
+# Fetching a font from a moving branch and feeding it straight into the build
+# means an upstream change (or a compromised mirror) silently ships different
+# letterforms to every visitor, and nobody would notice until someone looked
+# closely at a headline. Pinning makes the input reproducible; the digest makes
+# a substitution loud instead of silent.
+#
+# To take a newer upstream Fraunces: bump SOURCE_COMMIT, run this once, and it
+# will fail on the digest. Check the diff is one you actually want, then update
+# SOURCE_SHA256 to the value the error reports. Never delete the check.
+SOURCE_COMMIT = '6a003b5eb672dc8bf5bff5937cf5863f8b175445'
+SOURCE_SHA256 = '177ff6c0f14e5550a3c624247cd1189611d4eb65d000b14944c63d967958abbb'
 SOURCE = (
-    'https://raw.githubusercontent.com/google/fonts/main/ofl/fraunces/'
+    f'https://raw.githubusercontent.com/google/fonts/{SOURCE_COMMIT}/ofl/fraunces/'
     'Fraunces%5BSOFT%2CWONK%2Copsz%2Cwght%5D.ttf'
 )
 OUT = os.path.join('public', 'fonts', 'fraunces-600-var.woff2')
@@ -57,10 +70,21 @@ UNICODES = (
 
 
 def main():
-    print('fetching variable Fraunces from Google Fonts...')
+    print(f'fetching variable Fraunces, pinned at {SOURCE_COMMIT[:12]}...')
     raw = urllib.request.urlopen(SOURCE, timeout=120).read()
     if len(raw) < 100_000:
         sys.exit(f'unexpected download size ({len(raw)} bytes), aborting')
+
+    digest = hashlib.sha256(raw).hexdigest()
+    if digest != SOURCE_SHA256:
+        sys.exit(
+            'upstream font does not match the pinned digest, refusing to build.\n'
+            f'  expected {SOURCE_SHA256}\n'
+            f'  got      {digest}\n'
+            'Someone changed the source, or it was served by something other than '
+            'GitHub. Verify the change is intentional before touching SOURCE_SHA256.'
+        )
+    print(f'  digest verified ({len(raw)} bytes)')
 
     font = TTFont(io.BytesIO(raw))
     axes = {a.axisTag: (a.minValue, a.defaultValue, a.maxValue) for a in font['fvar'].axes}
