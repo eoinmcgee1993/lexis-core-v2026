@@ -41,6 +41,7 @@ const TRIAL = 30, WEEK = 199, MONTH = 599;
 const SITE = 'learnwithlexis.com';
 const TERMS = `Free ${TRIAL}-minute trial. No card required.`;
 const TERMS_TH = `ทดลองฟรี ${TRIAL} นาที ไม่ต้องผูกบัตร`;
+const PRICE_EN = `฿${WEEK}/week or ฿${MONTH}/month after that.`;
 
 // Copy. Every line is about the experience of using the product, which is
 // verifiable, rather than a claim about results, which would not be. The
@@ -54,7 +55,18 @@ const LINES = {
   before:  'Practice the conversation<br>before you have to<br>have it.',
   room:    'Thirty minutes.<br>No class.<br>No audience.',
   th_out:  'คุณรู้คำศัพท์อยู่แล้ว<br>แค่ยังไม่ได้พูดออกมา',
-  th_room: 'ไม่มีห้องเรียน<br>ไม่มีคนฟังอยู่ข้างๆ<br>แค่คุณกับ LEXIS'
+  th_room: 'ไม่มีห้องเรียน<br>ไม่มีคนฟังอยู่ข้างๆ<br>แค่คุณกับ LEXIS',
+  // Second wave, 27 Aug 2026. Same rule as above: these describe the
+  // experience, never a result, and never a volume promise. Deliberately no
+  // "unlimited" or "talk as much as you want" line anywhere, because the
+  // product has no stated fair-use ceiling and an ad is the wrong place to
+  // discover that (see LAUNCH-ACTION-PLAN.md, risk 1).
+  textbook: 'The textbook never<br>asks you a question<br>back.',
+  swim:    'You can’t learn to swim<br>by reading<br>about water.',
+  stranger:'Your first conversation<br>in English shouldn’t<br>be with a stranger.',
+  find:    'Thirty minutes<br>to find out if you can<br>hold a conversation.',
+  th_ask:  'หนังสือเรียน<br>ไม่เคยถามคำถามคุณกลับ',
+  th_first:'บทสนทนาแรกของคุณ<br>ไม่ควรเป็น<br>กับคนแปลกหน้า'
 };
 
 let fontCss = '';
@@ -186,6 +198,42 @@ async function main() {
 
   await C('templates/post-c-before.png', '12-portrait-black-speaking-alt', LINES.before, TERMS);
   await C('templates/post-c-room.png', '13-portrait-black-smile-alt', LINES.room, TERMS);
+
+  // ---- LAYOUT D: light. Warm cream, portrait right, rule under the mark.
+  // Six black squares in a row reads as a wall; the grid needs air, and the
+  // cream is as much the brand as the navy is.
+  console.log('\ntemplates/ — layout D, light');
+  const D = async (file, img, line, sub) => shot(file, 1080, 1080, `
+    <div style="width:100%;height:100%;background:${CANVAS};display:flex">
+      <div style="flex:1;padding:80px 56px 72px 76px;display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          ${lockup(34, INK, TEAL)}
+          <div style="width:52px;height:3px;background:${TEAL};margin-top:28px"></div>
+        </div>
+        <div class="d" style="font-size:50px;color:${INK};line-height:1.18">${line}</div>
+        <div>
+          <div style="font-size:22px;color:${INK};opacity:.6;line-height:1.5">${sub}</div>
+          <div style="margin-top:12px;font-size:19px;color:${TEAL};letter-spacing:.04em">${SITE}</div>
+        </div>
+      </div>
+      <div style="width:40%;position:relative;overflow:hidden">
+        <img class="fill" src="${await photo(img)}" style="object-position:52% 26%"/>
+      </div>
+    </div>`, CANVAS);
+
+  await D('templates/post-d-textbook.png', '03-portrait-cream-listening', LINES.textbook, TERMS);
+  await D('templates/post-d-stranger.png', '03-portrait-cream-listening', LINES.stranger, TERMS);
+  await D('templates/post-d-th.png', '03-portrait-cream-listening',
+    `<span class="t" lang="th" style="font-weight:600">${LINES.th_first}</span>`,
+    `<span class="t" lang="th">${TERMS_TH}</span>`);
+
+  // ---- second wave across the existing layouts, for grid variety
+  console.log('\ntemplates/ — second wave');
+  await A('templates/post-a-swim.png', '12-portrait-black-speaking-alt', LINES.swim, TERMS);
+  await B('templates/post-b-find.png', '10-closecrop-black', LINES.find, `${TERMS}<br>${PRICE_EN}`);
+  await C('templates/post-c-th-ask.png', '01-portrait-black-smile',
+    `<span class="t" lang="th" style="font-weight:600">${LINES.th_ask}</span>`,
+    `<span class="t" lang="th">${TERMS_TH}</span>`);
 
   // ---- STORIES: full-bleed vertical, headline in the space the shot left.
   console.log('\ntemplates/ — stories');
