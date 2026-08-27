@@ -18,18 +18,23 @@
 // TOPIC_CURRICULA.everyday and EverydayEnglishPage.jsx's own practice
 // prompts), not a real recording of a real session.
 //
-// The opening line IS real audio, though (22 Aug 2026): a one-off
-// text-to-speech render of the exact same line LEXIS's real Live
-// Conversation session uses, in the same voice. Correcting an earlier
+// Both of LEXIS's lines ARE real audio, though. Correcting an earlier
 // mistake in this file's own history — LEXIS's actual voice engine is
 // OpenAI's Realtime API (see backend/app.mjs's POST /api/session, voice
 // 'marin'), not ElevenLabs as previously stated here; there's no
-// ElevenLabs integration anywhere in this codebase. These two clips
-// (public/audio/hero-demo-en.mp3, -th.mp3) were rendered via OpenAI's
-// standalone /v1/audio/speech endpoint with that same voice — a one-time
-// synthesis, not a live session — for exactly the opening question, in
-// both languages, so the hero and the real product sound like the same
-// person. Muted by default and gated behind a tap (browsers block
+// ElevenLabs integration anywhere in this codebase. All four clips in
+// public/audio/ were rendered via OpenAI's standalone /v1/audio/speech
+// endpoint with that same voice — one-time syntheses, not live sessions —
+// so the hero and the real product sound like the same person. Anything
+// added here later must use that same endpoint and voice: a hero in a
+// different voice from the product is a small lie.
+//
+// 22 Aug 2026 shipped only the opening line. 27 Aug 2026 added the
+// follow-up, because shipping one of her two lines meant unmuting got you
+// 2.5s of speech and then nearly nine seconds of silence while she visibly
+// said something else. See LINE_AUDIO below.
+//
+// Muted by default and gated behind a tap (browsers block
 // autoplaying audio with sound anyway, and a marketing page that starts
 // talking at you unasked is its own bad experience) — see the mute
 // toggle below.
@@ -37,12 +42,26 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import TutorAvatarPhoto from './TutorAvatarPhoto';
 
-// Real synthesized audio of the exact opening line, matching SCRIPTS
-// below — see this file's header comment for how these were made.
-const OPENING_LINE_AUDIO = {
-  en: '/audio/hero-demo-en.mp3',
-  th: '/audio/hero-demo-th.mp3'
+// Real synthesized audio for BOTH of LEXIS's lines, matching SCRIPTS below
+// word for word. See this file's header comment for how these were made.
+//
+// The student's line in between is deliberately silent: in a real session
+// that beat is the visitor talking, so a voice there would be wrong. What
+// was wrong until 27 Aug 2026 was the FOLLOW-UP being silent too, which
+// meant unmuting got you 2.5s of speech and then nearly nine seconds of
+// nothing while LEXIS visibly said something else. Reported as "audio says
+// one line then sound goes off", and that is exactly what it was: the other
+// line had never been recorded.
+const LINE_AUDIO = {
+  en: { opening: '/audio/hero-demo-en.mp3', followup: '/audio/hero-demo-en-followup.mp3' },
+  th: { opening: '/audio/hero-demo-th.mp3', followup: '/audio/hero-demo-th-followup.mp3' }
 };
+
+// Which transcript step each clip belongs to, so voice and transcript stay
+// in step. These index into SCRIPTS below: 0 is LEXIS's opening line alone,
+// 3 is the step where her follow-up first appears.
+const OPENING_STEP = 0;
+const FOLLOWUP_STEP = 3;
 
 // Same env var LiveStage.jsx/LexisApp.jsx read for the real session's
 // avatar — one source of truth for which photo identity is in use, not a
@@ -92,7 +111,12 @@ const SCRIPTS = {
 };
 
 const STEP_MS = 2200;
-const END_PAUSE_MS = 2400; // hold the finished exchange on screen before looping
+// Long enough that the follow-up clip always finishes before the loop wraps
+// and restarts the opening line over the top of it. The follow-up starts at
+// FOLLOWUP_STEP * STEP_MS = 6600ms and the longest clip (Thai) runs 5.11s,
+// ending at 11.71s; the cycle is 4 * 2200 + 3600 = 12.4s, leaving ~0.7s of
+// air. Shorten this and the Thai line gets cut off mid-sentence.
+const END_PAUSE_MS = 3600;
 
 // A marketing hero runs for as long as the tab is open, so nothing here is
 // allowed to animate unconditionally. Three gates, all cheap:
@@ -197,7 +221,9 @@ export default function HeroLiveDemo({ direction, caption }) {
   // and a marketing page that starts talking at a visitor unasked is a bad
   // experience even where the browser would allow it. The visitor opts in.
   const [muted, setMuted] = useState(true);
-  const audioRef = useRef(null);
+  const openingRef = useRef(null);
+  const followupRef = useRef(null);
+  const wasMutedRef = useRef(true);
   const containerRef = useRef(null);
 
   const onScreen = useHeroIsOnScreen(containerRef);
@@ -213,7 +239,9 @@ export default function HeroLiveDemo({ direction, caption }) {
   // Otherwise it is the top of the loop, so a language toggle restarts it.
   useEffect(() => {
     setStep(prefersReducedMotion ? script.length - 1 : 0);
-    audioRef.current?.load(); // pick up the new-language src (see OPENING_LINE_AUDIO) before the next play()
+    // pick up the new-language srcs (see LINE_AUDIO) before the next play()
+    openingRef.current?.load();
+    followupRef.current?.load();
   }, [direction, prefersReducedMotion, script.length]);
 
   useEffect(() => {
@@ -226,35 +254,42 @@ export default function HeroLiveDemo({ direction, caption }) {
     return () => clearTimeout(timer);
   }, [step, script.length, animating]);
 
-  // Step 0 is the moment LEXIS's opening line first appears on its own —
-  // exactly what OPENING_LINE_AUDIO was rendered to match. Re-fires on
-  // every loop, and also whenever `muted` flips (so unmuting mid-loop
-  // doesn't have to wait for the next cycle if it happens to land on
-  // step 0 already).
+  // Plays whichever of LEXIS's two lines the transcript is currently on, and
+  // stops everything when muted or when nothing is animating (scrolled past,
+  // background tab, reduced motion). Without that last part, scrolling away
+  // from an unmuted hero leaves a voice talking to an empty screen.
   useEffect(() => {
-    if (step !== 0 || muted) return;
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.currentTime = 0;
-    audio.play().catch(() => {}); // a blocked autoplay here just means try again next loop — not worth surfacing
-  }, [step, muted]);
+    const clips = [openingRef.current, followupRef.current].filter(Boolean);
+    const justUnmuted = wasMutedRef.current && !muted;
+    wasMutedRef.current = muted;
 
+    if (muted || !animating) {
+      clips.forEach((a) => { a.pause(); a.currentTime = 0; });
+      return;
+    }
+
+    let el =
+      step === OPENING_STEP ? openingRef.current :
+      step === FOLLOWUP_STEP ? followupRef.current : null;
+
+    // Unmuting on a silent step should still produce her voice rather than
+    // nothing at all. That includes reduced motion, which parks the
+    // transcript on its final step where no clip belongs.
+    if (!el && justUnmuted) el = openingRef.current;
+    if (!el) return; // a silent beat mid-loop: leave whatever is playing alone
+
+    clips.forEach((a) => { if (a !== el) { a.pause(); a.currentTime = 0; } });
+    el.currentTime = 0;
+    el.play().catch(() => {}); // a blocked autoplay just means try again next loop
+  }, [step, muted, animating]);
+
+  // Playback is owned entirely by the effect above, so this only flips state.
+  // Having both try to drive the elements is how you get a clip restarting
+  // over itself on a single tap.
   function toggleMute() {
-    setMuted((wasMuted) => {
-      const audio = audioRef.current;
-      if (wasMuted) {
-        // unmuting: play immediately rather than making the visitor wait
-        // for the loop to come back around to step 0
-        if (audio) {
-          audio.currentTime = 0;
-          audio.play().catch(() => {});
-        }
-      } else {
-        audio?.pause();
-      }
-      return !wasMuted;
-    });
+    setMuted((wasMuted) => !wasMuted);
   }
+
 
   const visibleLines = script[step];
   const lexisIsTalking = visibleLines[visibleLines.length - 1]?.speaker === 'lexis';
@@ -266,7 +301,8 @@ export default function HeroLiveDemo({ direction, caption }) {
       className="relative w-64 sm:w-80 md:w-full md:max-w-sm rounded-2xl overflow-hidden border border-white/10 shadow-xl shadow-teal-900/10 bg-lexis-navy"
     >
       {/* Real audio, not a stand-in — see this file's header comment. */}
-      <audio ref={audioRef} src={OPENING_LINE_AUDIO[direction] || OPENING_LINE_AUDIO.en} preload="auto" />
+      <audio ref={openingRef} src={(LINE_AUDIO[direction] || LINE_AUDIO.en).opening} preload="auto" />
+      <audio ref={followupRef} src={(LINE_AUDIO[direction] || LINE_AUDIO.en).followup} preload="auto" />
 
       {/* Same ambient glow LiveStage.jsx uses so this reads as the same
           screen, not a lookalike. */}
