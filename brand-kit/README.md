@@ -24,6 +24,36 @@ Never re-export one of these by hand. The script is the source of truth
 for sizing and treatment, so a hand-made one-off drifts from the rest
 immediately.
 
+## 0a. The photo library
+
+`photography/` holds ten images of LEXIS, generated 27 Aug 2026 from the one
+original portrait using Nano Banana Pro (Gemini) with the original as an
+identity reference. Every frame was checked against the original before it
+was kept.
+
+**That check is not optional, and it is the whole reason this folder exists.**
+Two other tools were tried first and both silently replaced her with a
+different person: Canva dropped in an unrelated stock model, and Higgsfield's
+`soul_2` copied the styling (teal blouse, navy trousers, blue backdrop) while
+generating four different women, one of them blonde. Most image tools condition
+on *style*, not identity. If you generate more of her, put the new frame next
+to `frontend/public/avatar/lexis-tutor-photo.jpg` and actually look, every time.
+
+| File | Shot for |
+|---|---|
+| `01-portrait-black-smile` | Square, warm smile, black. Avatars, general use. |
+| `02-portrait-black-speaking` | Square, mid-sentence. The best single image for a voice product. |
+| `03-portrait-cream-listening` | Square, listening, warm cream. Light-background layouts. |
+| `05-vertical-black-headroom` | 3:4 with empty space above her for a headline. |
+| `07-banner-black-right` | 16:9, her on the right, two thirds empty black. Every wide cover. |
+| `09-story-black-lower` | 9:16, her low in frame, empty above. Stories and Reels. |
+| `10-closecrop-black` | Square, tight face crop. Split layouts, intimate pieces. |
+| `11-portrait-teal-overshoulder` | Square, over the shoulder, teal ground. Variety. |
+| `12`, `13` | Square alternates, speaking and smiling. |
+
+Stored as JPEG at 2048px long edge (5.4MB total, down from 66MB of PNG).
+Nothing in this kit composites larger than 2048.
+
 ## 0. Read this before you post LEXIS's face anywhere
 
 `avatars/lexis-photo-*` are crops of a **synthetic, generated portrait**
@@ -136,11 +166,33 @@ verified product fact.
 
 | File | Content |
 |---|---|
-| `post-square-1080-speak.png` | "Practice speaking English out loud, not typing." + trial terms. |
-| `post-square-1080-partner.png` | "A real conversation partner, not a course." + trial terms and price. |
-| `post-square-1080-th.png` | Thai pitch + Thai trial terms. |
-| `story-1080x1920-en.png` | Story / Reel / TikTok vertical, English, amber CTA. |
-| `story-1080x1920-th.png` | Same, Thai. |
+Rebuilt 27 Aug 2026 against the photo library. The first version was one
+layout stretched across every size, with a hole in the middle of each square
+post and the photo used in three pieces out of twelve. There are now **three
+distinct square layouts**, used deliberately:
+
+| Layout | What it is | When to use it |
+|---|---|---|
+| **A, photo-led** | Full-bleed portrait, gradient scrim, headline low-left under a short teal rule. | The default. Strongest scroll-stopper. |
+| **B, split** | Photo in the top 58%, type in solid black beneath. | When the line is short and wants room. |
+| **C, type-led** | Black field, small circular portrait top-right, large quiet headline. | When the words carry it. Good in a grid between photo-led posts. |
+
+| File | Layout | Line |
+|---|---|---|
+| `post-a-words.png` | A | "You already know the words. Saying them out loud is the hard part." |
+| `post-a-course.png` | A | "You don't need another course. You need someone to talk to." |
+| `post-b-reading.png` | B | "Reading English is not speaking English." |
+| `post-b-th.png` | B | Thai: you already know the words |
+| `post-c-before.png` | C | "Practice the conversation before you have to have it." |
+| `post-c-room.png` | C | "Thirty minutes. No class. No audience." |
+| `story-en.png` | Story | Full-bleed vertical, amber CTA. |
+| `story-th.png` | Story | Same, Thai. |
+
+**On the copy.** The earlier lines were feature statements and read as
+lifeless. These lead with the feeling of the problem rather than the
+mechanics of the product. Every one is still defensible: they describe the
+experience of using it, not a claim about results. Change them at the top of
+`generate_brand_kit_social.mjs`, never in the PNGs.
 
 To change the copy on any of these, edit the strings at the top of
 `generate_brand_kit_assets.mjs` and re-run it. Don't edit the PNGs.
