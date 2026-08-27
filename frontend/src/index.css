@@ -4,15 +4,45 @@
 
 /* Self-hosted (frontend/public/fonts/) rather than a Google Fonts <link> —
    no extra DNS/connection round-trip, and it keeps working if that host is
-   ever blocked. Latin subset only, one weight (600) — the only place this
+   ever blocked. Latin subset, weight pinned to 600 — the only place this
    typeface is used is short display headlines (see tailwind.config.js's
-   `font-display`), not body copy, so the full family isn't needed. */
+   `font-display`), not body copy, so the full family isn't needed.
+
+   VARIABLE on one axis on purpose (26 Aug 2026). Fraunces is an
+   optical-size family. What shipped here until now was a STATIC instance
+   cut at a small optical size, which rendered identically to Google's
+   opsz=14 "text" cut: exaggerated stroke contrast and chunky serifs, drawn
+   so they survive at 14px. As this site's only display face, at 40-60px
+   headings and a 150px+ wordmark, those compensations read as distorted
+   letterforms. That was reported twice off the live site before it was
+   diagnosed, and it was never a rendering bug: it was the wrong cut.
+
+   `font-size-adjust` and per-heading CSS are not needed to fix it. Leaving
+   the `opsz` axis live is enough, because browsers apply
+   `font-optical-sizing: auto` by default and feed the used font-size into
+   that axis. A 16px label and a 60px hero now each get the optical size
+   they were actually drawn for. Declared explicitly below to document the
+   intent rather than rely on an unstated default.
+
+   Rebuild with frontend/scripts/fonts/build_fraunces_subset.py — do not
+   re-download a static instance by hand. Two axes in this family default
+   to values you almost certainly do not want (`opsz` to 9, the smallest
+   cut, and `WONK` to 1, wonky alternates ON), which is exactly how the
+   previous file went wrong. The script pins both. */
 @font-face {
   font-family: 'Fraunces';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/fraunces-600.woff2') format('woff2');
+  src: url('/fonts/fraunces-600-var.woff2') format('woff2');
+}
+
+/* `font-optical-sizing` is an element property, not an @font-face
+   descriptor, so it belongs here rather than in the block above. `auto` is
+   already the browser default; it is stated once, inheritably, so the
+   behaviour the font above depends on is written down instead of assumed. */
+html {
+  font-optical-sizing: auto;
 }
 
 /* Self-hosted Thai companion to the two faces above — same self-hosting
