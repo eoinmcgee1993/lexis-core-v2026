@@ -5,6 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
 import { TRIAL } from '../content/facts';
+import AppLink from '../components/AppLink';
+
+// Set once a sign-in actually succeeds, so this device is treated as a
+// returning user next time. Deliberately not set on sign_up: an account that
+// has been created but never signed into should still land on sign-in only
+// after the confirmation round-trip completes.
+const RETURNING_KEY = 'lexis_has_signed_in';
 
 export default function AuthPage({ navigateTo }) {
   const { session, signIn, signUp } = useAuth();
@@ -19,7 +26,26 @@ export default function AuthPage({ navigateTo }) {
     description: 'Sign in to LEXIS to continue practicing spoken English or Thai.',
     robots: 'noindex, nofollow'
   });
-  const [mode, setMode] = useState('sign_in'); // 'sign_in' | 'sign_up'
+
+  // Default to sign_up, not sign_in. The primary CTA everywhere on the
+  // marketing site is "Try It Free" / "ลองใช้ฟรี", and it routes here. A
+  // first-time visitor who taps that was being shown a form headed "Sign in"
+  // with the subhead "Continue practicing with LEXIS.", i.e. asked to sign in
+  // to an account they have never had, under copy written for a returning
+  // user. Every paid click would land on that.
+  //
+  // Returning visitors are remembered instead: RETURNING_KEY is set on a
+  // successful sign-in below, so a device that has signed in before still
+  // opens on the sign-in form. localStorage can throw (private mode, blocked
+  // site data), so the read is guarded and falls back to sign_up, which is
+  // the safer default of the two.
+  const [mode, setMode] = useState(() => {
+    try {
+      return localStorage.getItem(RETURNING_KEY) ? 'sign_in' : 'sign_up';
+    } catch {
+      return 'sign_up';
+    }
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -50,6 +76,7 @@ export default function AuthPage({ navigateTo }) {
         setMode('sign_in');
       } else {
         await signIn(email, password);
+        try { localStorage.setItem(RETURNING_KEY, '1'); } catch { /* private mode: just default to sign_up next time */ }
         navigateTo('/app');
       }
     } catch (err) {
@@ -69,14 +96,13 @@ export default function AuthPage({ navigateTo }) {
   };
 
   return (
-    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col items-center justify-center p-4">
-      <button
-        onClick={() => navigateTo('/')}
-        className="absolute top-6 left-6 flex items-center space-x-2 text-xs text-lexis-ink/50 hover:text-lexis-ink transition-colors"
-      >
+    <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col items-center justify-center p-4">
+      <AppLink
+        to="/" navigateTo={navigateTo} className="absolute top-6 left-6 flex items-center space-x-2 text-xs text-lexis-ink/50 hover:text-lexis-ink transition-colors"
+          >
         <ArrowLeft className="w-4 h-4" />
         <span>Back to home</span>
-      </button>
+      </AppLink>
 
       <div className="w-full max-w-sm bg-white border border-lexis-ink/10 rounded-2xl p-8 shadow-sm">
         <div className="flex items-center space-x-3 mb-6">
@@ -159,7 +185,7 @@ export default function AuthPage({ navigateTo }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-50 text-white font-bold text-sm rounded-xl transition-all flex items-center justify-center space-x-2"
+            className="w-full min-h-[44px] py-3 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-50 text-lexis-navy font-bold text-sm rounded-xl transition-all flex items-center justify-center space-x-2"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />

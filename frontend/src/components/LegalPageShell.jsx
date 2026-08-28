@@ -8,6 +8,7 @@
 import React from 'react';
 import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import LexisMark from './LexisMark';
+import AppLink from './AppLink';
 
 // Loud, visible placeholder for any claim this page can't honestly make
 // yet (specific data-retention period, refund window, registered
@@ -27,15 +28,14 @@ export function Todo({ children }) {
 
 export default function LegalPageShell({ navigateTo, title, lastUpdated, children }) {
   return (
-    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
+    <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <header className="w-full max-w-3xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10">
-        <button
-          onClick={() => navigateTo('/')}
-          className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors"
-        >
+        <AppLink
+          to="/" navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors"
+          >
           <ArrowLeft className="w-4 h-4" />
           <span>Home</span>
-        </button>
+        </AppLink>
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700">
             <LexisMark className="w-5 h-5" />

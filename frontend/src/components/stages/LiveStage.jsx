@@ -133,7 +133,7 @@ export default function LiveStage({
   onEnableAudio
 }) {
   return (
-    <div className="relative min-h-screen bg-lexis-navy text-white font-sans flex flex-col items-center p-4 md:p-8 overflow-hidden">
+    <div className="relative min-h-[100dvh] bg-lexis-navy text-white font-sans flex flex-col items-center p-4 md:p-8 pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-[max(2rem,env(safe-area-inset-bottom))] overflow-hidden">
       {/* Ambient life for the dark canvas — before the mic/analyser data
           exists to drive the canvas waveform (canvasRef below), a plain
           lexis-navy fill reads as a dead black screen, especially through

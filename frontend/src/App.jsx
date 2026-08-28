@@ -60,7 +60,7 @@ function RouteController() {
   if (currentPath === '/app') {
     if (loading) {
       return (
-        <div className="min-h-screen bg-slate-950 text-slate-400 font-mono text-xs flex items-center justify-center">
+        <div className="min-h-[100dvh] bg-slate-950 text-slate-400 font-mono text-xs flex items-center justify-center">
           Loading LEXIS…
         </div>
       );

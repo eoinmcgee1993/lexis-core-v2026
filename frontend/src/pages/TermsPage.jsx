@@ -11,6 +11,7 @@ import LegalPageShell from '../components/LegalPageShell';
 import { useSeo } from '../lib/useSeo';
 import { SITE_URL, buildBreadcrumbJsonLd } from '../data/structuredData';
 import { PRICING, TRIAL, VAT } from '../content/facts';
+import AppLink from '../components/AppLink';
 
 export default function TermsPage({ navigateTo }) {
   useSeo({
@@ -47,7 +48,7 @@ export default function TermsPage({ navigateTo }) {
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Cancelling</h2>
       <p>
         You can cancel a paid plan at any time; see the
-        {' '}<button onClick={() => navigateTo('/refund')} className="text-teal-700 hover:text-teal-800 underline underline-offset-2">Refund &amp; Cancellation Policy</button>{' '}
+        {' '}<AppLink to="/refund" navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 underline underline-offset-2">Refund &amp; Cancellation Policy</AppLink>{' '}
         for exactly what that means for a plan already in progress.
       </p>
 

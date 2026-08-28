@@ -59,7 +59,10 @@ export const MONTHLY_SAVINGS_VS_WEEKLY_PCT = Math.round(
 export const PRICING_TEASER_EN = `Free ${TRIAL.minutes}-minute trial, then ฿${PRICING.weekly.thb}/week or ฿${PRICING.monthly.thb}/month.`;
 export const PRICING_TEASER_TH = `ทดลองฟรี ${TRIAL.minutes} นาที จากนั้น ฿${PRICING.weekly.thb}/สัปดาห์ หรือ ฿${PRICING.monthly.thb}/เดือน`;
 
-export const LANDING_DESCRIPTION_EN = `LEXIS is a voice conversation partner for Thai speakers practicing English and English speakers practicing Thai. Talk out loud, get gentle real-time corrections, and see what to work on next. Free ${TRIAL.minutes}-minute trial.`;
+// Kept under 160 characters so Google does not truncate it in results. The
+// longer version (213) was cut mid-sentence, losing the trial offer, which is
+// the part most likely to earn the click. Site audit M2, 27 Aug 2026.
+export const LANDING_DESCRIPTION_EN = `A voice conversation partner for practicing spoken English and Thai. Talk out loud, get gentle real-time corrections. Free ${TRIAL.minutes}-min trial, no card.`;
 export const PRICING_DESCRIPTION_EN = `LEXIS pricing: a free ${TRIAL.minutes}-minute trial, then ฿${PRICING.weekly.thb}/week or ฿${PRICING.monthly.thb}/month for unlimited voice practice in English or Thai. ${VAT.registered ? '' : 'No VAT, '}cancel anytime.`;
 
 // Thai-language versions of the two page descriptions above, for the /th
@@ -67,7 +70,7 @@ export const PRICING_DESCRIPTION_EN = `LEXIS pricing: a free ${TRIAL.minutes}-mi
 // (Stage 4 of the remediation brief — real /th pages, not the page's copy
 // re-served under a Thai URL). Same facts, translated, not a separate set
 // of numbers to keep in sync.
-export const LANDING_DESCRIPTION_TH = `LEXIS คือคู่สนทนาสำหรับฝึกพูด ทั้งคนไทยที่ฝึกภาษาอังกฤษ และคนที่ฝึกพูดภาษาไทย พูดออกเสียงจริง รับคำแนะนำแบบเรียลไทม์อย่างอ่อนโยน แล้วดูว่าควรฝึกอะไรต่อ ทดลองฟรี ${TRIAL.minutes} นาที`;
+export const LANDING_DESCRIPTION_TH = `คู่สนทนาสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย พูดออกเสียงจริง รับคำแนะนำแบบเรียลไทม์อย่างอ่อนโยน ทดลองฟรี ${TRIAL.minutes} นาที ไม่ต้องผูกบัตร`;
 export const PRICING_DESCRIPTION_TH = `ราคา LEXIS: ทดลองฟรี ${TRIAL.minutes} นาที จากนั้น ฿${PRICING.weekly.thb}/สัปดาห์ หรือ ฿${PRICING.monthly.thb}/เดือน สำหรับฝึกพูดภาษาอังกฤษหรือภาษาไทยได้ไม่จำกัด ${VAT.registered ? '' : 'ไม่มี VAT '}ยกเลิกได้ทุกเมื่อ`;
 
 // FAQ copy — rendered by LandingPage.jsx's <details>/<summary> list and

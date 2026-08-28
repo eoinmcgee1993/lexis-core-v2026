@@ -21,6 +21,7 @@ import LexisMark from '../components/LexisMark';
 import { useSeo } from '../lib/useSeo';
 import { SITE_URL, buildBreadcrumbJsonLd, buildTopicFaqJsonLd } from '../data/structuredData';
 import { TRIAL } from '../content/facts';
+import AppLink from '../components/AppLink';
 
 const PRACTICE_PROMPTS = [
   '"I\'d like to check in, please. I have a reservation."',
@@ -125,29 +126,27 @@ export default function TravelEnglishPage({ navigateTo, lang = 'en' }) {
   });
 
   return (
-    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
+    <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <header className="w-full max-w-3xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10">
-        <button
-          onClick={() => navigateTo(lang === 'th' ? '/th' : '/')}
-          className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors"
-        >
+        <AppLink
+          to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors"
+          >
           <ArrowLeft className="w-4 h-4" />
           <span>{t.home}</span>
-        </button>
+        </AppLink>
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700">
             <LexisMark className="w-5 h-5" />
           </div>
           <span className="text-lg font-display font-semibold text-lexis-ink">LEXIS</span>
         </div>
-        <button
-          onClick={() => navigateTo(lang === 'en' ? thUrl.replace(SITE_URL, '') : enUrl.replace(SITE_URL, ''))}
-          aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
+        <AppLink
+          to={lang === 'en' ? thUrl.replace(SITE_URL, '') : enUrl.replace(SITE_URL, '')} navigateTo={navigateTo} aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
           className="flex items-center gap-1 text-xs text-lexis-ink/50 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
-        >
+          >
           <Globe className="w-4 h-4 text-teal-700" />
           <span>{lang === 'en' ? 'ไทย' : 'EN'}</span>
-        </button>
+        </AppLink>
       </header>
 
       <section className="flex-1 w-full max-w-3xl mx-auto px-6 py-12">
@@ -190,13 +189,12 @@ export default function TravelEnglishPage({ navigateTo, lang = 'en' }) {
         </div>
 
         <div className="mt-12 text-center">
-          <button
-            onClick={() => navigateTo('/app')}
-            className="inline-flex items-center gap-2 bg-lexis-action hover:bg-lexis-action-dark text-white font-bold text-sm px-8 py-3.5 rounded-xl transition-all"
+          <AppLink
+            to="/app" navigateTo={navigateTo} className="inline-flex min-h-[44px] items-center gap-2 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-bold text-sm px-8 py-3.5 rounded-xl transition-all"
           >
             <Mic className="w-4 h-4" />
             <span>{t.cta}</span>
-          </button>
+          </AppLink>
           <p className="mt-3 text-xs text-lexis-ink/50">
             {t.trialNote(TRIAL.minutes)}
           </p>
@@ -205,9 +203,9 @@ export default function TravelEnglishPage({ navigateTo, lang = 'en' }) {
 
       <footer className="w-full max-w-3xl mx-auto p-6 border-t border-lexis-ink/10 flex items-center justify-between text-xs text-lexis-ink/40">
         <div>© 2026 LEXIS</div>
-        <button onClick={() => navigateTo(lang === 'th' ? '/th/pricing' : '/pricing')} className="hover:text-lexis-ink transition-colors">
+        <AppLink to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">
           {t.footerPricing}
-        </button>
+        </AppLink>
       </footer>
     </div>
   );

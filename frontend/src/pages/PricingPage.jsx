@@ -7,6 +7,7 @@ import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
 import { reportError } from '../lib/errorReporting';
 import { MONTHLY_SAVINGS_VS_WEEKLY_PCT, PRICING, PRICING_DESCRIPTION_EN, PRICING_DESCRIPTION_TH, SPONSOR_ADDON_THB, TRIAL, VAT } from '../content/facts';
+import AppLink from '../components/AppLink';
 
 // Display-language chrome strings for this page — Stage 4 (real /th and
 // /th/pricing routes, not a client-side toggle). Mirrors the same
@@ -152,15 +153,14 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
   };
 
   return (
-    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
+    <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <header className="w-full max-w-6xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10 gap-2">
-        <button
-          onClick={() => navigateTo(lang === 'th' ? '/th' : '/')}
-          className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors flex-shrink-0"
-        >
+        <AppLink
+          to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors flex-shrink-0"
+          >
           <ArrowLeft className="w-4 h-4" />
           <span>{t.home}</span>
-        </button>
+        </AppLink>
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700">
             <LexisMark className="w-5 h-5" />
@@ -171,14 +171,13 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
         </div>
         {/* Language toggle — navigates between /pricing and /th/pricing
             (Stage 4), same pattern as LandingPage.jsx's header toggle. */}
-        <button
-          onClick={() => navigateTo(lang === 'th' ? '/pricing' : '/th/pricing')}
-          aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
+        <AppLink
+          to={lang === 'th' ? '/pricing' : '/th/pricing'} navigateTo={navigateTo} aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
           className="flex items-center justify-center gap-2 bg-white border border-lexis-ink/10 rounded-xl text-xs text-lexis-ink/70 hover:border-teal-600/40 transition-all min-h-[44px] min-w-[44px] px-2.5 flex-shrink-0"
-        >
+          >
           <Globe className="w-4 h-4 text-teal-700 flex-shrink-0" />
           <span className="hidden sm:inline">{lang === 'en' ? 'ไทย' : 'English'}</span>
-        </button>
+        </AppLink>
       </header>
 
       <section className="flex-1 w-full max-w-5xl mx-auto px-6 py-12">
@@ -212,14 +211,14 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.freeTrialFeature2}</span></li>
               </ul>
             </div>
-            <button onClick={() => navigateTo('/app')} className="w-full py-3 bg-lexis-canvas hover:bg-lexis-ink/5 border border-lexis-ink/10 text-lexis-ink font-bold rounded-xl text-xs transition-all">
+            <AppLink to="/app" navigateTo={navigateTo} className="w-full min-h-[44px] py-3 bg-lexis-canvas hover:bg-lexis-ink/5 border border-lexis-ink/10 text-lexis-ink font-bold rounded-xl text-sm transition-all">
               {t.tryFree}
-            </button>
+            </AppLink>
           </div>
 
           {/* Weekly Pass (Featured) */}
           <div className="bg-white border-2 border-lexis-action p-6 rounded-2xl flex flex-col justify-between relative shadow-2xl shadow-lexis-action/10">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lexis-action text-white font-bold text-[10px] uppercase px-3 py-0.5 rounded-full">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lexis-action text-lexis-navy font-bold text-[10px] uppercase px-3 py-0.5 rounded-full">
               {t.mostPopular}
             </span>
             <div>
@@ -235,7 +234,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             <button
               onClick={() => startCheckout('weekly')}
               disabled={loadingTier === 'weekly'}
-              className="w-full py-3 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-60 text-white font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center space-x-2"
+              className="w-full min-h-[44px] py-3 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-60 text-lexis-navy font-bold rounded-xl text-sm text-center transition-all flex items-center justify-center space-x-2"
             >
               {loadingTier === 'weekly' ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>{t.getStartedNow}</span>}
             </button>
@@ -256,7 +255,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             <button
               onClick={() => startCheckout('monthly')}
               disabled={loadingTier === 'monthly'}
-              className="w-full py-3 bg-lexis-canvas hover:bg-lexis-ink/5 disabled:opacity-60 border border-lexis-ink/10 text-lexis-ink font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center space-x-2"
+              className="w-full min-h-[44px] py-3 bg-lexis-canvas hover:bg-lexis-ink/5 disabled:opacity-60 border border-lexis-ink/10 text-lexis-ink font-bold rounded-xl text-sm text-center transition-all flex items-center justify-center space-x-2"
             >
               {loadingTier === 'monthly' ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>{t.getStartedNow}</span>}
             </button>
@@ -277,13 +276,11 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             className="rounded border-lexis-ink/20 text-teal-600 focus:ring-teal-600"
           />
           <span>{t.sponsorLabel(SPONSOR_ADDON_THB)}</span>
-          <button
-            type="button"
-            onClick={(e) => { e.preventDefault(); navigateTo(lang === 'th' ? '/th/community' : '/community'); }}
-            className="text-teal-700 hover:text-teal-800 underline underline-offset-2"
+          <AppLink
+            to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 underline underline-offset-2"
           >
             {t.sponsorLearnMore}
-          </button>
+          </AppLink>
         </label>
 
         {!session && (
@@ -302,10 +299,10 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           {/* Community now has a real /th route too (22 Aug 2026) — link
               destination follows lang like everywhere else on this page.
               Terms/Privacy/Refund still English-only, unchanged. */}
-          <button onClick={() => navigateTo(lang === 'th' ? '/th/community' : '/community')} className="hover:text-lexis-ink transition-colors">{t.community}</button>
-          <button onClick={() => navigateTo('/privacy')} className="hover:text-lexis-ink transition-colors">{t.privacy}</button>
-          <button onClick={() => navigateTo('/terms')} className="hover:text-lexis-ink transition-colors">{t.terms}</button>
-          <button onClick={() => navigateTo('/refund')} className="hover:text-lexis-ink transition-colors">{t.refunds}</button>
+          <AppLink to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{t.community}</AppLink>
+          <AppLink to="/privacy" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{t.privacy}</AppLink>
+          <AppLink to="/terms" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{t.terms}</AppLink>
+          <AppLink to="/refund" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{t.refunds}</AppLink>
           <span>© 2026 LEXIS</span>
         </div>
       </footer>

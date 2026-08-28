@@ -315,7 +315,7 @@ export default function HeroLiveDemo({ direction, caption }) {
         onClick={toggleMute}
         aria-label={muted ? "Unmute LEXIS's voice" : "Mute LEXIS's voice"}
         aria-pressed={!muted}
-        className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+        className="absolute top-3 right-3 z-10 w-11 h-11 rounded-full bg-black/30 hover:bg-black/50 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition-colors"
       >
         {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
       </button>

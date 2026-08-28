@@ -5,6 +5,7 @@ import HeroLiveDemo from '../components/HeroLiveDemo';
 import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
 import { FAQS, LANDING_DESCRIPTION_EN, LANDING_DESCRIPTION_TH, PRICING_TEASER_EN, PRICING_TEASER_TH } from '../content/facts';
+import AppLink from '../components/AppLink';
 
 // Same key LexisApp.jsx reads on session start ('en' = practicing English,
 // 'th' = practicing Thai). Setting it here before navigating to /app means
@@ -194,7 +195,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
   });
 
   return (
-    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans">
+    <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans">
       {/* Header */}
       <header className="w-full max-w-6xl mx-auto p-4 sm:p-6 flex items-center justify-between border-b border-lexis-ink/10 gap-2">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
@@ -214,23 +215,21 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             icon-only language toggle and a tighter CTA on small screens —
             rather than hide the thing that didn't fit. */}
         <div className="flex items-center gap-1.5 sm:gap-4 flex-shrink-0">
-          <button
-            onClick={() => navigateTo(lang === 'en' ? '/th' : '/')}
-            aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
+          <AppLink
+            to={lang === 'en' ? '/th' : '/'} navigateTo={navigateTo} aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
             className="flex items-center justify-center sm:justify-start gap-2 bg-white border border-lexis-ink/10 rounded-xl text-xs text-lexis-ink/60 hover:border-teal-600/40 transition-all min-h-[44px] min-w-[44px] px-2.5 sm:px-3"
           >
             <Globe className="w-4 h-4 text-teal-700 flex-shrink-0" />
             <span className="hidden sm:inline">{lang === 'en' ? 'ไทย' : 'English'}</span>
-          </button>
-          <button
-            onClick={() => navigateTo(lang === 'th' ? '/th/pricing' : '/pricing')}
-            className="text-xs sm:text-sm text-lexis-ink/60 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
+          </AppLink>
+          <AppLink
+            to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="text-xs sm:text-sm text-lexis-ink/60 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
           >
             {c.pricing}
-          </button>
+          </AppLink>
           <button
             onClick={goPractice}
-            className="px-3 sm:px-5 py-2.5 bg-lexis-action hover:bg-lexis-action-dark text-white font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-lexis-action/20 flex items-center gap-1.5 sm:gap-2 min-h-[44px] whitespace-nowrap"
+            className="px-3 sm:px-5 py-2.5 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-lexis-action/20 flex items-center gap-1.5 sm:gap-2 min-h-[44px] whitespace-nowrap"
           >
             <span>{c.getStarted}</span>
             <ArrowRight className="w-4 h-4 flex-shrink-0" />
@@ -279,7 +278,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <div>
             <button
               onClick={goPractice}
-              className="px-8 py-4 bg-lexis-action hover:bg-lexis-action-dark transition-colors text-white font-display font-semibold text-lg rounded-2xl shadow-lg shadow-lexis-action/20 flex items-center space-x-3 mx-auto md:mx-0"
+              className="px-8 py-4 bg-lexis-action hover:bg-lexis-action-dark transition-colors text-lexis-navy font-display font-semibold text-lg rounded-2xl shadow-lg shadow-lexis-action/20 flex items-center space-x-3 mx-auto md:mx-0"
             >
               <Mic className="w-5 h-5" />
               <span>{t.cta}</span>
@@ -287,9 +286,9 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           </div>
           <div className="mt-6 flex items-center justify-center md:justify-start space-x-3 text-sm">
             <span className="text-lexis-ink/60">{t.pricingTeaser}</span>
-            <button onClick={() => navigateTo('/pricing')} className="text-teal-700 hover:text-teal-800 font-medium underline underline-offset-2">
+            <AppLink to="/pricing" navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 font-medium underline underline-offset-2">
               {t.viewPricing}
-            </button>
+            </AppLink>
           </div>
         </div>
 
@@ -416,12 +415,11 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             <h2 className="font-display font-semibold text-xl text-lexis-ink">{c.communityHeading}</h2>
             <p className="mt-2 text-sm text-lexis-ink/60 leading-relaxed max-w-lg">{c.communityBody}</p>
           </div>
-          <button
-            onClick={() => navigateTo(lang === 'th' ? '/th/community' : '/community')}
-            className="flex-shrink-0 text-teal-700 hover:text-teal-800 font-semibold text-sm underline underline-offset-2 whitespace-nowrap md:mt-1"
+          <AppLink
+            to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="flex-shrink-0 text-teal-700 hover:text-teal-800 font-semibold text-sm underline underline-offset-2 whitespace-nowrap md:mt-1"
           >
             {c.communityCta}
-          </button>
+          </AppLink>
         </div>
       </section>
 
@@ -466,10 +464,10 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
               text held for a separate translation pass — see those
               pages' own scope notes), so those three still point at
               their single English URL regardless of display language. */}
-          <button onClick={() => navigateTo(lang === 'th' ? '/th/community' : '/community')} className="hover:text-lexis-ink transition-colors">{c.community}</button>
-          <button onClick={() => navigateTo('/privacy')} className="hover:text-lexis-ink transition-colors">{c.privacy}</button>
-          <button onClick={() => navigateTo('/terms')} className="hover:text-lexis-ink transition-colors">{c.terms}</button>
-          <button onClick={() => navigateTo('/refund')} className="hover:text-lexis-ink transition-colors">{c.refunds}</button>
+          <AppLink to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{c.community}</AppLink>
+          <AppLink to="/privacy" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{c.privacy}</AppLink>
+          <AppLink to="/terms" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{c.terms}</AppLink>
+          <AppLink to="/refund" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{c.refunds}</AppLink>
           <span>© 2026 LEXIS</span>
         </div>
       </footer>

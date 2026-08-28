@@ -966,7 +966,7 @@ export default function LexisApp({ navigateTo }) {
   // Defensive fallback only — App.jsx's router guarantees a session exists
   // before this component ever mounts.
   if (!session) {
-    return <div className="min-h-screen bg-lexis-navy" />;
+    return <div className="min-h-[100dvh] bg-lexis-navy" />;
   }
 
   if (stage === 'topics') {
