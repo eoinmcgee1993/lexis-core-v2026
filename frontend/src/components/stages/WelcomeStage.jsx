@@ -53,7 +53,7 @@ export default function WelcomeStage({
   // "Cancelling a plan" section, which this button is the implementation of.
   const [confirmingCancel, setConfirmingCancel] = useState(false);
   return (
-    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
+    <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <div className="w-full max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-y-2 p-4 md:p-6">
         <button onClick={onGoHome} className="text-sm font-display font-semibold text-lexis-ink/80 hover:text-lexis-ink transition-colors">
           LEXIS
@@ -126,7 +126,7 @@ export default function WelcomeStage({
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span>{upgradeMessage || 'Free trial limit reached. Upgrade your pass to continue practicing.'}</span>
             </div>
-            <button onClick={onViewPricing} className="px-4 py-1.5 bg-lexis-action text-white font-bold text-xs rounded-xl flex items-center gap-1.5">
+            <button onClick={onViewPricing} className="px-4 py-1.5 bg-lexis-action text-lexis-navy font-bold text-xs rounded-xl flex items-center gap-1.5">
               <CreditCard className="w-4 h-4" />
               <span>View Pricing</span>
             </button>
@@ -173,7 +173,7 @@ export default function WelcomeStage({
 
         <button
           onClick={onStartTalking}
-          className="mt-10 px-10 py-4 bg-lexis-action hover:bg-lexis-action-dark text-white font-display font-semibold text-lg rounded-2xl shadow-lg shadow-lexis-action/25 transition-all hover:scale-105 active:scale-95 flex items-center gap-3"
+          className="mt-10 px-10 py-4 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-display font-semibold text-lg rounded-2xl shadow-lg shadow-lexis-action/25 transition-all hover:scale-105 active:scale-95 flex items-center gap-3"
         >
           <Mic className="w-5 h-5" />
           <span>Start Talking</span>

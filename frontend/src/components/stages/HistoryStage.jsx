@@ -82,7 +82,7 @@ function HistoryCard({ entry }) {
 
 export default function HistoryStage({ history, historyLoading, historyError, onBack }) {
   return (
-    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
+    <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <div className="w-full max-w-2xl mx-auto flex items-center p-4 md:p-6">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors">
           <ArrowLeft className="w-4 h-4" />

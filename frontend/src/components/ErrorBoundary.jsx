@@ -30,7 +30,7 @@ export default class ErrorBoundary extends React.Component {
     if (!this.state.hasError) return this.props.children;
 
     return (
-      <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col items-center justify-center p-6 text-center">
         <div className="w-full max-w-sm bg-white border border-lexis-ink/10 rounded-2xl p-8 shadow-sm">
           <div className="mx-auto w-fit p-2 bg-rose-50 border border-rose-200 rounded-xl text-rose-500 mb-4">
             <AlertTriangle className="w-5 h-5" />
@@ -42,7 +42,7 @@ export default class ErrorBoundary extends React.Component {
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-3 bg-lexis-action hover:bg-lexis-action-dark text-white font-bold text-sm rounded-xl transition-all"
+            className="w-full py-3 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-bold text-sm rounded-xl transition-all"
           >
             Reload
           </button>

@@ -71,7 +71,7 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
   const t = UI_STRINGS[direction] || UI_STRINGS.en;
 
   return (
-    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col items-center justify-center px-6 py-12">
+    <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md text-center">
         <h1 className="font-display font-semibold text-2xl mb-8">{t.title}</h1>
 
@@ -132,7 +132,7 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
         <div className="mt-10 flex flex-col items-center gap-3">
           <button
             onClick={onPracticeAgain}
-            className="px-8 py-3.5 bg-lexis-action hover:bg-lexis-action-dark text-white font-display font-semibold rounded-2xl shadow-lg shadow-lexis-action/25 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+            className="px-8 py-3.5 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-display font-semibold rounded-2xl shadow-lg shadow-lexis-action/25 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
           >
             <RotateCcw className="w-4 h-4" />
             <span>{t.practiceAgain}</span>

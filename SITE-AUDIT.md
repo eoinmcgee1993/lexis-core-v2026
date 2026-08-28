@@ -1,5 +1,12 @@
 # LEXIS site audit
 
+> **Status: all findings below were fixed on 27 Aug 2026 (PR #90).** The
+> report is kept as written, because the measurements are the evidence and
+> rewriting them into past tense would lose that. Verified after the fix:
+> amber CTA contrast 9.53:1, 76 internal anchors across 17 routes, /app opens
+> on "Create your account", 0 of 17 descriptions over 160 chars, 0
+> min-h-screen, all 4 icons 200, 0 primary CTAs under 44px, 0 regressions.
+
 27 Aug 2026, against commit `b55ac94`. Verified the local build serves the
 byte-identical `index-BwIRkFGb.js` and `index-CEidyXjQ.css` that
 learnwithlexis.com serves, so auditing the build is auditing production.

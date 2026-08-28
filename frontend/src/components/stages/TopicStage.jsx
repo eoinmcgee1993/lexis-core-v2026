@@ -16,7 +16,7 @@ const TOPICS = [
 
 export default function TopicStage({ onBack, onPickTopic }) {
   return (
-    <div className="min-h-screen lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
+    <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <div className="w-full max-w-4xl mx-auto flex items-center p-4 md:p-6">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors">
           <ArrowLeft className="w-4 h-4" />
@@ -52,7 +52,7 @@ export default function TopicStage({ onBack, onPickTopic }) {
 
         <button
           onClick={() => onPickTopic(null)}
-          className="mt-8 px-8 py-3.5 bg-lexis-action hover:bg-lexis-action-dark text-white font-display font-semibold rounded-2xl shadow-lg shadow-lexis-action/25 transition-all hover:scale-105 active:scale-95"
+          className="mt-8 px-8 py-3.5 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-display font-semibold rounded-2xl shadow-lg shadow-lexis-action/25 transition-all hover:scale-105 active:scale-95"
         >
           Just Talk
         </button>
