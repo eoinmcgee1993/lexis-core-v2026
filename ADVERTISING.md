@@ -29,14 +29,24 @@ connected, no budget is set. This is the asset, not the campaign.
 
 Three things from `LAUNCH-ACTION-PLAN.md` that gate paid media, in order:
 
-- **Analytics.** There is none. You cannot currently tell a click from a
-  signup. Buying traffic into an unmeasured funnel buys noise.
-- **Unit economics.** Work out per-minute Realtime cost against ฿599/month.
-  Paid acquisition into negative unit economics scales a loss.
-- **The auth wall.** Tapping "Try It Free" currently lands a brand-new
-  visitor on a **Sign in** form headed "Continue practicing with LEXIS."
-  Every baht of paid traffic hits that. Fix it before you buy clicks, not
-  after.
+- **Unit economics.** See `UNIT-ECONOMICS.md`. This is now the hard gate,
+  not analytics. At $0.20/min of Realtime audio the free trial costs about
+  $6 per signup and the ฿599 plan breaks even at 2.5 minutes of practice a
+  day, with no fair-use cap in the code to stop it. Until you have measured
+  your real per-minute rate, paid acquisition may lose money on contact,
+  before a single baht of ad spend.
+- **Analytics.** Already built, contrary to an earlier version of this file
+  that said there was none — that was wrong. `frontend/src/lib/analytics.js`
+  posts first-party events to `/api/analytics/event` and they land in the
+  `analytics_events` table: `pageview`, `signup_completed`,
+  `checkout_started`, `checkout_completed`, `session_connected`,
+  `plan_cancelled`. The funnel is measurable today. What it currently
+  measures is 105 sessions, 5 accounts, and **zero checkouts, ever** — so
+  the landing page is not the bottleneck you are buying your way past.
+- **The auth wall.** ~~Tapping "Try It Free" lands a brand-new visitor on a
+  **Sign in** form.~~ **Fixed** in PR #90 — `AuthPage.jsx` now opens on
+  "Create your account" for anyone without a prior sign-in on the device,
+  and only defaults to sign-in for returning visitors. No longer a gate.
 
 ---
 

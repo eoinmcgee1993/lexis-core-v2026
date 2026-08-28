@@ -59,12 +59,45 @@ Facebook page if you want it, but LINE matters more for a Thai audience
 than Facebook does now. Creating them is maybe an hour total. Do not
 start posting yet; just claim the handles before someone else does.
 
-### 1.4 Turn on analytics
-You cannot improve what you cannot see, and right now you cannot see
-anything: no analytics, no funnel, no idea how many people hit the
-landing page and bounced. Vercel Analytics is one toggle in the
-dashboard for this project. Do it before you spend a baht on ads,
-otherwise you will be buying traffic you cannot measure.
+### 1.4 Read the analytics you already have
+**Correction to an earlier version of this plan, which said there was no
+analytics: that was wrong.** LEXIS has had first-party analytics since
+before launch — `frontend/src/lib/analytics.js` posts to
+`/api/analytics/event`, and the events land in the `analytics_events`
+table in Supabase. It tracks `pageview`, `signup_completed`,
+`checkout_started`, `checkout_completed`, `session_connected` and
+`plan_cancelled`. No third-party script, no cookies, nothing to switch
+on. Do not add Vercel Analytics; you would be paying to duplicate it.
+
+So the step is not "turn it on", it is "go and look". As of 28 Aug 2026
+it says:
+
+| | |
+|---|---|
+| Landing-page sessions (19–28 Aug) | **105** |
+| Accounts created | **5** |
+| Practice sessions actually connected | **2** |
+| Checkouts started | **0** |
+| Checkouts completed | **0**, ever |
+
+Daily sessions are also trending down, not up: 19, 21, 9, 6, 10, 9, 17,
+10, 3, 3.
+
+That changes the advice in this document more than anything else in it.
+The problem is not that you cannot see the funnel. The problem is that
+the funnel is visible and almost nobody is entering it — 105 visits
+produced 5 accounts and not one attempt to pay. Traffic is the
+constraint, and no amount of landing-page tuning fixes a denominator of
+105. That is what §1.1 and §2.1 are for.
+
+Query it yourself any time:
+
+```sql
+select event_name, count(*) events, count(distinct session_id) sessions
+from analytics_events
+where created_at > now() - interval '7 days'
+group by 1 order by 2 desc;
+```
 
 ---
 
@@ -99,9 +132,13 @@ Post 3 to 5 a week for a month. Most will do nothing. That is normal and
 is not a signal to stop before roughly 20 posts.
 
 ### 2.3 What to deliberately not do yet
-- **Paid ads.** Not until you have analytics, and not until you know from
-  §1.2 what people actually say the product is worth. Ads amplify a
-  funnel; yours is unmeasured. You would be buying noise.
+- **Paid ads.** Not until `UNIT-ECONOMICS.md` is filled in with your real
+  per-minute Realtime cost, and not until you know from §1.2 what people
+  actually say the product is worth. The funnel is measured — that part is
+  fine. The risk is the other end: a 30-minute free trial with no card can
+  cost several dollars per signup, and the ฿599 plan currently promises
+  "unlimited" practice with no cap in the code. Buying traffic into that
+  scales a loss with perfect visibility.
 - **Google/SEO effort.** The pages are already built and correct. SEO
   compounds over months regardless of what you do next; it will not
   produce your first customer.
@@ -115,7 +152,7 @@ Weekly, five minutes, in a note on your phone:
 
 | Number | Where | Why it matters |
 |---|---|---|
-| Landing page visitors | Vercel Analytics | Denominator for everything else. |
+| Landing page visitors | `analytics_events`, `pageview` | Denominator for everything else. |
 | Trial starts | Supabase `profiles` count | Did the page convince anyone? |
 | Trials that finished the 30 min | Supabase | Did the product hold them? |
 | Paid conversions | Stripe | The only number that is revenue. |
@@ -173,8 +210,9 @@ The sequencing that follows from that:
 
 | When | What | Who |
 |---|---|---|
-| Now | §1 in full: ten users, accounts claimed, analytics on | You. Roughly two evenings. |
-| Now | Work out per-minute cost vs. price (§4.1) | You, or ask me |
+| Now | §1 in full: ten users, accounts claimed, analytics **read** | You. Roughly two evenings. |
+| Now | Measure per-minute Realtime cost — `UNIT-ECONOMICS.md` has the method and the model | You. Half an hour. |
+| Now | Decide the fair-use cap, and drop "unlimited" from the pricing copy in the same deploy | You, then me |
 | Week 2 | Partner outreach, first ten schools | You. This is the part that does not delegate. |
 | Week 3+ | Hire the VA. Brief is already written and ready to post. | `GROWTH-DELEGATION-BRIEF.md` |
 | Week 4+ | VA runs daily posting, DMs, and reporting | Them |
