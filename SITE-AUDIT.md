@@ -87,7 +87,7 @@ to an account they don't have, under copy written for a returning user. Every
 paid click will land here.
 
 **Fix:** default that screen to sign-up when the visitor arrives from a trial
-CTA, or at minimum lead with "Start your free 30 minutes" and put sign-in
+CTA, or at minimum lead with "Start your free 15 minutes" and put sign-in
 underneath.
 
 ### M2. Meta descriptions truncated on 4 routes

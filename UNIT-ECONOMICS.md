@@ -79,7 +79,12 @@ of a cap is not.
 
 ## The free trial is your real acquisition cost
 
-Every signup gets 30 minutes with no card on file (`TRIAL.minutes`;
+> **Superseded 29 Aug:** the trial is now **15 minutes** — see "What
+> shipped" below. The table in this section is the analysis that motivated
+> that change and is left at 30 minutes deliberately, because rewriting it
+> would destroy the reasoning. Halve every figure in it for today's trial.
+
+Every signup got 30 minutes with no card on file (`TRIAL.minutes`;
 `max_allowed_seconds = 1800` on all five production rows).
 
 | USD/min | Cost per trial | Per 100 signups | Conversion needed to break even |
@@ -173,11 +178,12 @@ both languages change together.
 **3. Measure your rate this week.** Steps at the top of this file. Until you
 have it, every number here is a range, and ranges do not make decisions.
 
-**4. Reconsider the 30-minute trial once the rate is known.** If it lands
+**4. Reconsider the 30-minute trial once the rate is known.** ~~If it lands
 near $0.20, a 30-minute uncarded trial costs $6 per signup and is your
-largest single line item. 10–15 minutes plus a card-on-file trial would both
-cut it and pre-qualify the funnel — but that is a conversion trade-off, so
-make it with the rate in hand, not before.
+largest single line item.~~ **Done** — the trial is 15 minutes as of 29 Aug,
+halving that line item to roughly $3 per signup at $0.20/min. A card-on-file
+trial would cut it further and pre-qualify the funnel, but that is a
+conversion trade-off worth making only with the measured rate in hand.
 
 ---
 

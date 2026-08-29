@@ -106,12 +106,12 @@ for (const plan of PLANS) {
   }
 }
 
-// The free trial is a fully unrecovered cost per signup: 30 minutes of
-// Realtime with no card on file (TRIAL.minutes in facts.js;
-// max_allowed_seconds = 1800 on every row in production `profiles`). It
+// The free trial is a fully unrecovered cost per signup: 15 minutes of
+// Realtime with no card on file (TRIAL.minutes in facts.js; the column
+// default is now 900, though rows created before 29 Aug keep 1800). It
 // is the real acquisition cost of this product, and it is paid whether or
 // not the visitor ever converts.
-const TRIAL_MINS = num('trialMins', 30);
+const TRIAL_MINS = num('trialMins', 15);
 
 console.log('\n\n── The free trial, which is the acquisition cost\n');
 console.log(

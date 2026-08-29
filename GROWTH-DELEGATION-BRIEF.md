@@ -72,7 +72,7 @@ Everything below is real, concrete, repeatable work, not busywork:
 
 **About:** LEXIS is a voice conversation partner for Thai speakers
 practicing English and English speakers practicing Thai — talk out loud,
-get gentle real-time corrections. Free 30-minute trial, ฿199/week or
+get gentle real-time corrections. Free 15-minute trial, ฿199/week or
 ฿599/month after that.
 
 **What you'll do:**

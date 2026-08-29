@@ -135,7 +135,7 @@ is not a signal to stop before roughly 20 posts.
 - **Paid ads.** Not until `UNIT-ECONOMICS.md` is filled in with your real
   per-minute Realtime cost, and not until you know from §1.2 what people
   actually say the product is worth. The funnel is measured — that part is
-  fine. The risk is the other end: a 30-minute free trial with no card can
+  fine. The risk is the other end: a 15-minute free trial with no card can
   cost several dollars per signup, and the ฿599 plan currently promises
   "unlimited" practice with no cap in the code. Buying traffic into that
   scales a loss with perfect visibility.
@@ -154,7 +154,7 @@ Weekly, five minutes, in a note on your phone:
 |---|---|---|
 | Landing page visitors | `analytics_events`, `pageview` | Denominator for everything else. |
 | Trial starts | Supabase `profiles` count | Did the page convince anyone? |
-| Trials that finished the 30 min | Supabase | Did the product hold them? |
+| Trials that finished the 15 min | Supabase | Did the product hold them? |
 | Paid conversions | Stripe | The only number that is revenue. |
 | Cancellations | Stripe | The one that tells you it did not stick. |
 

@@ -184,7 +184,7 @@ distinct square layouts**, used deliberately:
 | `post-b-reading.png` | B | "Reading English is not speaking English." |
 | `post-b-th.png` | B | Thai: you already know the words |
 | `post-c-before.png` | C | "Practice the conversation before you have to have it." |
-| `post-c-room.png` | C | "Thirty minutes. No class. No audience." |
+| `post-c-room.png` | C | "No class. No audience. Just you talking." |
 | `story-en.png` | Story | Full-bleed vertical, amber CTA. |
 | `story-th.png` | Story | Same, Thai. |
 
@@ -267,32 +267,32 @@ the same values the live site uses, not a separate "marketing palette."
 ## 5. Social bios
 
 Every bio below states the same real facts (voice-first, English + Thai,
-free 30-minute trial with no card, ฿199/week or ฿599/month after that),
+free 15-minute trial with no card, ฿199/week or ฿599/month after that),
 sized to fit each platform's own limit. Swap in the right link
 (`learnwithlexis.com`) in whichever field each platform gives you for one —
 none of these bios below try to cram the URL into the text itself.
 
 ### Instagram (150 characters)
-**EN:** Voice-first speaking practice for English & Thai. A real live conversation, not a chatbot: gentle corrections as you talk. Free 30-min trial, no card.
+**EN:** Voice-first speaking practice for English & Thai. A real live conversation, not a chatbot: gentle corrections as you talk. Free 15-min trial, no card.
 
-**TH:** ฝึกพูดภาษาอังกฤษและภาษาไทยด้วยเสียงจริง คุยสดกับ LEXIS ไม่ใช่แชทบอท แก้ไขให้อย่างอ่อนโยนระหว่างพูด ทดลองฟรี 30 นาที ไม่ต้องผูกบัตร
+**TH:** ฝึกพูดภาษาอังกฤษและภาษาไทยด้วยเสียงจริง คุยสดกับ LEXIS ไม่ใช่แชทบอท แก้ไขให้อย่างอ่อนโยนระหว่างพูด ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
 
 ### TikTok (80 characters)
 **EN:** Practice English & Thai out loud. Real voice, gentle live corrections.
 
-**TH:** ฝึกพูดอังกฤษ-ไทยออกเสียงจริง คุยสด แก้ให้อย่างอ่อนโยน ทดลองฟรี 30 นาที
+**TH:** ฝึกพูดอังกฤษ-ไทยออกเสียงจริง คุยสด แก้ให้อย่างอ่อนโยน ทดลองฟรี 15 นาที
 
 ### Facebook Page (short description, ~255 characters)
-**EN:** LEXIS is a voice conversation partner for practicing spoken English and Thai. Talk out loud, get gentle real-time corrections, and see what to work on next. Free 30-minute trial, no card required. ฿199/week or ฿599/month after that.
+**EN:** LEXIS is a voice conversation partner for practicing spoken English and Thai. Talk out loud, get gentle real-time corrections, and see what to work on next. Free 15-minute trial, no card required. ฿199/week or ฿599/month after that.
 
-**TH:** LEXIS คือคู่สนทนาสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย พูดออกเสียงจริง รับคำแนะนำแบบเรียลไทม์อย่างอ่อนโยน แล้วดูว่าควรฝึกอะไรต่อ ทดลองฟรี 30 นาที ไม่ต้องผูกบัตร หลังจากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน
+**TH:** LEXIS คือคู่สนทนาสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย พูดออกเสียงจริง รับคำแนะนำแบบเรียลไทม์อย่างอ่อนโยน แล้วดูว่าควรฝึกอะไรต่อ ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร หลังจากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน
 
 ### LINE Official Account (short intro)
 *I don't have hands-on LINE OA admin experience to confirm its exact field limits — treat this as a starting draft to fit into whatever field LINE gives you at setup, not a verified-to-fit string the way the others above are.*
 
-**EN:** Talk out loud, practice English or Thai, get gentle live corrections. Free 30-min trial.
+**EN:** Talk out loud, practice English or Thai, get gentle live corrections. Free 15-min trial.
 
-**TH:** คุยออกเสียงจริง ฝึกอังกฤษหรือไทย รับคำแนะนำสด ๆ อย่างอ่อนโยน ทดลองฟรี 30 นาที
+**TH:** คุยออกเสียงจริง ฝึกอังกฤษหรือไทย รับคำแนะนำสด ๆ อย่างอ่อนโยน ทดลองฟรี 15 นาที
 
 ---
 
@@ -306,14 +306,14 @@ for an unsubstantiated claim.
 ### Headlines (short — feed ads, display ads)
 - EN: "Practice speaking English out loud, not typing."
 - EN: "A real conversation partner, not a course."
-- EN: "Free 30 minutes. No card. Just talk."
+- EN: "Free 15 minutes. No card. Just talk."
 - TH: "ฝึกพูดภาษาอังกฤษออกเสียงจริง ไม่ใช่แค่พิมพ์"
-- TH: "ทดลองฟรี 30 นาที ไม่ต้องผูกบัตร แค่เริ่มพูด"
+- TH: "ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร แค่เริ่มพูด"
 
 ### Body copy (feed ads)
-- EN: "LEXIS listens, replies instantly, and corrects your English or Thai gently as you talk, out loud, no scripts. Free 30-minute trial, no card required."
-- EN: "Stuck reading textbooks instead of actually speaking? LEXIS is a live voice conversation partner, available any time, correcting you gently as you go. Try 30 minutes free."
-- TH: "LEXIS ฟัง ตอบกลับทันที และช่วยแก้ไขภาษาอังกฤษหรือภาษาไทยให้อย่างอ่อนโยนระหว่างที่คุณพูด ทดลองฟรี 30 นาที ไม่ต้องผูกบัตร"
+- EN: "LEXIS listens, replies instantly, and corrects your English or Thai gently as you talk, out loud, no scripts. Free 15-minute trial, no card required."
+- EN: "Stuck reading textbooks instead of actually speaking? LEXIS is a live voice conversation partner, available any time, correcting you gently as you go. Try 15 minutes free."
+- TH: "LEXIS ฟัง ตอบกลับทันที และช่วยแก้ไขภาษาอังกฤษหรือภาษาไทยให้อย่างอ่อนโยนระหว่างที่คุณพูด ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร"
 
 ### Call to action
 - EN: "Try It Free" (matches the site's own CTA button — keep ad and

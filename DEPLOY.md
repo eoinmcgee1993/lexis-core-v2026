@@ -99,7 +99,7 @@ npm run dev
 - Click **Launch App** → redirected to `/auth` (no session yet).
 - Sign up with an email/password, confirm the email if confirmation is enabled, sign in → lands on `/app`.
 - Click **INITIATE LEXIS**, allow microphone access, and speak.
-- After ~30 minutes of trial usage (or immediately, by lowering `max_allowed_seconds` on your test row), the next `/api/heartbeat` returns 403 and the app shows an "upgrade" banner linking to `/pricing`.
+- After ~15 minutes of trial usage (or immediately, by lowering `max_allowed_seconds` on your test row), the next `/api/heartbeat` returns 403 and the app shows an "upgrade" banner linking to `/pricing`.
 - On `/pricing`, click a paid plan → redirected to Stripe Checkout → complete a test payment (`4242 4242 4242 4242`) → redirected back to `/app?payment=success` with the pass now active.
 
 ## Production Deployment
