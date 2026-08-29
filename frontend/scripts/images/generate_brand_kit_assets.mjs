@@ -32,6 +32,7 @@ import { chromium } from 'playwright-core';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TRIAL as TRIAL_FACT, PRICING } from '../../src/content/facts.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONTEND = path.join(__dirname, '..', '..');
@@ -49,9 +50,12 @@ const CANVAS = '#FAFAF7';
 // Verified facts, mirrored from src/content/facts.js. Kept as literals
 // here rather than imported because facts.js is an ESM module inside the
 // Vite app; if these ever drift, facts.js is the source of truth.
-const TRIAL_MINUTES = 30;
-const WEEKLY_THB = 199;
-const MONTHLY_THB = 599;
+// Imported, never re-declared — same reason as the social generator: these
+// were a second copy of numbers that already live in facts.js, and they
+// silently went stale when the trial was halved to 15 (PR #92).
+const TRIAL_MINUTES = TRIAL_FACT.minutes;
+const WEEKLY_THB = PRICING.weekly.thb;
+const MONTHLY_THB = PRICING.monthly.thb;
 
 const PITCH_EN = 'Voice-first speaking practice, English and Thai.';
 const PITCH_TH = 'ฝึกพูดภาษาอังกฤษและภาษาไทยด้วยเสียงจริง';

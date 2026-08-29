@@ -42,7 +42,7 @@ The backend never talks to OpenAI on a user's behalf until `authenticate` + `req
 | **WebRTC Endpoint** | `POST /v1/realtime?model=` (beta) | `POST /v1/realtime/calls?model=` (GA) |
 | **Session Schema** | Flat (`voice`, `instructions` at root) | Nested (`session.audio.output.voice`) |
 | **Auth** | Unauthenticated `cors(*)` | Supabase JWT + per-user billing guard + rate limiting |
-| **Billing** | None | Free trial (30 min) → Stripe subscription Checkout (weekly/monthly), lifecycle synced via webhook |
+| **Billing** | None | Free trial (15 min) → Stripe subscription Checkout (weekly/monthly), lifecycle synced via webhook |
 | **Safety ID** | Missing | `OpenAI-Safety-Identifier` (SHA-256 hash of Supabase user id) |
 | **VAD Tuning** | Aggressive 500ms silence | Thai ESL profile: 800ms silence, 0.5 threshold |
 | **Pedagogy** | Generic tutor prompt | 15-25 word responses, gentle correction |

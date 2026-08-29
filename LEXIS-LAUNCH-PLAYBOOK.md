@@ -21,7 +21,7 @@ describes what's actually running today.
 - **Auth & database**: Supabase project `lexis-production`, RLS-enforced,
   with triggers/RPCs for usage tracking and entitlement checks.
 - **Billing**: Stripe, live mode (Clearmark account). Weekly (฿199) and
-  Monthly (฿599) plans, a free 30-minute trial, an optional LEXIS
+  Monthly (฿599) plans, a free 15-minute trial, an optional LEXIS
   Community sponsor add-on at checkout, and promotion-code-based partner
   discounts (see `PARTNER-CODES.md`).
 - **Realtime voice**: OpenAI Realtime API over WebRTC.

@@ -11,7 +11,7 @@ connected, no budget is set. This is the asset, not the campaign.
 ## Ground rules these were written under
 
 1. **Every claim is a verified product fact**, taken from
-   `frontend/src/content/facts.js`: a free 30-minute trial, no card required,
+   `frontend/src/content/facts.js`: a free 15-minute trial, no card required,
    ฿199/week or ฿599/month after that.
 2. **No volume promise.** Nothing says "unlimited", "as much as you want" or
    "talk all day". The product has no stated fair-use ceiling and a paid ad is
@@ -58,7 +58,7 @@ roughly 40; description at roughly 27. Everything below is inside those.
 ### EN-1 — the core one
 - **Primary:** You already know the words. Saying them out loud is the hard part. LEXIS is a voice partner you can practise with.
 - **Headline:** Practise speaking, out loud
-- **Description:** Free 30-min trial
+- **Description:** Free 15-min trial
 - **Creative:** `post-a-words.png`
 
 ### EN-2 — against courses
@@ -68,7 +68,7 @@ roughly 40; description at roughly 27. Everything below is inside those.
 - **Creative:** `post-a-course.png`
 
 ### EN-3 — the trial
-- **Primary:** Thirty minutes, free, no card. Find out whether you can actually hold a conversation in English.
+- **Primary:** Fifteen minutes, free, no card. Find out whether you can actually hold a conversation in English.
 - **Headline:** Thirty free minutes
 - **Description:** Then ฿199/week
 - **Creative:** `post-b-find.png`
@@ -76,7 +76,7 @@ roughly 40; description at roughly 27. Everything below is inside those.
 ### TH-1
 - **Primary:** คุณรู้คำศัพท์อยู่แล้ว แค่ยังไม่ได้พูดออกมา ฝึกพูดกับ LEXIS ได้ทุกเมื่อ
 - **Headline:** ฝึกพูดออกเสียงจริง
-- **Description:** ทดลองฟรี 30 นาที
+- **Description:** ทดลองฟรี 15 นาที
 - **Creative:** `post-b-th.png`
 
 ### TH-2
@@ -96,7 +96,7 @@ headline has to stand alone and none may contradict another.
 1. Practise Speaking English
 2. Speak English Out Loud
 3. A Real Conversation Partner
-4. Free 30-Minute Trial
+4. Free 15-Minute Trial
 5. No Card Required
 6. Practise English By Talking
 7. Speaking Practice, Any Time
@@ -105,10 +105,10 @@ headline has to stand alone and none may contradict another.
 10. Gentle Live Corrections
 
 ### Descriptions
-1. Talk out loud and get gentle corrections as you speak. Free 30-minute trial.
+1. Talk out loud and get gentle corrections as you speak. Free 15-minute trial.
 2. Not a course. A voice partner you can practise a real conversation with.
 3. Reading English is not speaking English. Practise the part that is hard.
-4. Free 30 minutes, no card. Then ฿199 a week or ฿599 a month.
+4. Free 15 minutes, no card. Then ฿199 a week or ฿599 a month.
 
 ---
 
@@ -116,10 +116,10 @@ headline has to stand alone and none may contradict another.
 
 Ad text 12-100 characters. Vertical creative only.
 
-- Reading English is not speaking English. Try 30 minutes free.
+- Reading English is not speaking English. Try 15 minutes free.
 - You already know the words. Saying them out loud is the hard part.
 - Practise the conversation before you have to have it. Free trial.
-- **TH:** คุณรู้คำศัพท์อยู่แล้ว แค่ยังไม่ได้พูดออกมา ทดลองฟรี 30 นาที
+- **TH:** คุณรู้คำศัพท์อยู่แล้ว แค่ยังไม่ได้พูดออกมา ทดลองฟรี 15 นาที
 - **Creative:** `story-en.png`, `story-th.png`
 
 ---

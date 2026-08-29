@@ -24,6 +24,13 @@ import { chromium } from 'playwright-core';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+// Trial length and prices are imported, never re-declared here. They were
+// hardcoded as a second copy of numbers that already live in facts.js —
+// which is exactly how the kit ended up rendering "Free 30-minute trial"
+// onto all 14 templates after the trial was halved to 15 (PR #92).
+// facts.js is a plain constants module with no React imports, so a Node
+// script can read it directly.
+import { TRIAL as TRIAL_FACT, PRICING } from '../../src/content/facts.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONTEND = path.join(__dirname, '..', '..');
@@ -37,7 +44,7 @@ const INK = '#1E293B';
 const CANVAS = '#FAFAF7';
 const BLACK = '#000000';
 
-const TRIAL = 30, WEEK = 199, MONTH = 599;
+const TRIAL = TRIAL_FACT.minutes, WEEK = PRICING.weekly.thb, MONTH = PRICING.monthly.thb;
 const SITE = 'learnwithlexis.com';
 const TERMS = `Free ${TRIAL}-minute trial. No card required.`;
 const TERMS_TH = `ทดลองฟรี ${TRIAL} นาที ไม่ต้องผูกบัตร`;
@@ -53,7 +60,7 @@ const LINES = {
   reading: 'Reading English<br>is not speaking English.',
   course:  'You don’t need<br>another course.<br>You need someone<br>to talk to.',
   before:  'Practice the conversation<br>before you have to<br>have it.',
-  room:    'Thirty minutes.<br>No class.<br>No audience.',
+  room:    'No class.<br>No audience.<br>Just you talking.',
   th_out:  'คุณรู้คำศัพท์อยู่แล้ว<br>แค่ยังไม่ได้พูดออกมา',
   th_room: 'ไม่มีห้องเรียน<br>ไม่มีคนฟังอยู่ข้างๆ<br>แค่คุณกับ LEXIS',
   // Second wave, 27 Aug 2026. Same rule as above: these describe the
@@ -64,7 +71,7 @@ const LINES = {
   textbook: 'The textbook never<br>asks you a question<br>back.',
   swim:    'You can’t learn to swim<br>by reading<br>about water.',
   stranger:'Your first conversation<br>in English shouldn’t<br>be with a stranger.',
-  find:    'Thirty minutes<br>to find out if you can<br>hold a conversation.',
+  find:    'Find out if you can<br>hold a conversation<br>before it matters.',
   th_ask:  'หนังสือเรียน<br>ไม่เคยถามคำถามคุณกลับ',
   th_first:'บทสนทนาแรกของคุณ<br>ไม่ควรเป็น<br>กับคนแปลกหน้า'
 };

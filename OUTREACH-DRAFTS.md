@@ -27,7 +27,7 @@ why — and it's the right trade until you have real numbers.
 
 - Voice conversation partner: Thai speakers practicing English, English
   speakers practicing Thai. Both directions.
-- Free 30-minute trial, no card required.
+- Free 15-minute trial, no card required.
 - ฿199/week or ฿599/month after that.
 - Real-time spoken conversation — no typing, no lag, corrections happen
   mid-conversation.
@@ -45,7 +45,7 @@ why — and it's the right trade until you have real numbers.
 **1.** Most "AI English practice" is a chatbot with a speaker bolted on.
 You type, it thinks, it reads its answer aloud. Dead air every turn.
 LEXIS just talks. Audio goes straight from your mic to the model and back.
-30 min free, no card → learnwithlexis.com
+15 min free, no card → learnwithlexis.com
 
 **2.** The hardest part of speaking a second language isn't vocabulary.
 It's answering out loud, at speed, with someone waiting.
@@ -57,7 +57,7 @@ Just the correction, then back to talking.
 
 **4.** Built for Thailand first: Thai speakers practicing English, English
 speakers practicing Thai. Both directions, same tutor.
-Free 30 minutes to try: learnwithlexis.com
+Free 15 minutes to try: learnwithlexis.com
 
 **5.** Interrupt her mid-sentence and she stops. Properly stops — not
 "finishes the sentence then notices". Real conversation involves talking
@@ -77,7 +77,7 @@ being corrected, and saying them again. LEXIS is built for the middle part.
 can't afford it. No lecture, no guilt trip, one tap. Entirely funded by
 people already using LEXIS. learnwithlexis.com/community
 
-**10.** Free 30-minute trial. No card. Talk out loud in English or Thai,
+**10.** Free 15-minute trial. No card. Talk out loud in English or Thai,
 get corrected as you go, see what to practice next.
 learnwithlexis.com
 
@@ -88,12 +88,12 @@ learnwithlexis.com
 **11. (Thai-market focused)**
 พูดภาษาอังกฤษออกเสียงจริง ไม่ใช่พิมพ์
 LEXIS คือคู่สนทนาที่ฟัง ตอบกลับทันที และช่วยแก้ไขให้อย่างอ่อนโยนระหว่างคุย
-ทดลองฟรี 30 นาที ไม่ต้องผูกบัตร → learnwithlexis.com
+ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร → learnwithlexis.com
 
 **12. (English, same message)**
 You can read English. You can probably write it. But when someone asks you
 a question out loud and waits — that's different, and that's the part
-almost nobody gets to practice. LEXIS is 30 minutes of exactly that, free.
+almost nobody gets to practice. LEXIS is 15 minutes of exactly that, free.
 
 **13.** Three things LEXIS is not:
 · Not a course with lessons to work through
@@ -112,7 +112,7 @@ stranger. Practise it before you're standing there.
 learnwithlexis.com/practice/travel-english
 
 **16.** ฿199 a week. Talk as much as you want.
-Or try 30 minutes free first — no card needed.
+Or try 15 minutes free first — no card needed.
 
 **17.** LEXIS listens in both English and Thai and adjusts to your level as
 you go. Total beginner or nearly fluent, you start from wherever you
@@ -153,7 +153,7 @@ of every LEXIS conversation is deliberately in the language the student
 hasn't mastered — so code-switching mid-sentence had to actually work.
 
 **24.** Building in public: LEXIS is a voice-native English/Thai tutor.
-Free 30-minute trial, ฿199/week after. Genuinely early, no big user numbers
+Free 15-minute trial, ฿199/week after. Genuinely early, no big user numbers
 to quote yet — but the thing works and I'd rather show it than describe it.
 learnwithlexis.com
 
@@ -166,7 +166,7 @@ learnwithlexis.com
 VO: "This is how most people practice English with AI."
 [Cut: person speaking into phone, LEXIS replying instantly]
 VO: "This is speaking practice. There's a difference, and your mouth knows it."
-[End card: learnwithlexis.com · 30 min free]
+[End card: learnwithlexis.com · 15 min free]
 
 **26. "Interrupt her" — 15s**
 [LEXIS mid-sentence, user talks over her, she stops immediately]
@@ -214,7 +214,7 @@ I'm not trying to replace your teachers. The gap I keep hearing about is
 between classes: students get an hour of speaking a week and then no
 practice partner until the next one.
 
-Free 30-minute trial if you want to try it yourself before deciding whether
+Free 15-minute trial if you want to try it yourself before deciding whether
 it's useful to your students: learnwithlexis.com
 
 If it's not a fit, no follow-up from me.
@@ -250,7 +250,7 @@ plain-language summary afterward based on what they actually said.
 The obvious use case is students who understand a lot but freeze when asked
 to speak.
 
-Free 30 minutes, no card: learnwithlexis.com
+Free 15 minutes, no card: learnwithlexis.com
 
 Happy to answer anything technical about how it works.
 
@@ -282,9 +282,9 @@ that actually holds people back in meetings is speaking under mild pressure
 in real time — which is hard to practise and awkward to practise at work.
 
 LEXIS is voice-only practice for exactly that: meetings, updates, follow-ups,
-colleague small talk. Free 30-minute trial, no card.
+colleague small talk. Free 15-minute trial, no card.
 
-Worth 30 minutes of your own time to judge it: learnwithlexis.com
+Worth 15 minutes of your own time to judge it: learnwithlexis.com
 
 [Your name]
 
@@ -295,20 +295,20 @@ Worth 30 minutes of your own time to judge it: learnwithlexis.com
 **36. Thai-market YouTuber/TikToker (English teaching)**
 Hi [Name] — I build LEXIS, a voice tutor for English and Thai. Your
 audience is exactly who it's for. Not pitching a paid partnership blind:
-try it free (30 min, no card) and if you don't rate it, tell me why — that
+try it free (15 min, no card) and if you don't rate it, tell me why — that
 feedback is worth more to me than a post. learnwithlexis.com
 
 **37. Expat-in-Thailand community admin**
 Hi [Name] — is a tool post OK in [Group]? LEXIS does Thai speaking practice
 for English speakers — you talk, it replies out loud in Thai and corrects
-you. Free 30-min trial. Happy to skip it if that's not what the group is
+you. Free 15-min trial. Happy to skip it if that's not what the group is
 for; just checking rather than posting and annoying people.
 
 **38. Language-learning subreddit / forum (post, not DM)**
 Title: I built a voice-only Thai/English tutor because typing practice
 wasn't helping me speak
 
-Body: Honest context — this is my product, free 30-min trial, paid after.
+Body: Honest context — this is my product, free 15-min trial, paid after.
 The problem I kept hitting: I could read and write far better than I could
 open my mouth. Typing to a chatbot didn't fix that because it doesn't
 pressure you the way a real reply does.
@@ -339,22 +339,22 @@ Happy to be specific and unglamorous about it.
 
 # SECTION 7 — Google Search ads (6 — headlines ≤30 chars, descriptions ≤90)
 
-**40.** H: Practice Speaking English | H: Free 30-Minute Trial | H: No Card Required
+**40.** H: Practice Speaking English | H: Free 15-Minute Trial | H: No Card Required
 D: Talk out loud with a real-time AI tutor. Gentle corrections as you speak.
 
 **41.** H: English Interview Practice | H: Say It Out Loud First | H: Free To Try
 D: Practise real interview questions out loud. Get corrected before it counts.
 
-**42.** H: Learn Thai By Speaking | H: Real Conversation Practice | H: 30 Min Free
+**42.** H: Learn Thai By Speaking | H: Real Conversation Practice | H: 15 Min Free
 D: Speak Thai out loud with a patient AI partner. Corrections as you go.
 
 **43.** H: Speaking Practice, Any Hour | H: No Booking, No Waiting | H: Start Now
 D: No tutor scheduling. Practise English or Thai the moment you want to.
 
 **44.** H: Business English Practice | H: Meetings, Emails, Small Talk | H: Try Free
-D: Practise workplace English out loud. Free 30-minute trial, no card.
+D: Practise workplace English out loud. Free 15-minute trial, no card.
 
-**45.** H: Travel English Practice | H: Hotels, Directions, Food | H: 30 Min Free
+**45.** H: Travel English Practice | H: Hotels, Directions, Food | H: 15 Min Free
 D: Rehearse real travel situations out loud before you're standing there.
 
 ---
@@ -368,10 +368,10 @@ minutes of exactly that, free, no card.
 **47.** Not a course. Not a chatbot. A conversation. You talk, she replies
 out loud in real time, and corrects you gently as you go. English or Thai.
 
-**48.** ฿199/week for unlimited speaking practice. Or 30 minutes free first,
+**48.** ฿199/week for unlimited speaking practice. Or 15 minutes free first,
 no card, to see if it actually helps.
 
-**49.** ฝึกพูดภาษาอังกฤษออกเสียงจริง ทดลองฟรี 30 นาที ไม่ต้องผูกบัตร
+**49.** ฝึกพูดภาษาอังกฤษออกเสียงจริง ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
 คุยจริง แก้ไขให้ทันทีระหว่างสนทนา
 
 ---
@@ -384,17 +384,17 @@ Description: LEXIS is a voice conversation partner, not a chatbot with a
 speaker attached. Your browser connects directly to the voice model, so
 there's no lag between you finishing and her replying. She corrects you
 gently mid-conversation and summarises what to work on afterward — based on
-what you actually said. English and Thai, both directions. 30 minutes free,
+what you actually said. English and Thai, both directions. 15 minutes free,
 no card.
 
 **51. Directory one-liner (for AlternativeTo, SaaS lists, etc.)**
 LEXIS — real-time voice practice for English and Thai. Talk out loud, get
-corrected as you speak, see what to practise next. Free 30-minute trial.
+corrected as you speak, see what to practise next. Free 15-minute trial.
 
 **52. Google Business Profile description**
 LEXIS is a voice-based speaking practice tool for English and Thai
 learners. Practise real spoken conversation with an AI tutor that replies
-in real time and corrects you gently as you go. Free 30-minute trial, no
+in real time and corrects you gently as you go. Free 15-minute trial, no
 card required. ฿199/week or ฿599/month.
 
 ---
