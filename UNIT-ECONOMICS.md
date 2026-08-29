@@ -179,9 +179,75 @@ largest single line item. 10–15 minutes plus a card-on-file trial would both
 cut it and pre-qualify the funnel — but that is a conversion trade-off, so
 make it with the rate in hand, not before.
 
-## What I did not do
+---
 
-I did not change any pricing, any cap, or any copy. Everything above is
-analysis; nothing in the product changed. The cap in recommendation 1 is a
-real code change to `requireEntitlement` and I would rather you decide the
-number than have me pick one from a rate I cannot see.
+# What shipped (29 Aug 2026)
+
+Recommendations 1 and 4 are now live. Recommendation 2 was deliberately
+deferred — see the warning below.
+
+## The fair-use cap
+
+`requireEntitlement` no longer short-circuits on `isPaid`. Active
+subscribers are now bounded per billing period:
+
+| Tier | Default ceiling | Env var |
+|---|---|---|
+| Weekly | 180 min/period (~26 min/day) | `FAIR_USE_WEEKLY_MINUTES` |
+| Monthly | 720 min/period (~24 min/day) | `FAIR_USE_MONTHLY_MINUTES` |
+
+Set either to `0` to disable that tier's cap. **These defaults bound the
+loss; they do not make it positive.** At $0.20/min a subscriber sitting at
+the monthly ceiling costs $144 against $15.51 of net revenue. The point is
+that $144 is now a known worst case instead of an unbounded one. Tighten
+them to the "cap @70%" column above once you have measured your rate — it
+is an env var, not a deploy.
+
+Mechanics worth knowing:
+
+- Two new columns, `period_seconds_used` and `period_started_at`.
+  `seconds_used` is untouched, because it is the trial's lifetime counter
+  and what the app renders as "left in trial".
+- **The window is time-based and self-healing**, rolled forward inside
+  `record_heartbeat` and re-checked in `requireEntitlement`. It is
+  deliberately *not* reset by a Stripe invoice webhook: if that webhook
+  were ever not enabled in the dashboard, a webhook-driven reset would
+  silently cap every paying subscriber forever after their first period.
+- 30 days, not a calendar month, in both the SQL and the JS — they have to
+  agree or a user gets blocked by one after the other has rolled.
+- Hitting the cap returns `FAIR_USE_REACHED`, not `TRIAL_EXHAUSTED`, and
+  the UI drops the "View Pricing" button for it. Telling someone who
+  already pays to upgrade is the obvious way to get this wrong.
+
+## The trial: 30 → 15 minutes
+
+`TRIAL.minutes` is 15 and the column default is 900. **Existing rows keep
+their 1800** — this is a `DEFAULT` change, not a backfill, so nobody
+mid-trial lost time they had already been promised. All copy in both
+languages regenerates from `TRIAL.minutes`, so EN and TH moved together.
+
+At $0.20/min this halves the acquisition cost per signup from ~$6.01 to
+~$3.01, and roughly halves the conversion rate needed to recover it.
+
+## ⚠️ The copy still says "unlimited"
+
+`PRICING_DESCRIPTION_EN` and `PRICING_DESCRIPTION_TH` still promise
+"unlimited voice practice" on live pages, in two languages, while the
+backend now enforces a ceiling. **This was a deliberate call to defer, not
+an oversight** — but it is a real refund and consumer-protection exposure
+in Thailand for as long as it stands, and it is the single loose end here.
+
+The in-app usage meter *was* changed, because leaving it reading
+"unlimited" on the same screen that blocks you is a guaranteed support
+ticket. It now shows minutes remaining this period. The marketing copy on
+the pricing and landing pages is what remains.
+
+Fixing it is a one-line change in `frontend/src/content/facts.js` — both
+descriptions read from the same file, so both languages change together.
+
+## Still outstanding
+
+1. **Measure your per-minute rate.** Method at the top of this file. Every
+   number here is a range until you do.
+2. **Then tighten the two env vars** to the margin you actually want.
+3. **Resolve the "unlimited" wording**, above.

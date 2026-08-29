@@ -114,6 +114,7 @@ npm run dev
    - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
    - `LEXIS_SALT` (any random string for hashing)
    - `ALLOWED_ORIGINS` (your Vercel domain(s), e.g. `https://lexis.vercel.app` — also doubles as the whitelist Stripe Checkout redirects are resolved against, see below)
+   - `FAIR_USE_WEEKLY_MINUTES` / `FAIR_USE_MONTHLY_MINUTES` (both optional; default 180 and 720). The per-billing-period practice ceiling for *paying* subscribers — before this existed, an active subscription bought an unbounded amount of Realtime audio against a fixed THB 199/599. Deliberately env vars rather than constants: the right number depends on the measured per-minute Realtime cost, so it can be tightened without a deploy. Set either to `0` to disable that tier's cap entirely. See `UNIT-ECONOMICS.md` for how the defaults were sized and what margin they imply.
    - `PORT` (Railway sets automatically)
 5. Deploy. Railway provides URL: `https://lexis-api.up.railway.app`.
 6. Point the Stripe webhook endpoint (step 2 above) at this URL.

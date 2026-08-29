@@ -17,12 +17,15 @@ export const CURRENCY = 'THB';
 // Confirmed directly against backend/app.mjs + backend/supabase-schema.sql
 // rather than assumed: the only real enforcement is
 // `seconds_used < max_allowed_seconds` (max_allowed_seconds defaults to
-// 1800 = 30 minutes total, however split across sessions). There is no
+// 900 = 15 minutes total, however split across sessions). There is no
 // session-count cap anywhere in the backend — "3 Practice Sessions (30
 // Mins)", which used to be on the pricing card, was simply wrong copy,
-// not a second real rule that needed reconciling with the 30-minute one.
+// not a second real rule that needed reconciling with the minute ceiling.
+// Paying subscribers are separately bounded by a per-period fair-use
+// ceiling (FAIR_USE_MINUTES in backend/app.mjs), which is not a trial
+// limit and is not surfaced in any of the copy below.
 export const TRIAL = {
-  minutes: 30,
+  minutes: 15,
   cardRequired: false
 };
 

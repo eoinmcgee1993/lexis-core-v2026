@@ -138,6 +138,9 @@ export default function LexisApp({ navigateTo }) {
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [upgradeMessage, setUpgradeMessage] = useState('');
+  // True when the 403 was a paying subscriber's fair-use ceiling rather
+  // than an exhausted trial — WelcomeStage drops the pricing CTA for it.
+  const [upgradeIsFairUse, setUpgradeIsFairUse] = useState(false);
   // Cancel Plan (WelcomeStage's header control, per RefundPage.jsx's
   // "Cancelling a plan" section) — POST /api/stripe/cancel sets Stripe's
   // cancel_at_period_end flag, which leaves profile.subscription_status as
@@ -514,11 +517,20 @@ export default function LexisApp({ navigateTo }) {
 
       if (!tokenRes.ok) {
         const err = await tokenRes.json().catch(() => ({}));
-        if (tokenRes.status === 403 && err.error === 'TRIAL_EXHAUSTED') {
+        // FAIR_USE_REACHED is a paying subscriber hitting their
+        // per-period ceiling, not a trial running out — same 403, but
+        // answering it with "upgrade your pass" and a pricing link would
+        // be telling someone who already pays to pay again.
+        if (tokenRes.status === 403 && (err.error === 'TRIAL_EXHAUSTED' || err.error === 'FAIR_USE_REACHED')) {
+          const fairUse = err.error === 'FAIR_USE_REACHED';
+          const fallback = fairUse
+            ? "You've reached this period's fair-use limit. It resets at the start of your next billing period."
+            : 'Free trial limit reached. Please upgrade your pass.';
           isUpgradeError = true;
           setUpgradeRequired(true);
-          setUpgradeMessage(err.message || 'Free trial limit reached. Please upgrade your pass.');
-          throw new Error(err.message || 'Free trial limit reached. Please upgrade your pass.');
+          setUpgradeIsFairUse(fairUse);
+          setUpgradeMessage(err.message || fallback);
+          throw new Error(err.message || fallback);
         }
         throw new Error(err.error || `Broker error status: ${tokenRes.status}`);
       }
@@ -576,9 +588,13 @@ export default function LexisApp({ navigateTo }) {
               });
               if (res.status === 403) {
                 const err = await res.json().catch(() => ({}));
+                const fairUse = err.error === 'FAIR_USE_REACHED';
                 setUpgradeRequired(true);
-                setUpgradeMessage(err.message || 'Usage limit reached. Please upgrade your pass.');
-                endSession('Usage limit reached.');
+                setUpgradeIsFairUse(fairUse);
+                setUpgradeMessage(err.message || (fairUse
+                  ? "You've reached this period's fair-use limit."
+                  : 'Usage limit reached. Please upgrade your pass.'));
+                endSession(fairUse ? 'Fair-use limit reached.' : 'Usage limit reached.');
               } else if (res.ok) {
                 refreshProfile(); // keeps the header's remaining-time display live
               }
@@ -1035,6 +1051,7 @@ export default function LexisApp({ navigateTo }) {
       justSponsored={justSponsored}
       upgradeRequired={upgradeRequired}
       upgradeMessage={upgradeMessage}
+      upgradeIsFairUse={upgradeIsFairUse}
       sessionError={sessionError}
       onDismissSessionError={() => setSessionError('')}
       onViewPricing={() => navigateTo('/pricing')}

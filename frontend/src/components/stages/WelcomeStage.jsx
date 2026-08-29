@@ -12,7 +12,19 @@ import { Mic, LogOut, AlertCircle, CreditCard, Clock, X, History } from 'lucide-
 
 function formatUsageLabel(profile) {
   if (profile.subscription_status === 'active') {
-    return `${profile.subscription_tier} plan: unlimited`;
+    // Was "unlimited". A per-period fair-use ceiling now exists
+    // (FAIR_USE_MINUTES in backend/app.mjs), so this meter must not claim
+    // otherwise on the same screen that is about to enforce it.
+    //
+    // It deliberately shows no remaining-minutes figure. The ceiling lives
+    // in the backend's environment, and `profile` here comes straight from
+    // supabase.from('profiles').select('*') in AuthContext — the client
+    // never sees that number, and hardcoding a second copy of it in the
+    // frontend would drift the moment the env var is tuned (which is the
+    // whole point of it being an env var). A subscriber who reaches the
+    // ceiling is told the exact limit by the FAIR_USE_REACHED message,
+    // which is generated server-side from the real value.
+    return `${profile.subscription_tier} plan`;
   }
   const remaining = Math.max(0, (profile.max_allowed_seconds || 0) - (profile.seconds_used || 0));
   const mins = Math.floor(remaining / 60);
@@ -36,6 +48,7 @@ export default function WelcomeStage({
   justSponsored,
   upgradeRequired,
   upgradeMessage,
+  upgradeIsFairUse = false,
   sessionError,
   onDismissSessionError,
   onViewPricing,
@@ -126,10 +139,15 @@ export default function WelcomeStage({
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span>{upgradeMessage || 'Free trial limit reached. Upgrade your pass to continue practicing.'}</span>
             </div>
-            <button onClick={onViewPricing} className="px-4 py-1.5 bg-lexis-action text-lexis-navy font-bold text-xs rounded-xl flex items-center gap-1.5">
-              <CreditCard className="w-4 h-4" />
-              <span>View Pricing</span>
-            </button>
+            {/* No pricing CTA on a fair-use stop: this person already pays,
+                and the only thing that resolves it is their next billing
+                period starting, not a purchase. */}
+            {!upgradeIsFairUse && (
+              <button onClick={onViewPricing} className="px-4 py-1.5 bg-lexis-action text-lexis-navy font-bold text-xs rounded-xl flex items-center gap-1.5">
+                <CreditCard className="w-4 h-4" />
+                <span>View Pricing</span>
+              </button>
+            )}
           </div>
         )}
 

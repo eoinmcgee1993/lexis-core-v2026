@@ -269,6 +269,50 @@ async function authenticate(req, res, next) {
   }
 }
 
+// Fair-use ceiling for *paying* subscribers, per billing period.
+//
+// Until this existed, `isPaid` short-circuited every usage check, so an
+// active subscription bought a genuinely unbounded amount of Realtime
+// audio — a cost line with no ceiling sitting behind a fixed THB 199/599.
+// See UNIT-ECONOMICS.md for the break-even maths this is sized against.
+//
+// Minutes per period, overridable per environment without a code change,
+// because the right number depends on the measured per-minute Realtime
+// rate and that is not knowable from in here. Setting either to 0 (or
+// anything non-positive) disables the cap for that tier, which is the
+// deliberate escape hatch if a cap ever needs lifting in a hurry.
+const FAIR_USE_MINUTES = {
+  weekly: Number(process.env.FAIR_USE_WEEKLY_MINUTES ?? 180),
+  monthly: Number(process.env.FAIR_USE_MONTHLY_MINUTES ?? 720)
+};
+
+// 30 days rather than a calendar month, matching the identical constant
+// in record_heartbeat (backend/supabase-schema.sql). The two must agree:
+// a calendar month in one and a fixed 30 days in the other would disagree
+// by up to a day at the boundary, and a user could be blocked by this
+// check while the database had already rolled their window.
+const PERIOD_DAYS = { weekly: 7, monthly: 30 };
+
+function fairUseCapSeconds(tier) {
+  const minutes = FAIR_USE_MINUTES[tier];
+  if (!Number.isFinite(minutes) || minutes <= 0) return null;
+  return Math.round(minutes * 60);
+}
+
+// Seconds used inside the *current* period. The database rolls the window
+// forward on each heartbeat, but a subscriber who has not spoken since
+// their period elapsed still carries a stale counter until the next beat
+// — so the same elapsed-window test has to run here too, or their first
+// session of a new period would be refused by a count that no longer
+// applies.
+function periodSecondsUsed(profile) {
+  const startedAt = profile.period_started_at ? Date.parse(profile.period_started_at) : NaN;
+  if (!Number.isFinite(startedAt)) return 0;
+  const windowMs = (PERIOD_DAYS[profile.subscription_tier] ?? 7) * 24 * 60 * 60 * 1000;
+  if (Date.now() - startedAt >= windowMs) return 0;
+  return profile.period_seconds_used || 0;
+}
+
 function requireEntitlement(req, res, next) {
   const profile = req.profile;
   const isPaid = profile.subscription_status === 'active';
@@ -279,6 +323,19 @@ function requireEntitlement(req, res, next) {
       ? 'Free trial limit reached. Please upgrade to a Weekly or Monthly Pass.'
       : 'Your pass has ended. Please renew to continue.';
     return res.status(403).json({ error: 'TRIAL_EXHAUSTED', message });
+  }
+
+  if (isPaid) {
+    const cap = fairUseCapSeconds(profile.subscription_tier);
+    if (cap !== null && periodSecondsUsed(profile) >= cap) {
+      // A distinct code from TRIAL_EXHAUSTED on purpose. This person is
+      // already paying, so the frontend must not answer them with an
+      // "upgrade your pass" prompt and a pricing link.
+      return res.status(403).json({
+        error: 'FAIR_USE_REACHED',
+        message: `You've reached this period's fair-use limit of ${Math.round(cap / 60)} minutes. It resets at the start of your next billing period.`
+      });
+    }
   }
 
   next();
@@ -397,7 +454,24 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/me', authenticate, (req, res) => {
-  res.json({ user: { id: req.user.id, email: req.user.email }, profile: req.profile });
+  // The fair-use ceiling lives in this process's env, so the client has no
+  // way to know it — send it alongside the profile, together with the
+  // *effective* period usage (periodSecondsUsed already zeroes a window
+  // that has elapsed but not yet been rolled by a heartbeat), so
+  // WelcomeStage's meter shows the same number this server will enforce.
+  const profile = req.profile;
+  const fairUseSeconds = profile.subscription_status === 'active'
+    ? fairUseCapSeconds(profile.subscription_tier)
+    : null;
+
+  res.json({
+    user: { id: req.user.id, email: req.user.email },
+    profile: {
+      ...profile,
+      fair_use_seconds: fairUseSeconds,
+      period_seconds_used: periodSecondsUsed(profile)
+    }
+  });
 });
 
 // Ephemeral Token Minting (GA Endpoint)
@@ -1065,6 +1139,13 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
           subscription_tier: session.metadata?.plan_tier || 'weekly',
           stripe_customer_id: session.customer,
           stripe_subscription_id: session.subscription,
+          // Anchor the fair-use window to the moment they actually start
+          // paying, and zero the counter so nothing carried over from a
+          // previous pass is charged against their first period. The
+          // window rolls itself forward from here (record_heartbeat), so
+          // renewals need no webhook of their own.
+          period_seconds_used: 0,
+          period_started_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
         .eq('id', session.metadata?.user_id);

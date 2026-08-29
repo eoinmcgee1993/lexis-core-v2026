@@ -19,7 +19,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     CHECK (subscription_tier IN ('free', 'weekly', 'monthly')),
   sessions_count INT NOT NULL DEFAULT 0,
   seconds_used INT NOT NULL DEFAULT 0,
-  max_allowed_seconds INT NOT NULL DEFAULT 1800, -- 30 Minutes Free Trial Total
+  max_allowed_seconds INT NOT NULL DEFAULT 900, -- 15 Minutes Free Trial Total
+  -- Fair-use accounting for paying subscribers, per billing period.
+  -- Deliberately separate from seconds_used: that column is the trial's
+  -- lifetime counter and is what WelcomeStage renders as "left in trial",
+  -- so resetting it every period would corrupt both the trial semantics
+  -- and the lifetime usage record.
+  period_seconds_used INT NOT NULL DEFAULT 0,
+  period_started_at TIMESTAMPTZ,
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -166,7 +173,7 @@ BEGIN
     COALESCE(new.raw_user_meta_data->>'full_name', 'Thai Youth Learner'),
     'free_trial',
     'free',
-    1800
+    900
   );
   RETURN NEW;
 END;
@@ -200,26 +207,57 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 8. Stored Procedure: Record Telemetry Heartbeat & Enforce Trial Cutoff
-CREATE OR REPLACE FUNCTION public.record_heartbeat(user_id_param UUID, increment_seconds INT)
-RETURNS TABLE(new_seconds_used INT, current_status TEXT) AS $$
+-- The return type changed when the fair-use window was added, and
+-- Postgres will not let CREATE OR REPLACE change a return type.
+DROP FUNCTION IF EXISTS public.record_heartbeat(UUID, INT);
+
+CREATE FUNCTION public.record_heartbeat(user_id_param UUID, increment_seconds INT)
+RETURNS TABLE(new_seconds_used INT, current_status TEXT, period_seconds INT) AS $$
 DECLARE
   v_seconds INT;
   v_max_seconds INT;
   v_status TEXT;
+  v_tier TEXT;
+  v_period_start TIMESTAMPTZ;
+  v_period_seconds INT;
+  v_window INTERVAL;
 BEGIN
   -- Per-heartbeat telemetry row (usage_logs was otherwise write-only-in-name —
   -- defined with a SELECT policy but nothing ever inserted into it).
   INSERT INTO public.usage_logs (user_id, duration_seconds)
   VALUES (user_id_param, increment_seconds);
 
+  SELECT subscription_status, subscription_tier, period_started_at
+    INTO v_status, v_tier, v_period_start
+  FROM public.profiles WHERE id = user_id_param;
+
+  -- 30 days, not INTERVAL '1 month', so this matches PERIOD_DAYS in
+  -- backend/app.mjs exactly. A calendar month here and a fixed 30 days
+  -- there would disagree by up to a day at the boundary, and a user could
+  -- be blocked by one while the other had already rolled their window.
+  v_window := CASE WHEN v_tier = 'monthly' THEN INTERVAL '30 days' ELSE INTERVAL '7 days' END;
+
+  -- Roll the fair-use window forward when it has elapsed. Deliberately
+  -- time-based and self-healing rather than reset by a Stripe invoice
+  -- webhook: if that webhook were ever not enabled in the dashboard, a
+  -- webhook-driven reset would silently cap every paying subscriber
+  -- forever after their first period. This cannot fail that way.
+  IF v_status = 'active' AND (v_period_start IS NULL OR now() - v_period_start >= v_window) THEN
+    UPDATE public.profiles
+    SET period_seconds_used = 0, period_started_at = now()
+    WHERE id = user_id_param;
+  END IF;
+
   UPDATE public.profiles
   SET
     seconds_used = seconds_used + increment_seconds,
+    period_seconds_used = period_seconds_used + increment_seconds,
     updated_at = timezone('utc'::text, now())
   WHERE id = user_id_param
-  RETURNING seconds_used, max_allowed_seconds, subscription_status INTO v_seconds, v_max_seconds, v_status;
+  RETURNING seconds_used, max_allowed_seconds, subscription_status, period_seconds_used
+  INTO v_seconds, v_max_seconds, v_status, v_period_seconds;
 
-  -- Auto-expire free trial if 30-minute ceiling reached
+  -- Auto-expire free trial at its ceiling
   IF v_status = 'free_trial' AND v_seconds >= v_max_seconds THEN
     UPDATE public.profiles
     SET subscription_status = 'expired'
@@ -227,7 +265,7 @@ BEGIN
     v_status := 'expired';
   END IF;
 
-  RETURN QUERY SELECT v_seconds, v_status;
+  RETURN QUERY SELECT v_seconds, v_status, v_period_seconds;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
