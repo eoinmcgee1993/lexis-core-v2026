@@ -47,9 +47,6 @@ const NAVY = '#050B14';
 const INK = '#1E293B';
 const CANVAS = '#FAFAF7';
 
-// Verified facts, mirrored from src/content/facts.js. Kept as literals
-// here rather than imported because facts.js is an ESM module inside the
-// Vite app; if these ever drift, facts.js is the source of truth.
 // Imported, never re-declared — same reason as the social generator: these
 // were a second copy of numbers that already live in facts.js, and they
 // silently went stale when the trial was halved to 15 (PR #92).
@@ -309,71 +306,14 @@ async function main() {
   }
 
   // ================================================================
-  console.log('\ncovers/ — one per platform that asks for a banner');
+  // covers/ — deliberately NOT written here.
   // ================================================================
-  const coverDark = (opts) => `
-    <div style="width:100%;height:100%;background:${NAVY};display:flex;
-      align-items:center;justify-content:center;padding:${opts.pad}px">
-      <div style="display:flex;flex-direction:column;align-items:${opts.align};
-        gap:${opts.gap}px;text-align:${opts.align === 'flex-start' ? 'left' : 'center'};
-        max-width:${opts.maxw}px">
-        <div style="display:flex;align-items:center;gap:${opts.markGap}px">
-          ${inlineMark(opts.mark, '#FFFFFF', TEAL)}
-          <div class="display" style="font-size:${opts.word}px;color:#fff;line-height:1">LEXIS</div>
-        </div>
-        <div style="font-size:${opts.sub}px;color:#fff;opacity:.68;line-height:1.45">${opts.text}</div>
-        ${opts.foot ? `<div style="font-size:${opts.foot}px;color:${TEAL};letter-spacing:.06em">${SITE}</div>` : ''}
-      </div>
-    </div>`;
-
-  await shot('covers/x-header-1500x500.png', {
-    w: 1500, h: 500, bg: NAVY,
-    body: coverDark({ pad: 0, align: 'center', gap: 26, maxw: 980, mark: 84, word: 92, markGap: 26, sub: 30, foot: 22, text: `${PITCH_EN}<br>${TERMS_EN}` })
-  });
-
-  // YouTube crops hard: everything must sit inside the 1546x423 centre.
-  await shot('covers/youtube-channel-2560x1440.png', {
-    w: 2560, h: 1440, bg: NAVY,
-    body: coverDark({ pad: 0, align: 'center', gap: 34, maxw: 1400, mark: 130, word: 150, markGap: 40, sub: 46, foot: 32, text: `${PITCH_EN}<br>${TERMS_EN}` })
-  });
-
-  await shot('covers/linkedin-page-1128x191.png', {
-    w: 1128, h: 191, bg: NAVY,
-    body: coverDark({ pad: 54, align: 'flex-start', gap: 12, maxw: 1020, mark: 46, word: 50, markGap: 16, sub: 19, foot: 0, text: PITCH_EN })
-  });
-
-  await shot('covers/facebook-cover-820x312.png', {
-    w: 820, h: 312, bg: NAVY,
-    body: coverDark({ pad: 0, align: 'center', gap: 18, maxw: 700, mark: 58, word: 64, markGap: 20, sub: 22, foot: 16, text: `${PITCH_EN}<br>${TERMS_EN}` })
-  });
-
-  await shot('covers/line-oa-cover-1080x878.png', {
-    w: 1080, h: 878, bg: NAVY,
-    body: `<div style="width:100%;height:100%;background:${NAVY};display:flex;flex-direction:column;
-        align-items:center;justify-content:center;gap:44px;text-align:center;padding:80px">
-        ${inlineMark(150, '#FFFFFF', TEAL)}
-        <div class="display" style="font-size:130px;color:#fff;line-height:1">LEXIS</div>
-        <div class="thai" lang="th" style="font-size:40px;color:#fff;opacity:.7;line-height:1.5">${PITCH_TH_LINES}</div>
-        <div class="thai" lang="th" style="font-size:32px;color:${TEAL}">ทดลองฟรี ${TRIAL_MINUTES} นาที</div>
-      </div>`
-  });
-
-  await shot('covers/og-share-card-1200x630.png', {
-    w: 1200, h: 630, bg: CANVAS,
-    body: `<div style="width:100%;height:100%;background:${CANVAS};display:flex;
-        align-items:center;gap:70px;padding:90px">
-        <img src="data:image/png;base64,${photoRing.toString('base64')}" width="330" height="330" style="flex-shrink:0"/>
-        <div style="display:flex;flex-direction:column;gap:26px">
-          <div style="display:flex;align-items:center;gap:18px">
-            ${inlineMark(46, '#FFFFFF', TEAL)}
-            <div class="display" style="font-size:50px;color:${INK};line-height:1">LEXIS</div>
-          </div>
-          <div class="display" style="font-size:56px;color:${INK};line-height:1.15">${PITCH_EN}</div>
-          <div style="font-size:27px;color:${INK};opacity:.6">${TERMS_EN}</div>
-        </div>
-      </div>`
-  });
-
+  // This script used to render all six covers/*.png as flat colour
+  // panels. generate_brand_kit_social.mjs writes those exact same six
+  // paths from the real photography (PR #87), and it runs second, so the
+  // only thing this block achieved was to silently revert every cover to
+  // the superseded flat design whenever this script was run on its own.
+  // Covers have one owner now: the social generator. Run that for covers.
   // ================================================================
   console.log('\ntemplates/ — ready-to-post, all copy verified');
   // ================================================================

@@ -245,11 +245,27 @@ in Thailand for as long as it stands, and it is the single loose end here.
 
 The in-app usage meter *was* changed, because leaving it reading
 "unlimited" on the same screen that blocks you is a guaranteed support
-ticket. It now shows minutes remaining this period. The marketing copy on
-the pricing and landing pages is what remains.
+ticket. It now reads `{tier} plan` and shows **no** remaining-minutes
+figure: the ceiling lives in the backend's environment and the client's
+profile comes straight from `supabase.from('profiles')`, so a second copy
+in the frontend would drift the moment the env var is tuned. (An earlier
+version of this section claimed the meter shows minutes remaining. It does
+not, and never did.)
 
-Fixing it is a one-line change in `frontend/src/content/facts.js` — both
-descriptions read from the same file, so both languages change together.
+**Scope of the remaining fix, corrected.** This was previously described
+here as "a one-line change in `facts.js`". That was wrong — `facts.js`
+holds only the two meta descriptions. The claim appears **11 times across
+7 files**:
+
+| File | Claims | Where a customer sees it |
+|---|---|---|
+| `PricingPage.jsx` | 4 | "Unlimited Practice for 7/30 Days" and "Talk as much as you want", EN + TH — on the card with the pay button |
+| `TermsPage.jsx` | 1 | "unlimited practice, billed on a recurring basis" — the **legal terms** |
+| 4 × `*EnglishPage.jsx` | 4 | "ฝึกซ้ำได้เท่าที่อยากฝึก ไม่จำกัดจำนวนครั้ง" / "no limit on repeat sessions" |
+| `facts.js` | 2 | meta descriptions, EN + TH |
+
+The Terms entry is the one that matters most: it is the contract, and it
+currently promises something the backend refuses.
 
 ## Still outstanding
 
