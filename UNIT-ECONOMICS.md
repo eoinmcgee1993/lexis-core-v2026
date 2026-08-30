@@ -197,17 +197,47 @@ deferred — see the warning below.
 `requireEntitlement` no longer short-circuits on `isPaid`. Active
 subscribers are now bounded per billing period:
 
-| Tier | Default ceiling | Env var |
-|---|---|---|
-| Weekly | 180 min/period (~26 min/day) | `FAIR_USE_WEEKLY_MINUTES` |
-| Monthly | 720 min/period (~24 min/day) | `FAIR_USE_MONTHLY_MINUTES` |
+| Tier | Ceiling | Per day | Env var |
+|---|---|---|---|
+| Weekly | 150 min/period | 21.4 min | `FAIR_USE_WEEKLY_MINUTES` |
+| Monthly | 450 min/period | 14.8 min | `FAIR_USE_MONTHLY_MINUTES` |
 
-Set either to `0` to disable that tier's cap. **These defaults bound the
-loss; they do not make it positive.** At $0.20/min a subscriber sitting at
-the monthly ceiling costs $144 against $15.51 of net revenue. The point is
-that $144 is now a known worst case instead of an unbounded one. Tighten
-them to the "cap @70%" column above once you have measured your rate — it
-is an env var, not a deploy.
+**Retuned 30 Aug.** The first pass used 180 and 720 — round numbers, not
+derived ones, and inconsistent with each other. The monthly plan yields 31%
+less revenue per entitled day, so 720/month handed a monthly subscriber
+**1.33× the worst-case cost per baht of revenue** that a weekly subscriber
+got: same product, same ceiling logic, materially different exposure, no
+justification behind it.
+
+These are set so both tiers carry the *same* worst-case minutes per
+baht-of-revenue-per-day — 0.754 weekly against 0.751 monthly, versus 0.905
+and 1.202 before. `backend/test/fair-use.test.mjs` asserts that property, so
+retuning one tier without the other fails loudly.
+
+Worst case at the ceiling, cost minus net revenue:
+
+| USD/min | Weekly (was 180 → now 150) | Monthly (was 720 → now 450) |
+|---|---|---|
+| 0.10 | −$13.05 → **−$10.05** | −$56.49 → **−$29.49** |
+| 0.20 | −$31.05 → **−$25.05** | −$128.49 → **−$74.49** |
+| 0.30 | −$49.05 → **−$40.05** | −$200.49 → **−$119.49** |
+
+**These are still losses.** No cap this product could ship makes the ceiling
+pay at ฿599 — the change takes the monthly worst case from −$128 to −$74, a
+42% improvement, not a positive number. Margin has to come from average
+usage sitting far below the cap.
+
+**They are not set from observed demand, because no such observation
+exists.** Every usage figure in the database is clipped by the trial
+ceiling: busiest day and heaviest account are both exactly 30.0 minutes,
+which *was* the trial limit — those users were cut off, not satisfied. And
+there has never been a paying subscriber to measure. Once you have the real
+per-minute rate, size these from the "cap @70%" column above instead of from
+the symmetry argument.
+
+Set either to `0` to disable that tier's cap. Both bound the loss rather
+than making it positive — see the table above. Retuning is an env var, not
+a deploy.
 
 Mechanics worth knowing:
 
