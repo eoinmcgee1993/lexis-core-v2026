@@ -276,17 +276,47 @@ async function authenticate(req, res, next) {
 // audio — a cost line with no ceiling sitting behind a fixed THB 199/599.
 // See UNIT-ECONOMICS.md for the break-even maths this is sized against.
 //
-// Minutes per period, overridable per environment without a code change,
-// because the right number depends on the measured per-minute Realtime
-// rate and that is not knowable from in here. Setting either to 0 (or
-// anything non-positive) disables the cap for that tier, which is the
-// deliberate escape hatch if a cap ever needs lifting in a hurry.
+// Minutes per period, overridable per environment without a code change.
+// Setting either to 0 (or anything non-positive) disables the cap for that
+// tier — the deliberate escape hatch if one ever needs lifting in a hurry.
+//
+// How these two numbers were chosen (30 Aug 2026). The first pass used 180
+// and 720, which were round numbers rather than derived ones, and they were
+// not consistent with each other: the monthly plan yields 31% less revenue
+// per entitled day than the weekly, so 720/month handed a monthly
+// subscriber 1.33x the worst-case cost per baht of revenue that a weekly
+// subscriber got. Same product, same ceiling logic, materially different
+// exposure — an asymmetry with no justification behind it.
+//
+// These are set so both tiers carry the SAME worst-case minutes per
+// baht-of-revenue-per-day (0.75 for each, vs 0.90 and 1.20 before):
+//
+//   weekly   150 min /  7.00 days = 21.4 min/day  against THB 28.43/day
+//   monthly  450 min / 30.44 days = 14.8 min/day  against THB 19.68/day
+//
+// They are still generous against any real behaviour — a committed learner
+// practising 15-20 minutes a day never reaches either. They are NOT set
+// from observed demand, because no such observation exists: every usage
+// figure in the database is clipped by the trial ceiling (busiest day and
+// heaviest account are both exactly 30.0 minutes, which is the old trial
+// limit, i.e. those users were cut off rather than satisfied), and there
+// has never been a paying subscriber to measure.
+//
+// What these do NOT do is make the ceiling profitable. At $0.20/min a
+// subscriber sitting at the monthly cap still costs ~$90 against $15.51 of
+// net revenue; the change takes the worst case from -$128 to -$74, a 42%
+// improvement, not a positive number. No cap this product could ship makes
+// the ceiling pay at THB 599 — margin has to come from average usage being
+// far below the cap. Once the real per-minute rate is measured, size these
+// from the "cap @70%" table in UNIT-ECONOMICS.md instead of from this
+// symmetry argument.
+//
 // Null-prototype so a tier string can never resolve to an inherited Object
 // member ('constructor', '__proto__') and land somewhere other than these
 // two entries.
 const FAIR_USE_MINUTES = Object.assign(Object.create(null), {
-  weekly: Number(process.env.FAIR_USE_WEEKLY_MINUTES ?? 180),
-  monthly: Number(process.env.FAIR_USE_MONTHLY_MINUTES ?? 720)
+  weekly: Number(process.env.FAIR_USE_WEEKLY_MINUTES ?? 150),
+  monthly: Number(process.env.FAIR_USE_MONTHLY_MINUTES ?? 450)
 });
 
 // 30 days rather than a calendar month, matching the identical constant
