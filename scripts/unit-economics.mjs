@@ -18,6 +18,8 @@
 // Everything else here is either measured from this repo or from the
 // production Supabase project, and is sourced inline.
 
+import { TRIAL, PRICING } from '../frontend/src/content/facts.js';
+
 const args = Object.fromEntries(
   process.argv.slice(2)
     .filter(a => a.startsWith('--'))
@@ -50,10 +52,14 @@ const TEXT_PER_SESSION_USD = num('textPerSession', 0.004);
 // pattern, not typical. 4/hour is the conservative middle. --sessionsPerHour
 const SESSIONS_PER_HOUR = num('sessionsPerHour', 4);
 
-// Prices, from frontend/src/content/facts.js (PRICING).
+// Imported from facts.js, not copied. This script previously re-declared
+// 199/599/15 as literals — the exact duplication the same change removed
+// from the two brand-kit generators, which is how those ended up rendering
+// a 30-minute trial after the product moved to 15. A model that quietly
+// prices the wrong plan is worse than no model.
 const PLANS = [
-  { name: 'Weekly Pass',      thb: 199, days: 7 },
-  { name: 'Monthly Immersion', thb: 599, days: 30.44 }
+  { name: 'Weekly Pass',       thb: PRICING.weekly.thb,  days: 7 },
+  { name: 'Monthly Immersion', thb: PRICING.monthly.thb, days: 30.44 }
 ];
 
 // The rate sweep. A single --rate prints one column; otherwise sweep.
@@ -111,7 +117,7 @@ for (const plan of PLANS) {
 // default is now 900, though rows created before 29 Aug keep 1800). It
 // is the real acquisition cost of this product, and it is paid whether or
 // not the visitor ever converts.
-const TRIAL_MINS = num('trialMins', 15);
+const TRIAL_MINS = num('trialMins', TRIAL.minutes);
 
 console.log('\n\n── The free trial, which is the acquisition cost\n');
 console.log(
@@ -120,7 +126,7 @@ console.log(
 );
 for (const rate of RATES) {
   const trial = costUSD(TRIAL_MINS, rate);
-  const needed = trial / netUSD(599);
+  const needed = trial / netUSD(PRICING.monthly.thb);
   console.log(
     '  ' + pad(f(rate, 3), 8) + pad('$' + f(trial, 2), 12) + pad('$' + f(trial * 100, 0), 10) +
     pad(f(needed * 100, 1) + '%', 14)

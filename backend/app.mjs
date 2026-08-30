@@ -281,21 +281,34 @@ async function authenticate(req, res, next) {
 // rate and that is not knowable from in here. Setting either to 0 (or
 // anything non-positive) disables the cap for that tier, which is the
 // deliberate escape hatch if a cap ever needs lifting in a hurry.
-const FAIR_USE_MINUTES = {
+// Null-prototype so a tier string can never resolve to an inherited Object
+// member ('constructor', '__proto__') and land somewhere other than these
+// two entries.
+const FAIR_USE_MINUTES = Object.assign(Object.create(null), {
   weekly: Number(process.env.FAIR_USE_WEEKLY_MINUTES ?? 180),
   monthly: Number(process.env.FAIR_USE_MONTHLY_MINUTES ?? 720)
-};
+});
 
 // 30 days rather than a calendar month, matching the identical constant
 // in record_heartbeat (backend/supabase-schema.sql). The two must agree:
 // a calendar month in one and a fixed 30 days in the other would disagree
 // by up to a day at the boundary, and a user could be blocked by this
 // check while the database had already rolled their window.
-const PERIOD_DAYS = { weekly: 7, monthly: 30 };
+const PERIOD_DAYS = Object.assign(Object.create(null), { weekly: 7, monthly: 30 });
 
 function fairUseCapSeconds(tier) {
-  const minutes = FAIR_USE_MINUTES[tier];
-  if (!Number.isFinite(minutes) || minutes <= 0) return null;
+  // Fail CLOSED on a tier this map doesn't know. `active` with some other
+  // tier is reachable without any attacker: customer.subscription.deleted
+  // sets subscription_tier to 'free', and customer.subscription.updated
+  // sets subscription_status without ever setting a tier — so an
+  // out-of-order or replayed pair can leave status 'active' against tier
+  // 'free'. Returning null there would silently lift the ceiling on the
+  // one account whose state is already wrong. The strictest known cap is
+  // the safe default; only an explicit non-positive env value disables it.
+  const known = Object.prototype.hasOwnProperty.call(FAIR_USE_MINUTES, tier);
+  const minutes = known ? FAIR_USE_MINUTES[tier] : Math.min(FAIR_USE_MINUTES.weekly, FAIR_USE_MINUTES.monthly);
+  if (!Number.isFinite(minutes)) return null;
+  if (minutes <= 0) return null;
   return Math.round(minutes * 60);
 }
 
@@ -454,11 +467,19 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/me', authenticate, (req, res) => {
-  // The fair-use ceiling lives in this process's env, so the client has no
-  // way to know it — send it alongside the profile, together with the
-  // *effective* period usage (periodSecondsUsed already zeroes a window
-  // that has elapsed but not yet been rolled by a heartbeat), so
-  // WelcomeStage's meter shows the same number this server will enforce.
+  // The fair-use ceiling lives in this process's env, so no client can
+  // derive it — this endpoint is the only way to read it, along with the
+  // *effective* period usage (periodSecondsUsed zeroes a window that has
+  // elapsed but not yet been rolled by a heartbeat).
+  //
+  // Nothing in the frontend consumes this today: AuthContext selects the
+  // profile straight from Supabase and never calls /api/me, and
+  // WelcomeStage's meter deliberately shows no remaining-minutes figure
+  // for exactly that reason. An earlier version of this comment claimed it
+  // fed that meter, which was never true. Kept because it is the correct
+  // shape for any client that does want the number (and it is already the
+  // endpoint's job to describe the caller's own entitlement) — but if you
+  // wire the meter up, read it from here rather than duplicating the cap.
   const profile = req.profile;
   const fairUseSeconds = profile.subscription_status === 'active'
     ? fairUseCapSeconds(profile.subscription_tier)

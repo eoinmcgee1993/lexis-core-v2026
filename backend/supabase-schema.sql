@@ -244,7 +244,20 @@ BEGIN
   -- forever after their first period. This cannot fail that way.
   IF v_status = 'active' AND (v_period_start IS NULL OR now() - v_period_start >= v_window) THEN
     UPDATE public.profiles
-    SET period_seconds_used = 0, period_started_at = now()
+    SET period_seconds_used = 0,
+        -- Advance by WHOLE windows rather than re-anchoring to now(). Setting
+        -- it to now() would move the period boundary later every time a
+        -- subscriber came back after a gap, drifting away from the fixed
+        -- Stripe billing anchor it is supposed to track — so someone who
+        -- paid on the 1st could still be blocked on the 4th while the error
+        -- told them it "resets at the start of your next billing period".
+        period_started_at = CASE
+          WHEN v_period_start IS NULL THEN now()
+          ELSE v_period_start + (
+            floor(extract(epoch FROM (now() - v_period_start))
+                  / extract(epoch FROM v_window))::int * v_window
+          )
+        END
     WHERE id = user_id_param;
   END IF;
 
@@ -291,6 +304,20 @@ GRANT EXECUTE ON FUNCTION public.record_heartbeat(UUID, INT) TO service_role;
 --   ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_subscription_tier_check;
 --   ALTER TABLE public.profiles ADD CONSTRAINT profiles_subscription_tier_check
 --     CHECK (subscription_tier IN ('free', 'weekly', 'monthly'));
+--
+--   -- Fair-use accounting (29 Aug 2026). REQUIRED before section 8's
+--   -- record_heartbeat is (re)created: CREATE TABLE IF NOT EXISTS is a no-op
+--   -- on an existing database, so the two columns declared up in section 1
+--   -- are NOT added by re-running this file — but the DROP/CREATE FUNCTION
+--   -- below runs regardless. plpgsql resolves column names at execution,
+--   -- not at definition, so the SQL Editor would report success and then
+--   -- every /api/heartbeat would 500 and all usage accounting (trial
+--   -- expiry included) would silently stop.
+--   ALTER TABLE public.profiles
+--     ADD COLUMN IF NOT EXISTS period_seconds_used INT NOT NULL DEFAULT 0,
+--     ADD COLUMN IF NOT EXISTS period_started_at TIMESTAMPTZ;
+--   -- New signups get 15 minutes; existing rows keep the 1800 they have.
+--   ALTER TABLE public.profiles ALTER COLUMN max_allowed_seconds SET DEFAULT 900;
 --
 -- then run sections 3-8 above (usage_logs table, RLS, trigger, RPCs).
 -- ============================================================================
