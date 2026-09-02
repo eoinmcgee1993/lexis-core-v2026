@@ -167,7 +167,13 @@ export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, is
   //    over-reacting to every small change in level.
   const normalizedLevel = Math.min(1, tutorLevel / 65);
   const rawOpenAmount = Math.pow(normalizedLevel, 0.75); // 0 = mouth closed, 1 = fully open
-  const openAmount = useSmoothed(rawOpenAmount, 10, !paused); // eased — see useSmoothed above for why
+  // rate 10 is a 100ms time constant, which is longer than an individual
+  // phoneme (roughly 50-150ms), so the mouth visibly trailed its own
+  // driving signal on top of the stream-vs-element lead fixed in
+  // LexisApp's analyser. 22 is ~45ms: still enough easing to stop the
+  // flicker this smoothing exists to prevent, short enough to sit inside
+  // a phoneme rather than across one.
+  const openAmount = useSmoothed(rawOpenAmount, 22, !paused);
   const blinkAmount = useBlink(!paused); // 0 = eyes open, 1 = fully closed
 
   if (failed) return null;

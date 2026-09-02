@@ -1078,7 +1078,18 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
 
     const frontendOrigin = resolveFrontendOrigin(req);
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      // payment_method_types deliberately omitted. Hardcoding ['card'] meant
+      // enabling a method in the Stripe Dashboard had no effect here, so the
+      // dashboard and the code could silently disagree. Omitting it lets
+      // Stripe offer whatever is enabled AND eligible for this session.
+      //
+      // Worth recording so nobody re-adds it expecting PromptPay: this is a
+      // subscription-mode Checkout, and Stripe's own docs list PromptPay as
+      // "not supported when using Checkout in subscription mode" (it is a
+      // one-time, customer-initiated QR payment; Subscriptions accept it
+      // only via the send_invoice collection method). So for a Thai
+      // audience this change does NOT add PromptPay — reaching that would
+      // mean changing the billing model, not this line.
       mode: 'subscription',
       customer_email: req.user.email,
       line_items: lineItems,

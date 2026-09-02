@@ -387,13 +387,67 @@ export default function LexisApp({ navigateTo }) {
       localAudioContextRef.current = localCtx;
       localAnalyserRef.current = localAnalyser;
 
-      // Remote AI Analyser
-      if (remoteStream) {
+      // Remote AI Analyser — drives the avatar's mouth, so it has to be in
+      // sync with what the listener actually HEARS, not with what has
+      // arrived off the wire.
+      //
+      // This used to read the MediaStream directly
+      // (createMediaStreamSource(remoteStream)). That taps packets as they
+      // arrive from the peer connection, while the audible playback is a
+      // completely separate consumer of the same stream — the <audio>
+      // element, which adds its own jitter buffer and output latency before
+      // a single sample reaches the speakers. The analyser therefore ran
+      // AHEAD of the voice by an amount that moved with the network, which
+      // is why the mouth looked out of sync rather than merely offset.
+      //
+      // createMediaElementSource taps the element itself, so analysis and
+      // playback share one clock and one buffer.
+      //
+      // The catch, and why the ordering below is not arbitrary: once
+      // createMediaElementSource is called, the element's audio is routed
+      // INTO the graph and no longer reaches the speakers on its own. If
+      // nothing connects it to a destination, LEXIS goes silent with no
+      // error. So connect(destination) happens FIRST — restoring playback —
+      // and only then is the analyser attached. Any failure falls back to
+      // the old stream tap, which is worse for sync but is never silent.
+      const audioEl = remoteAudioRef.current;
+      if (audioEl || remoteStream) {
         const remoteCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (remoteCtx.state === 'suspended') remoteCtx.resume();
         const remoteAnalyser = remoteCtx.createAnalyser();
         remoteAnalyser.fftSize = 512;
-        remoteCtx.createMediaStreamSource(remoteStream).connect(remoteAnalyser);
+
+        // Only tap the element if the context is genuinely RUNNING.
+        //
+        // This is the safety interlock for the trade-off above. Routing the
+        // element through the graph means a suspended context does not just
+        // stop the analyser — it stops the sound. pc.ontrack fires async,
+        // outside the gesture window, which is exactly the case the
+        // audioBlocked banner already exists for, so a suspended context
+        // here is a real mobile scenario and not a theoretical one.
+        // resume() is a promise and may simply be refused without a
+        // gesture, so its return value is not trustworthy; the state after
+        // it is. If the context is not running we take the stream tap
+        // instead: the mouth leads the voice slightly, which is a cosmetic
+        // fault, rather than LEXIS being silent, which is a total one.
+        let tappedElement = false;
+        if (audioEl && remoteCtx.state === 'running') {
+          try {
+            const elementSource = remoteCtx.createMediaElementSource(audioEl);
+            elementSource.connect(remoteCtx.destination); // playback first
+            elementSource.connect(remoteAnalyser);        // then analysis
+            tappedElement = true;
+          } catch (elErr) {
+            // createMediaElementSource throws if this element is already
+            // attached to another context. Not fatal: fall through to the
+            // stream tap rather than leaving the avatar frozen.
+            console.warn('[LEXIS Audio] Element tap unavailable, falling back to stream tap:', elErr);
+          }
+        }
+        if (!tappedElement && remoteStream) {
+          remoteCtx.createMediaStreamSource(remoteStream).connect(remoteAnalyser);
+        }
+
         remoteAudioContextRef.current = remoteCtx;
         remoteAnalyserRef.current = remoteAnalyser;
       }
