@@ -16,7 +16,7 @@ const TEXT = {
   en: {
     home: 'Home',
     heading: 'Simple, Transparent Pricing',
-    sub: 'Cancel anytime. Prices in Thai Baht.',
+    sub: 'One-off passes, nothing auto-renews. Card or PromptPay. Prices in Thai Baht.',
     vat: VAT.registered ? 'Prices include VAT.' : 'No VAT applies: not a VAT-registered business.',
     cancelled: 'Checkout was cancelled. No charge was made.',
     freeTrialTitle: 'Free Trial',
@@ -26,22 +26,24 @@ const TEXT = {
     tryFree: 'Try Free',
     weeklyTitle: 'Weekly Pass',
     weeklySub: 'Unlimited Practice for 7 Days',
-    perWeek: '/ week',
+    perWeek: 'one-off · 7 days',
     mostPopular: 'Most Popular',
     weeklyFeature1: 'Talk as much as you want',
     weeklyFeature2: 'Full conversation history',
     weeklyFeature3: "LEXIS adjusts to your level as you go",
+    noRenew: 'Your pass ends by itself after 7 days — it never renews, and there is nothing to cancel.',
     getStartedNow: 'Get Started Now',
     monthlyTitle: 'Monthly Immersion',
     monthlySub: 'Unlimited Practice for 30 Days',
-    perMonth: '/ month',
+    perMonth: 'one-off · 30 days',
     monthlyFeature1: (pct) => `Best value: about ${pct}% less than 4 weeks at the weekly rate`,
     monthlyFeature2: 'Talk as much as you want',
     monthlyFeature3: 'Great for building a daily habit',
+    noRenewMonthly: 'Your pass ends by itself after 30 days — it never renews, and there is nothing to cancel.',
     signInNote: "You'll be asked to sign in before checkout.",
     sponsorLabel: (thb) => `Add ฿${thb} to sponsor a student's practice time through LEXIS Community`,
     sponsorLearnMore: 'Learn more',
-    footerTrust: 'Private & secure • Payments handled by Stripe',
+    footerTrust: 'Private & secure • Card & PromptPay, handled by Stripe',
     privacy: 'Privacy',
     terms: 'Terms',
     refunds: 'Refunds',
@@ -50,7 +52,7 @@ const TEXT = {
   th: {
     home: 'หน้าแรก',
     heading: 'ราคาที่เรียบง่ายและโปร่งใส',
-    sub: 'ยกเลิกได้ทุกเมื่อ ราคาคิดเป็นเงินบาท',
+    sub: 'จ่ายครั้งเดียว ไม่มีการต่ออายุอัตโนมัติ จ่ายด้วยบัตรหรือพร้อมเพย์ ราคาเป็นเงินบาท',
     vat: VAT.registered ? 'ราคานี้รวมภาษีมูลค่าเพิ่มแล้ว' : 'ไม่มีภาษีมูลค่าเพิ่ม เนื่องจากธุรกิจนี้ไม่ได้จดทะเบียน VAT',
     cancelled: 'การชำระเงินถูกยกเลิก ไม่มีการเรียกเก็บเงิน',
     freeTrialTitle: 'ทดลองใช้ฟรี',
@@ -60,22 +62,24 @@ const TEXT = {
     tryFree: 'ลองใช้ฟรี',
     weeklyTitle: 'แพ็กเกจรายสัปดาห์',
     weeklySub: 'ฝึกได้ไม่จำกัดนาน 7 วัน',
-    perWeek: '/ สัปดาห์',
+    perWeek: 'จ่ายครั้งเดียว · 7 วัน',
     mostPopular: 'ยอดนิยม',
     weeklyFeature1: 'พูดได้เท่าที่อยากพูด',
     weeklyFeature2: 'ประวัติการสนทนาแบบเต็ม',
     weeklyFeature3: 'LEXIS ปรับให้เหมาะกับระดับของคุณไปเรื่อย ๆ',
+    noRenew: 'แพ็กเกจจะสิ้นสุดเองหลังจาก 7 วัน ไม่มีการต่ออายุอัตโนมัติ และไม่ต้องยกเลิก',
     getStartedNow: 'เริ่มเลย',
     monthlyTitle: 'แพ็กเกจรายเดือน',
     monthlySub: 'ฝึกได้ไม่จำกัดนาน 30 วัน',
-    perMonth: '/ เดือน',
+    perMonth: 'จ่ายครั้งเดียว · 30 วัน',
     monthlyFeature1: (pct) => `คุ้มค่าที่สุด ถูกกว่าจ่ายรายสัปดาห์ 4 สัปดาห์ประมาณ ${pct}%`,
     monthlyFeature2: 'พูดได้เท่าที่อยากพูด',
     monthlyFeature3: 'เหมาะสำหรับสร้างนิสัยฝึกทุกวัน',
+    noRenewMonthly: 'แพ็กเกจจะสิ้นสุดเองหลังจาก 30 วัน ไม่มีการต่ออายุอัตโนมัติ และไม่ต้องยกเลิก',
     signInNote: 'คุณจะต้องเข้าสู่ระบบก่อนชำระเงิน',
     sponsorLabel: (thb) => `เพิ่ม ฿${thb} เพื่อสนับสนุนเวลาฝึกพูดให้นักเรียนผ่าน LEXIS Community`,
     sponsorLearnMore: 'อ่านเพิ่มเติม',
-    footerTrust: 'ปลอดภัยและเป็นส่วนตัว • ชำระเงินผ่าน Stripe',
+    footerTrust: 'ปลอดภัยและเป็นส่วนตัว • บัตรและพร้อมเพย์ ผ่าน Stripe',
     privacy: 'นโยบายความเป็นส่วนตัว',
     terms: 'ข้อกำหนดการใช้งาน',
     refunds: 'การคืนเงิน',
@@ -227,7 +231,8 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             <div>
               <h3 className="text-lg font-bold text-lexis-action-dark mb-2">{t.weeklyTitle}</h3>
               <p className="text-xs text-lexis-ink/50 mb-4">{t.weeklySub}</p>
-              <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿{PRICING.weekly.thb} <span className="text-xs font-normal text-lexis-ink/40">{t.perWeek}</span></div>
+              <div className="text-3xl font-extrabold text-lexis-ink mb-1">฿{PRICING.weekly.thb} <span className="text-xs font-normal text-lexis-ink/40">{t.perWeek}</span></div>
+              <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenew}</p>
               <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.weeklyFeature1}</span></li>
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.weeklyFeature2}</span></li>
@@ -248,7 +253,8 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             <div>
               <h3 className="text-lg font-bold text-teal-700 mb-2">{t.monthlyTitle}</h3>
               <p className="text-xs text-lexis-ink/50 mb-4">{t.monthlySub}</p>
-              <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿{PRICING.monthly.thb} <span className="text-xs font-normal text-lexis-ink/40">{t.perMonth}</span></div>
+              <div className="text-3xl font-extrabold text-lexis-ink mb-1">฿{PRICING.monthly.thb} <span className="text-xs font-normal text-lexis-ink/40">{t.perMonth}</span></div>
+              <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenewMonthly}</p>
               <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.monthlyFeature1(MONTHLY_SAVINGS_VS_WEEKLY_PCT)}</span></li>
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.monthlyFeature2}</span></li>
@@ -265,12 +271,14 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           </div>
         </div>
 
-        {/* LEXIS Community pay-it-forward add-on — one flat amount, rides
-            whichever plan's billing cycle (see backend/app.mjs's
-            /api/stripe/checkout: price_data.recurring.interval matches
-            planTier). Deliberately plan-agnostic here since the checkbox
-            is above all three cards, not inside one — the actual amount
-            gets added to whichever paid plan the visitor clicks next. */}
+        {/* LEXIS Community pay-it-forward add-on — one flat amount added
+            to whichever pass the visitor buys next (backend/app.mjs's
+            /api/stripe/checkout appends it as a second one-time line
+            item). Since passes stopped being subscriptions it is a single
+            donation per pass rather than a standing commitment, so it
+            cannot outlive the purchase that started it. Deliberately
+            plan-agnostic here since the checkbox is above all three cards,
+            not inside one. */}
         <label className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mt-8 px-6 text-center text-xs text-lexis-ink/60 cursor-pointer">
           <input
             type="checkbox"

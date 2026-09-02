@@ -28,10 +28,13 @@ export default function TermsPage({ navigateTo }) {
         LEXIS is a voice conversation practice tool for spoken English
         and Thai, delivered through a web browser. A free trial gives
         every new account {TRIAL.minutes} minutes of practice
-        {TRIAL.cardRequired ? '' : ', no card required'}. Paid plans are
-        ฿{PRICING.weekly.thb}/week or ฿{PRICING.monthly.thb}/month for
-        unlimited practice, billed on a recurring basis through Stripe
-        until cancelled. {VAT.registered ? '' : 'No VAT applies: LEXIS is not a VAT-registered business.'}
+        {TRIAL.cardRequired ? '' : ', no card required'}. Paid access is
+        sold as a pass: a single payment of ฿{PRICING.weekly.thb} for{' '}
+        {PRICING.weekly.days} days, or ฿{PRICING.monthly.thb} for{' '}
+        {PRICING.monthly.days} days, of unlimited practice. Payment is
+        taken once through Stripe, by card or PromptPay. A pass does not
+        renew and no further payment is taken unless you buy another one.
+        {' '}{VAT.registered ? '' : 'No VAT applies: LEXIS is not a VAT-registered business.'}
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Your account</h2>
@@ -47,9 +50,12 @@ export default function TermsPage({ navigateTo }) {
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Cancelling</h2>
       <p>
-        You can cancel a paid plan at any time; see the
+        A pass is a one-off purchase, so there is no recurring payment to
+        cancel: it simply ends when its days run out. Accounts that
+        started a recurring plan before 2 September 2026 still have one,
+        and can still stop it renewing from inside the app. See the
         {' '}<AppLink to="/refund" navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 underline underline-offset-2">Refund &amp; Cancellation Policy</AppLink>{' '}
-        for exactly what that means for a plan already in progress.
+        for both cases.
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">What LEXIS is not</h2>

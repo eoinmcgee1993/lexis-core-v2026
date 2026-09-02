@@ -67,7 +67,9 @@ const PITCH_TH = 'ฝึกพูดภาษาอังกฤษและภ�
 // (which never wraps) uses PITCH_TH above.
 const PITCH_TH_LINES = 'ฝึกพูดภาษาอังกฤษ<br>และภาษาไทยด้วยเสียงจริง';
 const TERMS_EN = `Free ${TRIAL_MINUTES}-minute trial. No card required.`;
-const PRICE_EN = `฿${WEEKLY_THB}/week or ฿${MONTHLY_THB}/month after that.`;
+// A pass is a one-off purchase, so "฿199/week" would advertise a
+// recurring charge that does not exist (facts.js BILLING.autoRenews).
+const PRICE_EN = `฿${WEEKLY_THB} for ${PRICING.weekly.days} days or ฿${MONTHLY_THB} for ${PRICING.monthly.days}. One-off.`;
 const SITE = 'learnwithlexis.com';
 
 // --- the mark, as real SVG -------------------------------------------

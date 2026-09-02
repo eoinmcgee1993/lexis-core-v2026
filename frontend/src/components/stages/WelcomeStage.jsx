@@ -24,12 +24,33 @@ function formatUsageLabel(profile) {
     // whole point of it being an env var). A subscriber who reaches the
     // ceiling is told the exact limit by the FAIR_USE_REACHED message,
     // which is generated server-side from the real value.
+    // A pass has an end date, and it is the one number the holder
+    // actually needs — nothing renews, so "4 days left" is the difference
+    // between buying another one in time and losing access mid-week. Only
+    // passes have it; the recurring plans sold before 2 Sep 2026 leave
+    // access_expires_at NULL and fall back to the bare plan name.
+    const daysLeft = passDaysLeft(profile);
+    if (daysLeft !== null) {
+      return `${profile.subscription_tier} pass · ${daysLeft === 0 ? 'ends today' : `${daysLeft} day${daysLeft === 1 ? '' : 's'} left`}`;
+    }
     return `${profile.subscription_tier} plan`;
   }
   const remaining = Math.max(0, (profile.max_allowed_seconds || 0) - (profile.seconds_used || 0));
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
   return `${mins}m ${secs}s left in trial`;
+}
+
+// Whole days remaining on a one-off pass, or null when this profile has no
+// pass (never paid, or on one of the pre-2 Sep 2026 recurring plans, which
+// leave access_expires_at NULL because Stripe reports their liveness
+// instead). Rounded UP so the last partial day still reads as "1 day left"
+// rather than "ends today" while the pass is genuinely still usable.
+function passDaysLeft(profile) {
+  if (!profile?.access_expires_at) return null;
+  const expiresAt = Date.parse(profile.access_expires_at);
+  if (!Number.isFinite(expiresAt)) return null;
+  return Math.max(0, Math.ceil((expiresAt - Date.now()) / 86400000));
 }
 
 // currentPeriodEnd comes straight from Stripe's subscription object — a
@@ -79,7 +100,12 @@ export default function WelcomeStage({
             </span>
           )}
 
-          {profile?.subscription_status === 'active' && !cancelAtPeriodEnd && (
+          {/* Only a recurring plan can be cancelled, and only those have a
+              stripe_subscription_id — the same condition the backend's
+              /api/stripe/cancel checks. Showing this to a pass holder
+              would offer them an action that does nothing and imply their
+              pass is charging them again, which it isn't. */}
+          {profile?.subscription_status === 'active' && profile?.stripe_subscription_id && !cancelAtPeriodEnd && (
             confirmingCancel ? (
               <span className="flex items-center gap-1.5 text-xs">
                 <span className="text-lexis-ink/50">Cancel plan?</span>

@@ -29,9 +29,28 @@ export const TRIAL = {
   cardRequired: false
 };
 
+// `days` is how long each pass grants access for, and it is the same
+// number as PERIOD_DAYS in backend/app.mjs and the window in
+// record_heartbeat — a pass IS one fair-use period. `unitCode` is the
+// ISO 8601 duration code for the structured-data offer (WEE = week,
+// MON = month), describing the pass length, not a billing frequency.
 export const PRICING = {
-  weekly: { thb: 199, period: 'week', unitCode: 'WEE' },
-  monthly: { thb: 599, period: 'month', unitCode: 'MON' }
+  weekly: { thb: 199, period: 'week', days: 7, unitCode: 'WEE' },
+  monthly: { thb: 599, period: 'month', days: 30, unitCode: 'MON' }
+};
+
+// Passes are one-off purchases, not subscriptions (2 Sep 2026). The reason
+// is PromptPay: Thailand pays by bank QR, and Stripe cannot offer PromptPay
+// in a subscription-mode Checkout at all — so the choice was between
+// recurring billing and being payable by most of the country. See the
+// /api/stripe/checkout comment in backend/app.mjs.
+//
+// This flag exists so no page has to re-decide how to phrase it, and so
+// "cancel anytime" cannot creep back into the copy: there is nothing to
+// cancel, and saying otherwise on a pricing page is a consumer-law claim,
+// not a turn of phrase.
+export const BILLING = {
+  autoRenews: false
 };
 
 // LEXIS Community's pay-it-forward checkout add-on (PricingPage.jsx,
@@ -59,14 +78,14 @@ export const MONTHLY_SAVINGS_VS_WEEKLY_PCT = Math.round(
 // English-language display strings built from the numbers above, so
 // every page renders the identical sentence rather than each hand-typing
 // its own phrasing of the same facts.
-export const PRICING_TEASER_EN = `Free ${TRIAL.minutes}-minute trial, then ฿${PRICING.weekly.thb}/week or ฿${PRICING.monthly.thb}/month.`;
-export const PRICING_TEASER_TH = `ทดลองฟรี ${TRIAL.minutes} นาที จากนั้น ฿${PRICING.weekly.thb}/สัปดาห์ หรือ ฿${PRICING.monthly.thb}/เดือน`;
+export const PRICING_TEASER_EN = `Free ${TRIAL.minutes}-minute trial, then ฿${PRICING.weekly.thb} for ${PRICING.weekly.days} days or ฿${PRICING.monthly.thb} for ${PRICING.monthly.days}.`;
+export const PRICING_TEASER_TH = `ทดลองฟรี ${TRIAL.minutes} นาที จากนั้น ฿${PRICING.weekly.thb} ใช้ได้ ${PRICING.weekly.days} วัน หรือ ฿${PRICING.monthly.thb} ใช้ได้ ${PRICING.monthly.days} วัน`;
 
 // Kept under 160 characters so Google does not truncate it in results. The
 // longer version (213) was cut mid-sentence, losing the trial offer, which is
 // the part most likely to earn the click. Site audit M2, 27 Aug 2026.
 export const LANDING_DESCRIPTION_EN = `A voice conversation partner for practicing spoken English and Thai. Talk out loud, get gentle real-time corrections. Free ${TRIAL.minutes}-min trial, no card.`;
-export const PRICING_DESCRIPTION_EN = `LEXIS pricing: a free ${TRIAL.minutes}-minute trial, then ฿${PRICING.weekly.thb}/week or ฿${PRICING.monthly.thb}/month for unlimited voice practice in English or Thai. ${VAT.registered ? '' : 'No VAT, '}cancel anytime.`;
+export const PRICING_DESCRIPTION_EN = `LEXIS pricing: a free ${TRIAL.minutes}-minute trial, then a one-off ฿${PRICING.weekly.thb} ${PRICING.weekly.days}-day pass or ฿${PRICING.monthly.thb} ${PRICING.monthly.days}-day pass for unlimited voice practice in English or Thai. Pay by card or PromptPay. ${VAT.registered ? '' : 'No VAT, '}nothing auto-renews.`;
 
 // Thai-language versions of the two page descriptions above, for the /th
 // and /th/pricing routes' own <meta name="description"> and og:description
@@ -74,7 +93,7 @@ export const PRICING_DESCRIPTION_EN = `LEXIS pricing: a free ${TRIAL.minutes}-mi
 // re-served under a Thai URL). Same facts, translated, not a separate set
 // of numbers to keep in sync.
 export const LANDING_DESCRIPTION_TH = `คู่สนทนาสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย พูดออกเสียงจริง รับคำแนะนำแบบเรียลไทม์อย่างอ่อนโยน ทดลองฟรี ${TRIAL.minutes} นาที ไม่ต้องผูกบัตร`;
-export const PRICING_DESCRIPTION_TH = `ราคา LEXIS: ทดลองฟรี ${TRIAL.minutes} นาที จากนั้น ฿${PRICING.weekly.thb}/สัปดาห์ หรือ ฿${PRICING.monthly.thb}/เดือน สำหรับฝึกพูดภาษาอังกฤษหรือภาษาไทยได้ไม่จำกัด ${VAT.registered ? '' : 'ไม่มี VAT '}ยกเลิกได้ทุกเมื่อ`;
+export const PRICING_DESCRIPTION_TH = `ราคา LEXIS: ทดลองฟรี ${TRIAL.minutes} นาที จากนั้นจ่ายครั้งเดียว ฿${PRICING.weekly.thb} ใช้ได้ ${PRICING.weekly.days} วัน หรือ ฿${PRICING.monthly.thb} ใช้ได้ ${PRICING.monthly.days} วัน ฝึกพูดภาษาอังกฤษหรือภาษาไทยได้ไม่จำกัด จ่ายด้วยบัตรหรือพร้อมเพย์ ${VAT.registered ? '' : 'ไม่มี VAT '}ไม่มีการต่ออายุอัตโนมัติ`;
 
 // FAQ copy — rendered by LandingPage.jsx's <details>/<summary> list and
 // mirrored as FAQPage JSON-LD by structuredData.js's buildFaqJsonLd.
@@ -104,7 +123,7 @@ export const FAQS = {
     },
     {
       q: 'Is LEXIS free to try?',
-      a: `Yes. New accounts get a free ${TRIAL.minutes}-minute trial, no card required. After that, LEXIS is ฿${PRICING.weekly.thb}/week or ฿${PRICING.monthly.thb}/month.`
+      a: `Yes. New accounts get a free ${TRIAL.minutes}-minute trial, no card required. After that, a pass is a one-off purchase: ฿${PRICING.weekly.thb} for ${PRICING.weekly.days} days or ฿${PRICING.monthly.thb} for ${PRICING.monthly.days} days. Pay by card or PromptPay. Nothing renews by itself, so you only pay again when you decide to.`
     },
     {
       q: 'Do I need to be fluent to start?',
@@ -124,7 +143,7 @@ export const FAQS = {
     },
     {
       q: 'ทดลองใช้ LEXIS ฟรีได้ไหม',
-      a: `ได้ บัญชีใหม่ทุกบัญชีจะได้ทดลองใช้ฟรี ${TRIAL.minutes} นาที ไม่ต้องผูกบัตร หลังจากนั้น LEXIS มีราคา ฿${PRICING.weekly.thb}/สัปดาห์ หรือ ฿${PRICING.monthly.thb}/เดือน`
+      a: `ได้ บัญชีใหม่ทุกบัญชีจะได้ทดลองใช้ฟรี ${TRIAL.minutes} นาที ไม่ต้องผูกบัตร หลังจากนั้นเป็นการจ่ายครั้งเดียว ฿${PRICING.weekly.thb} ใช้ได้ ${PRICING.weekly.days} วัน หรือ ฿${PRICING.monthly.thb} ใช้ได้ ${PRICING.monthly.days} วัน จ่ายด้วยบัตรหรือพร้อมเพย์ ไม่มีการต่ออายุอัตโนมัติ คุณจ่ายอีกครั้งเมื่อคุณต้องการเท่านั้น`
     },
     {
       q: 'ต้องพูดคล่องก่อนถึงจะเริ่มได้ไหม',

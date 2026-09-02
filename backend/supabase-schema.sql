@@ -27,6 +27,19 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   -- and the lifetime usage record.
   period_seconds_used INT NOT NULL DEFAULT 0,
   period_started_at TIMESTAMPTZ,
+  -- When a one-off pass stops granting access. NULL means this row's
+  -- access is not a pass: either it has never been paid for, or it is one
+  -- of the recurring subscriptions sold before 2 Sep 2026, whose liveness
+  -- Stripe reports through customer.subscription.* webhooks instead. A
+  -- pass has no such events — nothing tells us a one-time charge got old
+  -- — so the expiry has to be written down at purchase and checked on
+  -- every request (paidAccessActive in backend/app.mjs).
+  access_expires_at TIMESTAMPTZ,
+  -- The last Stripe Checkout Session redeemed into a pass. Purely an
+  -- idempotency key for redeem_pass: Stripe delivers webhooks at least
+  -- once, and a delayed payment method such as PromptPay legitimately
+  -- produces two grantable events for one purchase.
+  last_checkout_session_id TEXT,
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -282,6 +295,69 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
+-- Redeem a paid Stripe Checkout Session into a pass.
+--
+-- All of it in one statement under a row lock, rather than a read followed
+-- by a write from the webhook handler, for two reasons that both cost real
+-- money if got wrong:
+--
+--   * Idempotency. Stripe guarantees at-least-once webhook delivery, and a
+--     PromptPay purchase can arrive as both checkout.session.completed and
+--     checkout.session.async_payment_succeeded. Keying on the session id
+--     means one paid pass grants exactly one pass, however many times we
+--     are told about it.
+--   * Stacking. Buying again while a pass is still running extends it from
+--     the later of now and the current expiry, so nobody loses the days
+--     they already paid for by renewing early.
+--
+-- The fair-use window is re-anchored to now() on every redemption, so each
+-- pass carries its own quota of minutes. Someone who has hit this period's
+-- ceiling and buys another pass has paid twice for those minutes — that is
+-- the intended outcome, not a loophole.
+CREATE OR REPLACE FUNCTION public.redeem_pass(
+  p_user_id UUID,
+  p_tier TEXT,
+  p_days INT,
+  p_session_id TEXT,
+  p_customer_id TEXT
+)
+RETURNS TIMESTAMPTZ AS $$
+DECLARE
+  v_expires TIMESTAMPTZ;
+  v_last_session TEXT;
+BEGIN
+  SELECT access_expires_at, last_checkout_session_id
+    INTO v_expires, v_last_session
+  FROM public.profiles WHERE id = p_user_id FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RETURN NULL;
+  END IF;
+
+  -- Already redeemed. Return the expiry we granted the first time so a
+  -- retry looks like a success to the caller rather than like a failure
+  -- worth retrying again.
+  IF v_last_session IS NOT NULL AND v_last_session = p_session_id THEN
+    RETURN v_expires;
+  END IF;
+
+  v_expires := GREATEST(COALESCE(v_expires, now()), now()) + (p_days || ' days')::INTERVAL;
+
+  UPDATE public.profiles
+  SET subscription_status = 'active',
+      subscription_tier = p_tier,
+      stripe_customer_id = COALESCE(p_customer_id, stripe_customer_id),
+      access_expires_at = v_expires,
+      last_checkout_session_id = p_session_id,
+      period_seconds_used = 0,
+      period_started_at = now(),
+      updated_at = timezone('utc'::text, now())
+  WHERE id = p_user_id;
+
+  RETURN v_expires;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- These SECURITY DEFINER functions are only ever called by the backend with
 -- the service_role key, but PostgREST exposes them to any signed-in user by
 -- default unless revoked — lock them down.
@@ -289,6 +365,10 @@ REVOKE EXECUTE ON FUNCTION public.increment_sessions(UUID) FROM PUBLIC, anon, au
 GRANT EXECUTE ON FUNCTION public.increment_sessions(UUID) TO service_role;
 REVOKE EXECUTE ON FUNCTION public.record_heartbeat(UUID, INT) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.record_heartbeat(UUID, INT) TO service_role;
+-- redeem_pass grants paid access, so an exposed EXECUTE would be a free
+-- unlimited pass for anyone with a signed-in session.
+REVOKE EXECUTE ON FUNCTION public.redeem_pass(UUID, TEXT, INT, TEXT, TEXT) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.redeem_pass(UUID, TEXT, INT, TEXT, TEXT) TO service_role;
 
 -- ============================================================================
 -- Migrating from the earlier supabase/schema.sql (sessions_used, no
@@ -318,6 +398,15 @@ GRANT EXECUTE ON FUNCTION public.record_heartbeat(UUID, INT) TO service_role;
 --     ADD COLUMN IF NOT EXISTS period_started_at TIMESTAMPTZ;
 --   -- New signups get 15 minutes; existing rows keep the 1800 they have.
 --   ALTER TABLE public.profiles ALTER COLUMN max_allowed_seconds SET DEFAULT 900;
+--
+--   -- One-off passes (2 Sep 2026). Same trap as the fair-use columns
+--   -- above: CREATE TABLE IF NOT EXISTS will not add these to an existing
+--   -- database, but redeem_pass below is created regardless and resolves
+--   -- its column names at execution — so without this every purchase
+--   -- webhook would 500 AFTER Stripe had taken the money.
+--   ALTER TABLE public.profiles
+--     ADD COLUMN IF NOT EXISTS access_expires_at TIMESTAMPTZ,
+--     ADD COLUMN IF NOT EXISTS last_checkout_session_id TEXT;
 --
 -- then run sections 3-8 above (usage_logs table, RLS, trigger, RPCs).
 -- ============================================================================
