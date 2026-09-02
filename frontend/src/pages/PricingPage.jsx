@@ -211,7 +211,10 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
                 <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.freeTrialFeature2}</span></li>
               </ul>
             </div>
-            <AppLink to="/app" navigateTo={navigateTo} className="w-full min-h-[44px] py-3 bg-lexis-canvas hover:bg-lexis-ink/5 border border-lexis-ink/10 text-lexis-ink font-bold rounded-xl text-sm transition-all">
+            {/* inline-flex + centring: this CTA is an <a>, and an anchor is
+                inline by default, so its label sat left-aligned while the
+                two <button> CTAs beside it centred theirs natively. */}
+            <AppLink to="/app" navigateTo={navigateTo} className="w-full min-h-[44px] py-3 inline-flex items-center justify-center text-center bg-lexis-canvas hover:bg-lexis-ink/5 border border-lexis-ink/10 text-lexis-ink font-bold rounded-xl text-sm transition-all">
               {t.tryFree}
             </AppLink>
           </div>
@@ -268,7 +271,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             planTier). Deliberately plan-agnostic here since the checkbox
             is above all three cards, not inside one — the actual amount
             gets added to whichever paid plan the visitor clicks next. */}
-        <label className="flex items-center justify-center gap-2 mt-8 text-xs text-lexis-ink/60 cursor-pointer">
+        <label className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mt-8 px-6 text-center text-xs text-lexis-ink/60 cursor-pointer">
           <input
             type="checkbox"
             checked={sponsorAdd}
