@@ -167,13 +167,17 @@ export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, is
   //    over-reacting to every small change in level.
   const normalizedLevel = Math.min(1, tutorLevel / 65);
   const rawOpenAmount = Math.pow(normalizedLevel, 0.75); // 0 = mouth closed, 1 = fully open
-  // rate 10 is a 100ms time constant, which is longer than an individual
-  // phoneme (roughly 50-150ms), so the mouth visibly trailed its own
-  // driving signal on top of the stream-vs-element lead fixed in
-  // LexisApp's analyser. 22 is ~45ms: still enough easing to stop the
-  // flicker this smoothing exists to prevent, short enough to sit inside
-  // a phoneme rather than across one.
-  const openAmount = useSmoothed(rawOpenAmount, 22, !paused);
+  // rate 10 (a ~100ms time constant) is deliberate and was tried at 22
+  // (~45ms) on the theory that 100ms is longer than a phoneme and so the
+  // mouth trailed its own signal. That reasoning was right about phonemes
+  // and wrong about this signal. HeroLiveDemo's useSimulatedTutorLevel
+  // regenerates its level EVERY FRAME as a slow sine plus +/-12 of random
+  // noise; the 100ms constant is what averages that noise into visible,
+  // flowing mouth motion. At 45ms the mouth tracked the noise instead of
+  // the speech envelope and read as jittering in place rather than
+  // opening and closing. Reported from a real device. Do not raise this
+  // without re-testing the hero demo, not just a live session.
+  const openAmount = useSmoothed(rawOpenAmount, 10, !paused);
   const blinkAmount = useBlink(!paused); // 0 = eyes open, 1 = fully closed
 
   if (failed) return null;
