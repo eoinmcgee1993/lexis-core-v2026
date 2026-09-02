@@ -408,12 +408,17 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           impact numbers that don't exist yet (see CommunityPage.jsx's own
           header comment) — only the pay-it-forward checkout add-on, which
           is actually live today. */}
-      <section className="w-full max-w-3xl mx-auto px-6 py-10 border-t border-lexis-ink/10">
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-5 text-center md:text-left">
-          <Heart className="w-5 h-5 text-teal-600 flex-shrink-0 mt-1" />
+      {/* Was a full-width strip with no background, a text-xl heading and
+          body at 60% opacity, sitting directly above the much larger FAQ
+          heading — so the eye skipped it entirely and it read as a caption
+          rather than a section. Given a tinted card, a heading that holds
+          its own, and body copy at readable contrast. */}
+      <section className="w-full max-w-3xl mx-auto px-6 py-12">
+        <div className="rounded-2xl border border-teal-600/20 bg-teal-600/5 p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-5 text-center md:text-left">
+          <Heart className="w-6 h-6 text-teal-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h2 className="font-display font-semibold text-xl text-lexis-ink">{c.communityHeading}</h2>
-            <p className="mt-2 text-sm text-lexis-ink/60 leading-relaxed max-w-lg">{c.communityBody}</p>
+            <h2 className="font-display font-semibold text-2xl text-lexis-ink">{c.communityHeading}</h2>
+            <p className="mt-2 text-sm text-lexis-ink/80 leading-relaxed max-w-lg">{c.communityBody}</p>
           </div>
           <AppLink
             to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="flex-shrink-0 text-teal-700 hover:text-teal-800 font-semibold text-sm underline underline-offset-2 whitespace-nowrap md:mt-1"

@@ -736,6 +736,35 @@ app.post('/api/translate', translateRateLimiter, authenticate, requireEntitlemen
     // isn't worth spending a model call on.
     if (text.length > 600) return res.status(400).json({ error: 'Text too long to translate.' });
 
+    // The subtitle is a GLOSS: it exists so the learner can check what LEXIS
+    // just said, so it must be in the language they already speak — the
+    // opposite of the one they are learning.
+    //
+    //   direction 'en' -> Thai speaker learning English -> gloss in Thai
+    //   direction 'th' -> English speaker learning Thai -> gloss in English
+    //
+    // (See buildTutorInstructions: direction 'th' means "Thai tutor for
+    // English speakers".)
+    //
+    // This used to be left to the model to auto-detect from the input:
+    // "if it's English translate to Thai, if it's Thai translate to
+    // English". That reads as correct and is wrong in exactly the case
+    // that matters. LEXIS is a bilingual tutor and code-switches
+    // constantly — a word of Thai encouragement while teaching English,
+    // an English scaffold while teaching Thai. Auto-detect keys off that
+    // fragment rather than off the lesson, so the gloss flips to the
+    // language the learner is trying to learn, which is precisely the one
+    // they cannot read yet. The frontend has always sent `direction`
+    // (LexisApp.jsx requestTranslation); this endpoint simply ignored it.
+    const direction = req.body?.direction === 'th' ? 'th' : 'en';
+    const targetLanguage = direction === 'th' ? 'English' : 'Thai';
+    const systemPrompt =
+      `You translate short spoken tutoring utterances for a language learner. ` +
+      `Translate the given text into ${targetLanguage}, whatever language it is written in. ` +
+      `If it is already entirely in ${targetLanguage}, repeat it unchanged. ` +
+      `If it mixes languages, render the whole thing in ${targetLanguage}. ` +
+      `Reply with ONLY the ${targetLanguage} translation — no quotes, no explanation, no romanization, no commentary.`;
+
     const apiKey = process.env.OPENAI_API_KEY;
     const model = process.env.OPENAI_TEXT_MODEL || 'gpt-4o-mini';
 
@@ -752,7 +781,7 @@ app.post('/api/translate', translateRateLimiter, authenticate, requireEntitlemen
         messages: [
           {
             role: 'system',
-            content: 'You translate short spoken tutoring utterances between English and Thai. If the given text is in English, translate it to Thai. If it is in Thai (or a mix of English and Thai), translate the whole thing to English. Reply with ONLY the translation — no quotes, no explanation, no repeating the original.'
+            content: systemPrompt
           },
           { role: 'user', content: text }
         ]
