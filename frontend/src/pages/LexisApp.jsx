@@ -170,6 +170,9 @@ export default function LexisApp({ navigateTo }) {
 
   // References
   const pcRef = useRef(null);
+  // Poll handle for the playout-lag measurement in setupDualVisualizers;
+  // held here so teardown can clear it like the other visualizer handles.
+  const visualizerStatsTimerRef = useRef(null);
   const dcRef = useRef(null);
   const mediaStreamRef = useRef(null);
   const localAnalyserRef = useRef(null);
@@ -387,30 +390,26 @@ export default function LexisApp({ navigateTo }) {
       localAudioContextRef.current = localCtx;
       localAnalyserRef.current = localAnalyser;
 
-      // Remote AI Analyser.
+      // Remote AI Analyser — still a STREAM tap, deliberately.
       //
-      // REVERTED 2 Sep 2026, and the attempt is recorded here so it is not
-      // repeated blind. This tapped the <audio> element instead of the
-      // stream (createMediaElementSource) so that analysis and playback
-      // would share one clock. The diagnosis behind it still stands: the
-      // stream tap sees packets as they arrive, while the element plays
-      // them after its own jitter buffer, so the mouth leads the voice.
+      // History, so the wrong fix is not tried a third time. The mouth led
+      // the voice because this tap sees packets as they arrive off the
+      // network, while the <audio> element plays them after its own jitter
+      // buffer. On 2 Sep 2026 that was addressed by tapping the element
+      // instead (createMediaElementSource) so analysis and playback would
+      // share a clock. On a real Android device it made LEXIS speak
+      // NOTICEABLY SLOWER — almost certainly a resample, since WebRTC audio
+      // is 48kHz and a default AudioContext adopts the device's preferred
+      // rate. Slower speech is a far worse fault than an early mouth on a
+      // product whose value is how a tutor sounds, so it was reverted.
       //
-      // But on a real Android device the element tap made LEXIS speak
-      // NOTICEABLY SLOWER. Audio was never lost — the interlock held — but
-      // slower speech is a worse fault than a mouth that leads, especially
-      // on a product whose whole value is how a tutor sounds. The likeliest
-      // cause is a sample-rate mismatch: WebRTC audio is 48kHz, and a
-      // default AudioContext takes the device's preferred rate, so routing
-      // playback through the graph can resample it. That is a hypothesis,
-      // not a confirmed diagnosis — it was not reproducible from a
-      // development sandbox.
-      //
-      // If this is attempted again: construct the context with an explicit
-      // sampleRate matched to the track's settings
-      // (track.getSettings().sampleRate) rather than letting it default,
-      // and test on a physical Android device, since that is where it was
-      // caught.
+      // The fix now runs the other way round, and this is the key idea:
+      // the audio path is left completely alone, and the VISUAL signal is
+      // delayed to meet it (see remoteLevelHistory below). Nothing here can
+      // resample, reroute or slow down what the student hears, because
+      // nothing here touches playback at all — the worst case of getting
+      // the delay wrong is a mouth that lags slightly, which is the same
+      // class of fault as today's, not a new one.
       if (remoteStream) {
         const remoteCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (remoteCtx.state === 'suspended') remoteCtx.resume();
@@ -423,6 +422,48 @@ export default function LexisApp({ navigateTo }) {
 
       const localData = new Uint8Array(localAnalyser.frequencyBinCount);
       const remoteData = remoteAnalyserRef.current ? new Uint8Array(remoteAnalyserRef.current.frequencyBinCount) : null;
+
+      // How far the analyser runs AHEAD of what the student actually hears:
+      // the receiver's jitter buffer plus the output device's own latency.
+      // Both are measured rather than guessed, because neither is a
+      // constant — jitter buffer depth adapts to the network, and output
+      // latency differs wildly between a laptop speaker and Bluetooth
+      // earbuds, which is exactly the range this product is used across.
+      // Starts at 0 so the mouth behaves exactly as before until a real
+      // reading arrives.
+      let playoutLagMs = 0;
+      const statsTimer = setInterval(async () => {
+        try {
+          const pc = pcRef.current;
+          if (!pc || pc.connectionState !== 'connected') return;
+          const stats = await pc.getStats();
+          let lag = 0;
+          stats.forEach((report) => {
+            if (report.type === 'inbound-rtp' && report.kind === 'audio' && report.jitterBufferEmittedCount > 0) {
+              // Cumulative averages, so this is the mean depth over the
+              // call rather than an instantaneous spike — steadier to drive
+              // an animation from.
+              lag = (report.jitterBufferDelay / report.jitterBufferEmittedCount) * 1000;
+            }
+          });
+          const outputLatency = remoteAudioContextRef.current?.outputLatency
+            || remoteAudioContextRef.current?.baseLatency
+            || 0;
+          lag += outputLatency * 1000;
+          // Clamped hard. A wild reading from a browser that reports these
+          // fields oddly should not park the mouth half a second behind.
+          playoutLagMs = Math.max(0, Math.min(400, lag));
+        } catch {
+          // Stats are a nicety; losing them just means no compensation.
+        }
+      }, 2000);
+      visualizerStatsTimerRef.current = statsTimer;
+
+      // Recent tutor levels, so the mouth can be driven by what was heard
+      // playoutLagMs ago instead of what just arrived. One second of
+      // history at ~60fps is a small, fixed cost and covers the 400ms cap
+      // with room to spare.
+      const remoteLevelHistory = [];
 
       const renderFrame = () => {
         if (!localAnalyserRef.current) return;
@@ -441,9 +482,26 @@ export default function LexisApp({ navigateTo }) {
           remoteLevel = rawRemote > 8 ? rawRemote : 0; // Noise-floor gate
         }
 
+        // The waveform ring stays on the live signal: it also reflects the
+        // student's own mic, which they hear with no delay, so holding it
+        // back would make their own voice feel laggy to fix someone else's.
         const effectiveLevel = Math.max(localLevel, remoteLevel * 0.9);
         setAudioLevel(Math.min(100, Math.round((effectiveLevel / 128) * 100)));
-        setTutorLevel(Math.min(100, Math.round((remoteLevel / 128) * 100)));
+
+        // The mouth, however, is only ever about LEXIS, and is the one
+        // thing a viewer checks against the voice — so it gets the delayed
+        // reading.
+        const now = performance.now();
+        remoteLevelHistory.push({ t: now, level: remoteLevel });
+        while (remoteLevelHistory.length > 1 && now - remoteLevelHistory[0].t > 1000) {
+          remoteLevelHistory.shift();
+        }
+        const target = now - playoutLagMs;
+        let heardLevel = remoteLevelHistory[0].level;
+        for (let i = remoteLevelHistory.length - 1; i >= 0; i--) {
+          if (remoteLevelHistory[i].t <= target) { heardLevel = remoteLevelHistory[i].level; break; }
+        }
+        setTutorLevel(Math.min(100, Math.round((heardLevel / 128) * 100)));
 
         // Render Canvas Waveform Ring
         const canvas = canvasRef.current;
@@ -965,6 +1023,10 @@ export default function LexisApp({ navigateTo }) {
       reconnectTimeoutRef.current = null;
     }
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    if (visualizerStatsTimerRef.current) {
+      clearInterval(visualizerStatsTimerRef.current);
+      visualizerStatsTimerRef.current = null;
+    }
     if (localAudioContextRef.current) localAudioContextRef.current.close().catch(() => {});
     if (remoteAudioContextRef.current) remoteAudioContextRef.current.close().catch(() => {});
     if (mediaStreamRef.current) mediaStreamRef.current.getTracks().forEach(t => t.stop());
