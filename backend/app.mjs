@@ -1387,9 +1387,19 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
     } else if (event.type === 'customer.subscription.updated') {
       // LEGACY. Nothing sold since 2 Sep 2026 creates a subscription, but
       // the ones created before it are still live in Stripe and still bill,
-      // so these two handlers stay until the last of them is gone. They
-      // match on stripe_subscription_id, which a pass never sets, so they
-      // cannot touch a pass holder's row.
+      // so these two handlers stay until the last of them is gone.
+      //
+      // They must not touch someone who has since bought a pass, and
+      // matching on stripe_subscription_id alone does NOT achieve that: a
+      // former subscriber keeps that id on their profile forever, so this
+      // handler would happily set an active pass holder to 'past_due' —
+      // and the deleted handler below would set them to 'canceled'/'free'
+      // — destroying access they had just paid for. Two of these
+      // subscriptions are past_due in Stripe right now, and past_due is
+      // exactly the state that ends in a deletion event, so this is the
+      // ordinary path rather than a corner case. Hence the live-pass guard
+      // on both: NULL expiry (a real legacy subscriber) or an expiry
+      // already in the past may be updated; a running pass may not.
       //
       // Covers payment failures / recoveries mid-cycle (Stripe status:
       // active, past_due, unpaid, canceled, incomplete, incomplete_expired).
@@ -1400,17 +1410,33 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
         const { error } = await supabase
           .from('profiles')
           .update({ subscription_status: mapped, updated_at: new Date().toISOString() })
-          .eq('stripe_subscription_id', subscription.id);
+          .eq('stripe_subscription_id', subscription.id)
+          .or(`access_expires_at.is.null,access_expires_at.lt.${new Date().toISOString()}`);
         if (error) logError('Webhook Failed to Update Subscription Status', error);
       }
 
     } else if (event.type === 'customer.subscription.deleted') {
       const subscription = event.data.object;
+
+      // Same live-pass guard as above, and for the same reason: this is the
+      // event that would otherwise cancel a pass somebody is currently
+      // using, because they happened to also hold an old subscription.
       const { error } = await supabase
         .from('profiles')
         .update({ subscription_status: 'canceled', subscription_tier: 'free', updated_at: new Date().toISOString() })
-        .eq('stripe_subscription_id', subscription.id);
+        .eq('stripe_subscription_id', subscription.id)
+        .or(`access_expires_at.is.null,access_expires_at.lt.${new Date().toISOString()}`);
       if (error) logError('Webhook Failed to Cancel Subscription', error);
+
+      // Forget the subscription itself either way. It no longer exists in
+      // Stripe, so keeping the id only leaves a "Cancel plan" button that
+      // errors and a row that a replayed event could match again. Runs
+      // after the update above, which still needs the id to find the row.
+      const { error: clearError } = await supabase
+        .from('profiles')
+        .update({ stripe_subscription_id: null, updated_at: new Date().toISOString() })
+        .eq('stripe_subscription_id', subscription.id);
+      if (clearError) logError('Webhook Failed to Clear Deleted Subscription Id', clearError);
     }
 
     res.json({ received: true });

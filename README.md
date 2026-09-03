@@ -2,7 +2,7 @@
 
 **Language Engine & eXecutive Intelligence System**
 
-A production-hardened, voice-native AI English tutor built on OpenAI Realtime API + native WebRTC, wrapped in a SaaS shell: Supabase email auth, a free-trial/subscription billing guard, Stripe subscription Checkout, and a bilingual (EN/TH) landing + pricing page. Designed for Thai youth ESL beta with sub-300ms latency, barge-in support, and real-time transcript streaming.
+A production-hardened, voice-native AI English tutor built on OpenAI Realtime API + native WebRTC, wrapped in a SaaS shell: Supabase email auth, a free-trial/pass billing guard, Stripe one-off pass Checkout (card + PromptPay), and a bilingual (EN/TH) landing + pricing page. Designed for Thai youth ESL beta with sub-300ms latency, barge-in support, and real-time transcript streaming.
 
 ## Architecture
 
@@ -28,11 +28,11 @@ A production-hardened, voice-native AI English tutor built on OpenAI Realtime AP
 │                              RAILWAY BACKEND BROKER                                      │
 │  • /api/session — Mint Ephemeral GA Tokens (/v1/realtime/client_secrets)                 │
 │  • /api/heartbeat — 30-Second Usage Telemetry & Trial Limit Enforcement                 │
-│  • /api/stripe/checkout, /api/stripe/webhook — Subscription Creation & Lifecycle        │
+│  • /api/stripe/checkout, /api/stripe/webhook — One-off Pass Purchase & Fulfilment       │
 └──────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-The backend never talks to OpenAI on a user's behalf until `authenticate` + `requireEntitlement` have verified the Supabase JWT and confirmed the user is inside their trial/subscription allowance — see `backend/server.mjs`. Checkout and `/api/me` deliberately use `authenticate` alone (no entitlement check), since a user who just ran out of trial time is exactly who needs to reach those endpoints.
+The backend never talks to OpenAI on a user's behalf until `authenticate` + `requireEntitlement` have verified the Supabase JWT and confirmed the user is inside their trial allowance or holds an unexpired pass — see `backend/server.mjs`. Checkout and `/api/me` deliberately use `authenticate` alone (no entitlement check), since a user who just ran out of trial time is exactly who needs to reach those endpoints.
 
 ## Reconciliation from Blueprint → v2026.3
 
@@ -42,11 +42,11 @@ The backend never talks to OpenAI on a user's behalf until `authenticate` + `req
 | **WebRTC Endpoint** | `POST /v1/realtime?model=` (beta) | `POST /v1/realtime/calls?model=` (GA) |
 | **Session Schema** | Flat (`voice`, `instructions` at root) | Nested (`session.audio.output.voice`) |
 | **Auth** | Unauthenticated `cors(*)` | Supabase JWT + per-user billing guard + rate limiting |
-| **Billing** | None | Free trial (15 min) → Stripe subscription Checkout (weekly/monthly), lifecycle synced via webhook |
+| **Billing** | None | Free trial (15 min) → Stripe one-off pass Checkout (7-day / 30-day), fulfilled by webhook. Payment mode, not subscription mode, so PromptPay can be offered — see CLAUDE.md |
 | **Safety ID** | Missing | `OpenAI-Safety-Identifier` (SHA-256 hash of Supabase user id) |
 | **VAD Tuning** | Aggressive 500ms silence | Thai ESL profile: 800ms silence, 0.5 threshold |
 | **Pedagogy** | Generic tutor prompt | 15-25 word responses, gentle correction |
-| **Voice** | `alloy` | `verse` |
+| **Voice** | `alloy` | `marin` |
 | **UI** | Plain monospace terminal | Landing/pricing/auth pages + Tailwind/lucide-react app shell + dual-analyser waveform ring |
 | **Audio Viz** | None | Real-time dual `AudioContext` + `AnalyserNode` (student + LEXIS, color-coded) |
 | **Cleanup** | Partial | Full track stop, PC close, DOM cleanup, heartbeat interval cleared |

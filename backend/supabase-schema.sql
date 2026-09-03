@@ -35,11 +35,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   -- — so the expiry has to be written down at purchase and checked on
   -- every request (paidAccessActive in backend/app.mjs).
   access_expires_at TIMESTAMPTZ,
-  -- The last Stripe Checkout Session redeemed into a pass. Purely an
-  -- idempotency key for redeem_pass: Stripe delivers webhooks at least
-  -- once, and a delayed payment method such as PromptPay legitimately
-  -- produces two grantable events for one purchase.
-  last_checkout_session_id TEXT,
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -295,20 +290,47 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
+-- Every Checkout Session that has already been turned into a pass.
+--
+-- This is a set, not a "most recent" marker, and that distinction is the
+-- whole point. The first version of this kept one last_checkout_session_id
+-- on the profile, which only rejects a duplicate that arrives immediately
+-- after the original. Stripe offers no such ordering guarantee, and the
+-- delayed-payment flow makes the bad interleaving ordinary rather than
+-- exotic: session A completes, session B is bought and redeemed, and then
+-- A's async_payment_succeeded finally lands. Against a single slot A no
+-- longer matches B, so it is granted a second time — one payment, two
+-- passes. A primary key on the session id cannot be fooled by ordering.
+CREATE TABLE IF NOT EXISTS public.redeemed_checkout_sessions (
+  session_id TEXT PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  redeemed_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+-- RLS on with no policies at all: the backend reaches this through
+-- redeem_pass with the service_role key (which bypasses RLS), and nothing
+-- else has any business reading which sessions have been redeemed.
+ALTER TABLE public.redeemed_checkout_sessions ENABLE ROW LEVEL SECURITY;
+
 -- Redeem a paid Stripe Checkout Session into a pass.
 --
 -- All of it in one statement under a row lock, rather than a read followed
--- by a write from the webhook handler, for two reasons that both cost real
--- money if got wrong:
+-- by a write from the webhook handler, for three reasons that each cost
+-- real money if got wrong:
 --
 --   * Idempotency. Stripe guarantees at-least-once webhook delivery, and a
 --     PromptPay purchase can arrive as both checkout.session.completed and
---     checkout.session.async_payment_succeeded. Keying on the session id
---     means one paid pass grants exactly one pass, however many times we
---     are told about it.
+--     checkout.session.async_payment_succeeded. The INSERT below is what
+--     decides: it either claims the session id or loses the race, so one
+--     paid session grants exactly one pass however often we are told.
 --   * Stacking. Buying again while a pass is still running extends it from
 --     the later of now and the current expiry, so nobody loses the days
 --     they already paid for by renewing early.
+--   * No silent downgrade. A monthly holder who adds a weekly pass keeps
+--     the monthly tier. Tier is not a label here — it picks the fair-use
+--     ceiling and the accounting window (FAIR_USE_MINUTES / PERIOD_DAYS in
+--     backend/app.mjs), so overwriting it would have cut a monthly
+--     subscriber from 450 minutes to 150 for a month they had paid for,
+--     as a consequence of spending MORE money.
 --
 -- The fair-use window is re-anchored to now() on every redemption, so each
 -- pass carries its own quota of minutes. Someone who has hit this period's
@@ -324,31 +346,41 @@ CREATE OR REPLACE FUNCTION public.redeem_pass(
 RETURNS TIMESTAMPTZ AS $$
 DECLARE
   v_expires TIMESTAMPTZ;
-  v_last_session TEXT;
+  v_tier TEXT;
+  v_claimed INT;
 BEGIN
-  SELECT access_expires_at, last_checkout_session_id
-    INTO v_expires, v_last_session
+  SELECT access_expires_at, subscription_tier
+    INTO v_expires, v_tier
   FROM public.profiles WHERE id = p_user_id FOR UPDATE;
 
   IF NOT FOUND THEN
     RETURN NULL;
   END IF;
 
-  -- Already redeemed. Return the expiry we granted the first time so a
-  -- retry looks like a success to the caller rather than like a failure
-  -- worth retrying again.
-  IF v_last_session IS NOT NULL AND v_last_session = p_session_id THEN
+  INSERT INTO public.redeemed_checkout_sessions (session_id, user_id)
+  VALUES (p_session_id, p_user_id)
+  ON CONFLICT (session_id) DO NOTHING;
+  GET DIAGNOSTICS v_claimed = ROW_COUNT;
+
+  -- Someone already redeemed this session. Return the expiry that redemption
+  -- produced, so a retry reads as success rather than as a failure worth
+  -- retrying again.
+  IF v_claimed = 0 THEN
     RETURN v_expires;
+  END IF;
+
+  -- Keep the longer tier while a pass is still live; see the header.
+  IF NOT (v_expires IS NOT NULL AND v_expires > now() AND v_tier = 'monthly') THEN
+    v_tier := p_tier;
   END IF;
 
   v_expires := GREATEST(COALESCE(v_expires, now()), now()) + (p_days || ' days')::INTERVAL;
 
   UPDATE public.profiles
   SET subscription_status = 'active',
-      subscription_tier = p_tier,
+      subscription_tier = v_tier,
       stripe_customer_id = COALESCE(p_customer_id, stripe_customer_id),
       access_expires_at = v_expires,
-      last_checkout_session_id = p_session_id,
       period_seconds_used = 0,
       period_started_at = now(),
       updated_at = timezone('utc'::text, now())
@@ -405,8 +437,11 @@ GRANT EXECUTE ON FUNCTION public.redeem_pass(UUID, TEXT, INT, TEXT, TEXT) TO ser
 --   -- its column names at execution — so without this every purchase
 --   -- webhook would 500 AFTER Stripe had taken the money.
 --   ALTER TABLE public.profiles
---     ADD COLUMN IF NOT EXISTS access_expires_at TIMESTAMPTZ,
---     ADD COLUMN IF NOT EXISTS last_checkout_session_id TEXT;
+--     ADD COLUMN IF NOT EXISTS access_expires_at TIMESTAMPTZ;
+--   -- Redemption bookkeeping moved out of profiles.last_checkout_session_id
+--   -- into its own table the same day; drop the column if you ran the
+--   -- first version of this migration. Nothing reads it.
+--   ALTER TABLE public.profiles DROP COLUMN IF EXISTS last_checkout_session_id;
 --
 -- then run sections 3-8 above (usage_logs table, RLS, trigger, RPCs).
 -- ============================================================================

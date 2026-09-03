@@ -22,7 +22,7 @@ export default function TermsPage({ navigateTo }) {
   });
 
   return (
-    <LegalPageShell navigateTo={navigateTo} title="Terms of Service" lastUpdated="19 August 2026">
+    <LegalPageShell navigateTo={navigateTo} title="Terms of Service" lastUpdated="2 September 2026">
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">What LEXIS is</h2>
       <p>
         LEXIS is a voice conversation practice tool for spoken English

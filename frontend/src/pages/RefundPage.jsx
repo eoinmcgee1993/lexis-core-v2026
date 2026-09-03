@@ -28,7 +28,7 @@ export default function RefundPage({ navigateTo }) {
   });
 
   return (
-    <LegalPageShell navigateTo={navigateTo} title="Refund & Cancellation Policy" lastUpdated="19 August 2026">
+    <LegalPageShell navigateTo={navigateTo} title="Refund & Cancellation Policy" lastUpdated="2 September 2026">
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Passes don't need cancelling</h2>
       <p>
         A LEXIS pass is a single payment for a fixed number of days:{' '}
