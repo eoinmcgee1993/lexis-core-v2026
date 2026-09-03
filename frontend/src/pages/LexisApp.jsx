@@ -18,6 +18,7 @@ import HistoryStage from '../components/stages/HistoryStage';
 import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
 import { reportError } from '../lib/errorReporting';
+import { analyseFrame, emptyVisemes } from '../lib/visemes';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -133,7 +134,14 @@ export default function LexisApp({ navigateTo }) {
   const [sessionError, setSessionError] = useState('');
   const [transcripts, setTranscripts] = useState([]);
   const [audioLevel, setAudioLevel] = useState(0);
-  const [tutorLevel, setTutorLevel] = useState(0); // LEXIS's own voice energy, drives the avatar's mouth
+  const [tutorLevel, setTutorLevel] = useState(0); // LEXIS's own voice energy, drives the waveform ring
+  // Phonetic mouth data derived from the same frames (src/lib/visemes.js).
+  // `openness` replaces loudness as the mouth-open signal — an /s/ is loud
+  // and made with the mouth nearly shut, which the old level-only mapping
+  // could not express. `visemes` is only usable by a rig that actually has
+  // those blend shapes; the placeholder .glb has none, so it stays inert
+  // until a real ARKit export is dropped in.
+  const [tutorMouth, setTutorMouth] = useState({ openness: 0, visemes: emptyVisemes() });
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
@@ -492,16 +500,25 @@ export default function LexisApp({ navigateTo }) {
         // thing a viewer checks against the voice — so it gets the delayed
         // reading.
         const now = performance.now();
-        remoteLevelHistory.push({ t: now, level: remoteLevel });
+        // Analysed once, here, and carried through the delay buffer with its
+        // own frame — re-analysing later against a stale byte array would
+        // silently pair one frame's spectrum with another frame's loudness.
+        const mouth = remoteData
+          ? analyseFrame(remoteData, remoteAudioContextRef.current?.sampleRate || 48000, remoteAnalyserRef.current?.fftSize || 512)
+          : { openness: 0, visemes: emptyVisemes() };
+        remoteLevelHistory.push({ t: now, level: remoteLevel, mouth });
         while (remoteLevelHistory.length > 1 && now - remoteLevelHistory[0].t > 1000) {
           remoteLevelHistory.shift();
         }
         const target = now - playoutLagMs;
-        let heardLevel = remoteLevelHistory[0].level;
+        let heard = remoteLevelHistory[0];
         for (let i = remoteLevelHistory.length - 1; i >= 0; i--) {
-          if (remoteLevelHistory[i].t <= target) { heardLevel = remoteLevelHistory[i].level; break; }
+          if (remoteLevelHistory[i].t <= target) { heard = remoteLevelHistory[i]; break; }
         }
-        setTutorLevel(Math.min(100, Math.round((heardLevel / 128) * 100)));
+        setTutorLevel(Math.min(100, Math.round((heard.level / 128) * 100)));
+        // The mouth data rides the SAME delayed sample, so the shape and the
+        // opening are never a frame out of step with each other.
+        setTutorMouth(heard.mouth);
 
         // Render Canvas Waveform Ring
         const canvas = canvasRef.current;
@@ -1051,6 +1068,7 @@ export default function LexisApp({ navigateTo }) {
     setStatus(finalStatus);
     setAudioLevel(0);
     setTutorLevel(0);
+    setTutorMouth({ openness: 0, visemes: emptyVisemes() });
     setAudioBlocked(false);
 
     // Route to the next stage based on whether a real conversation
@@ -1082,6 +1100,7 @@ export default function LexisApp({ navigateTo }) {
         isConnecting={isConnecting}
         status={status}
         tutorLevel={tutorLevel}
+        tutorMouth={tutorMouth}
         audioLevel={audioLevel}
         canvasRef={canvasRef}
         transcripts={transcripts}
