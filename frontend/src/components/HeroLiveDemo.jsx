@@ -38,7 +38,7 @@
 // autoplaying audio with sound anyway, and a marketing page that starts
 // talking at you unasked is its own bad experience) — see the mute
 // toggle below.
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import TutorAvatarPhoto from './TutorAvatarPhoto';
 
@@ -179,9 +179,124 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
+// Analyser tap on the two <audio> elements, so the mouth moves to the
+// speech the visitor is actually hearing.
+//
+// This is the lip-sync fix (3 Sep 2026). The mouth was driven by
+// useSimulatedTutorLevel below — a sine wave plus noise — while these
+// elements played REAL recorded speech. Those two signals have nothing to
+// do with each other, so the mouth could never match the voice; it wasn't
+// out of sync so much as unrelated to it. No amount of tuning the
+// simulation could have fixed that, which is why earlier attempts at the
+// smoothing constant went nowhere.
+//
+// Element-tapping is what broke a previous attempt at the REAL session
+// screen (see setupDualVisualizers in pages/LexisApp.jsx): routing a
+// WebRTC remote stream through an AudioContext resampled 48kHz audio and
+// made LEXIS speak slower on Android. That failure does not transfer
+// here. This is a plain <audio> element playing a same-origin mp3, which
+// the browser decodes and resamples correctly on its own; there is no
+// live stream and no fixed 48kHz clock to fight.
+//
+// The one real hazard is that createMediaElementSource REROUTES the
+// element: once called, its sound reaches the speakers only through the
+// graph. Wiring that into a suspended AudioContext would silence the
+// demo. So the context is resumed FIRST and the element is only routed
+// once the context is confirmed running — and anything unexpected falls
+// back to the simulation, whose worst case is the behaviour that shipped
+// before this. Attaching only after unmute also means the audible path is
+// untouched for the muted-autoplay default that most visitors see.
+
+// createMediaElementSource may be called only once per element, and the
+// node has to outlive React's effect churn, so both live outside the
+// component keyed by the element itself.
+const elementTaps = new WeakMap();
+let sharedAudioCtx = null;
+
+function tapElement(ctx, el) {
+  let tap = elementTaps.get(el);
+  if (!tap) {
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 512;
+    // Some smoothing in the analyser itself, on top of TutorAvatarPhoto's
+    // easing: raw frame-to-frame frequency data on speech is spiky enough
+    // to read as a flicker rather than a mouth.
+    analyser.smoothingTimeConstant = 0.6;
+    const source = ctx.createMediaElementSource(el);
+    source.connect(analyser);
+    analyser.connect(ctx.destination); // or the demo goes silent
+    tap = { analyser, data: new Uint8Array(analyser.frequencyBinCount) };
+    elementTaps.set(el, tap);
+  }
+  return tap;
+}
+
+// Returns 0-100 speech energy, or null when a real reading isn't available
+// (muted, blocked context, unsupported browser) so the caller can fall
+// back. Reads both clips and takes the louder: whichever is mid-line wins,
+// and the idle one contributes zero.
+function useAudioElementLevel(getElements, active) {
+  const [level, setLevel] = useState(null);
+
+  useEffect(() => {
+    if (!active) {
+      setLevel(null);
+      return;
+    }
+    let raf = null;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        if (!sharedAudioCtx) sharedAudioCtx = new Ctx();
+        const ctx = sharedAudioCtx;
+        if (ctx.state !== 'running') await ctx.resume();
+        // Never route an element into a graph that isn't running — that is
+        // the difference between a synced mouth and a silent demo.
+        if (ctx.state !== 'running' || cancelled) return;
+
+        const els = getElements();
+        if (!els.length) return;
+        const taps = els.map((el) => tapElement(ctx, el));
+        if (cancelled) return;
+
+        const tick = () => {
+          let peak = 0;
+          for (const tap of taps) {
+            tap.analyser.getByteFrequencyData(tap.data);
+            let sum = 0;
+            for (let i = 0; i < tap.data.length; i++) sum += tap.data[i];
+            peak = Math.max(peak, sum / tap.data.length);
+          }
+          setLevel(Math.min(100, (peak / 128) * 100));
+          raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      } catch {
+        // Fall back to the simulation rather than losing the mouth entirely.
+        if (!cancelled) setLevel(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (raf) cancelAnimationFrame(raf);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
+  return level;
+}
+
 // Simulated speech energy driving TutorAvatarPhoto's mouth — the same
 // component the real Live Conversation screen uses, fed a fake tutorLevel
-// instead of real audio-frequency data (there's no real audio here). A
+// instead of real audio-frequency data. Still the right answer while the
+// demo is MUTED, which is the default: there is no audible speech to sync
+// to, so the mouth is decorative and a plausible talking rhythm is all it
+// needs to be. The moment the visitor unmutes, useAudioElementLevel above
+// takes over. A
 // sine wave plus a little noise reads as talking; TutorAvatarPhoto's own
 // internal easing (useSmoothed) is what turns this into a natural-looking
 // mouth open/close rather than us re-implementing that smoothing here too.
@@ -293,7 +408,16 @@ export default function HeroLiveDemo({ direction, caption }) {
 
   const visibleLines = script[step];
   const lexisIsTalking = visibleLines[visibleLines.length - 1]?.speaker === 'lexis';
-  const simulatedTutorLevel = useSimulatedTutorLevel(lexisIsTalking && animating);
+  // Real speech energy whenever there is audible speech; the simulation
+  // only while muted or if the tap couldn't be established.
+  const measuredTutorLevel = useAudioElementLevel(
+    useCallback(() => [openingRef.current, followupRef.current].filter(Boolean), []),
+    !muted && animating
+  );
+  const simulatedTutorLevel = useSimulatedTutorLevel(
+    lexisIsTalking && animating && measuredTutorLevel === null
+  );
+  const tutorLevel = measuredTutorLevel ?? simulatedTutorLevel;
 
   return (
     <div
@@ -333,7 +457,7 @@ export default function HeroLiveDemo({ direction, caption }) {
             {AVATAR_PHOTO_URL && (
               <TutorAvatarPhoto
                 photoUrl={AVATAR_PHOTO_URL}
-                tutorLevel={simulatedTutorLevel}
+                tutorLevel={tutorLevel}
                 isConnected
                 isConnecting={false}
                 paused={!animating}

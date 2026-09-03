@@ -4,7 +4,7 @@
 - Node.js 18+
 - OpenAI API key with Realtime API access
 - Supabase project (Auth + Postgres)
-- Stripe account with two recurring Prices (Weekly ฿199, Monthly ฿599)
+- Stripe account with two **one-time** Prices (Weekly ฿199, Monthly ฿599) — LEXIS sells passes, not subscriptions
 - Railway account (backend)
 - Vercel account (frontend)
 - GitHub repository
@@ -52,9 +52,18 @@ lexis-core-v2026/
 4. **Project Settings → API**: copy the Project URL, `anon` public key, and `service_role` secret key — you'll need all three below.
 
 ## 2. Stripe Setup
-1. **Product catalog** → create a "Weekly Pass" product with a recurring ฿199/week Price, and a "Monthly Immersion" product with a recurring ฿599/month Price. Copy each Price ID (`price_...`, not the product id).
-2. The mapping from plan tier to Price ID lives server-side, in `backend/app.mjs`'s `STRIPE_PRICES` constant (moved here from the frontend 21 Aug 2026, re-audit B2 — a client used to be able to send an arbitrary `price_id` straight through with no server-side check that it matched the tier it claimed to be). Either edit that constant directly to your real IDs, or set the `STRIPE_PRICE_WEEKLY`/`STRIPE_PRICE_MONTHLY` environment variables (both optional — they override the constant's fallback values, so a price change only needs an env var update, not a redeploy). The frontend only ever sends which tier was picked (`planTier`); it never sends a price ID.
-3. **Developers → Webhooks** → add an endpoint at `https://your-backend.up.railway.app/api/stripe/webhook`, subscribed to `checkout.session.completed`, `customer.subscription.updated`, and `customer.subscription.deleted`. Copy the endpoint's **Signing secret** (`whsec_...`).
+1. **Product catalog** → create a "Weekly Pass" product with a **one-time** ฿199 Price, and a "Monthly Immersion" product with a **one-time** ฿599 Price. Copy each Price ID (`price_...`, not the product id). One-time, not recurring: a pass is a single payment buying a fixed number of days, and Checkout runs in `payment` mode so PromptPay can be offered — see step 2.
+2. The mapping from plan tier to Price ID lives server-side, in `backend/app.mjs`'s `STRIPE_PRICES` constant (moved here from the frontend 21 Aug 2026, re-audit B2 — a client used to be able to send an arbitrary `price_id` straight through with no server-side check that it matched the tier it claimed to be). Either edit that constant directly to your real IDs, or set the `STRIPE_PRICE_WEEKLY_ONETIME`/`STRIPE_PRICE_MONTHLY_ONETIME` environment variables (both optional — they override the constant's fallback values, so a price change only needs an env var update, not a redeploy). The frontend only ever sends which tier was picked (`planTier`); it never sends a price ID.
+
+   Both must be **one-time** Prices (`type: one_time`), not recurring ones. Checkout runs in `payment` mode so that PromptPay is offered — Stripe does not support PromptPay in subscription-mode Checkout, and Thailand pays by bank QR — and a recurring Price in a payment-mode session is a hard Stripe error. The `_ONETIME` suffix is deliberate: the older `STRIPE_PRICE_WEEKLY`/`STRIPE_PRICE_MONTHLY` variables may still be set in an existing environment, pointing at the recurring Prices, and reusing those names would have let a stale value break every checkout silently. Delete the old two once nothing reads them.
+3. **Settings → Payment methods** → enable the methods you want offered. The checkout code names none of them, so this dashboard page is the only place that decides. Enable **PromptPay** for a Thai audience: it is the country's bank-QR standard, and it only appears on THB-priced sessions, so nobody outside Thailand is shown a QR they can't use.
+4. **Developers → Webhooks** → add an endpoint at `https://your-backend.up.railway.app/api/stripe/webhook`, subscribed to:
+   - `checkout.session.completed` — the normal grant
+   - `checkout.session.async_payment_succeeded` — **required**, not optional. PromptPay and other delayed methods confirm *after* the customer is redirected back; they arrive as `completed` with `payment_status: 'unpaid'`, which the backend refuses to grant on, and then as this event once the money moves. Without it a PromptPay customer pays and never receives their pass.
+   - `checkout.session.async_payment_failed` — so an abandoned QR is recorded rather than silently lost
+   - `customer.subscription.updated`, `customer.subscription.deleted` — only for subscriptions created before 2 Sep 2026; a fresh deployment has none and can skip both
+
+   Copy the endpoint's **Signing secret** (`whsec_...`).
 
 ## Local Development
 
@@ -167,7 +176,8 @@ Run these against the actual deployed Railway/Vercel/Supabase/Stripe stack befor
 | `401 Unauthorized` | User isn't signed in, or the Supabase session expired — sign in again |
 | `403 TRIAL_EXHAUSTED` on `/api/session` or `/api/heartbeat` | Trial exhausted or subscription lapsed — expected; user needs to buy/renew a pass via `/pricing` |
 | `403 Profile not found` | The signup trigger didn't fire — re-run `backend/supabase-schema.sql`, or check Postgres logs for the trigger |
-| Stripe checkout 500s | `STRIPE_PRICE_WEEKLY`/`STRIPE_PRICE_MONTHLY` (if set) don't match a real Stripe Price, or `STRIPE_SECRET_KEY` is for the wrong mode (test vs live) — `planTier` → price mapping is server-side now (`backend/app.mjs`'s `STRIPE_PRICES`), the frontend no longer sends a priceId at all (21 Aug 2026, re-audit B2) |
+| Stripe checkout 500s | `STRIPE_PRICE_WEEKLY_ONETIME`/`STRIPE_PRICE_MONTHLY_ONETIME` (if set) don't match a real Stripe Price, are **recurring** rather than one-time (payment-mode Checkout rejects those outright), or `STRIPE_SECRET_KEY` is for the wrong mode (test vs live) — `planTier` → price mapping is server-side now (`backend/app.mjs`'s `STRIPE_PRICES`), the frontend no longer sends a priceId at all (21 Aug 2026, re-audit B2) |
+| Payment succeeds but access isn't granted | The `access_expires_at` column, the `redeemed_checkout_sessions` table, or the `redeem_pass` function are missing — re-run the migration block at the bottom of `backend/supabase-schema.sql`. Check `error_logs` for `Webhook Failed to Redeem Pass`. Also confirm the Stripe webhook endpoint is subscribed to `checkout.session.async_payment_succeeded`, not just `checkout.session.completed`: a PromptPay payment that confirms after the redirect arrives only on the async event |
 | Stripe webhook `signature verification failed` | `STRIPE_WEBHOOK_SECRET` doesn't match the endpoint in the Stripe Dashboard |
 | Payment succeeded but account still shows `free_trial` | The webhook endpoint isn't reachable, or isn't subscribed to `checkout.session.completed` — check Stripe's webhook delivery logs |
 | `OpenAI API Error 404` | Check `OPENAI_MODEL` is a valid Realtime model |

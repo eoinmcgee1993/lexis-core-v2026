@@ -71,7 +71,12 @@ class AvatarErrorBoundary extends React.Component {
   }
 }
 
-function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
+// tutorMouth is the phonetic analysis from src/lib/visemes.js: `openness`
+// (jaw position derived from first-formant share, not loudness) and
+// `visemes` (blend-shape weights, only usable by a rig that has them).
+// Defaulted so any caller still passing only tutorLevel keeps working —
+// notably the marketing hero, which has no real audio while muted.
+function TutorAvatar({ isConnected, isConnecting, tutorLevel, tutorMouth = null }) {
   const svgFallback = <TutorAvatarSVG isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />;
   const [photoFailed, setPhotoFailed] = useState(false);
 
@@ -82,6 +87,7 @@ function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
         isConnected={isConnected}
         isConnecting={isConnecting}
         tutorLevel={tutorLevel}
+        openness={tutorMouth ? tutorMouth.openness : null}
         onError={() => setPhotoFailed(true)}
       />
     );
@@ -92,7 +98,14 @@ function TutorAvatar({ isConnected, isConnecting, tutorLevel }) {
   return (
     <AvatarErrorBoundary fallback={svgFallback}>
       <Suspense fallback={svgFallback}>
-        <TutorAvatar3D url={AVATAR_GLB_URL} isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />
+        <TutorAvatar3D
+          url={AVATAR_GLB_URL}
+          isConnected={isConnected}
+          isConnecting={isConnecting}
+          tutorLevel={tutorLevel}
+          openness={tutorMouth ? tutorMouth.openness : null}
+          visemes={tutorMouth ? tutorMouth.visemes : null}
+        />
       </Suspense>
     </AvatarErrorBoundary>
   );
@@ -119,6 +132,7 @@ export default function LiveStage({
   isConnecting,
   status,
   tutorLevel,
+  tutorMouth,
   audioLevel,
   canvasRef,
   transcripts,
@@ -197,7 +211,7 @@ export default function LiveStage({
             <div className={`w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden flex items-center justify-center border ${
               isConnected ? 'bg-teal-950/40 border-teal-400/50 shadow-inner' : 'bg-white/5 border-white/10'
             }`}>
-              <TutorAvatar isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />
+              <TutorAvatar isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} tutorMouth={tutorMouth} />
             </div>
           </div>
           <div className="absolute -bottom-8 text-center">

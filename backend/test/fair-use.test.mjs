@@ -36,7 +36,8 @@ const grab = (name) => {
 const consts = src.slice(src.indexOf('const FAIR_USE_MINUTES'), src.indexOf('function fairUseCapSeconds'));
 const tmp = path.join(here, '.fair-use-extract.mjs');
 fs.writeFileSync(tmp, consts + grab('fairUseCapSeconds') + '\n' + grab('periodSecondsUsed') +
-  '\nexport { fairUseCapSeconds, periodSecondsUsed, FAIR_USE_MINUTES };');
+  '\n' + grab('passDays') + '\n' + grab('paidAccessActive') +
+  '\nexport { fairUseCapSeconds, periodSecondsUsed, passDays, paidAccessActive, FAIR_USE_MINUTES };');
 const m = await import(`file://${tmp}`);
 fs.unlinkSync(tmp);
 
@@ -77,6 +78,33 @@ t('monthly day 31 has rolled',      m.periodSecondsUsed({ subscription_tier: 'mo
 t('unparseable timestamp -> 0',     m.periodSecondsUsed({ subscription_tier: 'weekly',  period_started_at: 'nope',   period_seconds_used: 600 }), 0);
 t('absent anchor -> 0',             m.periodSecondsUsed({ subscription_tier: 'weekly',  period_seconds_used: 600 }), 0);
 t('unknown tier uses 7-day window', m.periodSecondsUsed({ subscription_tier: 'free',    period_started_at: ago(8),   period_seconds_used: 600 }), 0);
+
+// ── One-off passes (2 Sep 2026) ────────────────────────────────────────
+// A pass is a single charge buying a fixed window, so nothing in Stripe
+// ever fires to say it ended — paidAccessActive is the only thing that
+// ends one. These cases exist because getting it wrong in either direction
+// costs money: too lax and expired passes keep spending Realtime minutes,
+// too strict and a paying customer is locked out mid-pass.
+const inDays = (d) => new Date(Date.now() + d * 864e5).toISOString();
+
+t('pass valid mid-window',   m.paidAccessActive({ subscription_status: 'active', access_expires_at: inDays(3) }),    true);
+t('pass valid with a minute left', m.paidAccessActive({ subscription_status: 'active', access_expires_at: inDays(1 / 1440) }), true);
+t('expired pass is not active', m.paidAccessActive({ subscription_status: 'active', access_expires_at: ago(0.001) }), false);
+t('expired pass, long gone',    m.paidAccessActive({ subscription_status: 'active', access_expires_at: ago(40) }),    false);
+// NULL expiry = one of the recurring subscriptions sold before the switch.
+// Its liveness is Stripe's to report, so status alone decides.
+t('legacy subscription: no expiry, active', m.paidAccessActive({ subscription_status: 'active', access_expires_at: null }), true);
+t('legacy subscription: absent column',     m.paidAccessActive({ subscription_status: 'active' }),                         true);
+t('past_due is not access',  m.paidAccessActive({ subscription_status: 'past_due', access_expires_at: inDays(3) }),  false);
+t('canceled is not access',  m.paidAccessActive({ subscription_status: 'canceled', access_expires_at: inDays(3) }),  false);
+t('free_trial is not paid access', m.paidAccessActive({ subscription_status: 'free_trial' }),                        false);
+// Fails closed: a non-null value we cannot read is not proof of a live pass.
+t('unparseable expiry is not active', m.paidAccessActive({ subscription_status: 'active', access_expires_at: 'nope' }), false);
+
+// A pass IS one fair-use period, so these two must not drift apart.
+t('weekly pass is one weekly window',  m.passDays('weekly'),  7);
+t('monthly pass is one monthly window', m.passDays('monthly'), 30);
+t('unknown tier falls back to the shortest pass', m.passDays('free'), 7);
 
 // The property the caps were derived from: both tiers must carry the same
 // worst-case minutes per baht of revenue per day. The first pass (180/720)

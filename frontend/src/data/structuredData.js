@@ -36,12 +36,13 @@ export const APP_ID = `${SITE_URL}/#software`;
 // static block if either changes.
 
 // '/pricing' only, injected by PricingPage.jsx via useSeo.
-// UnitPriceSpecification with billingDuration + unitCode (ISO 8601-ish
-// duration codes: WEE = week, MON = month) signals these are recurring
-// charges, not one-time prices — a re-audit's N4 finding was that a bare
-// {"price": "199"} with only a priceValidUntil reads to an answer engine
-// as "LEXIS costs ฿199, full stop," which understates what a subscriber
-// actually pays over time.
+// UnitPriceSpecification with referenceQuantity + unitCode (ISO 8601-ish
+// duration codes: WEE = week, MON = month) says what the price BUYS: ฿199
+// for one week of access. It used to carry billingDuration instead, which
+// says the charge repeats every week — true when LEXIS sold subscriptions,
+// and a false claim now that a pass is a single payment that never renews
+// (2 Sep 2026). An answer engine repeating "฿199 per week, billed weekly"
+// would be quoting us on terms we do not offer.
 // lang defaults to 'en'; '/th/pricing' passes 'th' (Stage 4) so the
 // offer names/description read naturally in Thai rather than mixing an
 // English label into an otherwise-Thai page's structured data. The
@@ -65,18 +66,22 @@ const OFFER_TEXT = {
 export function buildOffersJsonLd(lang = 'en') {
   const text = OFFER_TEXT[lang];
   const pricingUrl = `${SITE_URL}${lang === 'th' ? '/th/pricing' : '/pricing'}`;
-  const recurringOffer = (name, tier) => ({
+  const passOffer = (name, tier) => ({
     '@type': 'Offer',
     name,
     url: pricingUrl,
     availability: 'https://schema.org/InStock',
+    price: String(tier.thb),
+    priceCurrency: CURRENCY,
     priceSpecification: {
       '@type': 'UnitPriceSpecification',
       price: String(tier.thb),
       priceCurrency: CURRENCY,
-      billingDuration: 1,
-      billingIncrement: 1,
-      unitCode: tier.unitCode
+      referenceQuantity: {
+        '@type': 'QuantitativeValue',
+        value: 1,
+        unitCode: tier.unitCode
+      }
     }
   });
   return {
@@ -95,8 +100,8 @@ export function buildOffersJsonLd(lang = 'en') {
         priceCurrency: CURRENCY,
         description: text.freeTrialDesc(TRIAL.minutes)
       },
-      recurringOffer(text.weekly, PRICING.weekly),
-      recurringOffer(text.monthly, PRICING.monthly)
+      passOffer(text.weekly, PRICING.weekly),
+      passOffer(text.monthly, PRICING.monthly)
     ]
   };
 }

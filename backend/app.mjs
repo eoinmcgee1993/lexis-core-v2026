@@ -356,15 +356,37 @@ function periodSecondsUsed(profile) {
   return profile.period_seconds_used || 0;
 }
 
+// Whether a paid entitlement is currently live.
+//
+// A one-off pass says when it ends; a legacy subscription does not, because
+// its liveness is Stripe's to report through the customer.subscription.*
+// webhooks. So a NULL access_expires_at means "not a pass" and is left to
+// subscription_status alone — that is what keeps the subscribers created
+// before 2 Sep 2026 working — while a pass that has run out stops counting
+// here whether or not anything told us. There is no Stripe event for "a
+// one-time charge got old", so this check is the only thing that ends a
+// pass.
+//
+// A non-null value that will not parse is treated as expired rather than
+// as valid: we cannot show the pass is still good, and the column is a
+// timestamptz written by Postgres, so this is unreachable short of a
+// schema change.
+function paidAccessActive(profile) {
+  if (profile.subscription_status !== 'active') return false;
+  if (!profile.access_expires_at) return true;
+  const expiresAt = Date.parse(profile.access_expires_at);
+  return Number.isFinite(expiresAt) && expiresAt > Date.now();
+}
+
 function requireEntitlement(req, res, next) {
   const profile = req.profile;
-  const isPaid = profile.subscription_status === 'active';
+  const isPaid = paidAccessActive(profile);
   const isTrialValid = profile.subscription_status === 'free_trial' && profile.seconds_used < profile.max_allowed_seconds;
 
   if (!isPaid && !isTrialValid) {
     const message = profile.subscription_status === 'free_trial' || profile.subscription_status === 'expired'
       ? 'Free trial limit reached. Please upgrade to a Weekly or Monthly Pass.'
-      : 'Your pass has ended. Please renew to continue.';
+      : 'Your pass has ended. Buy another one to keep going — passes never renew on their own.';
     return res.status(403).json({ error: 'TRIAL_EXHAUSTED', message });
   }
 
@@ -511,7 +533,7 @@ app.get('/api/me', authenticate, (req, res) => {
   // endpoint's job to describe the caller's own entitlement) — but if you
   // wire the meter up, read it from here rather than duplicating the cap.
   const profile = req.profile;
-  const fairUseSeconds = profile.subscription_status === 'active'
+  const fairUseSeconds = paidAccessActive(profile)
     ? fairUseCapSeconds(profile.subscription_tier)
     : null;
 
@@ -1042,13 +1064,53 @@ const SPONSOR_ADDON_THB = 50;
 // keeps working with zero Vercel config changes, while still letting a
 // price change happen via an env var update instead of a frontend
 // deploy, if that's ever wanted.
+//
+// These are ONE-TIME prices (Stripe `type: one_time`), not the recurring
+// ones this used to charge — see the checkout endpoint below for why the
+// billing model changed. The recurring prices still exist and still bill
+// the subscribers created before the change; nothing new is sold on them.
+//
+// Deliberately NOT the STRIPE_PRICE_WEEKLY / STRIPE_PRICE_MONTHLY env var
+// names this used to read. Those may still be set in a deployed
+// environment, pointing at the recurring prices, and a recurring price in
+// a payment-mode Checkout Session is a hard Stripe error — so a stale
+// value would silently break every checkout. New names mean an unset
+// variable falls through to the correct default instead.
 const STRIPE_PRICES = {
-  weekly: process.env.STRIPE_PRICE_WEEKLY || 'price_1U1hdLF1FdEsYK5EOSheNGGS',   // LEXIS Weekly Pass
-  monthly: process.env.STRIPE_PRICE_MONTHLY || 'price_1U1hdOF1FdEsYK5Ec6DgUlil'  // LEXIS Monthly Immersion
+  weekly: process.env.STRIPE_PRICE_WEEKLY_ONETIME || 'price_1UBKYIF1FdEsYK5EmoapMorw',   // LEXIS Weekly Pass — 7-day, THB 199
+  monthly: process.env.STRIPE_PRICE_MONTHLY_ONETIME || 'price_1UBKYMF1FdEsYK5EMo7f5rVQ'  // LEXIS Monthly Immersion — 30-day, THB 599
 };
+
+// How long a pass buys, in days, keyed by tier — the same PERIOD_DAYS the
+// fair-use window uses, named here for the places that read it as an
+// access duration rather than as an accounting window. Under one-off
+// passes those two are the same span by construction: a pass IS one
+// fair-use period.
+function passDays(tier) {
+  return PERIOD_DAYS[tier] ?? PERIOD_DAYS.weekly;
+}
 
 // Stripe Checkout — auth required, but NOT entitlement-gated: a user whose
 // trial just expired is exactly who needs to reach this endpoint.
+//
+// One-off passes, not subscriptions (2 Sep 2026). LEXIS sells to a Thai
+// audience, and PromptPay — the bank QR standard the country actually pays
+// with — is the payment method that matters most here. Stripe supports it,
+// this account has it enabled, and it has already taken a live PromptPay
+// charge. What Stripe will not do is offer it in a subscription-mode
+// Checkout: its docs list PromptPay as "not supported when using Checkout
+// in subscription mode", because it is a one-time customer-initiated
+// payment. Subscriptions can take it only through the send_invoice
+// collection method — i.e. emailing an invoice and waiting, which is not a
+// checkout flow anyone completes for a THB 199 impulse buy. Card-only
+// checkout was the real price of staying on subscriptions.
+//
+// So a pass is now a single charge buying a fixed window of access: 7 days
+// weekly, 30 days monthly. Nothing auto-renews, and the consequences of
+// that all land in the webhook below — access is granted as an explicit
+// access_expires_at rather than implied by a live Stripe subscription, and
+// a payment that confirms after the redirect has to be waited for rather
+// than assumed.
 app.post('/api/stripe/checkout', authenticate, async (req, res) => {
   try {
     const { planTier, sponsorAdd } = req.body || {};
@@ -1059,30 +1121,51 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
 
     const lineItems = [{ price: priceId, quantity: 1 }];
     if (sponsorAdd) {
-      // price_data with an inline `recurring` block creates the Price
-      // object on the fly, scoped to this one Checkout Session — no
-      // pre-created Stripe Price ID needed (unlike priceId above, which
-      // does require one). Matches the main plan's own billing interval
-      // so it rides the same subscription/invoice cycle rather than
-      // becoming a second, separately-timed charge.
+      // price_data creates the Price object on the fly, scoped to this one
+      // Checkout Session — no pre-created Stripe Price ID needed (unlike
+      // priceId above, which does require one). No `recurring` block: in
+      // payment mode every line item has to be one-time, and the add-on is
+      // now a single donation riding along with a single pass rather than
+      // a standing commitment that outlives the pass that started it.
       lineItems.push({
         price_data: {
           currency: 'thb',
           product_data: { name: 'LEXIS Community: sponsor a student' },
-          unit_amount: SPONSOR_ADDON_THB * 100, // satang
-          recurring: { interval: planTier === 'monthly' ? 'month' : 'week' }
+          unit_amount: SPONSOR_ADDON_THB * 100 // satang
         },
         quantity: 1
       });
     }
 
     const frontendOrigin = resolveFrontendOrigin(req);
+    const metadata = {
+      user_id: req.user.id,
+      plan_tier: planTier,
+      pass_days: String(passDays(planTier)),
+      sponsor_add: sponsorAdd ? 'true' : 'false'
+    };
+
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
+      // payment_method_types deliberately omitted. Hardcoding ['card'] meant
+      // enabling a method in the Stripe Dashboard had no effect here, so the
+      // dashboard and the code could silently disagree. Omitting it lets
+      // Stripe offer whatever is enabled AND eligible for this session —
+      // which, for a THB-denominated payment-mode session on this account,
+      // is what puts PromptPay in front of a Thai customer alongside cards,
+      // Apple Pay and Google Pay.
+      mode: 'payment',
       customer_email: req.user.email,
+      // In payment mode Stripe only creates a Customer when it has to, so
+      // session.customer would otherwise come back null and we'd have no
+      // stripe_customer_id to store against the profile.
+      customer_creation: 'always',
       line_items: lineItems,
-      metadata: { user_id: req.user.id, plan_tier: planTier || 'weekly', sponsor_add: sponsorAdd ? 'true' : 'false' },
+      metadata,
+      // Mirrored onto the PaymentIntent so a charge opened in the Stripe
+      // dashboard — for a refund, or a PromptPay payer asking where their
+      // money went — still says which LEXIS account it belongs to. The
+      // Checkout Session's own metadata is not visible from a charge.
+      payment_intent_data: { metadata },
       success_url: `${frontendOrigin}/app?payment=success${sponsorAdd ? '&sponsor=1' : ''}`,
       cancel_url: `${frontendOrigin}/pricing?payment=cancelled`,
       allow_promotion_codes: true
@@ -1102,10 +1185,23 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
 // point Stripe fires customer.subscription.deleted — already handled by the
 // webhook below (sets subscription_status: 'canceled', subscription_tier:
 // 'free') with no further changes needed here.
+//
+// Since 2 Sep 2026 no NEW purchase creates a subscription (see the checkout
+// endpoint), so for anyone who bought a pass this endpoint has nothing to
+// act on and says so — a pass ends by itself and cannot renew, which is a
+// better answer than "no active subscription". The endpoint stays because
+// the subscriptions created before that date are still live in Stripe and
+// still renew every week, and their owners must still be able to stop them.
 app.post('/api/stripe/cancel', cancelRateLimiter, authenticate, async (req, res) => {
   try {
     const subscriptionId = req.profile.stripe_subscription_id;
-    if (!subscriptionId || req.profile.subscription_status !== 'active') {
+    if (!subscriptionId) {
+      return res.status(400).json({
+        error: 'NOTHING_TO_CANCEL',
+        message: 'Your pass is a one-off purchase. It ends on its own and never renews, so there is nothing to cancel.'
+      });
+    }
+    if (req.profile.subscription_status !== 'active') {
       return res.status(400).json({ error: 'No active paid subscription to cancel.' });
     }
 
@@ -1210,33 +1306,101 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
   }
 
   try {
-    if (event.type === 'checkout.session.completed') {
+    if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       const session = event.data.object;
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          subscription_status: 'active',
-          subscription_tier: session.metadata?.plan_tier || 'weekly',
-          stripe_customer_id: session.customer,
-          stripe_subscription_id: session.subscription,
-          // Anchor the fair-use window to the moment they actually start
-          // paying, and zero the counter so nothing carried over from a
-          // previous pass is charged against their first period. The
-          // window rolls itself forward from here (record_heartbeat), so
-          // renewals need no webhook of their own.
-          period_seconds_used: 0,
-          period_started_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', session.metadata?.user_id);
+
+      // Two events, because a payment method can confirm after the customer
+      // has already been redirected. Cards settle inside Checkout and
+      // arrive here as `completed` with payment_status 'paid'; a delayed
+      // method arrives as `completed` with payment_status 'unpaid' and then
+      // as `async_payment_succeeded` once the money actually moves. Granting
+      // on `completed` alone would hand out a pass for a payment that had
+      // not happened and might never happen, so the payment_status test is
+      // what makes the pair safe rather than the event name.
+      //
+      // 'no_payment_required' is the 100%-off promotion-code case — a real
+      // entitlement, deliberately granted.
+      if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required') {
+        // Not an error: this is the normal first half of a PromptPay or
+        // other delayed payment. Nothing to do until it succeeds or fails.
+        console.log('[LEXIS Webhook] Checkout session awaiting payment:', session.id, session.payment_status);
+        return res.json({ received: true });
+      }
+
+      // This Stripe account sells more than LEXIS, and one webhook endpoint
+      // receives checkout.session.completed for all of it. A session with
+      // no user_id in its metadata was not created by /api/stripe/checkout
+      // above, so it is not a LEXIS pass and there is nothing here to
+      // fulfil — bail before redeem_pass, or every unrelated sale would
+      // raise a "no profile for that user" alarm.
+      const userId = session.metadata?.user_id;
+      if (!userId) {
+        console.log('[LEXIS Webhook] Ignoring checkout session with no LEXIS user_id:', session.id);
+        return res.json({ received: true });
+      }
+
+      const planTier = ['weekly', 'monthly'].includes(session.metadata?.plan_tier)
+        ? session.metadata.plan_tier
+        : 'weekly';
+
+      // redeem_pass (backend/supabase-schema.sql) does the whole grant in
+      // one statement under a row lock: it extends access_expires_at from
+      // the later of now and any pass still running, re-anchors the
+      // fair-use window, and no-ops if this same Checkout Session has
+      // already been redeemed. That last part is not optional — Stripe
+      // guarantees at-least-once delivery, and a PromptPay purchase can
+      // legitimately arrive as both of the two event types above, so a
+      // read-then-write here would hand out one paid pass twice.
+      const { data: expiresAt, error } = await supabase.rpc('redeem_pass', {
+        p_user_id: userId,
+        p_tier: planTier,
+        p_days: PERIOD_DAYS[planTier] ?? PERIOD_DAYS.weekly,
+        p_session_id: session.id,
+        p_customer_id: session.customer || null
+      });
       // A silent DB-write failure here is worse than most: Stripe already
-      // has the customer's money, and res.json({received:true}) below
-      // tells Stripe not to retry — so this doesn't self-heal the way a
-      // 500 + Stripe retry would. logError (not a plain console.error)
-      // specifically so this shows up in error_logs, not just platform logs.
-      if (error) logError('Webhook Failed to Activate Subscription', error);
+      // has the customer's money. Unlike the old handler this one CAN
+      // self-heal — it throws to the 500 below, Stripe retries, and
+      // redeem_pass is idempotent, so a retry either fixes it or repeats
+      // harmlessly. logError (not a plain console.error) so it also shows
+      // up in error_logs rather than only in platform logs.
+      if (error) {
+        logError('Webhook Failed to Redeem Pass', error);
+        throw error;
+      }
+      if (!expiresAt) {
+        // The RPC found no profile for this user_id. Retrying will not
+        // conjure one, so don't 500 into a Stripe retry loop — record it
+        // loudly instead; it needs a human, and the money is already taken.
+        logError('Webhook Redeemed Pass For Unknown Profile', new Error(`No profile for user_id ${userId} (session ${session.id})`));
+      }
+
+    } else if (event.type === 'checkout.session.async_payment_failed') {
+      // The other half of the delayed-payment pair: the customer opened a
+      // PromptPay QR (or similar) and never completed it, or the bank
+      // rejected it. No entitlement was granted on `completed`, so there is
+      // nothing to take back — this is recorded only so a support question
+      // about a checkout that "went through" has an answer.
+      const session = event.data.object;
+      console.log('[LEXIS Webhook] Checkout payment failed:', session.id, session.metadata?.user_id);
 
     } else if (event.type === 'customer.subscription.updated') {
+      // LEGACY. Nothing sold since 2 Sep 2026 creates a subscription, but
+      // the ones created before it are still live in Stripe and still bill,
+      // so these two handlers stay until the last of them is gone.
+      //
+      // They must not touch someone who has since bought a pass, and
+      // matching on stripe_subscription_id alone does NOT achieve that: a
+      // former subscriber keeps that id on their profile forever, so this
+      // handler would happily set an active pass holder to 'past_due' —
+      // and the deleted handler below would set them to 'canceled'/'free'
+      // — destroying access they had just paid for. Two of these
+      // subscriptions are past_due in Stripe right now, and past_due is
+      // exactly the state that ends in a deletion event, so this is the
+      // ordinary path rather than a corner case. Hence the live-pass guard
+      // on both: NULL expiry (a real legacy subscriber) or an expiry
+      // already in the past may be updated; a running pass may not.
+      //
       // Covers payment failures / recoveries mid-cycle (Stripe status:
       // active, past_due, unpaid, canceled, incomplete, incomplete_expired).
       const subscription = event.data.object;
@@ -1246,17 +1410,33 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
         const { error } = await supabase
           .from('profiles')
           .update({ subscription_status: mapped, updated_at: new Date().toISOString() })
-          .eq('stripe_subscription_id', subscription.id);
+          .eq('stripe_subscription_id', subscription.id)
+          .or(`access_expires_at.is.null,access_expires_at.lt.${new Date().toISOString()}`);
         if (error) logError('Webhook Failed to Update Subscription Status', error);
       }
 
     } else if (event.type === 'customer.subscription.deleted') {
       const subscription = event.data.object;
+
+      // Same live-pass guard as above, and for the same reason: this is the
+      // event that would otherwise cancel a pass somebody is currently
+      // using, because they happened to also hold an old subscription.
       const { error } = await supabase
         .from('profiles')
         .update({ subscription_status: 'canceled', subscription_tier: 'free', updated_at: new Date().toISOString() })
-        .eq('stripe_subscription_id', subscription.id);
+        .eq('stripe_subscription_id', subscription.id)
+        .or(`access_expires_at.is.null,access_expires_at.lt.${new Date().toISOString()}`);
       if (error) logError('Webhook Failed to Cancel Subscription', error);
+
+      // Forget the subscription itself either way. It no longer exists in
+      // Stripe, so keeping the id only leaves a "Cancel plan" button that
+      // errors and a row that a replayed event could match again. Runs
+      // after the update above, which still needs the id to find the row.
+      const { error: clearError } = await supabase
+        .from('profiles')
+        .update({ stripe_subscription_id: null, updated_at: new Date().toISOString() })
+        .eq('stripe_subscription_id', subscription.id);
+      if (clearError) logError('Webhook Failed to Clear Deleted Subscription Id', clearError);
     }
 
     res.json({ received: true });

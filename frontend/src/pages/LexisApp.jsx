@@ -18,6 +18,7 @@ import HistoryStage from '../components/stages/HistoryStage';
 import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
 import { reportError } from '../lib/errorReporting';
+import { analyseFrame, emptyVisemes } from '../lib/visemes';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -133,7 +134,14 @@ export default function LexisApp({ navigateTo }) {
   const [sessionError, setSessionError] = useState('');
   const [transcripts, setTranscripts] = useState([]);
   const [audioLevel, setAudioLevel] = useState(0);
-  const [tutorLevel, setTutorLevel] = useState(0); // LEXIS's own voice energy, drives the avatar's mouth
+  const [tutorLevel, setTutorLevel] = useState(0); // LEXIS's own voice energy, drives the waveform ring
+  // Phonetic mouth data derived from the same frames (src/lib/visemes.js).
+  // `openness` replaces loudness as the mouth-open signal — an /s/ is loud
+  // and made with the mouth nearly shut, which the old level-only mapping
+  // could not express. `visemes` is only usable by a rig that actually has
+  // those blend shapes; the placeholder .glb has none, so it stays inert
+  // until a real ARKit export is dropped in.
+  const [tutorMouth, setTutorMouth] = useState({ openness: 0, visemes: emptyVisemes() });
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
@@ -170,6 +178,9 @@ export default function LexisApp({ navigateTo }) {
 
   // References
   const pcRef = useRef(null);
+  // Poll handle for the playout-lag measurement in setupDualVisualizers;
+  // held here so teardown can clear it like the other visualizer handles.
+  const visualizerStatsTimerRef = useRef(null);
   const dcRef = useRef(null);
   const mediaStreamRef = useRef(null);
   const localAnalyserRef = useRef(null);
@@ -387,7 +398,26 @@ export default function LexisApp({ navigateTo }) {
       localAudioContextRef.current = localCtx;
       localAnalyserRef.current = localAnalyser;
 
-      // Remote AI Analyser
+      // Remote AI Analyser — still a STREAM tap, deliberately.
+      //
+      // History, so the wrong fix is not tried a third time. The mouth led
+      // the voice because this tap sees packets as they arrive off the
+      // network, while the <audio> element plays them after its own jitter
+      // buffer. On 2 Sep 2026 that was addressed by tapping the element
+      // instead (createMediaElementSource) so analysis and playback would
+      // share a clock. On a real Android device it made LEXIS speak
+      // NOTICEABLY SLOWER — almost certainly a resample, since WebRTC audio
+      // is 48kHz and a default AudioContext adopts the device's preferred
+      // rate. Slower speech is a far worse fault than an early mouth on a
+      // product whose value is how a tutor sounds, so it was reverted.
+      //
+      // The fix now runs the other way round, and this is the key idea:
+      // the audio path is left completely alone, and the VISUAL signal is
+      // delayed to meet it (see remoteLevelHistory below). Nothing here can
+      // resample, reroute or slow down what the student hears, because
+      // nothing here touches playback at all — the worst case of getting
+      // the delay wrong is a mouth that lags slightly, which is the same
+      // class of fault as today's, not a new one.
       if (remoteStream) {
         const remoteCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (remoteCtx.state === 'suspended') remoteCtx.resume();
@@ -400,6 +430,48 @@ export default function LexisApp({ navigateTo }) {
 
       const localData = new Uint8Array(localAnalyser.frequencyBinCount);
       const remoteData = remoteAnalyserRef.current ? new Uint8Array(remoteAnalyserRef.current.frequencyBinCount) : null;
+
+      // How far the analyser runs AHEAD of what the student actually hears:
+      // the receiver's jitter buffer plus the output device's own latency.
+      // Both are measured rather than guessed, because neither is a
+      // constant — jitter buffer depth adapts to the network, and output
+      // latency differs wildly between a laptop speaker and Bluetooth
+      // earbuds, which is exactly the range this product is used across.
+      // Starts at 0 so the mouth behaves exactly as before until a real
+      // reading arrives.
+      let playoutLagMs = 0;
+      const statsTimer = setInterval(async () => {
+        try {
+          const pc = pcRef.current;
+          if (!pc || pc.connectionState !== 'connected') return;
+          const stats = await pc.getStats();
+          let lag = 0;
+          stats.forEach((report) => {
+            if (report.type === 'inbound-rtp' && report.kind === 'audio' && report.jitterBufferEmittedCount > 0) {
+              // Cumulative averages, so this is the mean depth over the
+              // call rather than an instantaneous spike — steadier to drive
+              // an animation from.
+              lag = (report.jitterBufferDelay / report.jitterBufferEmittedCount) * 1000;
+            }
+          });
+          const outputLatency = remoteAudioContextRef.current?.outputLatency
+            || remoteAudioContextRef.current?.baseLatency
+            || 0;
+          lag += outputLatency * 1000;
+          // Clamped hard. A wild reading from a browser that reports these
+          // fields oddly should not park the mouth half a second behind.
+          playoutLagMs = Math.max(0, Math.min(400, lag));
+        } catch {
+          // Stats are a nicety; losing them just means no compensation.
+        }
+      }, 2000);
+      visualizerStatsTimerRef.current = statsTimer;
+
+      // Recent tutor levels, so the mouth can be driven by what was heard
+      // playoutLagMs ago instead of what just arrived. One second of
+      // history at ~60fps is a small, fixed cost and covers the 400ms cap
+      // with room to spare.
+      const remoteLevelHistory = [];
 
       const renderFrame = () => {
         if (!localAnalyserRef.current) return;
@@ -418,9 +490,35 @@ export default function LexisApp({ navigateTo }) {
           remoteLevel = rawRemote > 8 ? rawRemote : 0; // Noise-floor gate
         }
 
+        // The waveform ring stays on the live signal: it also reflects the
+        // student's own mic, which they hear with no delay, so holding it
+        // back would make their own voice feel laggy to fix someone else's.
         const effectiveLevel = Math.max(localLevel, remoteLevel * 0.9);
         setAudioLevel(Math.min(100, Math.round((effectiveLevel / 128) * 100)));
-        setTutorLevel(Math.min(100, Math.round((remoteLevel / 128) * 100)));
+
+        // The mouth, however, is only ever about LEXIS, and is the one
+        // thing a viewer checks against the voice — so it gets the delayed
+        // reading.
+        const now = performance.now();
+        // Analysed once, here, and carried through the delay buffer with its
+        // own frame — re-analysing later against a stale byte array would
+        // silently pair one frame's spectrum with another frame's loudness.
+        const mouth = remoteData
+          ? analyseFrame(remoteData, remoteAudioContextRef.current?.sampleRate || 48000, remoteAnalyserRef.current?.fftSize || 512)
+          : { openness: 0, visemes: emptyVisemes() };
+        remoteLevelHistory.push({ t: now, level: remoteLevel, mouth });
+        while (remoteLevelHistory.length > 1 && now - remoteLevelHistory[0].t > 1000) {
+          remoteLevelHistory.shift();
+        }
+        const target = now - playoutLagMs;
+        let heard = remoteLevelHistory[0];
+        for (let i = remoteLevelHistory.length - 1; i >= 0; i--) {
+          if (remoteLevelHistory[i].t <= target) { heard = remoteLevelHistory[i]; break; }
+        }
+        setTutorLevel(Math.min(100, Math.round((heard.level / 128) * 100)));
+        // The mouth data rides the SAME delayed sample, so the shape and the
+        // opening are never a frame out of step with each other.
+        setTutorMouth(heard.mouth);
 
         // Render Canvas Waveform Ring
         const canvas = canvasRef.current;
@@ -942,6 +1040,10 @@ export default function LexisApp({ navigateTo }) {
       reconnectTimeoutRef.current = null;
     }
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    if (visualizerStatsTimerRef.current) {
+      clearInterval(visualizerStatsTimerRef.current);
+      visualizerStatsTimerRef.current = null;
+    }
     if (localAudioContextRef.current) localAudioContextRef.current.close().catch(() => {});
     if (remoteAudioContextRef.current) remoteAudioContextRef.current.close().catch(() => {});
     if (mediaStreamRef.current) mediaStreamRef.current.getTracks().forEach(t => t.stop());
@@ -966,6 +1068,7 @@ export default function LexisApp({ navigateTo }) {
     setStatus(finalStatus);
     setAudioLevel(0);
     setTutorLevel(0);
+    setTutorMouth({ openness: 0, visemes: emptyVisemes() });
     setAudioBlocked(false);
 
     // Route to the next stage based on whether a real conversation
@@ -997,6 +1100,7 @@ export default function LexisApp({ navigateTo }) {
         isConnecting={isConnecting}
         status={status}
         tutorLevel={tutorLevel}
+        tutorMouth={tutorMouth}
         audioLevel={audioLevel}
         canvasRef={canvasRef}
         transcripts={transcripts}

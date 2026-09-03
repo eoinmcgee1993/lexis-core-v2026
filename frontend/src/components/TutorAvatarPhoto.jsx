@@ -138,7 +138,7 @@ function deriveVariantUrls(photoUrl) {
   };
 }
 
-export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, isConnecting, onError, paused = false }) {
+export default function TutorAvatarPhoto({ photoUrl, tutorLevel, openness = null, isConnected, isConnecting, onError, paused = false }) {
   const active = isConnected || isConnecting;
   const [failed, setFailed] = useState(false);
   // Each overlay variant fails independently of the base photo and of each
@@ -165,9 +165,28 @@ export default function TutorAvatarPhoto({ photoUrl, tutorLevel, isConnected, is
   //    than the original /85 (so it stays visible), but pulled back from
   //    the most aggressive settings on all three axes at once so it's not
   //    over-reacting to every small change in level.
-  const normalizedLevel = Math.min(1, tutorLevel / 65);
+  // `openness`, when the caller has it, is a phonetically derived figure
+  // (src/lib/visemes.js): jaw opening tracked from first-formant share
+  // rather than from loudness. It is strictly better than the fallback
+  // below, which cannot tell a shouted /s/ — mouth almost shut — from a
+  // shouted /a/, and so threw the jaw wide open on every "yes" and "this".
+  // The fallback stays for callers with only a level to give, notably the
+  // muted marketing hero running off a simulated signal.
+  const normalizedLevel = openness !== null
+    ? Math.min(1, openness * 1.35)
+    : Math.min(1, tutorLevel / 65);
   const rawOpenAmount = Math.pow(normalizedLevel, 0.75); // 0 = mouth closed, 1 = fully open
-  const openAmount = useSmoothed(rawOpenAmount, 10, !paused); // eased — see useSmoothed above for why
+  // rate 10 (a ~100ms time constant) is deliberate and was tried at 22
+  // (~45ms) on the theory that 100ms is longer than a phoneme and so the
+  // mouth trailed its own signal. That reasoning was right about phonemes
+  // and wrong about this signal. HeroLiveDemo's useSimulatedTutorLevel
+  // regenerates its level EVERY FRAME as a slow sine plus +/-12 of random
+  // noise; the 100ms constant is what averages that noise into visible,
+  // flowing mouth motion. At 45ms the mouth tracked the noise instead of
+  // the speech envelope and read as jittering in place rather than
+  // opening and closing. Reported from a real device. Do not raise this
+  // without re-testing the hero demo, not just a live session.
+  const openAmount = useSmoothed(rawOpenAmount, 10, !paused);
   const blinkAmount = useBlink(!paused); // 0 = eyes open, 1 = fully closed
 
   if (failed) return null;

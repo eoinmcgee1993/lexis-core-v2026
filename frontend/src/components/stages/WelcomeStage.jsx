@@ -24,12 +24,48 @@ function formatUsageLabel(profile) {
     // whole point of it being an env var). A subscriber who reaches the
     // ceiling is told the exact limit by the FAIR_USE_REACHED message,
     // which is generated server-side from the real value.
-    return `${profile.subscription_tier} plan`;
+    // A pass has an end date, and it is the one number the holder
+    // actually needs — nothing renews, so "4 days left" is the difference
+    // between buying another one in time and losing access mid-week. Only
+    // passes have it; the recurring plans sold before 2 Sep 2026 leave
+    // access_expires_at NULL and fall back to the bare plan name.
+    const daysLeft = passDaysLeft(profile);
+    if (daysLeft === null) return `${profile.subscription_tier} plan`;
+    // 0 is only ever reachable once the pass has actually run out — days
+    // are rounded up, so the final partial day reads as "last day". That
+    // matters: subscription_status stays 'active' after a pass expires
+    // (nothing in Stripe fires to change it), so without this branch a
+    // lapsed pass would keep displaying a day count forever while the
+    // backend was already refusing to start sessions.
+    if (daysLeft <= 0) return `${profile.subscription_tier} pass ended`;
+    if (daysLeft === 1) return `${profile.subscription_tier} pass · last day`;
+    return `${profile.subscription_tier} pass · ${daysLeft} days left`;
   }
   const remaining = Math.max(0, (profile.max_allowed_seconds || 0) - (profile.seconds_used || 0));
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
   return `${mins}m ${secs}s left in trial`;
+}
+
+// Whole days remaining on a one-off pass, or null when this profile has no
+// pass (never paid, or on one of the pre-2 Sep 2026 recurring plans, which
+// leave access_expires_at NULL because Stripe reports their liveness
+// instead). Rounded UP so the last partial day still reads as "1 day left"
+// rather than "ends today" while the pass is genuinely still usable.
+function passDaysLeft(profile) {
+  if (!profile?.access_expires_at) return null;
+  const expiresAt = Date.parse(profile.access_expires_at);
+  if (!Number.isFinite(expiresAt)) return null;
+  return Math.max(0, Math.ceil((expiresAt - Date.now()) / 86400000));
+}
+
+// Mirrors paidAccessActive() in backend/app.mjs. The backend is the only
+// authority on entitlement; this exists purely so the UI doesn't announce
+// something the backend hasn't agreed to yet.
+function hasLiveAccess(profile) {
+  if (profile?.subscription_status !== 'active') return false;
+  const daysLeft = passDaysLeft(profile);
+  return daysLeft === null || daysLeft > 0;
 }
 
 // currentPeriodEnd comes straight from Stripe's subscription object — a
@@ -79,7 +115,12 @@ export default function WelcomeStage({
             </span>
           )}
 
-          {profile?.subscription_status === 'active' && !cancelAtPeriodEnd && (
+          {/* Only a recurring plan can be cancelled, and only those have a
+              stripe_subscription_id — the same condition the backend's
+              /api/stripe/cancel checks. Showing this to a pass holder
+              would offer them an action that does nothing and imply their
+              pass is charging them again, which it isn't. */}
+          {profile?.subscription_status === 'active' && profile?.stripe_subscription_id && !cancelAtPeriodEnd && (
             confirmingCancel ? (
               <span className="flex items-center gap-1.5 text-xs">
                 <span className="text-lexis-ink/50">Cancel plan?</span>
@@ -126,11 +167,27 @@ export default function WelcomeStage({
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-start pt-8 md:pt-16 pb-12 px-6 text-center">
+        {/* justPaid is only the ?payment=success redirect, which says the
+            customer finished Checkout — not that the money arrived. For a
+            card those are the same moment; for PromptPay and other delayed
+            methods the bank confirms afterwards, and the backend
+            deliberately withholds the pass until it does. Announcing
+            "confirmed" off the redirect alone would tell someone their pass
+            was active while every session start was still being refused,
+            so the profile decides which of the two messages this is. */}
         {justPaid && (
-          <div className="mb-6 px-4 py-3 bg-teal-600/10 border border-teal-600/30 rounded-2xl text-teal-700 text-xs">
-            Payment confirmed. Your pass is now active. Thank you!
-            {justSponsored && ' Thank you for adding a LEXIS Community sponsorship, it means a lot.'}
-          </div>
+          hasLiveAccess(profile) ? (
+            <div className="mb-6 px-4 py-3 bg-teal-600/10 border border-teal-600/30 rounded-2xl text-teal-700 text-xs">
+              Payment confirmed. Your pass is now active. Thank you!
+              {justSponsored && ' Thank you for adding a LEXIS Community sponsorship, it means a lot.'}
+            </div>
+          ) : (
+            <div className="mb-6 px-4 py-3 bg-lexis-action/10 border border-lexis-action/30 rounded-2xl text-lexis-action-dark text-xs">
+              Thanks — we're waiting for your bank to confirm the payment.
+              This is usually only a few seconds. Refresh this page and your
+              pass will appear; you won't be charged twice.
+            </div>
+          )
         )}
 
         {upgradeRequired && (

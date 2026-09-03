@@ -48,7 +48,9 @@ const TRIAL = TRIAL_FACT.minutes, WEEK = PRICING.weekly.thb, MONTH = PRICING.mon
 const SITE = 'learnwithlexis.com';
 const TERMS = `Free ${TRIAL}-minute trial. No card required.`;
 const TERMS_TH = `ทดลองฟรี ${TRIAL} นาที ไม่ต้องผูกบัตร`;
-const PRICE_EN = `฿${WEEK}/week or ฿${MONTH}/month after that.`;
+// A pass is a one-off purchase, so "฿199/week" would advertise a
+// recurring charge that does not exist (facts.js BILLING.autoRenews).
+const PRICE_EN = `฿${WEEK} for ${PRICING.weekly.days} days or ฿${MONTH} for ${PRICING.monthly.days}. One-off.`;
 
 // Copy. Every line is about the experience of using the product, which is
 // verifiable, rather than a claim about results, which would not be. The
