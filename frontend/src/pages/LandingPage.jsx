@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Mic, ShieldCheck, Zap, Globe, ArrowRight, MessageCircle, TrendingUp, Heart, Gauge } from 'lucide-react';
+import { Mic, ShieldCheck, Zap, Globe, ArrowRight, ChevronDown, MessageCircle, TrendingUp, Heart, Gauge } from 'lucide-react';
 import LexisMark from '../components/LexisMark';
+import WaveRule from '../components/WaveRule';
 import HeroLiveDemo from '../components/HeroLiveDemo';
 import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
@@ -242,7 +243,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           background, which read as generic/faceless. A real depiction of
           who a student is talking to does more for "impressive" than any
           amount of copy polish alone would. */}
-      <section className="w-full max-w-6xl mx-auto px-6 py-16 md:py-20 grid md:grid-cols-2 gap-12 items-center">
+      <section className="lexis-clip-x w-full max-w-6xl mx-auto px-6 pt-14 pb-20 md:pt-20 md:pb-28 grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div className="text-center md:text-left">
           <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-6">
             <Zap className="w-3.5 h-3.5" />
@@ -278,7 +279,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <div>
             <button
               onClick={goPractice}
-              className="px-8 py-4 bg-lexis-action hover:bg-lexis-action-dark transition-colors text-lexis-navy font-display font-semibold text-lg rounded-2xl shadow-lg shadow-lexis-action/20 flex items-center space-x-3 mx-auto md:mx-0"
+              className="px-8 py-4 bg-lexis-action hover:bg-lexis-action-dark hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 text-lexis-navy font-display font-semibold text-lg rounded-2xl lexis-lift flex items-center space-x-3 mx-auto md:mx-0"
             >
               <Mic className="w-5 h-5" />
               <span>{t.cta}</span>
@@ -316,7 +317,12 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             remains — but that was not the reason for it, and it is still
             a live decision to make deliberately rather than by side
             effect. */}
-        <div className="relative flex justify-center md:justify-end">
+        {/* lexis-stage puts a contained pool of light under the demo (see
+            index.css). It was rendering as a small dark rectangle floating
+            in the corner despite being the most persuasive thing on the
+            page — the real product, running, with LEXIS's real voice one
+            tap away. */}
+        <div className="lexis-stage flex justify-center md:justify-end">
           <HeroLiveDemo direction={direction} caption={c.heroDemoCaption} />
         </div>
 
@@ -332,13 +338,27 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           directions, level-adaptive, no scheduling); the "nothing else
           quite like this" impression comes from specificity, not from
           asserting market uniqueness as fact. */}
-      <section className="w-full max-w-4xl mx-auto px-6 py-10">
+      <section className="lexis-band w-full">
+       {/* Asymmetric two-column: heading anchors the left, prose occupies
+           the right. Unifying the container width fixed the wandering left
+           edge but left a narrow measure hugging one side of a wide
+           section, which is just dead space by another name. A 5/7 split
+           uses the width without letting the line length run past what is
+           comfortable to read. */}
+       <div className="max-w-6xl mx-auto px-6 py-20 md:py-24 grid md:grid-cols-12 gap-x-12 gap-y-8">
+        <div className="md:col-span-5">
         <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-5">
           <Gauge className="w-3.5 h-3.5" />
           <span>{c.meetHeading}</span>
         </div>
-        <h2 className="font-display font-semibold text-3xl md:text-4xl leading-tight text-balance mb-5 text-lexis-ink">{c.meetTitle}</h2>
-        <p className="text-base text-lexis-ink/60 leading-relaxed max-w-3xl mb-8">{c.meetBody}</p>
+        {/* Measure is constrained on the TEXT, not on the section, so the
+            content edge stays put while line length stays readable. That
+            distinction is what the old per-section max-w-4xl/5xl/3xl was
+            reaching for and getting wrong. */}
+        <h2 className="font-display font-semibold text-3xl md:text-[2.75rem] leading-[1.1] text-balance text-lexis-ink">{c.meetTitle}</h2>
+        </div>
+        <div className="md:col-span-7 md:pt-2">
+        <p className="text-base md:text-lg text-lexis-ink/70 leading-relaxed mb-8">{c.meetBody}</p>
         {/* 21 Aug 2026 (interface re-audit, "delete the cards" + "icons only
             where they carry meaning"): was four bg-white bordered chips
             each repeating the same Zap icon — the icon carried no distinct
@@ -352,6 +372,8 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             </React.Fragment>
           ))}
         </div>
+        </div>
+       </div>
       </section>
 
       {/* How it works — three concrete steps instead of adjective-heavy
@@ -364,17 +386,30 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           carry the hierarchy instead of a box — nothing bounds the
           content, so the sequence itself (1, 2, 3) is what a visitor's
           eye follows down the page. */}
-      <section className="w-full max-w-5xl mx-auto px-6 py-14">
-        <h2 className="font-display font-semibold text-2xl text-center mb-12">{c.howItWorks}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8">
+      <section className="w-full max-w-6xl mx-auto px-6 py-20 md:py-24">
+        <div className="flex items-center gap-6 mb-12 md:mb-16">
+          <h2 className="font-display font-semibold text-2xl md:text-3xl flex-shrink-0">{c.howItWorks}</h2>
+          <WaveRule className="flex-1 min-w-0" />
+        </div>
+        {/* The numerals carry the hierarchy (the re-audit's call, kept),
+            but at a size that can actually hold it, over a rule that makes
+            the three read as one sequence rather than three orphans. Still
+            no box per step. */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 sm:gap-8 lg:gap-12">
           {HOW_IT_WORKS[lang].map(({ icon: Icon, title, desc }, i) => (
-            <div key={title} className="text-center sm:text-left">
-              <div className="flex items-center gap-3 mb-3 justify-center sm:justify-start">
-                <span className="font-display font-semibold text-4xl text-lexis-action-dark leading-none">{i + 1}</span>
-                <Icon className="w-5 h-5 text-teal-700" />
+            <div key={title} className="relative sm:pt-8">
+              <div
+                className="hidden sm:block absolute top-0 left-0 right-0 h-px bg-lexis-ink/10"
+                aria-hidden="true"
+              />
+              <div className="flex items-baseline gap-3 mb-4">
+                <span className="font-display font-semibold text-5xl md:text-6xl text-lexis-action-dark leading-none tabular-nums">
+                  {i + 1}
+                </span>
+                <Icon className="w-5 h-5 text-teal-700 self-center" />
               </div>
-              <div className="font-semibold text-sm text-lexis-ink mb-1.5">{title}</div>
-              <div className="text-sm text-lexis-ink/60 leading-relaxed">{desc}</div>
+              <div className="font-display font-semibold text-lg text-lexis-ink mb-2">{title}</div>
+              <div className="text-sm md:text-base text-lexis-ink/65 leading-relaxed max-w-xs">{desc}</div>
             </div>
           ))}
         </div>
@@ -393,12 +428,20 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           two unrelated claims). A hairline-ruled row states the same four
           facts as text, at equal weight, without borrowed "trust badge"
           iconography standing in for actual trust signals. */}
-      <section className="w-full max-w-4xl mx-auto px-6 py-10">
-        <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-lexis-ink/10 border-t border-b border-lexis-ink/10 text-xs text-lexis-ink/60 text-center">
-          <div className="flex-1 py-4 sm:px-4">{c.trust[0]}</div>
-          <div className="flex-1 py-4 sm:px-4">{c.trust[1]}</div>
-          <div className="flex-1 py-4 sm:px-4">{c.trust[2]}</div>
-          <div className="flex-1 py-4 sm:px-4">{c.trust[3]}</div>
+      {/* Still four plain facts at equal weight with no borrowed trust-badge
+          iconography — the re-audit's decision. What changed is only the
+          density: a 4-column hairline table at text-xs read as a spec sheet
+          footnote. Same text, given the room to be read. */}
+      <section className="lexis-band w-full">
+        <div className="max-w-6xl mx-auto px-6 py-14 md:py-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-8">
+            {c.trust.map((claim) => (
+              <div key={claim} className="flex items-start gap-3">
+                <span className="mt-2 w-1.5 h-1.5 rounded-full bg-teal-600/70 flex-shrink-0" aria-hidden="true" />
+                <span className="text-sm text-lexis-ink/70 leading-relaxed">{claim}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -413,12 +456,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           heading — so the eye skipped it entirely and it read as a caption
           rather than a section. Given a tinted card, a heading that holds
           its own, and body copy at readable contrast. */}
-      <section className="w-full max-w-3xl mx-auto px-6 py-12">
-        <div className="rounded-2xl border border-teal-600/20 bg-teal-600/5 p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-5 text-center md:text-left">
-          <Heart className="w-6 h-6 text-teal-600 flex-shrink-0 mt-0.5" />
+      <section className="w-full max-w-6xl mx-auto px-6 py-20 md:py-24">
+        <div className="rounded-3xl border border-teal-600/20 bg-teal-600/[0.06] p-8 md:p-12 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 text-center md:text-left lexis-lift-soft">
+          <span className="flex-shrink-0 w-12 h-12 rounded-2xl bg-teal-600/10 border border-teal-600/20 flex items-center justify-center">
+            <Heart className="w-5 h-5 text-teal-600" />
+          </span>
           <div className="flex-1">
-            <h2 className="font-display font-semibold text-2xl text-lexis-ink">{c.communityHeading}</h2>
-            <p className="mt-2 text-sm text-lexis-ink/80 leading-relaxed max-w-lg">{c.communityBody}</p>
+            <h2 className="font-display font-semibold text-2xl md:text-3xl text-lexis-ink">{c.communityHeading}</h2>
+            <p className="mt-3 text-sm md:text-base text-lexis-ink/75 leading-relaxed max-w-xl">{c.communityBody}</p>
           </div>
           <AppLink
             to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="flex-shrink-0 text-teal-700 hover:text-teal-800 font-semibold text-sm underline underline-offset-2 whitespace-nowrap md:mt-1"
@@ -434,30 +479,43 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           engines (ChatGPT search, Perplexity, Google's AI overviews) as
           much as human visitors — clear, self-contained Q&A is exactly
           the shape those tools quote from. */}
-      <section className="w-full max-w-3xl mx-auto px-6 py-14">
-        <h2 className="font-display font-semibold text-2xl text-center mb-8">{c.faqHeading}</h2>
+      <section className="w-full max-w-6xl mx-auto px-6 pb-20 md:pb-28">
+        <div className="grid md:grid-cols-12 gap-x-12 gap-y-8">
+        <div className="md:col-span-4">
+          <h2 className="font-display font-semibold text-2xl md:text-3xl text-balance">{c.faqHeading}</h2>
+          <WaveRule className="mt-5 max-w-[220px]" />
+        </div>
+        <div className="md:col-span-8">
         {/* 21 Aug 2026 (interface re-audit, "delete the cards"): was one
             bg-white bordered box per question. <details>/<summary> markup
             is unchanged (still real semantic HTML, still mirrored as
             FAQPage JSON-LD) — only the visual container is gone, replaced
             by hairline rules between rows, plain-list style. */}
+        {/* <details>/<summary> markup unchanged — still real semantic HTML,
+            still mirrored as FAQPage JSON-LD. The row just behaves like
+            something you can press now: a hover tint, and a chevron that
+            rotates to point down when open rather than a right-arrow that
+            reads as "go somewhere else". */}
         <div className="divide-y divide-lexis-ink/10 border-t border-b border-lexis-ink/10">
           {FAQS[lang].map(({ q, a }) => (
-            <details key={q} className="group py-4">
-              <summary className="cursor-pointer list-none flex items-center justify-between gap-3 font-semibold text-sm text-lexis-ink">
+            <details key={q} className="group">
+              <summary className="cursor-pointer list-none flex items-center justify-between gap-4 font-semibold text-base text-lexis-ink py-5 px-2 -mx-2 rounded-lg hover:bg-lexis-ink/[0.03] transition-colors">
                 <span>{q}</span>
-                <ArrowRight className="w-4 h-4 text-lexis-ink/30 flex-shrink-0 transition-transform group-open:rotate-90" />
+                <ChevronDown className="w-4 h-4 text-lexis-ink/35 flex-shrink-0 transition-transform duration-200 group-open:rotate-180" />
               </summary>
-              <p className="mt-3 text-sm text-lexis-ink/60 leading-relaxed">{a}</p>
+              <p className="pb-5 px-2 -mx-2 -mt-1 text-sm md:text-base text-lexis-ink/65 leading-relaxed max-w-2xl">{a}</p>
             </details>
           ))}
+        </div>
+        </div>
         </div>
       </section>
 
       {/* Footer — the "Private & secure" claim used to have nothing
           behind it (flagged in a re-audit: U6). Now links to the actual
           Privacy Policy that explains what that claim means. */}
-      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/60">
+      <footer className="lexis-band w-full">
+       <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-5 text-xs text-lexis-ink/60">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-teal-600" />
           <span>{c.footerTrust}</span>
@@ -475,6 +533,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <AppLink to="/refund" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{c.refunds}</AppLink>
           <span>© 2026 LEXIS</span>
         </div>
+       </div>
       </footer>
     </div>
   );

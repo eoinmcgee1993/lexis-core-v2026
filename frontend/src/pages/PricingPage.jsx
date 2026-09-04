@@ -184,10 +184,14 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
         </AppLink>
       </header>
 
-      <section className="flex-1 w-full max-w-5xl mx-auto px-6 py-12">
-        <h1 className="font-display font-semibold text-2xl text-center mb-2 text-lexis-ink">{t.heading}</h1>
-        <p className="text-center text-sm text-lexis-ink/50">{t.sub}</p>
-        <p className="text-center text-xs text-lexis-ink/30 mb-10">
+      {/* Same max-w-6xl content edge as the landing page. Type scale lifted
+          across the board: a pricing page whose headline is text-2xl and
+          whose feature list is text-xs reads as a settings screen, not as
+          the page where someone decides to pay. */}
+      <section className="flex-1 w-full max-w-6xl mx-auto px-6 py-16 md:py-20">
+        <h1 className="font-display font-semibold text-3xl md:text-[2.5rem] leading-[1.15] text-center mb-4 text-lexis-ink text-balance">{t.heading}</h1>
+        <p className="text-center text-base text-lexis-ink/60 max-w-xl mx-auto">{t.sub}</p>
+        <p className="text-center text-xs text-lexis-ink/40 mt-2 mb-12 md:mb-16">
           {t.vat}
         </p>
 
@@ -205,14 +209,14 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Free Tier */}
-          <div className="bg-white border border-lexis-ink/10 p-6 rounded-2xl flex flex-col justify-between">
+          <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between transition-shadow hover:lexis-lift-soft">
             <div>
-              <h3 className="text-lg font-bold text-teal-700 mb-2">{t.freeTrialTitle}</h3>
-              <p className="text-xs text-lexis-ink/50 mb-4">{t.freeTrialSub(TRIAL.minutes)}</p>
-              <div className="text-3xl font-extrabold text-lexis-ink mb-6">฿0</div>
-              <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.freeTrialFeature1(TRIAL.minutes)}</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.freeTrialFeature2}</span></li>
+              <h3 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.freeTrialTitle}</h3>
+              <p className="text-sm text-lexis-ink/55 mb-6">{t.freeTrialSub(TRIAL.minutes)}</p>
+              <div className="font-display font-semibold text-5xl text-lexis-ink mb-6 tracking-tight">฿0</div>
+              <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.freeTrialFeature1(TRIAL.minutes)}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.freeTrialFeature2}</span></li>
               </ul>
             </div>
             {/* inline-flex + centring: this CTA is an <a>, and an anchor is
@@ -224,41 +228,41 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           </div>
 
           {/* Weekly Pass (Featured) */}
-          <div className="bg-white border-2 border-lexis-action p-6 rounded-2xl flex flex-col justify-between relative shadow-2xl shadow-lexis-action/10">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lexis-action text-lexis-navy font-bold text-[10px] uppercase px-3 py-0.5 rounded-full">
+          <div className="bg-white border-2 border-lexis-action p-7 md:p-8 rounded-3xl flex flex-col justify-between relative lexis-lift md:-translate-y-3">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lexis-action text-lexis-navy font-bold text-[10px] uppercase tracking-wider px-3.5 py-1 rounded-full whitespace-nowrap">
               {t.mostPopular}
             </span>
             <div>
-              <h3 className="text-lg font-bold text-lexis-action-dark mb-2">{t.weeklyTitle}</h3>
-              <p className="text-xs text-lexis-ink/50 mb-4">{t.weeklySub}</p>
-              <div className="text-3xl font-extrabold text-lexis-ink mb-1">฿{PRICING.weekly.thb} <span className="text-xs font-normal text-lexis-ink/40">{t.perWeek}</span></div>
+              <h3 className="font-display font-semibold text-xl text-lexis-action-dark mb-2">{t.weeklyTitle}</h3>
+              <p className="text-sm text-lexis-ink/55 mb-6">{t.weeklySub}</p>
+              <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿{PRICING.weekly.thb} <span className="font-sans text-xs font-normal text-lexis-ink/45 tracking-normal">{t.perWeek}</span></div>
               <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenew}</p>
-              <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.weeklyFeature1}</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.weeklyFeature2}</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.weeklyFeature3}</span></li>
+              <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.weeklyFeature1}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.weeklyFeature2}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.weeklyFeature3}</span></li>
               </ul>
             </div>
             <button
               onClick={() => startCheckout('weekly')}
               disabled={loadingTier === 'weekly'}
-              className="w-full min-h-[44px] py-3 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-60 text-lexis-navy font-bold rounded-xl text-sm text-center transition-all flex items-center justify-center space-x-2"
+              className="w-full min-h-[48px] py-3.5 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-60 text-lexis-navy font-semibold rounded-2xl text-sm text-center transition-all flex items-center justify-center space-x-2"
             >
               {loadingTier === 'weekly' ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>{t.getStartedNow}</span>}
             </button>
           </div>
 
           {/* Monthly Pass */}
-          <div className="bg-white border border-lexis-ink/10 p-6 rounded-2xl flex flex-col justify-between">
+          <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between transition-shadow hover:lexis-lift-soft">
             <div>
-              <h3 className="text-lg font-bold text-teal-700 mb-2">{t.monthlyTitle}</h3>
-              <p className="text-xs text-lexis-ink/50 mb-4">{t.monthlySub}</p>
-              <div className="text-3xl font-extrabold text-lexis-ink mb-1">฿{PRICING.monthly.thb} <span className="text-xs font-normal text-lexis-ink/40">{t.perMonth}</span></div>
+              <h3 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.monthlyTitle}</h3>
+              <p className="text-sm text-lexis-ink/55 mb-6">{t.monthlySub}</p>
+              <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿{PRICING.monthly.thb} <span className="font-sans text-xs font-normal text-lexis-ink/45 tracking-normal">{t.perMonth}</span></div>
               <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenewMonthly}</p>
-              <ul className="text-xs space-y-3 text-lexis-ink/70 mb-6">
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.monthlyFeature1(MONTHLY_SAVINGS_VS_WEEKLY_PCT)}</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.monthlyFeature2}</span></li>
-                <li className="flex items-center space-x-2"><Check className="w-4 h-4 text-teal-600" /><span>{t.monthlyFeature3}</span></li>
+              <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.monthlyFeature1(MONTHLY_SAVINGS_VS_WEEKLY_PCT)}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.monthlyFeature2}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.monthlyFeature3}</span></li>
               </ul>
             </div>
             <button

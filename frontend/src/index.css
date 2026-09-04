@@ -183,3 +183,89 @@ html {
     98% { transform: scaleY(0.1); }
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Marketing page composition primitives (3 Sep 2026).
+
+   Why these exist. The 21 Aug interface re-audit deleted every card on
+   the landing page ("delete the cards", "icons only where they carry
+   meaning"). That call was right about the cards — a bordered box per
+   four-word step gave a step the same weight as a paragraph — but
+   removing them took the page's only structure with it and put nothing
+   back. What was left was text on one flat cream plane, with a DIFFERENT
+   container width per section (6xl / 4xl / 5xl / 4xl / 3xl / 3xl / 6xl),
+   so the left edge moved on every scroll. Reported as "generic and dull",
+   which it was.
+
+   The fix is structure WITHOUT going back to a box per item: full-bleed
+   bands to separate sections, one elevated stage for the product shot,
+   and a constant content edge. Nothing below re-introduces the per-item
+   card the re-audit removed.
+   ───────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* A section band, one step lighter than the canvas. Full-bleed so the
+     SECTION is what changes colour, not a box floating inside it — that
+     is the difference between structure and decoration. */
+  .lexis-band {
+    background-color: rgba(255, 255, 255, 0.6);
+    border-block: 1px solid rgba(30, 41, 59, 0.07);
+  }
+
+  /* The dark stage the hero demo sits on. The demo is the single most
+     persuasive asset on the page (the real product, running, with real
+     audio) and it was rendering as a small dark rectangle floating in the
+     corner. A contained pool of light under it reads as a product shot
+     rather than an embedded widget. */
+  .lexis-stage {
+    position: relative;
+  }
+  .lexis-stage::before {
+    content: '';
+    position: absolute;
+    /* Vertical bleed only. A negative HORIZONTAL inset pushed the glow past
+       its container and into the document's scroll width; .lexis-clip-x
+       below hides that, but overflow-x:clip is Safari 16+, so on an older
+       iPhone the wobble would come back. Keeping the box within its bounds
+       fixes it everywhere and leaves the clip as a second line of defence.
+       The blur below still spreads the light sideways, so nothing is lost
+       visually. */
+    inset: -12% 0;
+    background:
+      radial-gradient(ellipse 50% 50% at 50% 45%, rgba(13, 148, 136, 0.18), transparent 70%),
+      radial-gradient(ellipse 70% 60% at 50% 60%, rgba(5, 11, 20, 0.10), transparent 75%);
+    filter: blur(14px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .lexis-stage > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* The glow above is absolutely positioned with a NEGATIVE inset, so it
+     deliberately paints outside its box — and an overflowing pseudo-element
+     still counts toward the document's scroll width. Left alone it added
+     2-12px of horizontal scroll at every viewport width (it scales with the
+     container, so it grew with the screen), which is the kind of defect that
+     shows up as a faint sideways wobble on a phone and never gets diagnosed.
+     `clip` rather than `hidden` on purpose: hidden creates a scroll
+     container, which would break position:sticky for any descendant. */
+  .lexis-clip-x {
+    overflow-x: clip;
+  }
+
+  /* Lifts the CTA off the page without a heavy drop shadow. Two stacked
+     shadows: a tight contact shadow for edge definition, a wide soft one
+     for elevation — a single large blur reads as a smudge. */
+  .lexis-lift {
+    box-shadow:
+      0 1px 2px rgba(30, 41, 59, 0.10),
+      0 12px 28px -8px rgba(255, 158, 0, 0.42);
+  }
+  .lexis-lift-soft {
+    box-shadow:
+      0 1px 2px rgba(30, 41, 59, 0.06),
+      0 10px 30px -12px rgba(30, 41, 59, 0.18);
+  }
+
+}
