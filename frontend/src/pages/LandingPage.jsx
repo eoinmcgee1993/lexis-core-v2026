@@ -230,7 +230,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           </AppLink>
           <button
             onClick={goPractice}
-            className="px-3 sm:px-5 py-2.5 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-lexis-action/20 flex items-center gap-1.5 sm:gap-2 min-h-[44px] whitespace-nowrap"
+            className="px-3 sm:px-5 py-2.5 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-semibold text-xs sm:text-sm rounded-xl transition-all lexis-lift flex items-center gap-1.5 sm:gap-2 min-h-[44px] whitespace-nowrap"
           >
             <span>{c.getStarted}</span>
             <ArrowRight className="w-4 h-4 flex-shrink-0" />

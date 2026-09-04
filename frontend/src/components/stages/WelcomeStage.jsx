@@ -248,7 +248,7 @@ export default function WelcomeStage({
 
         <button
           onClick={onStartTalking}
-          className="mt-10 px-10 py-4 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-display font-semibold text-lg rounded-2xl shadow-lg shadow-lexis-action/25 transition-all hover:scale-105 active:scale-95 flex items-center gap-3"
+          className="mt-10 px-10 py-4 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-display font-semibold text-lg rounded-2xl lexis-lift transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-3"
         >
           <Mic className="w-5 h-5" />
           <span>Start Talking</span>

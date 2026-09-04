@@ -210,7 +210,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
 
         <div className="mt-14 text-center">
           <AppLink
-            to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="inline-flex min-h-[44px] items-center gap-2 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-bold text-sm px-8 py-3.5 rounded-xl transition-all hover:scale-105"
+            to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="inline-flex min-h-[44px] items-center gap-2 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-bold text-sm px-8 py-3.5 rounded-xl lexis-lift transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
           >
             <Heart className="w-4 h-4" />
             <span>{t.ctaButton}</span>
