@@ -19,7 +19,7 @@ export default function TopicStage({ onBack, onPickTopic }) {
     <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <div className="w-full max-w-4xl mx-auto flex items-center p-4 md:p-6">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors">
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>Back</span>
         </button>
       </div>
@@ -40,7 +40,7 @@ export default function TopicStage({ onBack, onPickTopic }) {
               className="group flex items-center gap-4 text-left bg-white border border-lexis-ink/10 rounded-2xl p-4 lexis-lift-soft hover:border-teal-500/50 hover:-translate-y-0.5 transition-all duration-200"
             >
               <div className="p-2.5 bg-teal-600/10 text-teal-700 rounded-xl flex-shrink-0 transition-colors group-hover:bg-teal-600/15">
-                <Icon className="w-5 h-5" />
+                <Icon className="w-5 h-5" aria-hidden="true" />
               </div>
               <div>
                 <div className="font-semibold text-sm">{label}</div>

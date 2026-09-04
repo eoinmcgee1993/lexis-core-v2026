@@ -77,7 +77,7 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
 
         {feedbackLoading && (
           <div className="flex flex-col items-center gap-3 py-8 text-lexis-ink/50">
-            <Loader2 className="w-6 h-6 animate-spin" />
+            <Loader2 className="w-6 h-6 animate-spin" aria-hidden="true" />
             <p className="text-sm">{t.loading}</p>
           </div>
         )}
@@ -104,7 +104,7 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
                 <ul className="space-y-2">
                   {feedback.strengths.map((s, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-lexis-ink/80">
-                      <CheckCircle2 className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
                       <span>{s}</span>
                     </li>
                   ))}
@@ -134,7 +134,7 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
             onClick={onPracticeAgain}
             className="px-8 py-3.5 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-display font-semibold rounded-2xl lexis-lift transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-4 h-4" aria-hidden="true" />
             <span>{t.practiceAgain}</span>
           </button>
           <button onClick={onDone} className="text-xs text-lexis-ink/40 hover:text-lexis-ink/70 transition-colors">

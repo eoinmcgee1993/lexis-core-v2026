@@ -210,21 +210,21 @@ export default function LiveStage({
           title="End session"
           className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 
       {audioBlocked && (
         <div className="relative z-10 w-full max-w-4xl mt-2 p-4 bg-lexis-action/10 border border-lexis-action/30 rounded-2xl flex items-center justify-between gap-3">
           <div className="flex items-center space-x-3 text-lexis-action text-xs">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
             <span>LEXIS is talking, but your browser blocked the audio. Tap to enable it.</span>
           </div>
           <button
             onClick={onEnableAudio}
             className="px-4 py-1.5 bg-lexis-action text-lexis-navy font-bold text-xs rounded-xl flex items-center space-x-1 flex-shrink-0"
           >
-            <Volume2 className="w-4 h-4" />
+            <Volume2 className="w-4 h-4" aria-hidden="true" />
             <span>Enable Audio</span>
           </button>
         </div>
@@ -260,7 +260,7 @@ export default function LiveStage({
             title={isMuted ? 'Unmute your mic' : 'Mute your mic'}
             className={`flex flex-col items-center gap-1 px-2.5 py-2.5 rounded-xl border text-xs font-medium ${isMuted ? 'bg-rose-500/20 border-rose-500/50 text-rose-300' : 'bg-white/5 border-white/10 text-slate-200'}`}
           >
-            {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            {isMuted ? <MicOff className="w-5 h-5" aria-hidden="true" /> : <Mic className="w-5 h-5" aria-hidden="true" />}
             <span>{isMuted ? 'Muted' : 'Mic on'}</span>
           </button>
           <button
@@ -268,7 +268,7 @@ export default function LiveStage({
             title={isSpeakerMuted ? 'Unmute LEXIS' : 'Mute LEXIS'}
             className={`flex flex-col items-center gap-1 px-2.5 py-2.5 rounded-xl border text-xs font-medium ${isSpeakerMuted ? 'bg-lexis-action/20 border-lexis-action/50 text-lexis-action' : 'bg-white/5 border-white/10 text-slate-200'}`}
           >
-            {isSpeakerMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            {isSpeakerMuted ? <VolumeX className="w-5 h-5" aria-hidden="true" /> : <Volume2 className="w-5 h-5" aria-hidden="true" />}
             <span>{isSpeakerMuted ? 'Silenced' : 'Sound on'}</span>
           </button>
           <button
@@ -277,14 +277,14 @@ export default function LiveStage({
             title={voiceState === 'speaking' ? 'Jump in and interrupt LEXIS' : 'Nothing to interrupt right now'}
             className="flex flex-col items-center gap-1 px-2.5 py-2.5 bg-white/5 border border-white/10 text-slate-200 rounded-xl hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none text-xs font-medium transition-opacity"
           >
-            <Hand className="w-5 h-5 text-lexis-action" />
+            <Hand className="w-5 h-5 text-lexis-action" aria-hidden="true" />
             <span>Interrupt</span>
           </button>
           <button
             onClick={onEndCall}
             className="flex flex-col items-center gap-1 px-3 py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 font-semibold rounded-xl text-xs"
           >
-            {isConnecting ? <RotateCcw className="w-5 h-5 animate-spin" /> : <PhoneOff className="w-5 h-5" />}
+            {isConnecting ? <RotateCcw className="w-5 h-5 animate-spin" aria-hidden="true" /> : <PhoneOff className="w-5 h-5" aria-hidden="true" />}
             <span>End Session</span>
           </button>
         </div>

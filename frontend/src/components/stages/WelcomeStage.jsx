@@ -110,7 +110,7 @@ export default function WelcomeStage({
         <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2">
           {profile && (
             <span className="flex items-center gap-1.5 text-xs text-lexis-ink/50">
-              <Clock className="w-3.5 h-3.5" />
+              <Clock className="w-3.5 h-3.5" aria-hidden="true" />
               <span>{formatUsageLabel(profile)}</span>
             </span>
           )}
@@ -158,10 +158,10 @@ export default function WelcomeStage({
           )}
 
           <button onClick={onViewHistory} className="p-2 text-lexis-ink/40 hover:text-lexis-ink transition-colors" title="Practice history">
-            <History className="w-4 h-4" />
+            <History className="w-4 h-4" aria-hidden="true" />
           </button>
           <button onClick={onSignOut} className="p-2 text-lexis-ink/40 hover:text-lexis-ink transition-colors" title="Sign out">
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -193,7 +193,7 @@ export default function WelcomeStage({
         {upgradeRequired && (
           <div className="mb-6 w-full max-w-sm p-4 bg-lexis-action/10 border border-lexis-action/30 rounded-2xl flex flex-col items-center gap-3 text-center">
             <div className="flex items-center gap-2 text-lexis-action-dark text-xs">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <AlertCircle className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
               <span>{upgradeMessage || 'Free trial limit reached. Upgrade your pass to continue practicing.'}</span>
             </div>
             {/* No pricing CTA on a fair-use stop: this person already pays,
@@ -201,7 +201,7 @@ export default function WelcomeStage({
                 period starting, not a purchase. */}
             {!upgradeIsFairUse && (
               <button onClick={onViewPricing} className="px-4 py-1.5 bg-lexis-action text-lexis-navy font-bold text-xs rounded-xl flex items-center gap-1.5">
-                <CreditCard className="w-4 h-4" />
+                <CreditCard className="w-4 h-4" aria-hidden="true" />
                 <span>View Pricing</span>
               </button>
             )}
@@ -216,10 +216,10 @@ export default function WelcomeStage({
             connected. */}
         {sessionError && (
           <div className="mb-6 w-full max-w-sm p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-left">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-500 mt-0.5" />
+            <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-500 mt-0.5" aria-hidden="true" />
             <p className="flex-1 text-xs text-rose-700">{sessionError}</p>
             <button onClick={onDismissSessionError} className="text-rose-400 hover:text-rose-600 flex-shrink-0" title="Dismiss">
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         )}
@@ -250,7 +250,7 @@ export default function WelcomeStage({
           onClick={onStartTalking}
           className="mt-10 px-10 py-4 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-display font-semibold text-lg rounded-2xl lexis-lift transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-3"
         >
-          <Mic className="w-5 h-5" />
+          <Mic className="w-5 h-5" aria-hidden="true" />
           <span>Start Talking</span>
         </button>
       </div>

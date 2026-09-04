@@ -165,7 +165,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
         <AppLink
           to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors flex-shrink-0"
           >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>{t.home}</span>
         </AppLink>
         <div className="flex items-center space-x-3">
@@ -182,7 +182,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           to={lang === 'th' ? '/pricing' : '/th/pricing'} navigateTo={navigateTo} aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
           className="flex items-center justify-center gap-2 bg-white border border-lexis-ink/10 rounded-xl text-xs text-lexis-ink/70 hover:border-teal-600/40 transition-all min-h-[44px] min-w-[44px] px-2.5 flex-shrink-0"
           >
-          <Globe className="w-4 h-4 text-teal-700 flex-shrink-0" />
+          <Globe className="w-4 h-4 text-teal-700 flex-shrink-0" aria-hidden="true" />
           <span className="hidden sm:inline">{lang === 'en' ? 'ไทย' : 'English'}</span>
         </AppLink>
       </header>
@@ -192,6 +192,14 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           whose feature list is text-xs reads as a settings screen, not as
           the page where someone decides to pay. */}
       <section className="flex-1 w-full max-w-6xl mx-auto px-6 py-16 md:py-20">
+        {/* The three plan names below are h2, not h3 (4 Sep 2026). They were
+            h3 under this h1 with no h2 anywhere on the page, so the outline
+            jumped a level: a screen reader announces a missing rank, and a
+            crawler reads the page as having a title and no sections. The
+            plans ARE the sections of a pricing page. Purely semantic — the
+            size comes from text-xl on the element, so nothing moves.
+            Checked across all 14 prerendered routes; /pricing and
+            /th/pricing were the only two with a broken outline. */}
         <h1 className="font-display font-semibold text-3xl md:text-[2.5rem] leading-[1.15] text-center mb-4 text-lexis-ink text-balance">{t.heading}</h1>
         <p className="text-center text-base text-lexis-ink/60 max-w-xl mx-auto">{t.sub}</p>
         <p className="text-center text-xs text-lexis-ink/40 mt-2 mb-12 md:mb-16">
@@ -205,21 +213,21 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
         )}
         {error && (
           <div className="mb-6 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm flex items-center justify-center space-x-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
             <span>{error}</span>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Free Tier */}
-          <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between transition-shadow hover:lexis-lift-soft">
+          <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between lexis-lift-hover">
             <div>
-              <h3 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.freeTrialTitle}</h3>
+              <h2 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.freeTrialTitle}</h2>
               <p className="text-sm text-lexis-ink/55 mb-6">{t.freeTrialSub(TRIAL.minutes)}</p>
               <div className="font-display font-semibold text-5xl text-lexis-ink mb-6 tracking-tight">฿0</div>
               <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
-                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.freeTrialFeature1(TRIAL.minutes)}</span></li>
-                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.freeTrialFeature2}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.freeTrialFeature1(TRIAL.minutes)}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.freeTrialFeature2}</span></li>
               </ul>
             </div>
             {/* inline-flex + centring: this CTA is an <a>, and an anchor is
@@ -236,14 +244,14 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
               {t.mostPopular}
             </span>
             <div>
-              <h3 className="font-display font-semibold text-xl text-lexis-action-dark mb-2">{t.weeklyTitle}</h3>
+              <h2 className="font-display font-semibold text-xl text-lexis-action-dark mb-2">{t.weeklyTitle}</h2>
               <p className="text-sm text-lexis-ink/55 mb-6">{t.weeklySub}</p>
               <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿{PRICING.weekly.thb} <span className="font-sans text-xs font-normal text-lexis-ink/45 tracking-normal">{t.perWeek}</span></div>
               <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenew}</p>
               <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
-                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.weeklyFeature1}</span></li>
-                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.weeklyFeature2}</span></li>
-                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.weeklyFeature3}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.weeklyFeature1}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.weeklyFeature2}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.weeklyFeature3}</span></li>
               </ul>
             </div>
             <button
@@ -251,21 +259,21 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
               disabled={loadingTier === 'weekly'}
               className="w-full min-h-[48px] py-3.5 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-60 text-lexis-navy font-semibold rounded-2xl text-sm text-center transition-all flex items-center justify-center space-x-2"
             >
-              {loadingTier === 'weekly' ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>{t.getStartedNow}</span>}
+              {loadingTier === 'weekly' ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <span>{t.getStartedNow}</span>}
             </button>
           </div>
 
           {/* Monthly Pass */}
-          <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between transition-shadow hover:lexis-lift-soft">
+          <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between lexis-lift-hover">
             <div>
-              <h3 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.monthlyTitle}</h3>
+              <h2 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.monthlyTitle}</h2>
               <p className="text-sm text-lexis-ink/55 mb-6">{t.monthlySub}</p>
               <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿{PRICING.monthly.thb} <span className="font-sans text-xs font-normal text-lexis-ink/45 tracking-normal">{t.perMonth}</span></div>
               <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenewMonthly}</p>
               <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
-                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.monthlyFeature1(MONTHLY_SAVINGS_VS_WEEKLY_PCT)}</span></li>
-                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.monthlyFeature2}</span></li>
-                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" /><span>{t.monthlyFeature3}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.monthlyFeature1(MONTHLY_SAVINGS_VS_WEEKLY_PCT)}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.monthlyFeature2}</span></li>
+                <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.monthlyFeature3}</span></li>
               </ul>
             </div>
             <button
@@ -273,7 +281,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
               disabled={loadingTier === 'monthly'}
               className="w-full min-h-[44px] py-3 bg-lexis-canvas hover:bg-lexis-ink/5 disabled:opacity-60 border border-lexis-ink/10 text-lexis-ink font-bold rounded-xl text-sm text-center transition-all flex items-center justify-center space-x-2"
             >
-              {loadingTier === 'monthly' ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>{t.getStartedNow}</span>}
+              {loadingTier === 'monthly' ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <span>{t.getStartedNow}</span>}
             </button>
           </div>
         </div>
@@ -310,7 +318,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
 
       <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/40">
         <div className="flex items-center space-x-2">
-          <ShieldCheck className="w-4 h-4 text-teal-600" />
+          <ShieldCheck className="w-4 h-4 text-teal-600" aria-hidden="true" />
           <span>{t.footerTrust}</span>
         </div>
         <div className="flex items-center gap-4">

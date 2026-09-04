@@ -220,7 +220,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             to={lang === 'en' ? '/th' : '/'} navigateTo={navigateTo} aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
             className="flex items-center justify-center sm:justify-start gap-2 bg-white border border-lexis-ink/10 rounded-xl text-xs text-lexis-ink/60 hover:border-teal-600/40 transition-all min-h-[44px] min-w-[44px] px-2.5 sm:px-3"
           >
-            <Globe className="w-4 h-4 text-teal-700 flex-shrink-0" />
+            <Globe className="w-4 h-4 text-teal-700 flex-shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">{lang === 'en' ? 'ไทย' : 'English'}</span>
           </AppLink>
           <AppLink
@@ -233,7 +233,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             className="px-3 sm:px-5 py-2.5 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-semibold text-xs sm:text-sm rounded-xl transition-all lexis-lift flex items-center gap-1.5 sm:gap-2 min-h-[44px] whitespace-nowrap"
           >
             <span>{c.getStarted}</span>
-            <ArrowRight className="w-4 h-4 flex-shrink-0" />
+            <ArrowRight className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
           </button>
         </div>
       </header>
@@ -246,7 +246,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
       <section className="lexis-clip-x w-full max-w-6xl mx-auto px-6 pt-14 pb-20 md:pt-20 md:pb-28 grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div className="text-center md:text-left">
           <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-6">
-            <Zap className="w-3.5 h-3.5" />
+            <Zap className="w-3.5 h-3.5" aria-hidden="true" />
             <span>{c.heroBadge}</span>
           </div>
           <h1 className="font-display font-semibold text-4xl md:text-5xl tracking-tight mb-6 text-lexis-ink leading-tight text-balance">
@@ -281,7 +281,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
               onClick={goPractice}
               className="px-8 py-4 bg-lexis-action hover:bg-lexis-action-dark hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 text-lexis-navy font-display font-semibold text-lg rounded-2xl lexis-lift flex items-center space-x-3 mx-auto md:mx-0"
             >
-              <Mic className="w-5 h-5" />
+              <Mic className="w-5 h-5" aria-hidden="true" />
               <span>{t.cta}</span>
             </button>
           </div>
@@ -348,7 +348,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
        <div className="max-w-6xl mx-auto px-6 py-20 md:py-24 grid md:grid-cols-12 gap-x-12 gap-y-8">
         <div className="md:col-span-5">
         <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-5">
-          <Gauge className="w-3.5 h-3.5" />
+          <Gauge className="w-3.5 h-3.5" aria-hidden="true" />
           <span>{c.meetHeading}</span>
         </div>
         {/* Measure is constrained on the TEXT, not on the section, so the
@@ -406,7 +406,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
                 <span className="font-display font-semibold text-5xl md:text-6xl text-lexis-action-dark leading-none tabular-nums">
                   {i + 1}
                 </span>
-                <Icon className="w-5 h-5 text-teal-700 self-center" />
+                <Icon className="w-5 h-5 text-teal-700 self-center" aria-hidden="true" />
               </div>
               <div className="font-display font-semibold text-lg text-lexis-ink mb-2">{title}</div>
               <div className="text-sm md:text-base text-lexis-ink/65 leading-relaxed max-w-xs">{desc}</div>
@@ -459,7 +459,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
       <section className="w-full max-w-6xl mx-auto px-6 py-20 md:py-24">
         <div className="rounded-3xl border border-teal-600/20 bg-teal-600/[0.06] p-8 md:p-12 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 text-center md:text-left lexis-lift-soft">
           <span className="flex-shrink-0 w-12 h-12 rounded-2xl bg-teal-600/10 border border-teal-600/20 flex items-center justify-center">
-            <Heart className="w-5 h-5 text-teal-600" />
+            <Heart className="w-5 h-5 text-teal-600" aria-hidden="true" />
           </span>
           <div className="flex-1">
             <h2 className="font-display font-semibold text-2xl md:text-3xl text-lexis-ink">{c.communityHeading}</h2>
@@ -501,7 +501,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             <details key={q} className="group">
               <summary className="cursor-pointer list-none flex items-center justify-between gap-4 font-semibold text-base text-lexis-ink py-5 px-2 -mx-2 rounded-lg hover:bg-lexis-ink/[0.03] transition-colors">
                 <span>{q}</span>
-                <ChevronDown className="w-4 h-4 text-lexis-ink/35 flex-shrink-0 transition-transform duration-200 group-open:rotate-180" />
+                <ChevronDown className="w-4 h-4 text-lexis-ink/35 flex-shrink-0 transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
               </summary>
               <p className="pb-5 px-2 -mx-2 -mt-1 text-sm md:text-base text-lexis-ink/65 leading-relaxed max-w-2xl">{a}</p>
             </details>
@@ -517,7 +517,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
       <footer className="lexis-band w-full">
        <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-5 text-xs text-lexis-ink/60">
         <div className="flex items-center space-x-2">
-          <ShieldCheck className="w-4 h-4 text-teal-600" />
+          <ShieldCheck className="w-4 h-4 text-teal-600" aria-hidden="true" />
           <span>{c.footerTrust}</span>
         </div>
         <div className="flex items-center gap-4">

@@ -273,6 +273,33 @@ html {
       0 10px 30px -12px rgba(30, 41, 59, 0.18);
   }
 
+  /* Rest-to-hover version of the above, with the :hover baked in.
+     `hover:lexis-lift-soft` looked like it should work and generated NO CSS
+     — Tailwind builds variants for utilities it can construct, and a class
+     written by hand into @layer components is not one of those, so the
+     variant silently produced nothing. The two pricing cards using it had
+     `transition-shadow` on a shadow that never changed: no hover feedback
+     at all on a page where the whole job is choosing between three cards.
+     Same failure mode as `from-lexis-ink/12`, and caught the same way —
+     by grepping the built stylesheet rather than trusting the class name. */
+  .lexis-lift-hover {
+    box-shadow: 0 1px 2px rgba(30, 41, 59, 0.04);
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+  .lexis-lift-hover:hover {
+    box-shadow:
+      0 1px 2px rgba(30, 41, 59, 0.06),
+      0 10px 30px -12px rgba(30, 41, 59, 0.18);
+    transform: translateY(-2px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lexis-lift-hover,
+    .lexis-lift-hover:hover {
+      transition: none;
+      transform: none;
+    }
+  }
+
 }
 
 /* ─────────────────────────────────────────────────────────────────────

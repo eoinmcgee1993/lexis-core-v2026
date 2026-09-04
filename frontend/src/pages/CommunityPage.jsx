@@ -120,7 +120,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
         <AppLink
           to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors"
           >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>{t.home}</span>
         </AppLink>
         <div className="flex items-center space-x-3">
@@ -133,14 +133,14 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
           to={lang === 'en' ? thUrl.replace(SITE_URL, '') : enUrl.replace(SITE_URL, '')} navigateTo={navigateTo} aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
           className="flex items-center gap-1 text-xs text-lexis-ink/50 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
           >
-          <Globe className="w-4 h-4 text-teal-700" />
+          <Globe className="w-4 h-4 text-teal-700" aria-hidden="true" />
           <span>{lang === 'en' ? 'ไทย' : 'EN'}</span>
         </AppLink>
       </header>
 
       <section className="w-full max-w-3xl mx-auto px-6 pt-16 pb-10 text-center md:text-left">
         <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-6">
-          <Heart className="w-3.5 h-3.5" />
+          <Heart className="w-3.5 h-3.5" aria-hidden="true" />
           <span>{t.badge}</span>
         </div>
         <h1 className="font-display font-semibold text-5xl md:text-6xl leading-[0.98] text-balance text-lexis-ink">
@@ -161,7 +161,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
         <div className="space-y-10 text-sm text-lexis-ink/80 leading-relaxed">
           <div>
             <h2 className="font-display font-semibold text-xl text-lexis-ink pt-2 flex items-center gap-2">
-              <Coins className="w-5 h-5 text-teal-600" />
+              <Coins className="w-5 h-5 text-teal-600" aria-hidden="true" />
               {t.fundedHeading}
             </h2>
             <p className="mt-3 text-base">{t.fundedBody}</p>
@@ -169,7 +169,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
 
           <div className="bg-white border-2 border-teal-600/30 rounded-2xl p-6 flex items-start gap-4 shadow-sm">
             <div className="p-2.5 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700 flex-shrink-0">
-              <Target className="w-5 h-5" />
+              <Target className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
               <h2 className="font-display font-semibold text-lg text-lexis-ink">{t.goalHeading}</h2>
@@ -179,7 +179,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
 
           <div>
             <h2 className="font-display font-semibold text-xl text-lexis-ink pt-2 flex items-center gap-2">
-              <ArrowRight className="w-5 h-5 text-teal-600" />
+              <ArrowRight className="w-5 h-5 text-teal-600" aria-hidden="true" />
               {t.whereHeading}
             </h2>
             <p className="mt-3 text-base">{t.whereBody}</p>
@@ -187,7 +187,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
 
           <div>
             <h2 className="font-display font-semibold text-xl text-lexis-ink pt-2 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-teal-600" />
+              <Building2 className="w-5 h-5 text-teal-600" aria-hidden="true" />
               {t.schoolsHeading}
             </h2>
             <p className="mt-3 text-base">{t.schoolsBody}</p>
@@ -195,7 +195,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
 
           <div>
             <h2 className="font-display font-semibold text-xl text-lexis-ink pt-2 flex items-center gap-2">
-              <Mail className="w-5 h-5 text-teal-600" />
+              <Mail className="w-5 h-5 text-teal-600" aria-hidden="true" />
               {t.contactHeading}
             </h2>
             <p className="mt-3 text-base">
@@ -212,7 +212,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
           <AppLink
             to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="inline-flex min-h-[44px] items-center gap-2 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-bold text-sm px-8 py-3.5 rounded-xl lexis-lift transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
           >
-            <Heart className="w-4 h-4" />
+            <Heart className="w-4 h-4" aria-hidden="true" />
             <span>{t.ctaButton}</span>
           </AppLink>
         </div>
