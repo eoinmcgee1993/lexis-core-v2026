@@ -274,3 +274,37 @@ html {
   }
 
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Reduced motion (4 Sep 2026).
+
+   Everything above this line that loops does so forever: the tutor's idle
+   blink, .animate-float on the hero, .animate-pulse-slow on the live
+   session's audio ring. For a user with vestibular sensitivity that is not
+   a preference setting they can wait out — it runs for as long as the page
+   is open, and this app's whole premise is staying on one page talking.
+
+   Deliberately scoped to the DECORATIVE loops. animate-spin is left alone:
+   it is only ever on <Loader2>, where the spin IS the information that
+   something is still happening, and freezing it turns a working wait into
+   what looks like a hung screen. Same reasoning for the mouth — it is
+   driven by real speech and carries meaning, so it is not motion for its
+   own sake, and it is inline style rather than a class anyway.
+
+   Not a blanket `* { animation: none }`: that also kills transitions
+   people rely on to see that a control responded, which trades one
+   accessibility problem for another.
+
+   NOTE: an earlier commit on this branch REMOVED a prefers-reduced-motion
+   guard, and this is not a reversal of it. That one guarded an animation
+   that did not exist — it asserted a promise the CSS could not keep. These
+   three do exist; the block below is checked against the utilities the
+   build actually generates.
+   ───────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .lexis-avatar-eye,
+  .animate-float,
+  .animate-pulse-slow {
+    animation: none !important;
+  }
+}

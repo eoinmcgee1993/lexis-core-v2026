@@ -26,8 +26,27 @@ const TutorAvatar3D = AVATAR_GLB_URL ? React.lazy(() => import('../TutorAvatar3D
 // cyan/emerald pair, for consistency with everything else on this screen —
 // this is a fallback path (AVATAR_PHOTO_URL is set in production), so it's
 // a lower-traffic surface, but still worth keeping in the same system.
-function TutorAvatarSVG({ isConnected, isConnecting, tutorLevel }) {
-  const mouthHeight = 4 + Math.min(18, (tutorLevel / 100) * 18);
+function TutorAvatarSVG({ isConnected, isConnecting, tutorLevel, openness = null }) {
+  // Driven by `openness` from src/lib/visemes.js — jaw position derived from
+  // first-formant share — with tutorLevel only as the fallback when no
+  // analysis is available (the marketing hero while muted, and any caller
+  // still on the old single-number signal).
+  //
+  // This tier was missed when the photo and 3D avatars moved off raw
+  // loudness, so it kept the exact bug that work existed to fix: /s/ is one
+  // of the loudest sounds in English and is made with the mouth almost shut,
+  // so a loudness-driven jaw threw itself open on every "yes", "this",
+  // "practice". Worth fixing here specifically because this is the FALLBACK
+  // face — it renders when the photo or the model failed to load, i.e.
+  // exactly when the experience is already degraded.
+  const opening = openness != null ? openness : Math.min(1, tutorLevel / 100);
+
+  // The mouth narrows as it opens rather than only growing taller. A jaw
+  // dropped for an open vowel rounds the lips; a close front vowel like /i/
+  // spreads them wide. Scaling width inversely is the cheapest way to get
+  // that relationship, and it stops a wide-open mouth reading as a letterbox.
+  const mouthHeight = 4 + opening * 18;
+  const mouthWidth = 30 - opening * 6;
   const active = isConnected || isConnecting;
   return (
     <svg viewBox="0 0 100 100" className="w-20 h-20 md:w-28 md:h-28" role="img" aria-label="LEXIS tutor avatar">
@@ -41,13 +60,13 @@ function TutorAvatarSVG({ isConnected, isConnecting, tutorLevel }) {
       <ellipse cx="34" cy="42" rx="5" ry="6" className="lexis-avatar-eye" fill={active ? '#5eead4' : '#475569'} />
       <ellipse cx="66" cy="42" rx="5" ry="6" className="lexis-avatar-eye" fill={active ? '#5eead4' : '#475569'} />
       <rect
-        x="35"
+        x={50 - mouthWidth / 2}
         y={62 - mouthHeight / 2}
-        width="30"
+        width={mouthWidth}
         height={mouthHeight}
         rx={mouthHeight / 2}
         fill={isConnected ? '#FF9E00' : '#334155'}
-        style={{ transition: 'height 60ms ease-out, y 60ms ease-out' }}
+        style={{ transition: 'height 60ms ease-out, y 60ms ease-out, width 60ms ease-out, x 60ms ease-out' }}
       />
     </svg>
   );
@@ -77,7 +96,14 @@ class AvatarErrorBoundary extends React.Component {
 // Defaulted so any caller still passing only tutorLevel keeps working —
 // notably the marketing hero, which has no real audio while muted.
 function TutorAvatar({ isConnected, isConnecting, tutorLevel, tutorMouth = null }) {
-  const svgFallback = <TutorAvatarSVG isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />;
+  const svgFallback = (
+    <TutorAvatarSVG
+      isConnected={isConnected}
+      isConnecting={isConnecting}
+      tutorLevel={tutorLevel}
+      openness={tutorMouth ? tutorMouth.openness : null}
+    />
+  );
   const [photoFailed, setPhotoFailed] = useState(false);
 
   if (AVATAR_PHOTO_URL && !photoFailed) {
