@@ -23,6 +23,7 @@ const TEXT = {
     freeTrialSub: (minutes) => `${minutes} Minutes of Free Practice`,
     freeTrialFeature1: (minutes) => `${minutes} minutes of practice time`,
     freeTrialFeature2: 'Real-time feedback as you speak',
+    freeTrialNote: (minutes) => `No card required. ${minutes} minutes in total, however you split them across sessions.`,
     tryFree: 'Try Free',
     weeklyTitle: 'Weekly Pass',
     weeklySub: 'Unlimited Practice for 7 Days',
@@ -59,6 +60,7 @@ const TEXT = {
     freeTrialSub: (minutes) => `ฝึกฝนฟรี ${minutes} นาที`,
     freeTrialFeature1: (minutes) => `เวลาฝึกฝน ${minutes} นาที`,
     freeTrialFeature2: 'รับคำแนะนำแบบเรียลไทม์ขณะพูด',
+    freeTrialNote: (minutes) => `ไม่ต้องผูกบัตร รวมทั้งหมด ${minutes} นาที จะแบ่งใช้กี่ครั้งก็ได้`,
     tryFree: 'ลองใช้ฟรี',
     weeklyTitle: 'แพ็กเกจรายสัปดาห์',
     weeklySub: 'ฝึกได้ไม่จำกัดนาน 7 วัน',
@@ -224,7 +226,18 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             <div>
               <h2 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.freeTrialTitle}</h2>
               <p className="text-sm text-lexis-ink/55 mb-6">{t.freeTrialSub(TRIAL.minutes)}</p>
-              <div className="font-display font-semibold text-5xl text-lexis-ink mb-6 tracking-tight">฿0</div>
+              <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿0</div>
+              {/* The free card had two bullets against the paid cards' three
+                  plus a note, so in an equal-height 3-up grid it rendered
+                  with ~110px of dead space above its CTA — visible only by
+                  screenshotting the built page, not by reading the JSX.
+                  Filled with facts already canonical in facts.js rather
+                  than invented copy: TRIAL.cardRequired is false, and the
+                  trial is 15 minutes TOTAL (max_allowed_seconds = 900,
+                  however split across sessions). The second half earns its
+                  place independently — people assume a free trial resets
+                  daily, and this one does not. */}
+              <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.freeTrialNote(TRIAL.minutes)}</p>
               <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
                 <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.freeTrialFeature1(TRIAL.minutes)}</span></li>
                 <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.freeTrialFeature2}</span></li>
