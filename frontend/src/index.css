@@ -207,8 +207,13 @@ html {
      SECTION is what changes colour, not a box floating inside it — that
      is the difference between structure and decoration. */
   .lexis-band {
+    /* Separation by surface shift and spacing alone — no rules. Checked
+       against how high-end product marketing pages actually band their
+       sections (linear.app, 3 Sep 2026): they change the ground and give
+       the sections room, and draw no line between them. This carried a
+       hairline on both edges as well, which is belt-and-braces and reads
+       boxy: the eye only needs one cue that the ground changed. */
     background-color: rgba(255, 255, 255, 0.6);
-    border-block: 1px solid rgba(30, 41, 59, 0.07);
   }
 
   /* The dark stage the hero demo sits on. The demo is the single most

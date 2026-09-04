@@ -224,7 +224,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             <span className="hidden sm:inline">{lang === 'en' ? 'ไทย' : 'English'}</span>
           </AppLink>
           <AppLink
-            to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="text-xs sm:text-sm text-lexis-ink/60 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
+            to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="flex items-center text-xs sm:text-sm text-lexis-ink/60 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
           >
             {c.pricing}
           </AppLink>
