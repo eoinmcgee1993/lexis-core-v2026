@@ -142,7 +142,10 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ planTier, sponsorAdd })
+        // lang goes with it so Stripe renders Checkout in the language
+        // this page is being read in, rather than in whatever the browser
+        // is set to — see /api/stripe/checkout's checkoutLocale.
+        body: JSON.stringify({ planTier, sponsorAdd, lang })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Checkout error: ${res.status}`);

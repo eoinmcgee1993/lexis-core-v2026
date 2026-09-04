@@ -1090,6 +1090,55 @@ function passDays(tier) {
   return PERIOD_DAYS[tier] ?? PERIOD_DAYS.weekly;
 }
 
+// Per-session Checkout branding (4 Sep 2026).
+//
+// This Stripe account is Clearmark's, and its account-wide branding says
+// "Digital Renaissance", with that business's icon and Stripe's stock blue
+// button. So a LEXIS customer who clicked Get Started was handed a payment
+// page for a company they had never heard of, looking nothing like the site
+// they arrived from — reported straight off the live checkout as "tab says
+// digital renaissance" and "random stuff up top left". On a THB 199 impulse
+// buy from a first-time visitor, that is not a cosmetic problem; it is the
+// moment the purchase reads as a scam.
+//
+// The account-wide setting is shared with Clearmark's other products, so
+// repointing it is not this codebase's call to make. branding_settings
+// overrides it for THIS session only, which is exactly the right scope:
+// LEXIS's checkout looks like LEXIS and nothing else on the account moves.
+//
+// Known limit, so nobody thinks this is finished: Stripe applies these to
+// the Checkout PAGE only. Receipts, invoices and the card statement still
+// carry the account's own business name and descriptor. This narrows the
+// mismatch to after the payment; removing it entirely means changing
+// account-wide settings, which is a decision for whoever owns the account.
+//
+// button_color is the teal from the mark (Tailwind's teal-600 — the same
+// #0D9488 as frontend/public/favicon.svg) rather than the amber the site
+// uses for its own CTAs. The amber only has contrast against DARK text; it
+// is navy-on-amber everywhere in the app. Stripe picks the button's text
+// colour itself, and a brand colour that works under only one foreground is
+// a bad bet when something else chooses the foreground. Teal reads
+// correctly under either, and it matches the icon sitting directly above it.
+//
+// The images are URLs on the live site rather than uploaded Stripe File
+// objects. A File would be a second copy to keep in step with
+// public/icon-*.png by hand; this way the badge on the checkout page is
+// literally the same file as the PWA icon and the favicon, and updating the
+// mark updates all three at once.
+//
+// Pinned to the production host rather than built from resolveFrontendOrigin
+// below: Stripe fetches these server-side, and a Vercel preview origin sits
+// behind deployment protection, so a preview's checkout would hand Stripe a
+// URL it gets a login page from.
+const LEXIS_CHECKOUT_BRANDING = {
+  display_name: 'LEXIS',
+  background_color: '#FAFAF7',  // lexis-canvas
+  button_color: '#0D9488',      // teal-600 — the mark's own colour
+  border_style: 'rounded',      // matches the app's rounded-2xl surfaces
+  icon: { type: 'url', url: 'https://learnwithlexis.com/icon-192.png' },
+  logo: { type: 'url', url: 'https://learnwithlexis.com/icon-512.png' }
+};
+
 // Stripe Checkout — auth required, but NOT entitlement-gated: a user whose
 // trial just expired is exactly who needs to reach this endpoint.
 //
@@ -1113,7 +1162,7 @@ function passDays(tier) {
 // than assumed.
 app.post('/api/stripe/checkout', authenticate, async (req, res) => {
   try {
-    const { planTier, sponsorAdd } = req.body || {};
+    const { planTier, sponsorAdd, lang } = req.body || {};
     if (!planTier || !['weekly', 'monthly'].includes(planTier)) {
       return res.status(400).json({ error: 'Invalid planTier: expected "weekly" or "monthly".' });
     }
@@ -1145,7 +1194,16 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
       sponsor_add: sponsorAdd ? 'true' : 'false'
     };
 
-    const session = await stripe.checkout.sessions.create({
+    // Stripe renders Checkout in the browser's locale by default. That is
+    // the right guess on most sites and the wrong one here: a Thai learner
+    // reading the Thai pricing page on a phone set to English should not be
+    // handed an English payment page at the one moment they are deciding
+    // whether to trust it. Pass through the language the page was actually
+    // being read in. Anything unrecognised falls back to Stripe's own
+    // detection rather than being forced to English.
+    const checkoutLocale = lang === 'th' ? 'th' : lang === 'en' ? 'en' : null;
+
+    const params = {
       // payment_method_types deliberately omitted. Hardcoding ['card'] meant
       // enabling a method in the Stripe Dashboard had no effect here, so the
       // dashboard and the code could silently disagree. Omitting it lets
@@ -1168,8 +1226,31 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
       payment_intent_data: { metadata },
       success_url: `${frontendOrigin}/app?payment=success${sponsorAdd ? '&sponsor=1' : ''}`,
       cancel_url: `${frontendOrigin}/pricing?payment=cancelled`,
-      allow_promotion_codes: true
-    });
+      allow_promotion_codes: true,
+      branding_settings: LEXIS_CHECKOUT_BRANDING,
+      ...(checkoutLocale ? { locale: checkoutLocale } : {})
+    };
+
+    // Branding must never be able to take checkout down. Two of those fields
+    // are URLs Stripe fetches server-side while creating the session, so an
+    // icon renamed in a future frontend deploy — or any branding field a
+    // later Stripe API version stops accepting — would turn a cosmetic
+    // problem into "nobody can pay", which is the single worst failure this
+    // product has. Retry once without it and log loudly: a plainly branded
+    // checkout that works beats a correctly branded one that doesn't exist.
+    //
+    // Deliberately catches everything rather than sniffing the error for a
+    // branding-shaped message. A real fault (a bad price ID, Stripe down)
+    // fails the retry too and lands in the outer catch exactly as before —
+    // one extra API call on a request that was already failing.
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create(params);
+    } catch (brandingErr) {
+      const { branding_settings, ...unbranded } = params;
+      session = await stripe.checkout.sessions.create(unbranded);
+      logError('Stripe Checkout branding rejected - fell back to account branding', brandingErr);
+    }
 
     res.json({ url: session.url });
   } catch (err) {
