@@ -6,7 +6,7 @@
 // session lifecycle itself — LexisApp.jsx still does all of that — this is
 // purely presentation plus the translation-subtitle fetch, which is scoped
 // here (rather than in LexisApp.jsx) because it's a live-stage-only concern.
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useState, useId } from 'react';
 import { Mic, MicOff, Volume2, VolumeX, Hand, PhoneOff, RotateCcw, X, AlertCircle } from 'lucide-react';
 import TutorAvatarPhoto from '../TutorAvatarPhoto';
 
@@ -48,15 +48,24 @@ function TutorAvatarSVG({ isConnected, isConnecting, tutorLevel, openness = null
   const mouthHeight = 4 + opening * 18;
   const mouthWidth = 30 - opening * 6;
   const active = isConnected || isConnecting;
+
+  // The gradient's id was the document-global literal "lexisFaceGradient".
+  // SVG paint references resolve by id across the whole document, so a
+  // second instance anywhere on the page — a picture-in-picture tutor, a
+  // preview beside the live one — would have BOTH faces painted from
+  // whichever <defs> the browser saw first, silently and without an error.
+  // Only one renders today; useId makes that a property of the component
+  // rather than a coincidence of the layout.
+  const gradientId = useId();
   return (
     <svg viewBox="0 0 100 100" className="w-20 h-20 md:w-28 md:h-28" role="img" aria-label="LEXIS tutor avatar">
       <defs>
-        <radialGradient id="lexisFaceGradient" cx="35%" cy="30%" r="80%">
+        <radialGradient id={gradientId} cx="35%" cy="30%" r="80%">
           <stop offset="0%" stopColor={active ? '#0f766e' : '#1e293b'} />
           <stop offset="100%" stopColor={active ? '#042f2e' : '#0f172a'} />
         </radialGradient>
       </defs>
-      <circle cx="50" cy="50" r="46" fill="url(#lexisFaceGradient)" stroke={isConnected ? '#2dd4bf' : '#475569'} strokeWidth="2" />
+      <circle cx="50" cy="50" r="46" fill={`url(#${gradientId})`} stroke={isConnected ? '#2dd4bf' : '#475569'} strokeWidth="2" />
       <ellipse cx="34" cy="42" rx="5" ry="6" className="lexis-avatar-eye" fill={active ? '#5eead4' : '#475569'} />
       <ellipse cx="66" cy="42" rx="5" ry="6" className="lexis-avatar-eye" fill={active ? '#5eead4' : '#475569'} />
       <rect

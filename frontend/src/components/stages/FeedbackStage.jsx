@@ -49,7 +49,7 @@ function ConfidenceRing({ value, label }) {
   const offset = circumference - (value / 100) * circumference;
   return (
     <div className="relative w-32 h-32">
-      <svg viewBox="0 0 120 120" className="w-32 h-32 -rotate-90">
+      <svg viewBox="0 0 120 120" className="w-32 h-32 -rotate-90" aria-hidden="true" focusable="false">
         <circle cx="60" cy="60" r={radius} fill="none" stroke="#E7E5DE" strokeWidth="10" />
         <circle
           cx="60" cy="60" r={radius} fill="none"
