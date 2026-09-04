@@ -6,7 +6,7 @@ import { buildBreadcrumbJsonLd, buildOffersJsonLd, SITE_URL } from '../data/stru
 import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
 import { reportError } from '../lib/errorReporting';
-import { MONTHLY_SAVINGS_VS_WEEKLY_PCT, PRICING, PRICING_DESCRIPTION_EN, PRICING_DESCRIPTION_TH, SPONSOR_ADDON_THB, TRIAL, VAT } from '../content/facts';
+import { FAIR_USE, MONTHLY_SAVINGS_VS_WEEKLY_PCT, PRICING, PRICING_DESCRIPTION_EN, PRICING_DESCRIPTION_TH, SPONSOR_ADDON_THB, TRIAL, VAT } from '../content/facts';
 import AppLink from '../components/AppLink';
 
 // Display-language chrome strings for this page — Stage 4 (real /th and
@@ -34,6 +34,7 @@ const TEXT = {
     weeklyFeature3: "LEXIS adjusts to your level as you go",
     noRenew: 'Your pass ends by itself after 7 days — it never renews, and there is nothing to cancel.',
     getStartedNow: 'Get Started Now',
+    fairUse: (w, m) => `Fair use: a pass covers up to ${w} minutes of live practice a week, ${m} a month.`,
     monthlyTitle: 'Monthly Immersion',
     monthlySub: 'Unlimited Practice for 30 Days',
     perMonth: 'one-off · 30 days',
@@ -71,6 +72,7 @@ const TEXT = {
     weeklyFeature3: 'LEXIS ปรับให้เหมาะกับระดับของคุณไปเรื่อย ๆ',
     noRenew: 'แพ็กเกจจะสิ้นสุดเองหลังจาก 7 วัน ไม่มีการต่ออายุอัตโนมัติ และไม่ต้องยกเลิก',
     getStartedNow: 'เริ่มเลย',
+    fairUse: (w, m) => `การใช้งานอย่างเป็นธรรม: แพ็กเกจใช้ฝึกพูดสดได้สูงสุด ${w} นาทีต่อสัปดาห์ และ ${m} นาทีต่อเดือน`,
     monthlyTitle: 'แพ็กเกจรายเดือน',
     monthlySub: 'ฝึกได้ไม่จำกัดนาน 30 วัน',
     perMonth: 'จ่ายครั้งเดียว · 30 วัน',
@@ -321,6 +323,20 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             {t.sponsorLearnMore}
           </AppLink>
         </label>
+
+        {/* Fair use, stated BEFORE the buy button rather than only in the
+            Terms, and deliberately NOT inside the !session branch — a
+            signed-in returning buyer needs it as much as a new one.
+            The cards above say "Unlimited Practice" while the backend has
+            always enforced a per-period ceiling that appeared in no
+            user-facing copy at all. Whether the cards keep the word
+            "unlimited" is a positioning call and is left alone; this is the
+            clause that makes it ordinary marketing rather than a false
+            claim. Numbers come from facts.js, which mirrors
+            FAIR_USE_MINUTES in backend/app.mjs. */}
+        <p className="text-center text-xs text-lexis-ink/40 mt-4">
+          {t.fairUse(FAIR_USE.weekly.minutes, FAIR_USE.monthly.minutes)}
+        </p>
 
         {!session && (
           <p className="text-center text-xs text-lexis-ink/40 mt-4">

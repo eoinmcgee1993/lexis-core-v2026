@@ -39,6 +39,32 @@ export const PRICING = {
   monthly: { thb: 599, period: 'month', days: 30, unitCode: 'MON' }
 };
 
+// The per-period fair-use ceiling, mirroring FAIR_USE_MINUTES in
+// backend/app.mjs. These two must agree; the backend is the enforcement and
+// this is the disclosure, and a ceiling that is enforced but not disclosed
+// is the problem this export exists to end.
+//
+// Until now it was surfaced NOWHERE in user-facing copy — not on the
+// pricing page, not in the FAQ, not in the Terms, which themselves said
+// "unlimited practice". A paid product with an undisclosed usage limit is
+// not a positioning question, it is a claim that cannot be supported, and
+// this file's whole reason for existing is that a commercial claim is
+// treated here as a factual assertion.
+//
+// Note this does NOT decide whether the cards say "unlimited". Plenty of
+// products say it and carry a fair-use clause; that is a positioning call
+// for whoever owns the pricing. What it does is make the clause exist, so
+// the word is defensible instead of false.
+//
+// If FAIR_USE_WEEKLY_MINUTES / FAIR_USE_MONTHLY_MINUTES are ever set in the
+// backend environment, these numbers go stale — same hazard the price
+// constants have always had, and the same answer: change it here, and every
+// page that shows it follows.
+export const FAIR_USE = {
+  weekly: { minutes: 150 },
+  monthly: { minutes: 450 }
+};
+
 // Passes are one-off purchases, not subscriptions (2 Sep 2026). The reason
 // is PromptPay: Thailand pays by bank QR, and Stripe cannot offer PromptPay
 // in a subscription-mode Checkout at all — so the choice was between
