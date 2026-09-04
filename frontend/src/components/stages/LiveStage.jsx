@@ -245,11 +245,11 @@ export default function LiveStage({
           </div>
         </div>
 
-        <div className="flex items-center space-x-3 mt-8 bg-white/5 border border-white/10 p-2 rounded-2xl shadow-xl">
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-8 bg-white/5 border border-white/10 p-2 rounded-2xl shadow-xl">
           <button
             onClick={onToggleMute}
             title={isMuted ? 'Unmute your mic' : 'Mute your mic'}
-            className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border text-[10px] font-medium ${isMuted ? 'bg-rose-500/20 border-rose-500/50 text-rose-300' : 'bg-white/5 border-white/10 text-slate-200'}`}
+            className={`flex flex-col items-center gap-1 px-2.5 py-2.5 rounded-xl border text-xs font-medium ${isMuted ? 'bg-rose-500/20 border-rose-500/50 text-rose-300' : 'bg-white/5 border-white/10 text-slate-200'}`}
           >
             {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
             <span>{isMuted ? 'Muted' : 'Mic on'}</span>
@@ -257,7 +257,7 @@ export default function LiveStage({
           <button
             onClick={onToggleSpeakerMute}
             title={isSpeakerMuted ? 'Unmute LEXIS' : 'Mute LEXIS'}
-            className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border text-[10px] font-medium ${isSpeakerMuted ? 'bg-lexis-action/20 border-lexis-action/50 text-lexis-action' : 'bg-white/5 border-white/10 text-slate-200'}`}
+            className={`flex flex-col items-center gap-1 px-2.5 py-2.5 rounded-xl border text-xs font-medium ${isSpeakerMuted ? 'bg-lexis-action/20 border-lexis-action/50 text-lexis-action' : 'bg-white/5 border-white/10 text-slate-200'}`}
           >
             {isSpeakerMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             <span>{isSpeakerMuted ? 'Silenced' : 'Sound on'}</span>
@@ -266,14 +266,14 @@ export default function LiveStage({
             onClick={onInterrupt}
             disabled={voiceState !== 'speaking'}
             title={voiceState === 'speaking' ? 'Jump in and interrupt LEXIS' : 'Nothing to interrupt right now'}
-            className="flex flex-col items-center gap-1 px-3 py-2.5 bg-white/5 border border-white/10 text-slate-200 rounded-xl hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none text-[10px] font-medium transition-opacity"
+            className="flex flex-col items-center gap-1 px-2.5 py-2.5 bg-white/5 border border-white/10 text-slate-200 rounded-xl hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none text-xs font-medium transition-opacity"
           >
             <Hand className="w-5 h-5 text-lexis-action" />
             <span>Interrupt</span>
           </button>
           <button
             onClick={onEndCall}
-            className="flex flex-col items-center gap-1 px-4 py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 font-semibold rounded-xl text-[10px]"
+            className="flex flex-col items-center gap-1 px-3 py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 font-semibold rounded-xl text-xs"
           >
             {isConnecting ? <RotateCcw className="w-5 h-5 animate-spin" /> : <PhoneOff className="w-5 h-5" />}
             <span>End Session</span>
@@ -289,13 +289,13 @@ export default function LiveStage({
             slightly behind speech. */}
         {transcripts.length > 0 && (
           <div ref={transcriptContainerRef} className="w-full mt-10 bg-white/5 border border-white/10 rounded-2xl p-4 max-h-60 overflow-y-auto space-y-3">
-            <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Conversation</div>
+            <div className="text-[11px] text-slate-500 uppercase tracking-wider mb-2">Conversation</div>
             {transcripts.map((item, idx) => (
-              <div key={idx} className={`text-xs p-3 rounded-xl ${item.speaker === 'lexis' ? 'bg-teal-950/30 border border-teal-800/30 text-teal-100 ml-4' : 'bg-white/5 border border-white/10 text-slate-300 mr-4'}`}>
-                <span className="font-bold uppercase mr-2 opacity-60">{item.speaker === 'lexis' ? 'LEXIS:' : 'You:'}</span>
+              <div key={idx} className={`text-sm leading-relaxed p-3 rounded-xl ${item.speaker === 'lexis' ? 'bg-teal-950/30 border border-teal-800/30 text-teal-100 ml-4' : 'bg-white/5 border border-white/10 text-slate-300 mr-4'}`}>
+                <span className="font-bold uppercase text-[11px] tracking-wider mr-2 opacity-60">{item.speaker === 'lexis' ? 'LEXIS:' : 'You:'}</span>
                 {item.text}
                 {item.speaker === 'lexis' && item.translation && (
-                  <div className="mt-1.5 pt-1.5 border-t border-teal-800/30 text-teal-300/70 italic">
+                  <div className="mt-1.5 pt-1.5 border-t border-teal-800/30 text-teal-300/70 italic leading-relaxed">
                     {item.translation}
                   </div>
                 )}
