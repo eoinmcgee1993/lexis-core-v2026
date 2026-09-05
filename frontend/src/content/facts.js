@@ -93,13 +93,46 @@ export const VAT = {
   registered: false
 };
 
-// "Best value — about 25% less than 4 weeks at the weekly rate" is
-// computed here so the claim can't silently go stale if either price
-// ever changes without someone remembering to also update a hand-typed
-// percentage on the pricing card.
+// "Best value — about 25% less than 4 weeks at the weekly rate" was
+// computed here so the claim could not go stale if a price changed.
+//
+// RETIRED FROM THE PRICING CARD, 4 Sep 2026, and the reason matters more
+// than the constant. The percentage is true on PRICE — 4 x ฿199 = ฿796
+// against ฿599 — but it compares days of access while saying nothing about
+// practice time, and the cards now state the minutes. Run the numbers the
+// way a reader can once both are visible:
+//
+//   4 weekly passes   ฿796  ->  600 minutes over 28 days   ฿1.327/minute
+//   1 monthly pass    ฿599  ->  450 minutes over 30 days   ฿1.331/minute
+//
+// The tiers are within 0.3% of each other per minute — by design; the
+// fair-use suite already asserts they are symmetric per baht-day. So a
+// "25% less" badge sitting beside "450 minutes" invites a comparison it
+// loses, and disclosing the minutes is what would have turned a defensible
+// claim into a misleading one. This file's whole premise is that a
+// commercial claim is a factual assertion, so the claim goes rather than
+// the disclosure.
+//
+// Kept exported, not deleted: it is still the correct number for the
+// access-duration comparison, and scripts/unit-economics.mjs is the sort
+// of place that legitimately wants it. What replaced it on the card is
+// MONTHLY_MINUTES_MULTIPLE below — a fact that survives the disclosure.
 export const MONTHLY_SAVINGS_VS_WEEKLY_PCT = Math.round(
   ((PRICING.weekly.thb * 4 - PRICING.monthly.thb) / (PRICING.weekly.thb * 4)) * 100
 );
+
+// How much more practice time a monthly pass carries than a weekly one.
+// Exactly 3 on today's numbers, and derived rather than typed so it follows
+// FAIR_USE the way every other figure on the pricing page follows this file.
+//
+// This is what the monthly card claims now. It is the honest form of "best
+// value": more practice in one purchase, stated in the same unit the card
+// has just used, instead of a discount that only holds if you ignore that
+// unit. Rounded to one decimal so a future ceiling change cannot silently
+// print "3x" when it is really 2.6.
+export const MONTHLY_MINUTES_MULTIPLE = Math.round(
+  (FAIR_USE.monthly.minutes / FAIR_USE.weekly.minutes) * 10
+) / 10;
 
 // English-language display strings built from the numbers above, so
 // every page renders the identical sentence rather than each hand-typing
@@ -107,11 +140,16 @@ export const MONTHLY_SAVINGS_VS_WEEKLY_PCT = Math.round(
 export const PRICING_TEASER_EN = `Free ${TRIAL.minutes}-minute trial, then ฿${PRICING.weekly.thb} for ${PRICING.weekly.days} days or ฿${PRICING.monthly.thb} for ${PRICING.monthly.days}.`;
 export const PRICING_TEASER_TH = `ทดลองฟรี ${TRIAL.minutes} นาที จากนั้น ฿${PRICING.weekly.thb} ใช้ได้ ${PRICING.weekly.days} วัน หรือ ฿${PRICING.monthly.thb} ใช้ได้ ${PRICING.monthly.days} วัน`;
 
-// Kept under 160 characters so Google does not truncate it in results. The
+// Kept under 160 characters so Google does not truncate them in results.
+//
+// The PRICING pair was over that limit anyway — 193 characters, cut
+// mid-sentence in exactly the way the note warns about — because the rule
+// was written for the landing description and never re-applied when the
+// pricing one grew. Both are now inside it. The
 // longer version (213) was cut mid-sentence, losing the trial offer, which is
 // the part most likely to earn the click. Site audit M2, 27 Aug 2026.
 export const LANDING_DESCRIPTION_EN = `A voice conversation partner for practicing spoken English and Thai. Talk out loud, get gentle real-time corrections. Free ${TRIAL.minutes}-min trial, no card.`;
-export const PRICING_DESCRIPTION_EN = `LEXIS pricing: a free ${TRIAL.minutes}-minute trial, then a one-off ฿${PRICING.weekly.thb} ${PRICING.weekly.days}-day pass or ฿${PRICING.monthly.thb} ${PRICING.monthly.days}-day pass for unlimited voice practice in English or Thai. Pay by card or PromptPay. ${VAT.registered ? '' : 'No VAT, '}nothing auto-renews.`;
+export const PRICING_DESCRIPTION_EN = `Free ${TRIAL.minutes}-minute trial, then a one-off ฿${PRICING.weekly.thb} ${PRICING.weekly.days}-day or ฿${PRICING.monthly.thb} ${PRICING.monthly.days}-day pass for voice practice in English or Thai. Card or PromptPay, ${VAT.registered ? '' : 'no VAT, '}nothing auto-renews.`;
 
 // Thai-language versions of the two page descriptions above, for the /th
 // and /th/pricing routes' own <meta name="description"> and og:description
@@ -119,7 +157,7 @@ export const PRICING_DESCRIPTION_EN = `LEXIS pricing: a free ${TRIAL.minutes}-mi
 // re-served under a Thai URL). Same facts, translated, not a separate set
 // of numbers to keep in sync.
 export const LANDING_DESCRIPTION_TH = `คู่สนทนาสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย พูดออกเสียงจริง รับคำแนะนำแบบเรียลไทม์อย่างอ่อนโยน ทดลองฟรี ${TRIAL.minutes} นาที ไม่ต้องผูกบัตร`;
-export const PRICING_DESCRIPTION_TH = `ราคา LEXIS: ทดลองฟรี ${TRIAL.minutes} นาที จากนั้นจ่ายครั้งเดียว ฿${PRICING.weekly.thb} ใช้ได้ ${PRICING.weekly.days} วัน หรือ ฿${PRICING.monthly.thb} ใช้ได้ ${PRICING.monthly.days} วัน ฝึกพูดภาษาอังกฤษหรือภาษาไทยได้ไม่จำกัด จ่ายด้วยบัตรหรือพร้อมเพย์ ${VAT.registered ? '' : 'ไม่มี VAT '}ไม่มีการต่ออายุอัตโนมัติ`;
+export const PRICING_DESCRIPTION_TH = `ทดลองฟรี ${TRIAL.minutes} นาที จากนั้นจ่ายครั้งเดียว ฿${PRICING.weekly.thb} ใช้ได้ ${PRICING.weekly.days} วัน หรือ ฿${PRICING.monthly.thb} ใช้ได้ ${PRICING.monthly.days} วัน ฝึกพูดอังกฤษหรือไทย จ่ายด้วยบัตรหรือพร้อมเพย์ ${VAT.registered ? '' : 'ไม่มี VAT '}ไม่ต่ออายุอัตโนมัติ`;
 
 // FAQ copy — rendered by LandingPage.jsx's <details>/<summary> list and
 // mirrored as FAQPage JSON-LD by structuredData.js's buildFaqJsonLd.

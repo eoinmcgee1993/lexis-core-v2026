@@ -43,7 +43,7 @@ const TEXT = {
     kind: "The kind of questions you'll practice",
     kindBody: 'Common, real interview prompts, the ones that come up regardless of industry:',
     after: 'What you get after each session',
-    afterBody: "A plain-language summary of what you did well and what to work on next, grounded in what you actually said, not a generic score. Practice again as many times as you want; there's no limit on repeat sessions.",
+    afterBody: "A plain-language summary of what you did well and what to work on next, grounded in what you actually said, not a generic score. Practice again as many times as you want — there's no limit on repeat sessions, only the practice time your pass carries.",
     cta: 'Start practicing free',
     trialNote: (minutes) => `Free ${minutes}-minute trial. No card required.`,
     footerPricing: 'View pricing'
@@ -57,7 +57,7 @@ const TEXT = {
     kind: 'คำถามแบบที่จะได้ฝึก',
     kindBody: 'คำถามสัมภาษณ์จริงที่เจอบ่อย ไม่ว่าจะสายงานไหนก็เจอได้:',
     after: 'สิ่งที่ได้หลังจบแต่ละเซสชัน',
-    afterBody: 'สรุปผลแบบเข้าใจง่ายว่าทำได้ดีตรงไหนและควรฝึกอะไรต่อ อ้างอิงจากสิ่งที่คุณพูดจริง ไม่ใช่คะแนนทั่วไป ฝึกซ้ำได้เท่าที่อยากฝึก ไม่จำกัดจำนวนครั้ง',
+    afterBody: 'สรุปผลแบบเข้าใจง่ายว่าทำได้ดีตรงไหนและควรฝึกอะไรต่อ อ้างอิงจากสิ่งที่คุณพูดจริง ไม่ใช่คะแนนทั่วไป ฝึกซ้ำได้ไม่จำกัดจำนวนครั้ง จำกัดเพียงเวลาฝึกที่แพ็กเกจของคุณมี',
     cta: 'เริ่มฝึกฟรี',
     trialNote: (minutes) => `ทดลองใช้ฟรี ${minutes} นาที ไม่ต้องผูกบัตร`,
     footerPricing: 'ดูราคา'
