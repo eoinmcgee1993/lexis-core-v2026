@@ -1,16 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="LEXIS">
-  <!-- Rounded-square teal-600 (#0D9488, the app's existing "live" accent —
-       see scripts/design/lexis-visual-system.md) background with a white
-       five-bar waveform, matching src/components/LexisMark.jsx — the
-       brand mark used as the logo badge everywhere else (Landing/Pricing/
-       Auth/legal-page headers). Previously a generic four-point sparkle;
-       replaced (19 Aug 2026) for reading as generic-AI-product iconography
-       rather than anything specific to a voice product — a waveform is
-       literal instead: LEXIS's whole product is a live voice conversation. -->
+  <!-- Rounded-square teal-600 (#0D9488 — the app's "live" accent, and the
+       colour the Stripe Checkout button now uses) with the LEXIS waveform in
+       white. Redrawn 4 Sep 2026 alongside src/components/LexisMark.jsx; see
+       that file for why the contour is 7/13/21/16/10 rather than the old
+       mirror-symmetric 8/14/20/14/8, and why it stays a waveform at all.
+
+       The five <rect>s below are the SAME coordinates as LexisMark.jsx,
+       verbatim. They are inset by one transform instead of being restated at
+       favicon scale, so the two files cannot drift apart — which is the
+       failure this pairing is most prone to.
+
+       scale(0.7) about the centre leaves the waveform spanning 14.7 of 24
+       with ~4.6 of margin. The old version ran the bars to 1.5 from the
+       edge, so the outer two crowded the rx=6 corner curve and the mark had
+       no room to breathe inside its own container. -->
   <rect width="24" height="24" rx="6" fill="#0D9488" />
-  <rect x="1.5" y="8" width="3" height="8" rx="1.5" fill="#FFFFFF" />
-  <rect x="6" y="5" width="3" height="14" rx="1.5" fill="#FFFFFF" />
-  <rect x="10.5" y="2" width="3" height="20" rx="1.5" fill="#FFFFFF" />
-  <rect x="15" y="5" width="3" height="14" rx="1.5" fill="#FFFFFF" />
-  <rect x="19.5" y="8" width="3" height="8" rx="1.5" fill="#FFFFFF" />
+  <g fill="#FFFFFF" transform="translate(12 12) scale(0.7) translate(-12 -12)">
+    <rect x="1.5" y="8.5" width="3" height="7" rx="1.5" />
+    <rect x="6" y="5.5" width="3" height="13" rx="1.5" />
+    <rect x="10.5" y="1.5" width="3" height="21" rx="1.5" />
+    <rect x="15" y="4" width="3" height="16" rx="1.5" />
+    <rect x="19.5" y="7" width="3" height="10" rx="1.5" />
+  </g>
 </svg>
