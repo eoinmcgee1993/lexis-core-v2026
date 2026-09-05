@@ -55,7 +55,7 @@ const TEXT = {
     kind: "The kind of conversation you'll practice",
     kindBody: 'Real everyday topics, the ones that come up constantly regardless of where you are:',
     after: 'What you get after each session',
-    afterBody: "A plain-language summary of what you did well and what to work on next, grounded in what you actually said, not a generic score. Practice again as many times as you want; there's no limit on repeat sessions.",
+    afterBody: "A plain-language summary of what you did well and what to work on next, grounded in what you actually said, not a generic score. Practice again as many times as you want — there's no limit on repeat sessions, only the practice time your pass carries.",
     cta: 'Start practicing free',
     trialNote: (minutes) => `Free ${minutes}-minute trial. No card required.`,
     footerPricing: 'View pricing'
@@ -69,7 +69,7 @@ const TEXT = {
     kind: 'บทสนทนาแบบที่จะได้ฝึก',
     kindBody: 'หัวข้อในชีวิตประจำวันจริง ๆ ที่เจอบ่อยไม่ว่าจะอยู่ที่ไหน:',
     after: 'สิ่งที่ได้หลังจบแต่ละเซสชัน',
-    afterBody: 'สรุปผลแบบเข้าใจง่ายว่าทำได้ดีตรงไหนและควรฝึกอะไรต่อ อ้างอิงจากสิ่งที่คุณพูดจริง ไม่ใช่คะแนนทั่วไป ฝึกซ้ำได้เท่าที่อยากฝึก ไม่จำกัดจำนวนครั้ง',
+    afterBody: 'สรุปผลแบบเข้าใจง่ายว่าทำได้ดีตรงไหนและควรฝึกอะไรต่อ อ้างอิงจากสิ่งที่คุณพูดจริง ไม่ใช่คะแนนทั่วไป ฝึกซ้ำได้ไม่จำกัดจำนวนครั้ง จำกัดเพียงเวลาฝึกที่แพ็กเกจของคุณมี',
     cta: 'เริ่มฝึกฟรี',
     trialNote: (minutes) => `ทดลองใช้ฟรี ${minutes} นาที ไม่ต้องผูกบัตร`,
     footerPricing: 'ดูราคา'
@@ -145,7 +145,7 @@ export default function EverydayEnglishPage({ navigateTo, lang = 'en' }) {
         <AppLink
           to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors"
           >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>{t.home}</span>
         </AppLink>
         <div className="flex items-center space-x-3">
@@ -158,7 +158,7 @@ export default function EverydayEnglishPage({ navigateTo, lang = 'en' }) {
           to={lang === 'en' ? thUrl.replace(SITE_URL, '') : enUrl.replace(SITE_URL, '')} navigateTo={navigateTo} aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
           className="flex items-center gap-1 text-xs text-lexis-ink/50 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
           >
-          <Globe className="w-4 h-4 text-teal-700" />
+          <Globe className="w-4 h-4 text-teal-700" aria-hidden="true" />
           <span>{lang === 'en' ? 'ไทย' : 'EN'}</span>
         </AppLink>
       </header>
@@ -174,7 +174,7 @@ export default function EverydayEnglishPage({ navigateTo, lang = 'en' }) {
         <div className="space-y-8 text-sm text-lexis-ink/80 leading-relaxed">
           <div>
             <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2 flex items-center gap-2">
-              <Mic className="w-4 h-4 text-teal-600" />
+              <Mic className="w-4 h-4 text-teal-600" aria-hidden="true" />
               {t.why}
             </h2>
             <p className="mt-2">{t.whyBody}</p>
@@ -182,7 +182,7 @@ export default function EverydayEnglishPage({ navigateTo, lang = 'en' }) {
 
           <div>
             <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2 flex items-center gap-2">
-              <MessageCircle className="w-4 h-4 text-teal-600" />
+              <MessageCircle className="w-4 h-4 text-teal-600" aria-hidden="true" />
               {t.kind}
             </h2>
             <p className="mt-2">{t.kindBody}</p>
@@ -195,7 +195,7 @@ export default function EverydayEnglishPage({ navigateTo, lang = 'en' }) {
 
           <div>
             <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-teal-600" />
+              <TrendingUp className="w-4 h-4 text-teal-600" aria-hidden="true" />
               {t.after}
             </h2>
             <p className="mt-2">{t.afterBody}</p>
@@ -206,7 +206,7 @@ export default function EverydayEnglishPage({ navigateTo, lang = 'en' }) {
           <AppLink
             to="/app" navigateTo={navigateTo} className="inline-flex min-h-[44px] items-center gap-2 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-bold text-sm px-8 py-3.5 rounded-xl transition-all"
           >
-            <Mic className="w-4 h-4" />
+            <Mic className="w-4 h-4" aria-hidden="true" />
             <span>{t.cta}</span>
           </AppLink>
           <p className="mt-3 text-xs text-lexis-ink/50">

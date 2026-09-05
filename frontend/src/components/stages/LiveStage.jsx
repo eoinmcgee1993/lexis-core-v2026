@@ -6,7 +6,7 @@
 // session lifecycle itself — LexisApp.jsx still does all of that — this is
 // purely presentation plus the translation-subtitle fetch, which is scoped
 // here (rather than in LexisApp.jsx) because it's a live-stage-only concern.
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useState, useId } from 'react';
 import { Mic, MicOff, Volume2, VolumeX, Hand, PhoneOff, RotateCcw, X, AlertCircle } from 'lucide-react';
 import TutorAvatarPhoto from '../TutorAvatarPhoto';
 
@@ -26,28 +26,56 @@ const TutorAvatar3D = AVATAR_GLB_URL ? React.lazy(() => import('../TutorAvatar3D
 // cyan/emerald pair, for consistency with everything else on this screen —
 // this is a fallback path (AVATAR_PHOTO_URL is set in production), so it's
 // a lower-traffic surface, but still worth keeping in the same system.
-function TutorAvatarSVG({ isConnected, isConnecting, tutorLevel }) {
-  const mouthHeight = 4 + Math.min(18, (tutorLevel / 100) * 18);
+function TutorAvatarSVG({ isConnected, isConnecting, tutorLevel, openness = null }) {
+  // Driven by `openness` from src/lib/visemes.js — jaw position derived from
+  // first-formant share — with tutorLevel only as the fallback when no
+  // analysis is available (the marketing hero while muted, and any caller
+  // still on the old single-number signal).
+  //
+  // This tier was missed when the photo and 3D avatars moved off raw
+  // loudness, so it kept the exact bug that work existed to fix: /s/ is one
+  // of the loudest sounds in English and is made with the mouth almost shut,
+  // so a loudness-driven jaw threw itself open on every "yes", "this",
+  // "practice". Worth fixing here specifically because this is the FALLBACK
+  // face — it renders when the photo or the model failed to load, i.e.
+  // exactly when the experience is already degraded.
+  const opening = openness != null ? openness : Math.min(1, tutorLevel / 100);
+
+  // The mouth narrows as it opens rather than only growing taller. A jaw
+  // dropped for an open vowel rounds the lips; a close front vowel like /i/
+  // spreads them wide. Scaling width inversely is the cheapest way to get
+  // that relationship, and it stops a wide-open mouth reading as a letterbox.
+  const mouthHeight = 4 + opening * 18;
+  const mouthWidth = 30 - opening * 6;
   const active = isConnected || isConnecting;
+
+  // The gradient's id was the document-global literal "lexisFaceGradient".
+  // SVG paint references resolve by id across the whole document, so a
+  // second instance anywhere on the page — a picture-in-picture tutor, a
+  // preview beside the live one — would have BOTH faces painted from
+  // whichever <defs> the browser saw first, silently and without an error.
+  // Only one renders today; useId makes that a property of the component
+  // rather than a coincidence of the layout.
+  const gradientId = useId();
   return (
     <svg viewBox="0 0 100 100" className="w-20 h-20 md:w-28 md:h-28" role="img" aria-label="LEXIS tutor avatar">
       <defs>
-        <radialGradient id="lexisFaceGradient" cx="35%" cy="30%" r="80%">
+        <radialGradient id={gradientId} cx="35%" cy="30%" r="80%">
           <stop offset="0%" stopColor={active ? '#0f766e' : '#1e293b'} />
           <stop offset="100%" stopColor={active ? '#042f2e' : '#0f172a'} />
         </radialGradient>
       </defs>
-      <circle cx="50" cy="50" r="46" fill="url(#lexisFaceGradient)" stroke={isConnected ? '#2dd4bf' : '#475569'} strokeWidth="2" />
+      <circle cx="50" cy="50" r="46" fill={`url(#${gradientId})`} stroke={isConnected ? '#2dd4bf' : '#475569'} strokeWidth="2" />
       <ellipse cx="34" cy="42" rx="5" ry="6" className="lexis-avatar-eye" fill={active ? '#5eead4' : '#475569'} />
       <ellipse cx="66" cy="42" rx="5" ry="6" className="lexis-avatar-eye" fill={active ? '#5eead4' : '#475569'} />
       <rect
-        x="35"
+        x={50 - mouthWidth / 2}
         y={62 - mouthHeight / 2}
-        width="30"
+        width={mouthWidth}
         height={mouthHeight}
         rx={mouthHeight / 2}
         fill={isConnected ? '#FF9E00' : '#334155'}
-        style={{ transition: 'height 60ms ease-out, y 60ms ease-out' }}
+        style={{ transition: 'height 60ms ease-out, y 60ms ease-out, width 60ms ease-out, x 60ms ease-out' }}
       />
     </svg>
   );
@@ -77,7 +105,14 @@ class AvatarErrorBoundary extends React.Component {
 // Defaulted so any caller still passing only tutorLevel keeps working —
 // notably the marketing hero, which has no real audio while muted.
 function TutorAvatar({ isConnected, isConnecting, tutorLevel, tutorMouth = null }) {
-  const svgFallback = <TutorAvatarSVG isConnected={isConnected} isConnecting={isConnecting} tutorLevel={tutorLevel} />;
+  const svgFallback = (
+    <TutorAvatarSVG
+      isConnected={isConnected}
+      isConnecting={isConnecting}
+      tutorLevel={tutorLevel}
+      openness={tutorMouth ? tutorMouth.openness : null}
+    />
+  );
   const [photoFailed, setPhotoFailed] = useState(false);
 
   if (AVATAR_PHOTO_URL && !photoFailed) {
@@ -175,21 +210,21 @@ export default function LiveStage({
           title="End session"
           className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 
       {audioBlocked && (
         <div className="relative z-10 w-full max-w-4xl mt-2 p-4 bg-lexis-action/10 border border-lexis-action/30 rounded-2xl flex items-center justify-between gap-3">
           <div className="flex items-center space-x-3 text-lexis-action text-xs">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
             <span>LEXIS is talking, but your browser blocked the audio. Tap to enable it.</span>
           </div>
           <button
             onClick={onEnableAudio}
             className="px-4 py-1.5 bg-lexis-action text-lexis-navy font-bold text-xs rounded-xl flex items-center space-x-1 flex-shrink-0"
           >
-            <Volume2 className="w-4 h-4" />
+            <Volume2 className="w-4 h-4" aria-hidden="true" />
             <span>Enable Audio</span>
           </button>
         </div>
@@ -219,37 +254,37 @@ export default function LiveStage({
           </div>
         </div>
 
-        <div className="flex items-center space-x-3 mt-8 bg-white/5 border border-white/10 p-2 rounded-2xl shadow-xl">
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-8 bg-white/5 border border-white/10 p-2 rounded-2xl shadow-xl">
           <button
             onClick={onToggleMute}
             title={isMuted ? 'Unmute your mic' : 'Mute your mic'}
-            className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border text-[10px] font-medium ${isMuted ? 'bg-rose-500/20 border-rose-500/50 text-rose-300' : 'bg-white/5 border-white/10 text-slate-200'}`}
+            className={`flex flex-col items-center gap-1 px-2.5 py-2.5 rounded-xl border text-xs font-medium ${isMuted ? 'bg-rose-500/20 border-rose-500/50 text-rose-300' : 'bg-white/5 border-white/10 text-slate-200'}`}
           >
-            {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            {isMuted ? <MicOff className="w-5 h-5" aria-hidden="true" /> : <Mic className="w-5 h-5" aria-hidden="true" />}
             <span>{isMuted ? 'Muted' : 'Mic on'}</span>
           </button>
           <button
             onClick={onToggleSpeakerMute}
             title={isSpeakerMuted ? 'Unmute LEXIS' : 'Mute LEXIS'}
-            className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-xl border text-[10px] font-medium ${isSpeakerMuted ? 'bg-lexis-action/20 border-lexis-action/50 text-lexis-action' : 'bg-white/5 border-white/10 text-slate-200'}`}
+            className={`flex flex-col items-center gap-1 px-2.5 py-2.5 rounded-xl border text-xs font-medium ${isSpeakerMuted ? 'bg-lexis-action/20 border-lexis-action/50 text-lexis-action' : 'bg-white/5 border-white/10 text-slate-200'}`}
           >
-            {isSpeakerMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            {isSpeakerMuted ? <VolumeX className="w-5 h-5" aria-hidden="true" /> : <Volume2 className="w-5 h-5" aria-hidden="true" />}
             <span>{isSpeakerMuted ? 'Silenced' : 'Sound on'}</span>
           </button>
           <button
             onClick={onInterrupt}
             disabled={voiceState !== 'speaking'}
             title={voiceState === 'speaking' ? 'Jump in and interrupt LEXIS' : 'Nothing to interrupt right now'}
-            className="flex flex-col items-center gap-1 px-3 py-2.5 bg-white/5 border border-white/10 text-slate-200 rounded-xl hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none text-[10px] font-medium transition-opacity"
+            className="flex flex-col items-center gap-1 px-2.5 py-2.5 bg-white/5 border border-white/10 text-slate-200 rounded-xl hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none text-xs font-medium transition-opacity"
           >
-            <Hand className="w-5 h-5 text-lexis-action" />
+            <Hand className="w-5 h-5 text-lexis-action" aria-hidden="true" />
             <span>Interrupt</span>
           </button>
           <button
             onClick={onEndCall}
-            className="flex flex-col items-center gap-1 px-4 py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 font-semibold rounded-xl text-[10px]"
+            className="flex flex-col items-center gap-1 px-3 py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 font-semibold rounded-xl text-xs"
           >
-            {isConnecting ? <RotateCcw className="w-5 h-5 animate-spin" /> : <PhoneOff className="w-5 h-5" />}
+            {isConnecting ? <RotateCcw className="w-5 h-5 animate-spin" aria-hidden="true" /> : <PhoneOff className="w-5 h-5" aria-hidden="true" />}
             <span>End Session</span>
           </button>
         </div>
@@ -263,13 +298,13 @@ export default function LiveStage({
             slightly behind speech. */}
         {transcripts.length > 0 && (
           <div ref={transcriptContainerRef} className="w-full mt-10 bg-white/5 border border-white/10 rounded-2xl p-4 max-h-60 overflow-y-auto space-y-3">
-            <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Conversation</div>
+            <div className="text-[11px] text-slate-500 uppercase tracking-wider mb-2">Conversation</div>
             {transcripts.map((item, idx) => (
-              <div key={idx} className={`text-xs p-3 rounded-xl ${item.speaker === 'lexis' ? 'bg-teal-950/30 border border-teal-800/30 text-teal-100 ml-4' : 'bg-white/5 border border-white/10 text-slate-300 mr-4'}`}>
-                <span className="font-bold uppercase mr-2 opacity-60">{item.speaker === 'lexis' ? 'LEXIS:' : 'You:'}</span>
+              <div key={idx} className={`text-sm leading-relaxed p-3 rounded-xl ${item.speaker === 'lexis' ? 'bg-teal-950/30 border border-teal-800/30 text-teal-100 ml-4' : 'bg-white/5 border border-white/10 text-slate-300 mr-4'}`}>
+                <span className="font-bold uppercase text-[11px] tracking-wider mr-2 opacity-60">{item.speaker === 'lexis' ? 'LEXIS:' : 'You:'}</span>
                 {item.text}
                 {item.speaker === 'lexis' && item.translation && (
-                  <div className="mt-1.5 pt-1.5 border-t border-teal-800/30 text-teal-300/70 italic">
+                  <div className="mt-1.5 pt-1.5 border-t border-teal-800/30 text-teal-300/70 italic leading-relaxed">
                     {item.translation}
                   </div>
                 )}

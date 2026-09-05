@@ -441,7 +441,7 @@ export default function HeroLiveDemo({ direction, caption }) {
         aria-pressed={!muted}
         className="absolute top-3 right-3 z-10 w-11 h-11 rounded-full bg-black/30 hover:bg-black/50 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition-colors"
       >
-        {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+        {muted ? <VolumeX size={14} aria-hidden="true" /> : <Volume2 size={14} aria-hidden="true" />}
       </button>
 
       <div className="relative p-5 flex flex-col items-center">

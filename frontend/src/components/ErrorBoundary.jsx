@@ -33,7 +33,7 @@ export default class ErrorBoundary extends React.Component {
       <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col items-center justify-center p-6 text-center">
         <div className="w-full max-w-sm bg-white border border-lexis-ink/10 rounded-2xl p-8 shadow-sm">
           <div className="mx-auto w-fit p-2 bg-rose-50 border border-rose-200 rounded-xl text-rose-500 mb-4">
-            <AlertTriangle className="w-5 h-5" />
+            <AlertTriangle className="w-5 h-5" aria-hidden="true" />
           </div>
           <h1 className="text-lg font-display font-semibold text-lexis-ink mb-1">Something went wrong</h1>
           <p className="text-xs text-lexis-ink/50 mb-6">

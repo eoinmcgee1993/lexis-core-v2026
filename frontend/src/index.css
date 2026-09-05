@@ -183,3 +183,155 @@ html {
     98% { transform: scaleY(0.1); }
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Marketing page composition primitives (3 Sep 2026).
+
+   Why these exist. The 21 Aug interface re-audit deleted every card on
+   the landing page ("delete the cards", "icons only where they carry
+   meaning"). That call was right about the cards — a bordered box per
+   four-word step gave a step the same weight as a paragraph — but
+   removing them took the page's only structure with it and put nothing
+   back. What was left was text on one flat cream plane, with a DIFFERENT
+   container width per section (6xl / 4xl / 5xl / 4xl / 3xl / 3xl / 6xl),
+   so the left edge moved on every scroll. Reported as "generic and dull",
+   which it was.
+
+   The fix is structure WITHOUT going back to a box per item: full-bleed
+   bands to separate sections, one elevated stage for the product shot,
+   and a constant content edge. Nothing below re-introduces the per-item
+   card the re-audit removed.
+   ───────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* A section band, one step lighter than the canvas. Full-bleed so the
+     SECTION is what changes colour, not a box floating inside it — that
+     is the difference between structure and decoration. */
+  .lexis-band {
+    /* Separation by surface shift and spacing alone — no rules. Checked
+       against how high-end product marketing pages actually band their
+       sections (linear.app, 3 Sep 2026): they change the ground and give
+       the sections room, and draw no line between them. This carried a
+       hairline on both edges as well, which is belt-and-braces and reads
+       boxy: the eye only needs one cue that the ground changed. */
+    background-color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* The dark stage the hero demo sits on. The demo is the single most
+     persuasive asset on the page (the real product, running, with real
+     audio) and it was rendering as a small dark rectangle floating in the
+     corner. A contained pool of light under it reads as a product shot
+     rather than an embedded widget. */
+  .lexis-stage {
+    position: relative;
+  }
+  .lexis-stage::before {
+    content: '';
+    position: absolute;
+    /* Vertical bleed only. A negative HORIZONTAL inset pushed the glow past
+       its container and into the document's scroll width; .lexis-clip-x
+       below hides that, but overflow-x:clip is Safari 16+, so on an older
+       iPhone the wobble would come back. Keeping the box within its bounds
+       fixes it everywhere and leaves the clip as a second line of defence.
+       The blur below still spreads the light sideways, so nothing is lost
+       visually. */
+    inset: -12% 0;
+    background:
+      radial-gradient(ellipse 50% 50% at 50% 45%, rgba(13, 148, 136, 0.18), transparent 70%),
+      radial-gradient(ellipse 70% 60% at 50% 60%, rgba(5, 11, 20, 0.10), transparent 75%);
+    filter: blur(14px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .lexis-stage > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* The glow above is absolutely positioned with a NEGATIVE inset, so it
+     deliberately paints outside its box — and an overflowing pseudo-element
+     still counts toward the document's scroll width. Left alone it added
+     2-12px of horizontal scroll at every viewport width (it scales with the
+     container, so it grew with the screen), which is the kind of defect that
+     shows up as a faint sideways wobble on a phone and never gets diagnosed.
+     `clip` rather than `hidden` on purpose: hidden creates a scroll
+     container, which would break position:sticky for any descendant. */
+  .lexis-clip-x {
+    overflow-x: clip;
+  }
+
+  /* Lifts the CTA off the page without a heavy drop shadow. Two stacked
+     shadows: a tight contact shadow for edge definition, a wide soft one
+     for elevation — a single large blur reads as a smudge. */
+  .lexis-lift {
+    box-shadow:
+      0 1px 2px rgba(30, 41, 59, 0.10),
+      0 12px 28px -8px rgba(255, 158, 0, 0.42);
+  }
+  .lexis-lift-soft {
+    box-shadow:
+      0 1px 2px rgba(30, 41, 59, 0.06),
+      0 10px 30px -12px rgba(30, 41, 59, 0.18);
+  }
+
+  /* Rest-to-hover version of the above, with the :hover baked in.
+     `hover:lexis-lift-soft` looked like it should work and generated NO CSS
+     — Tailwind builds variants for utilities it can construct, and a class
+     written by hand into @layer components is not one of those, so the
+     variant silently produced nothing. The two pricing cards using it had
+     `transition-shadow` on a shadow that never changed: no hover feedback
+     at all on a page where the whole job is choosing between three cards.
+     Same failure mode as `from-lexis-ink/12`, and caught the same way —
+     by grepping the built stylesheet rather than trusting the class name. */
+  .lexis-lift-hover {
+    box-shadow: 0 1px 2px rgba(30, 41, 59, 0.04);
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+  .lexis-lift-hover:hover {
+    box-shadow:
+      0 1px 2px rgba(30, 41, 59, 0.06),
+      0 10px 30px -12px rgba(30, 41, 59, 0.18);
+    transform: translateY(-2px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lexis-lift-hover,
+    .lexis-lift-hover:hover {
+      transition: none;
+      transform: none;
+    }
+  }
+
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Reduced motion (4 Sep 2026).
+
+   Everything above this line that loops does so forever: the tutor's idle
+   blink, .animate-float on the hero, .animate-pulse-slow on the live
+   session's audio ring. For a user with vestibular sensitivity that is not
+   a preference setting they can wait out — it runs for as long as the page
+   is open, and this app's whole premise is staying on one page talking.
+
+   Deliberately scoped to the DECORATIVE loops. animate-spin is left alone:
+   it is only ever on <Loader2>, where the spin IS the information that
+   something is still happening, and freezing it turns a working wait into
+   what looks like a hung screen. Same reasoning for the mouth — it is
+   driven by real speech and carries meaning, so it is not motion for its
+   own sake, and it is inline style rather than a class anyway.
+
+   Not a blanket `* { animation: none }`: that also kills transitions
+   people rely on to see that a control responded, which trades one
+   accessibility problem for another.
+
+   NOTE: an earlier commit on this branch REMOVED a prefers-reduced-motion
+   guard, and this is not a reversal of it. That one guarded an animation
+   that did not exist — it asserted a promise the CSS could not keep. These
+   three do exist; the block below is checked against the utilities the
+   build actually generates.
+   ───────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .lexis-avatar-eye,
+  .animate-float,
+  .animate-pulse-slow {
+    animation: none !important;
+  }
+}

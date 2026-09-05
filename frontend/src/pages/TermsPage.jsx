@@ -10,7 +10,7 @@ import React from 'react';
 import LegalPageShell from '../components/LegalPageShell';
 import { useSeo } from '../lib/useSeo';
 import { SITE_URL, buildBreadcrumbJsonLd } from '../data/structuredData';
-import { PRICING, TRIAL, VAT } from '../content/facts';
+import { FAIR_USE, PRICING, TRIAL, VAT } from '../content/facts';
 import AppLink from '../components/AppLink';
 
 export default function TermsPage({ navigateTo }) {
@@ -31,10 +31,47 @@ export default function TermsPage({ navigateTo }) {
         {TRIAL.cardRequired ? '' : ', no card required'}. Paid access is
         sold as a pass: a single payment of ฿{PRICING.weekly.thb} for{' '}
         {PRICING.weekly.days} days, or ฿{PRICING.monthly.thb} for{' '}
-        {PRICING.monthly.days} days, of unlimited practice. Payment is
+        {PRICING.monthly.days} days of practice, up to the fair-use
+        ceiling set out below. Payment is
         taken once through Stripe, by card or PromptPay. A pass does not
         renew and no further payment is taken unless you buy another one.
         {' '}{VAT.registered ? '' : 'No VAT applies: LEXIS is not a VAT-registered business.'}
+      </p>
+
+      {/* Fair use, added 4 Sep 2026. The backend has always enforced a
+          per-period ceiling (FAIR_USE_MINUTES in backend/app.mjs) that was
+          disclosed in no user-facing copy at all — not here, not in the
+          FAQ, not on the pricing page.
+
+          At first this section sat under a paragraph still selling
+          "unlimited practice", on the reasoning that a disclosed clause
+          makes the word ordinary marketing rather than a false claim. The
+          owner then chose to drop the word outright, so the paragraph above
+          and the pricing cards now lead with the ceiling instead of
+          qualifying a superlative. This section is what they point at.
+
+          Numbers come from facts.js so this cannot drift away from the
+          pricing page the way the trial length once did. */}
+      <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Fair use</h2>
+      <p>
+        A pass has no session limit and no daily allowance: you can use it
+        in one long conversation or in many short ones. What it does have is
+        a fair-use ceiling on total live practice —{' '}
+        {FAIR_USE.weekly.minutes} minutes on a{' '}
+        {PRICING.weekly.days}-day pass and {FAIR_USE.monthly.minutes}{' '}
+        minutes on a {PRICING.monthly.days}-day pass. The ceiling exists
+        because every minute of conversation costs LEXIS money in real
+        time; it is not a soft target. A pass is one fair-use period, so
+        if you reach the ceiling, live practice pauses for the rest of
+        that pass and the rest of your account stays available. Buying
+        another pass starts a fresh window straight away. Nothing renews
+        by itself, here or anywhere else in LEXIS. Almost nobody reaches
+        the ceiling: it works out at about{' '}
+        {Math.round(FAIR_USE.weekly.minutes / PRICING.weekly.days)} minutes
+        of talking every single day on the {PRICING.weekly.days}-day pass,
+        and{' '}
+        {Math.round(FAIR_USE.monthly.minutes / PRICING.monthly.days)} a day
+        on the {PRICING.monthly.days}-day one.
       </p>
 
       <h2 className="font-display font-semibold text-lg text-lexis-ink pt-2">Your account</h2>

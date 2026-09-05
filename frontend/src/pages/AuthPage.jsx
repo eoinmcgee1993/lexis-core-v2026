@@ -100,7 +100,7 @@ export default function AuthPage({ navigateTo }) {
       <AppLink
         to="/" navigateTo={navigateTo} className="absolute top-6 left-6 flex items-center space-x-2 text-xs text-lexis-ink/50 hover:text-lexis-ink transition-colors"
           >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4" aria-hidden="true" />
         <span>Back to home</span>
       </AppLink>
 
@@ -135,7 +135,7 @@ export default function AuthPage({ navigateTo }) {
 
           <div>
             <label className="text-xs text-lexis-ink/50 mb-1 flex items-center space-x-1.5">
-              <Mail className="w-3 h-3" /><span>Email</span>
+              <Mail className="w-3 h-3" aria-hidden="true" /><span>Email</span>
             </label>
             <input
               type="email"
@@ -149,7 +149,7 @@ export default function AuthPage({ navigateTo }) {
 
           <div>
             <label className="text-xs text-lexis-ink/50 mb-1 flex items-center space-x-1.5">
-              <Lock className="w-3 h-3" /><span>Password</span>
+              <Lock className="w-3 h-3" aria-hidden="true" /><span>Password</span>
             </label>
             <input
               type="password"
@@ -188,11 +188,11 @@ export default function AuthPage({ navigateTo }) {
             className="w-full min-h-[44px] py-3 bg-lexis-action hover:bg-lexis-action-dark disabled:opacity-50 text-lexis-navy font-bold text-sm rounded-xl transition-all flex items-center justify-center space-x-2"
           >
             {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
             ) : mode === 'sign_in' ? (
-              <><LogIn className="w-4 h-4" /><span>Sign in</span></>
+              <><LogIn className="w-4 h-4" aria-hidden="true" /><span>Sign in</span></>
             ) : (
-              <><UserPlus className="w-4 h-4" /><span>Create account</span></>
+              <><UserPlus className="w-4 h-4" aria-hidden="true" /><span>Create account</span></>
             )}
           </button>
         </form>

@@ -46,7 +46,7 @@ function HistoryCard({ entry }) {
             <span className="text-sm font-display font-semibold text-teal-700">{entry.confidence}%</span>
           )}
           {hasDetail && (
-            <ChevronDown className={`w-4 h-4 text-lexis-ink/40 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-lexis-ink/40 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
           )}
         </div>
       </button>
@@ -57,7 +57,7 @@ function HistoryCard({ entry }) {
             <ul className="space-y-1.5">
               {entry.strengths.map((s, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-lexis-ink/70">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
                   <span>{s}</span>
                 </li>
               ))}
@@ -85,7 +85,7 @@ export default function HistoryStage({ history, historyLoading, historyError, on
     <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <div className="w-full max-w-2xl mx-auto flex items-center p-4 md:p-6">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors">
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>Back</span>
         </button>
       </div>
@@ -95,7 +95,7 @@ export default function HistoryStage({ history, historyLoading, historyError, on
 
         {historyLoading && (
           <div className="flex flex-col items-center gap-3 py-12 text-lexis-ink/50">
-            <Loader2 className="w-6 h-6 animate-spin" />
+            <Loader2 className="w-6 h-6 animate-spin" aria-hidden="true" />
           </div>
         )}
 

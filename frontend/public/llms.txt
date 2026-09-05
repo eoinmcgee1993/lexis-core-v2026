@@ -21,9 +21,15 @@ with a person.
 
 ## Pricing
 
-- Free trial: 30 minutes of practice, no card required.
-- Weekly pass: ฿199/week, unlimited practice.
-- Monthly pass: ฿599/month, unlimited practice (best value vs. paying weekly).
+Passes are ONE-OFF purchases, not subscriptions. Nothing auto-renews and
+there is nothing to cancel; a pass simply ends when its days run out.
+
+- Free trial: 15 minutes of practice in total, no card required.
+- Weekly pass: ฿199 once, 7 days of access, up to 150 minutes of live practice.
+- Monthly pass: ฿599 once, 30 days of access, up to 450 minutes of live practice.
+- The minute figures are a fair-use ceiling, enforced, not a target. There is
+  no session limit and no daily allowance within them.
+- Payment by card or PromptPay, through Stripe.
 - Prices are in Thai Baht. No VAT applies (not a VAT-registered business).
 
 ## Pages
@@ -54,3 +60,12 @@ the structured data on each page (see each page's JSON-LD) or for
 crawling the actual content. It's kept deliberately short and factual —
 nothing here should be treated as a testimonial, review, or usage claim,
 because none are made anywhere on the site.
+
+Maintenance note (4 Sep 2026): this file is hand-written, which means it
+does NOT follow frontend/src/content/facts.js the way every rendered page
+does. It had drifted three ways at once — a 30-minute trial that has been
+15 for weeks, "฿199/week" for a pass that does not recur, and "unlimited
+practice" against an enforced per-period ceiling — and it was being served
+to model crawlers as canonical fact the whole time. If a price, the trial
+length, the pass duration or the fair-use ceiling changes in facts.js,
+change it here in the same commit.
