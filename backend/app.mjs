@@ -1130,6 +1130,37 @@ function passDays(tier) {
 // below: Stripe fetches these server-side, and a Vercel preview origin sits
 // behind deployment protection, so a preview's checkout would hand Stripe a
 // URL it gets a login page from.
+// The Stripe API version used for the Checkout call, and ONLY that call.
+//
+// This is the bug that made the branding above do nothing for four days.
+// stripe-node 16.12.0 pins Stripe-Version: 2024-06-20 and app.mjs constructs
+// the client as `new Stripe(key)` with no options, so every request went out
+// on that version. `branding_settings` was added in 2025-09-30.clover —
+// fifteen months later. Stripe's own upgrade guide is explicit that "your API
+// version controls ... what parameters you can include in requests", so the
+// parameter came back as an unknown one, the fallback below stripped it, and
+// every LEXIS customer kept seeing the account's Digital Renaissance branding
+// on a checkout that otherwise worked perfectly. Nothing surfaced, because a
+// working-but-unbranded checkout looks exactly like a working one.
+//
+// Verified rather than reasoned about: the header was read straight off the
+// outgoing request with https.request intercepted, both before and after this
+// change.
+//
+// 2025-09-30.clover specifically — the EARLIEST version that carries
+// branding_settings, not the newest. clover and dahlia are major releases
+// with breaking changes, and every release past this one is surface we would
+// be adopting for no reason.
+//
+// Applied per request rather than on the client, which is the part that keeps
+// this safe. CLAUDE.md is clear that the legacy customer.subscription.*
+// handlers still serve people who are genuinely still billing; moving the
+// whole client would change the object shapes those handlers read. Webhook
+// payload versions are set by the account default and the endpoint, not by
+// the request that created the object, so nothing downstream of this session
+// moves either. The blast radius is one API call.
+const CHECKOUT_API_VERSION = '2025-09-30.clover';
+
 const LEXIS_CHECKOUT_BRANDING = {
   display_name: 'LEXIS',
   background_color: '#FAFAF7',  // lexis-canvas
@@ -1243,12 +1274,34 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
     // branding-shaped message. A real fault (a bad price ID, Stripe down)
     // fails the retry too and lands in the outer catch exactly as before —
     // one extra API call on a request that was already failing.
+    // Stamps which branding the customer was actually shown onto the session
+    // AND the PaymentIntent, so it lands on the charge in the Stripe
+    // dashboard. This exists because the version bug above was undetectable
+    // from outside: the fallback is silent by design, Vercel's Hobby plan
+    // keeps runtime logs for one hour, and a fallen-back checkout is
+    // indistinguishable from a working one. Now every payment carries the
+    // answer permanently, and "is branding live?" is a dashboard filter
+    // rather than a log you had to be watching for.
+    const markBranding = (p, brand) => ({
+      ...p,
+      metadata: { ...p.metadata, checkout_branding: brand },
+      payment_intent_data: {
+        ...p.payment_intent_data,
+        metadata: { ...p.payment_intent_data.metadata, checkout_branding: brand }
+      }
+    });
+
     let session;
     try {
-      session = await stripe.checkout.sessions.create(params);
+      session = await stripe.checkout.sessions.create(
+        markBranding(params, 'lexis'),
+        { apiVersion: CHECKOUT_API_VERSION }
+      );
     } catch (brandingErr) {
       const { branding_settings, ...unbranded } = params;
-      session = await stripe.checkout.sessions.create(unbranded);
+      session = await stripe.checkout.sessions.create(
+        markBranding(unbranded, 'account-fallback')
+      );
       logError('Stripe Checkout branding rejected - fell back to account branding', brandingErr);
     }
 
