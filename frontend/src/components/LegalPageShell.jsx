@@ -31,7 +31,7 @@ export default function LegalPageShell({ navigateTo, title, lastUpdated, childre
     <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <header className="w-full max-w-3xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10">
         <AppLink
-          to="/" navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors"
+          to="/" navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/70 hover:text-lexis-ink transition-colors"
           >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>Home</span>
@@ -47,13 +47,13 @@ export default function LegalPageShell({ navigateTo, title, lastUpdated, childre
 
       <section className="flex-1 w-full max-w-3xl mx-auto px-6 py-12">
         <h1 className="font-display font-semibold text-3xl mb-2 text-lexis-ink">{title}</h1>
-        <p className="text-xs text-lexis-ink/40 mb-10">Last updated {lastUpdated}</p>
+        <p className="text-xs text-lexis-ink/65 mb-10">Last updated {lastUpdated}</p>
         <div className="space-y-6 text-sm text-lexis-ink/80 leading-relaxed">
           {children}
         </div>
       </section>
 
-      <footer className="w-full max-w-3xl mx-auto p-6 border-t border-lexis-ink/10 flex items-center justify-between text-xs text-lexis-ink/40">
+      <footer className="w-full max-w-3xl mx-auto p-6 border-t border-lexis-ink/10 flex items-center justify-between text-xs text-lexis-ink/65">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-teal-600" aria-hidden="true" />
           <span>Private &amp; secure • Payments handled by Stripe</span>

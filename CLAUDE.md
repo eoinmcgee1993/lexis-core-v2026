@@ -26,8 +26,9 @@ banners (`1. ENV CHECK` … `7. ROUTES`).
 ```bash
 # Backend
 cd backend
-npm test                       # node test/fair-use.test.mjs — the only test suite
-node test/fair-use.test.mjs    # same thing; there is no runner, it's a plain script
+npm test                       # runs both suites below in sequence
+node test/fair-use.test.mjs    # there is no runner; each suite is a plain script
+node test/checkout.test.mjs    # boots app.mjs against local fake Stripe/Supabase
 npm run dev                    # node --watch server.mjs (needs backend/.env)
 node --check app.mjs           # fast syntax gate before committing
 
@@ -139,6 +140,17 @@ to work around.
 
 Assertions are written against the live constants, not hardcoded minutes, so
 retuning a cap can't silently invalidate the suite.
+
+`backend/test/checkout.test.mjs` takes the opposite approach and runs the real
+handlers: it stands up local HTTP servers for Stripe and Supabase, points the
+app at them, and then imports `app.mjs` for real. Nothing inside the app is
+stubbed, so what it asserts is the shipped params object. The seam is
+`test/stripe-local-loader.mjs`, a module-resolution hook that swaps the
+`stripe` specifier for a shim — deliberately outside `app.mjs`, because a
+production code path that exists only for tests is the last thing payment code
+needs. It covers the Community add-on's two mutually exclusive paths and the
+branding fallback, and it fails loudly if `optional_items` is ever carried into
+that fallback, where the SDK's pinned API version cannot accept it.
 
 For SQL, the established pattern is to exercise a function against production
 inside a `DO $$ ... RAISE EXCEPTION $$` block — the exception carries the results

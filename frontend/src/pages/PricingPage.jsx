@@ -167,7 +167,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
     <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <header className="w-full max-w-6xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10 gap-2">
         <AppLink
-          to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors flex-shrink-0"
+          to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/70 hover:text-lexis-ink transition-colors flex-shrink-0"
           >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>{t.home}</span>
@@ -205,8 +205,8 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             Checked across all 14 prerendered routes; /pricing and
             /th/pricing were the only two with a broken outline. */}
         <h1 className="font-display font-semibold text-3xl md:text-[2.5rem] leading-[1.15] text-center mb-4 text-lexis-ink text-balance">{t.heading}</h1>
-        <p className="text-center text-base text-lexis-ink/60 max-w-xl mx-auto">{t.sub}</p>
-        <p className="text-center text-xs text-lexis-ink/40 mt-2 mb-12 md:mb-16">
+        <p className="text-center text-base text-lexis-ink/75 max-w-xl mx-auto">{t.sub}</p>
+        <p className="text-center text-xs text-lexis-ink/65 mt-2 mb-12 md:mb-16">
           {t.vat}
         </p>
 
@@ -222,12 +222,66 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           </div>
         )}
 
+        {/* LEXIS Community pay-it-forward add-on — one flat amount added to
+            whichever pass the visitor buys next (backend/app.mjs's
+            /api/stripe/checkout puts it in as a second one-time line item).
+            Since passes stopped being subscriptions it is a single donation
+            per pass rather than a standing commitment, so it cannot outlive
+            the purchase that started it. Plan-agnostic because it sits
+            outside all three cards rather than inside one.
+
+            It used to sit BELOW the grid — which meant it was below every
+            buy button on the page, so the ordinary path was to click Get
+            Started and never see it. An add-on offered after the checkout
+            has already begun is not an offer. It reads slightly oddly above
+            the prices it modifies, and that is the trade: being seen beats
+            being in the tidiest place.
+
+            Missing it here is no longer final either — Stripe now shows the
+            same add-on on the checkout page itself for anyone who arrives
+            with the box unticked (optional_items, same endpoint). */}
+        <div className="flex justify-center mb-12">
+          {/* Given a border and a ground rather than left as loose text. As
+              bare copy it sat a few pixels off the MOST POPULAR badge on the
+              middle card and read as a stray caption belonging to it; as a
+              bounded control it reads as its own offer, which is what it is.
+              rounded-2xl, not -full: the label wraps to two lines on a phone
+              and a pill shape does not survive that. */}
+          {/* The box is a sibling of the <label> rather than wrapped by it,
+              which is not the shorter spelling and is the correct one here:
+              Learn more is a LINK inside that copy, and a click on a link
+              nested in a label both follows it and toggles the box. htmlFor
+              keeps the association a screen reader needs while leaving the
+              link outside the thing being toggled.
+
+              items-start with a fixed-width box, rather than a wrapping
+              centred row: on a phone the label runs to two lines, and
+              centring left the checkbox stranded alone above them. */}
+          <div className="inline-flex items-start gap-2.5 max-w-xl px-4 py-2.5 bg-white/70 border border-lexis-ink/10 hover:border-teal-600/40 rounded-2xl text-left text-xs text-lexis-ink/75 transition-colors">
+            <input
+              id="sponsor-add"
+              type="checkbox"
+              checked={sponsorAdd}
+              onChange={(e) => setSponsorAdd(e.target.checked)}
+              className="mt-0.5 flex-shrink-0 rounded border-lexis-ink/20 text-teal-600 focus:ring-teal-600 cursor-pointer"
+            />
+            <span>
+              <label htmlFor="sponsor-add" className="cursor-pointer">{t.sponsorLabel(SPONSOR_ADDON_THB)}</label>{' '}
+              <AppLink
+                to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 underline underline-offset-2 whitespace-nowrap"
+              >
+                {t.sponsorLearnMore}
+              </AppLink>
+            </span>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Free Tier */}
           <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between lexis-lift-hover">
             <div>
               <h2 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.freeTrialTitle}</h2>
-              <p className="text-sm text-lexis-ink/55 mb-6">{t.freeTrialSub(TRIAL.minutes)}</p>
+              <p className="text-sm text-lexis-ink/70 mb-6">{t.freeTrialSub(TRIAL.minutes)}</p>
               <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿0</div>
               {/* The free card had two bullets against the paid cards' three
                   plus a note, so in an equal-height 3-up grid it rendered
@@ -260,7 +314,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             </span>
             <div>
               <h2 className="font-display font-semibold text-xl text-lexis-action-dark mb-2">{t.weeklyTitle}</h2>
-              <p className="text-sm text-lexis-ink/55 mb-6">{t.weeklySub(FAIR_USE.weekly.minutes)}</p>
+              <p className="text-sm text-lexis-ink/70 mb-6">{t.weeklySub(FAIR_USE.weekly.minutes)}</p>
               <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿{PRICING.weekly.thb} <span className="font-sans text-xs font-normal text-lexis-ink/45 tracking-normal">{t.perWeek}</span></div>
               <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenew}</p>
               <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
@@ -282,7 +336,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between lexis-lift-hover">
             <div>
               <h2 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.monthlyTitle}</h2>
-              <p className="text-sm text-lexis-ink/55 mb-6">{t.monthlySub(FAIR_USE.monthly.minutes)}</p>
+              <p className="text-sm text-lexis-ink/70 mb-6">{t.monthlySub(FAIR_USE.monthly.minutes)}</p>
               <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿{PRICING.monthly.thb} <span className="font-sans text-xs font-normal text-lexis-ink/45 tracking-normal">{t.perMonth}</span></div>
               <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenewMonthly}</p>
               <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
@@ -301,29 +355,6 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           </div>
         </div>
 
-        {/* LEXIS Community pay-it-forward add-on — one flat amount added
-            to whichever pass the visitor buys next (backend/app.mjs's
-            /api/stripe/checkout appends it as a second one-time line
-            item). Since passes stopped being subscriptions it is a single
-            donation per pass rather than a standing commitment, so it
-            cannot outlive the purchase that started it. Deliberately
-            plan-agnostic here since the checkbox is above all three cards,
-            not inside one. */}
-        <label className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mt-8 px-6 text-center text-xs text-lexis-ink/60 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={sponsorAdd}
-            onChange={(e) => setSponsorAdd(e.target.checked)}
-            className="rounded border-lexis-ink/20 text-teal-600 focus:ring-teal-600"
-          />
-          <span>{t.sponsorLabel(SPONSOR_ADDON_THB)}</span>
-          <AppLink
-            to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 underline underline-offset-2"
-          >
-            {t.sponsorLearnMore}
-          </AppLink>
-        </label>
-
         {/* Fair use, stated BEFORE the buy button rather than only in the
             Terms, and deliberately NOT inside the !session branch — a
             signed-in returning buyer needs it as much as a new one.
@@ -338,18 +369,18 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             So this line no longer repeats the numbers, which are three
             inches above it. It says the thing the numbers do not: that the
             ceiling is real, and what actually happens when you hit it. */}
-        <p className="text-center text-xs text-lexis-ink/40 mt-4">
+        <p className="text-center text-xs text-lexis-ink/65 mt-8">
           {t.fairUse()}
         </p>
 
         {!session && (
-          <p className="text-center text-xs text-lexis-ink/40 mt-4">
+          <p className="text-center text-xs text-lexis-ink/65 mt-4">
             {t.signInNote}
           </p>
         )}
       </section>
 
-      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/40">
+      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/65">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-teal-600" aria-hidden="true" />
           <span>{t.footerTrust}</span>

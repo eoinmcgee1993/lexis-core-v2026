@@ -36,7 +36,7 @@ export default class ErrorBoundary extends React.Component {
             <AlertTriangle className="w-5 h-5" aria-hidden="true" />
           </div>
           <h1 className="text-lg font-display font-semibold text-lexis-ink mb-1">Something went wrong</h1>
-          <p className="text-xs text-lexis-ink/50 mb-6">
+          <p className="text-xs text-lexis-ink/70 mb-6">
             LEXIS hit an unexpected error. Reloading usually fixes it, and we've
             been notified.
           </p>

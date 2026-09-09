@@ -97,9 +97,20 @@ export default function LexisApp({ navigateTo }) {
   });
 
   const justPaid = new URLSearchParams(window.location.search).get('payment') === 'success';
-  // LEXIS Community pay-it-forward add-on (PricingPage.jsx) — only
-  // meaningful alongside justPaid, never read on its own.
-  const justSponsored = justPaid && new URLSearchParams(window.location.search).get('sponsor') === '1';
+  const checkoutSessionId = new URLSearchParams(window.location.search).get('session_id');
+
+  // LEXIS Community pay-it-forward add-on — only meaningful alongside
+  // justPaid, never read on its own.
+  //
+  // This used to be a `?sponsor=1` flag the backend wrote into success_url
+  // from whatever the pricing page's checkbox said before checkout started.
+  // The add-on is now also offered on Stripe's own page (optional_items),
+  // where it can be added — or an already-added one removed — after that URL
+  // was fixed, so the flag was reporting an intention rather than a purchase.
+  // It is answered by the server from the paid line items instead, which
+  // means it arrives a moment late; false until then, which is the right way
+  // round for a thank-you.
+  const [justSponsored, setJustSponsored] = useState(false);
 
   // Stage machine — see the file header. 'welcome' is always the entry
   // point; nothing auto-advances past it.
@@ -234,12 +245,36 @@ export default function LexisApp({ navigateTo }) {
   }, [transcripts]);
 
   // Drop ?payment=success from the URL once shown, so refreshing this page
-  // later doesn't keep re-showing "payment confirmed" indefinitely.
+  // later doesn't keep re-showing "payment confirmed" indefinitely. The
+  // session id is read out of the URL above, during render, so stripping it
+  // here does not race the lookup below.
   useEffect(() => {
-    if (justPaid) {
-      trackEvent('checkout_completed', { metadata: { planTier: profile?.subscription_tier, sponsorAdd: justSponsored } });
-      window.history.replaceState({}, '', '/app');
+    if (!justPaid) return undefined;
+
+    let abandoned = false;
+    // One call site for the analytics event so it fires exactly once
+    // whichever way the lookup goes. A failed lookup is not a failed
+    // purchase: it reports sponsorAdd: false and shows no thank-you, which
+    // is the quiet wrong answer rather than the loud one.
+    const settle = (sponsored) => {
+      if (abandoned) return;
+      if (sponsored) setJustSponsored(true);
+      trackEvent('checkout_completed', { metadata: { planTier: profile?.subscription_tier, sponsorAdd: sponsored } });
+    };
+
+    if (checkoutSessionId && session) {
+      fetch(`${BACKEND_URL}/api/stripe/checkout-result?session_id=${encodeURIComponent(checkoutSessionId)}`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => settle(Boolean(data?.sponsored)))
+        .catch(() => settle(false));
+    } else {
+      settle(false);
     }
+
+    window.history.replaceState({}, '', '/app');
+    return () => { abandoned = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -195,6 +195,11 @@ const historyRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 20, message:
 
 const cancelRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 5, message: 'Rate limit exceeded. Please wait a moment.' });
 
+// The success page reads this exactly once per purchase, so anything past
+// a handful in a minute is a loop or a probe. Low because each call is a
+// billable outbound Stripe request made on behalf of whoever asked.
+const checkoutResultRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 10, message: 'Rate limit exceeded. Please wait a moment.' });
+
 // Generous relative to the others — pageviews fire on every route change,
 // not just a deliberate user action, so a normal browsing session can
 // legitimately produce many more of these than, say, cancel attempts.
@@ -1051,6 +1056,51 @@ app.get('/api/history', historyRateLimiter, authenticate, async (req, res) => {
 // checkout logic and copy separately.
 const SPONSOR_ADDON_THB = 50;
 
+// KEEP IN STEP WITH STRIPE. Until 9 Sep 2026 this constant WAS the price —
+// it built the line item inline, so changing it here changed what customers
+// paid. It no longer does: the amount now lives on the Stripe Price below,
+// and this number's remaining jobs are the price_data fallback and
+// recognising the add-on on a session that has no price id. Changing it
+// alone changes neither the charge nor the copy (that's facts.js). Moving
+// the price means a new Stripe Price, this constant, and facts.js.
+
+// The add-on's own Stripe Price — live mode, Clearmark, THB 50 one-time
+// (product prod_VEAhqVWYonxpx6).
+//
+// This used to be built inline with price_data at checkout time, which is
+// simpler and was fine while the add-on was only ever a checkbox on our own
+// pricing page. It stopped being fine once the add-on had to appear ON the
+// Stripe page as well: Stripe's `optional_items` takes a Price ID and
+// nothing else, and it is refused outright on a session where any line item
+// uses a custom amount. So price_data could not coexist with the feature —
+// the persistent Price is what makes it reachable at all.
+//
+// Same env-override shape as STRIPE_PRICES above for the same reason: the
+// amount can move without a deploy. If the override is set to something
+// Stripe rejects, checkout falls back to the inline price_data path below
+// rather than failing — the add-on's presentation is worth strictly less
+// than the pass sale it rides on.
+const STRIPE_SPONSOR_PRICE = process.env.STRIPE_PRICE_SPONSOR_ONETIME || 'price_1UDiMWF1FdEsYK5EmAraMzIJ';
+
+// Built here rather than inline so the two call sites — the pre-ticked line
+// item and the optional item — cannot drift into charging different amounts
+// for the same named thing.
+const sponsorLineItem = () => (
+  STRIPE_SPONSOR_PRICE
+    ? { price: STRIPE_SPONSOR_PRICE, quantity: 1 }
+    : {
+        // Fallback for a deployment with the price deliberately unset. Keeps
+        // the checkbox working; optional_items is skipped in this mode
+        // because Stripe will not accept it alongside a custom amount.
+        price_data: {
+          currency: 'thb',
+          product_data: { name: 'LEXIS Community: sponsor a student' },
+          unit_amount: SPONSOR_ADDON_THB * 100 // satang
+        },
+        quantity: 1
+      }
+);
+
 // Stripe recurring Price IDs — live mode, Clearmark account
 // (acct_1T1zS9F1FdEsYK5E). Moved here from PricingPage.jsx (21 Aug 2026,
 // re-audit B2): the client used to send its own priceId straight through
@@ -1199,23 +1249,27 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
     }
     const priceId = STRIPE_PRICES[planTier];
 
+    // The add-on appears in one of two places, never both.
+    //
+    // Ticked on our pricing page, it is a real line item: the customer has
+    // already agreed to it, so it must be on the bill they are shown, not
+    // something they have to re-confirm on a second page.
+    //
+    // Not ticked, it goes in `optional_items` — Stripe renders it on the
+    // Checkout page itself as an "add to order" row. This is the whole point
+    // of the change (reported as "there is no community add-on at check
+    // out"): the checkbox lives at the bottom of a long pricing page, and
+    // someone who scrolled past it previously had no second chance. Now the
+    // offer is also made at the moment they are already paying.
+    //
+    // Passing it in both places is not an option Stripe allows, and would be
+    // wrong anyway — it would read as being asked to pay twice.
     const lineItems = [{ price: priceId, quantity: 1 }];
-    if (sponsorAdd) {
-      // price_data creates the Price object on the fly, scoped to this one
-      // Checkout Session — no pre-created Stripe Price ID needed (unlike
-      // priceId above, which does require one). No `recurring` block: in
-      // payment mode every line item has to be one-time, and the add-on is
-      // now a single donation riding along with a single pass rather than
-      // a standing commitment that outlives the pass that started it.
-      lineItems.push({
-        price_data: {
-          currency: 'thb',
-          product_data: { name: 'LEXIS Community: sponsor a student' },
-          unit_amount: SPONSOR_ADDON_THB * 100 // satang
-        },
-        quantity: 1
-      });
-    }
+    if (sponsorAdd) lineItems.push(sponsorLineItem());
+
+    // optional_items needs a real Price ID on every line item in the session,
+    // so it is skipped entirely in the price_data fallback mode above.
+    const offerSponsorOptionally = !sponsorAdd && Boolean(STRIPE_SPONSOR_PRICE);
 
     const frontendOrigin = resolveFrontendOrigin(req);
     const metadata = {
@@ -1249,13 +1303,23 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
       // stripe_customer_id to store against the profile.
       customer_creation: 'always',
       line_items: lineItems,
+      ...(offerSponsorOptionally ? { optional_items: [sponsorLineItem()] } : {}),
       metadata,
       // Mirrored onto the PaymentIntent so a charge opened in the Stripe
       // dashboard — for a refund, or a PromptPay payer asking where their
       // money went — still says which LEXIS account it belongs to. The
       // Checkout Session's own metadata is not visible from a charge.
       payment_intent_data: { metadata },
-      success_url: `${frontendOrigin}/app?payment=success${sponsorAdd ? '&sponsor=1' : ''}`,
+      // The sponsorship flag used to be baked in here from the request body,
+      // which was only ever true by luck: it recorded what the customer
+      // ticked BEFORE checkout, not what they bought. With optional_items
+      // that gap is now routine — someone who adds the sponsorship on
+      // Stripe's own page would have been thanked for nothing, and Stripe
+      // also lets a customer remove a line item, so the flag could be true
+      // for a purchase that no longer contained it. The session id goes
+      // through instead and /api/stripe/checkout-result reads the line items
+      // that were actually paid for.
+      success_url: `${frontendOrigin}/app?payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${frontendOrigin}/pricing?payment=cancelled`,
       allow_promotion_codes: true,
       branding_settings: LEXIS_CHECKOUT_BRANDING,
@@ -1298,9 +1362,14 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
         { apiVersion: CHECKOUT_API_VERSION }
       );
     } catch (brandingErr) {
-      const { branding_settings, ...unbranded } = params;
+      // optional_items is dropped alongside branding_settings, and not
+      // because it failed. The retry runs on the SDK's own pinned API
+      // version (2024-06-20), which predates optional_items entirely — so
+      // carrying it over would make the safety net throw the moment it was
+      // needed. Both are presentation; the pass sale is not.
+      const { branding_settings, optional_items, ...degraded } = params;
       session = await stripe.checkout.sessions.create(
-        markBranding(unbranded, 'account-fallback')
+        markBranding(degraded, 'account-fallback')
       );
       logError('Stripe Checkout branding rejected - fell back to account branding', brandingErr);
     }
@@ -1309,6 +1378,59 @@ app.post('/api/stripe/checkout', authenticate, async (req, res) => {
   } catch (err) {
     logError('Stripe Checkout Error', err);
     res.status(500).json({ error: 'Failed to create payment checkout session.' });
+  }
+});
+
+// What did this checkout actually contain? Read by the success page to
+// decide whether to thank someone for a LEXIS Community sponsorship.
+//
+// It exists because the answer stopped being knowable up front. The pricing
+// page's checkbox is one of two ways to add the sponsorship now; the other
+// is Stripe's own optional-items row, which is chosen after we have already
+// handed over the redirect URL. Nothing we put in success_url can know about
+// it, so this reads the completed session instead of guessing.
+//
+// Deliberately NOT the thing that grants anything. Entitlement comes from
+// the webhook and redeem_pass, on Stripe's signed event, exactly as before;
+// this endpoint only decides whether one sentence of copy is shown, which is
+// why it is safe for it to run on an unverified redirect the customer
+// controls. It is authenticated and ownership-checked all the same: a
+// session id is guessable-ish and belongs to someone, so the user_id in its
+// metadata has to match the caller or there is nothing to say.
+app.get('/api/stripe/checkout-result', checkoutResultRateLimiter, authenticate, async (req, res) => {
+  try {
+    const sessionId = String(req.query.session_id || '');
+    if (!sessionId.startsWith('cs_')) {
+      return res.status(400).json({ error: 'Invalid session_id.' });
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ['line_items'] });
+    if (session.metadata?.user_id !== req.user.id) {
+      // Not this caller's checkout. 404 rather than 403 so the endpoint
+      // cannot be used to confirm that a session id exists.
+      return res.status(404).json({ error: 'No such checkout session.' });
+    }
+
+    // Match on the price, not the product name: the name is display copy and
+    // is translated/edited freely, while STRIPE_SPONSOR_PRICE is the same
+    // constant that put the item there. The price_data fallback has no id to
+    // match, so it is recognised by amount and by having no price object —
+    // the only other line item on these sessions is a pass, at THB 199/599.
+    const items = session.line_items?.data || [];
+    const sponsored = items.some((item) => (
+      item.price?.id === STRIPE_SPONSOR_PRICE ||
+      (!item.price?.id && item.amount_total === SPONSOR_ADDON_THB * 100)
+    ));
+
+    res.json({
+      sponsored,
+      paid: session.payment_status === 'paid' || session.payment_status === 'no_payment_required'
+    });
+  } catch (err) {
+    // A success page that cannot answer this should still be a success page,
+    // so this stays non-fatal on the client side (see LexisApp.jsx).
+    logError('Stripe Checkout Result Error', err);
+    res.status(500).json({ error: 'Could not read that checkout session.' });
   }
 });
 
