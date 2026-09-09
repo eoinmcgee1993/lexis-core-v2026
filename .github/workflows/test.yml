@@ -29,12 +29,15 @@ jobs:
         working-directory: backend
 
     steps:
-      - uses: actions/checkout@v4
+      # v5, not v4: v4 targets Node 20, which GitHub is deprecating on its
+      # runners. It still runs — forced onto Node 24 — but emits a warning on
+      # every job, and a warning nobody can act on is one nobody reads.
+      - uses: actions/checkout@v5
 
       # 22, not the engines floor of 18: checkout.test.mjs installs a
       # module-resolution hook with node:module's register(), which needs
       # 20.6+, and 22 is what the suites are actually developed against.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
