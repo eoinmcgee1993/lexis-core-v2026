@@ -222,6 +222,60 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           </div>
         )}
 
+        {/* LEXIS Community pay-it-forward add-on — one flat amount added to
+            whichever pass the visitor buys next (backend/app.mjs's
+            /api/stripe/checkout puts it in as a second one-time line item).
+            Since passes stopped being subscriptions it is a single donation
+            per pass rather than a standing commitment, so it cannot outlive
+            the purchase that started it. Plan-agnostic because it sits
+            outside all three cards rather than inside one.
+
+            It used to sit BELOW the grid — which meant it was below every
+            buy button on the page, so the ordinary path was to click Get
+            Started and never see it. An add-on offered after the checkout
+            has already begun is not an offer. It reads slightly oddly above
+            the prices it modifies, and that is the trade: being seen beats
+            being in the tidiest place.
+
+            Missing it here is no longer final either — Stripe now shows the
+            same add-on on the checkout page itself for anyone who arrives
+            with the box unticked (optional_items, same endpoint). */}
+        <div className="flex justify-center mb-12">
+          {/* Given a border and a ground rather than left as loose text. As
+              bare copy it sat a few pixels off the MOST POPULAR badge on the
+              middle card and read as a stray caption belonging to it; as a
+              bounded control it reads as its own offer, which is what it is.
+              rounded-2xl, not -full: the label wraps to two lines on a phone
+              and a pill shape does not survive that. */}
+          {/* The box is a sibling of the <label> rather than wrapped by it,
+              which is not the shorter spelling and is the correct one here:
+              Learn more is a LINK inside that copy, and a click on a link
+              nested in a label both follows it and toggles the box. htmlFor
+              keeps the association a screen reader needs while leaving the
+              link outside the thing being toggled.
+
+              items-start with a fixed-width box, rather than a wrapping
+              centred row: on a phone the label runs to two lines, and
+              centring left the checkbox stranded alone above them. */}
+          <div className="inline-flex items-start gap-2.5 max-w-xl px-4 py-2.5 bg-white/70 border border-lexis-ink/10 hover:border-teal-600/40 rounded-2xl text-left text-xs text-lexis-ink/75 transition-colors">
+            <input
+              id="sponsor-add"
+              type="checkbox"
+              checked={sponsorAdd}
+              onChange={(e) => setSponsorAdd(e.target.checked)}
+              className="mt-0.5 flex-shrink-0 rounded border-lexis-ink/20 text-teal-600 focus:ring-teal-600 cursor-pointer"
+            />
+            <span>
+              <label htmlFor="sponsor-add" className="cursor-pointer">{t.sponsorLabel(SPONSOR_ADDON_THB)}</label>{' '}
+              <AppLink
+                to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 underline underline-offset-2 whitespace-nowrap"
+              >
+                {t.sponsorLearnMore}
+              </AppLink>
+            </span>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Free Tier */}
           <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between lexis-lift-hover">
@@ -301,29 +355,6 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           </div>
         </div>
 
-        {/* LEXIS Community pay-it-forward add-on — one flat amount added
-            to whichever pass the visitor buys next (backend/app.mjs's
-            /api/stripe/checkout appends it as a second one-time line
-            item). Since passes stopped being subscriptions it is a single
-            donation per pass rather than a standing commitment, so it
-            cannot outlive the purchase that started it. Deliberately
-            plan-agnostic here since the checkbox is above all three cards,
-            not inside one. */}
-        <label className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mt-8 px-6 text-center text-xs text-lexis-ink/75 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={sponsorAdd}
-            onChange={(e) => setSponsorAdd(e.target.checked)}
-            className="rounded border-lexis-ink/20 text-teal-600 focus:ring-teal-600"
-          />
-          <span>{t.sponsorLabel(SPONSOR_ADDON_THB)}</span>
-          <AppLink
-            to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 underline underline-offset-2"
-          >
-            {t.sponsorLearnMore}
-          </AppLink>
-        </label>
-
         {/* Fair use, stated BEFORE the buy button rather than only in the
             Terms, and deliberately NOT inside the !session branch — a
             signed-in returning buyer needs it as much as a new one.
@@ -338,7 +369,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             So this line no longer repeats the numbers, which are three
             inches above it. It says the thing the numbers do not: that the
             ceiling is real, and what actually happens when you hit it. */}
-        <p className="text-center text-xs text-lexis-ink/65 mt-4">
+        <p className="text-center text-xs text-lexis-ink/65 mt-8">
           {t.fairUse()}
         </p>
 
