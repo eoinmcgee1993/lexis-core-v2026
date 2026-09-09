@@ -152,6 +152,13 @@ needs. It covers the Community add-on's two mutually exclusive paths and the
 branding fallback, and it fails loudly if `optional_items` is ever carried into
 that fallback, where the SDK's pinned API version cannot accept it.
 
+Both suites run in CI on every pull request and on pushes to `main`
+(`.github/workflows/test.yml`). Nothing else does: the build is left to
+Vercel, which already runs it on both projects and reports each as a commit
+status, and the workflow needs no secrets because neither suite reaches a real
+service. The repo's other workflow, `manual.yml`, is GitHub's stock
+dispatch template and does nothing.
+
 For SQL, the established pattern is to exercise a function against production
 inside a `DO $$ ... RAISE EXCEPTION $$` block — the exception carries the results
 out and rolls the transaction back, so nothing is written.

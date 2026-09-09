@@ -1,0 +1,56 @@
+# Runs the two backend suites on every push and pull request.
+#
+# It exists because until now nothing did. The repo's only other workflow is
+# GitHub's stock manual-dispatch template, so CI on a pull request showed two
+# Vercel deploys and nothing else — meaning `backend/test/checkout.test.mjs`
+# and `fair-use.test.mjs` only ever ran when somebody typed `npm test`, and a
+# PR that broke the fair-use cap or the Stripe checkout params would have gone
+# green.
+#
+# Deliberately just the tests. Vercel already builds both the frontend and the
+# backend on every push to this repo and reports each as a commit status, so
+# repeating `npm run build` here would add several minutes, pull headless
+# Chromium for the prerender step, and tell us nothing Vercel has not already
+# said. Tests are the whole gap.
+name: Tests
+
+# main plus pull requests, rather than every branch: a PR branch would
+# otherwise run the same commit twice, once for the push and once for the PR.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 22, not the engines floor of 18: checkout.test.mjs installs a
+      # module-resolution hook with node:module's register(), which needs
+      # 20.6+, and 22 is what the suites are actually developed against.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+
+      # The same gate the CONVENTIONS section calls for before committing.
+      # Cheap, and it fails with a clearer message than a suite that dies on
+      # import.
+      - name: Syntax gate
+        run: node --check app.mjs
+
+      # Both suites, in sequence — see backend/package.json. They need no
+      # secrets: fair-use reads helpers out of app.mjs by source text, and
+      # checkout boots the app against local fake Stripe and Supabase servers
+      # on placeholder env.
+      - name: Tests
+        run: npm test
