@@ -152,7 +152,11 @@ console.log('\n--- add-on ticked on the pricing page ---');
   check('add-on is not ALSO offered again on Stripe', sent.get('optional_items[0][price]') === null);
 }
 
-console.log('\n--- Stripe rejects the branding block ---');
+// This block deliberately makes Stripe reject the request, so app.mjs logs a
+// StripeInvalidRequestError and a stack trace to the console. That output is
+// the test working, not the test failing — said here because it is otherwise
+// alarming to read in a CI log.
+console.log('\n--- Stripe rejects the branding block (an error + stack below is expected) ---');
 {
   rejectBranding = true;
   const { res, sent, call } = await startCheckout({ planTier: 'weekly', sponsorAdd: false, lang: 'en' });
