@@ -61,7 +61,7 @@ function ConfidenceRing({ value, label }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="font-display font-semibold text-3xl text-lexis-ink">{value}%</span>
-        <span className="text-[10px] uppercase tracking-wider text-lexis-ink/40">{label}</span>
+        <span className="text-[10px] uppercase tracking-wider text-lexis-ink/65">{label}</span>
       </div>
     </div>
   );
@@ -76,7 +76,7 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
         <h1 className="font-display font-semibold text-2xl mb-8">{t.title}</h1>
 
         {feedbackLoading && (
-          <div className="flex flex-col items-center gap-3 py-8 text-lexis-ink/50">
+          <div className="flex flex-col items-center gap-3 py-8 text-lexis-ink/70">
             <Loader2 className="w-6 h-6 animate-spin" aria-hidden="true" />
             <p className="text-sm">{t.loading}</p>
           </div>
@@ -84,13 +84,13 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
 
         {!feedbackLoading && feedbackError && (
           <div className="py-8">
-            <p className="text-sm text-lexis-ink/60">{t.errorFallback}</p>
+            <p className="text-sm text-lexis-ink/75">{t.errorFallback}</p>
           </div>
         )}
 
         {!feedbackLoading && !feedbackError && feedback?.insufficient && (
           <div className="py-8">
-            <p className="text-sm text-lexis-ink/60">{feedback.message}</p>
+            <p className="text-sm text-lexis-ink/75">{feedback.message}</p>
           </div>
         )}
 
@@ -118,9 +118,9 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
                 <ul className="space-y-3">
                   {feedback.improvements.map((imp, i) => (
                     <li key={i} className="bg-white border border-lexis-ink/10 rounded-xl p-3 text-sm">
-                      <div className="text-lexis-ink/40 line-through">{imp.original}</div>
+                      <div className="text-lexis-ink/65 line-through">{imp.original}</div>
                       <div className="text-lexis-ink font-medium mt-0.5">{imp.corrected}</div>
-                      {imp.note && <div className="text-lexis-ink/60 text-xs mt-1.5">{imp.note}</div>}
+                      {imp.note && <div className="text-lexis-ink/75 text-xs mt-1.5">{imp.note}</div>}
                     </li>
                   ))}
                 </ul>
@@ -137,7 +137,7 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
             <RotateCcw className="w-4 h-4" aria-hidden="true" />
             <span>{t.practiceAgain}</span>
           </button>
-          <button onClick={onDone} className="text-xs text-lexis-ink/40 hover:text-lexis-ink/70 transition-colors">
+          <button onClick={onDone} className="text-xs text-lexis-ink/65 hover:text-lexis-ink/70 transition-colors">
             {t.doneForNow}
           </button>
         </div>

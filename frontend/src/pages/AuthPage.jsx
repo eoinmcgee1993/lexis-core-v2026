@@ -98,7 +98,7 @@ export default function AuthPage({ navigateTo }) {
   return (
     <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col items-center justify-center p-4">
       <AppLink
-        to="/" navigateTo={navigateTo} className="absolute top-6 left-6 flex items-center space-x-2 text-xs text-lexis-ink/50 hover:text-lexis-ink transition-colors"
+        to="/" navigateTo={navigateTo} className="absolute top-6 left-6 flex items-center space-x-2 text-xs text-lexis-ink/70 hover:text-lexis-ink transition-colors"
           >
         <ArrowLeft className="w-4 h-4" aria-hidden="true" />
         <span>Back to home</span>
@@ -115,14 +115,14 @@ export default function AuthPage({ navigateTo }) {
         </div>
 
         <h1 className="text-xl font-bold mb-1 text-lexis-ink">{mode === 'sign_in' ? 'Sign in' : 'Create your account'}</h1>
-        <p className="text-xs text-lexis-ink/50 mb-6">
+        <p className="text-xs text-lexis-ink/70 mb-6">
           {mode === 'sign_in' ? 'Continue practicing with LEXIS.' : `Start your free ${TRIAL.minutes}-minute trial.`}
         </p>
 
         <form onSubmit={submit} className="space-y-4">
           {mode === 'sign_up' && (
             <div>
-              <label className="text-xs text-lexis-ink/50 mb-1 block">Full name</label>
+              <label className="text-xs text-lexis-ink/70 mb-1 block">Full name</label>
               <input
                 type="text"
                 value={fullName}
@@ -134,7 +134,7 @@ export default function AuthPage({ navigateTo }) {
           )}
 
           <div>
-            <label className="text-xs text-lexis-ink/50 mb-1 flex items-center space-x-1.5">
+            <label className="text-xs text-lexis-ink/70 mb-1 flex items-center space-x-1.5">
               <Mail className="w-3 h-3" aria-hidden="true" /><span>Email</span>
             </label>
             <input
@@ -148,7 +148,7 @@ export default function AuthPage({ navigateTo }) {
           </div>
 
           <div>
-            <label className="text-xs text-lexis-ink/50 mb-1 flex items-center space-x-1.5">
+            <label className="text-xs text-lexis-ink/70 mb-1 flex items-center space-x-1.5">
               <Lock className="w-3 h-3" aria-hidden="true" /><span>Password</span>
             </label>
             <input
@@ -163,7 +163,7 @@ export default function AuthPage({ navigateTo }) {
           </div>
 
           {mode === 'sign_up' && (
-            <label className="flex items-start gap-2 text-xs text-lexis-ink/60 cursor-pointer">
+            <label className="flex items-start gap-2 text-xs text-lexis-ink/75 cursor-pointer">
               <input
                 type="checkbox"
                 required
@@ -199,7 +199,7 @@ export default function AuthPage({ navigateTo }) {
 
         <button
           onClick={() => { setMode(mode === 'sign_in' ? 'sign_up' : 'sign_in'); setError(''); setNotice(''); setAgeConfirmed(false); }}
-          className="w-full text-center text-xs text-lexis-ink/50 hover:text-teal-700 mt-5 transition-colors"
+          className="w-full text-center text-xs text-lexis-ink/70 hover:text-teal-700 mt-5 transition-colors"
         >
           {mode === 'sign_in' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
         </button>

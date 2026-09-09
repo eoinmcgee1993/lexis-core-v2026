@@ -218,13 +218,13 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
         <div className="flex items-center gap-1.5 sm:gap-4 flex-shrink-0">
           <AppLink
             to={lang === 'en' ? '/th' : '/'} navigateTo={navigateTo} aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
-            className="flex items-center justify-center sm:justify-start gap-2 bg-white border border-lexis-ink/10 rounded-xl text-xs text-lexis-ink/60 hover:border-teal-600/40 transition-all min-h-[44px] min-w-[44px] px-2.5 sm:px-3"
+            className="flex items-center justify-center sm:justify-start gap-2 bg-white border border-lexis-ink/10 rounded-xl text-xs text-lexis-ink/75 hover:border-teal-600/40 transition-all min-h-[44px] min-w-[44px] px-2.5 sm:px-3"
           >
             <Globe className="w-4 h-4 text-teal-700 flex-shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">{lang === 'en' ? 'ไทย' : 'English'}</span>
           </AppLink>
           <AppLink
-            to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="flex items-center text-xs sm:text-sm text-lexis-ink/60 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
+            to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="flex items-center text-xs sm:text-sm text-lexis-ink/75 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
           >
             {c.pricing}
           </AppLink>
@@ -252,7 +252,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <h1 className="font-display font-semibold text-4xl md:text-5xl tracking-tight mb-6 text-lexis-ink leading-tight text-balance">
             {t.heroTitle}
           </h1>
-          <p className="text-lg md:text-xl text-lexis-ink/60 mb-6 max-w-xl mx-auto md:mx-0 leading-relaxed">
+          <p className="text-lg md:text-xl text-lexis-ink/75 mb-6 max-w-xl mx-auto md:mx-0 leading-relaxed">
             {t.heroSub}
           </p>
 
@@ -263,14 +263,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             <button
               onClick={() => selectDirection('en')}
               aria-pressed={direction === 'en'}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'en' ? 'bg-teal-600 text-white' : 'text-lexis-ink/60 hover:text-lexis-ink'}`}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'en' ? 'bg-teal-700 text-white' : 'text-lexis-ink/75 hover:text-lexis-ink'}`}
             >
               {c.learnEnglish}
             </button>
             <button
               onClick={() => selectDirection('th')}
               aria-pressed={direction === 'th'}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'th' ? 'bg-teal-600 text-white' : 'text-lexis-ink/60 hover:text-lexis-ink'}`}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'th' ? 'bg-teal-700 text-white' : 'text-lexis-ink/75 hover:text-lexis-ink'}`}
             >
               {c.learnThai}
             </button>
@@ -286,7 +286,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             </button>
           </div>
           <div className="mt-6 flex items-center justify-center md:justify-start space-x-3 text-sm">
-            <span className="text-lexis-ink/60">{t.pricingTeaser}</span>
+            <span className="text-lexis-ink/75">{t.pricingTeaser}</span>
             <AppLink to="/pricing" navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 font-medium underline underline-offset-2">
               {t.viewPricing}
             </AppLink>
@@ -364,7 +364,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             each repeating the same Zap icon — the icon carried no distinct
             information four times over. A plain dot-separated row states
             the same four facts without dressing each one up as an object. */}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-medium text-lexis-ink/60">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-medium text-lexis-ink/75">
           {c.meetSpecs.map((spec, i) => (
             <React.Fragment key={spec}>
               {i > 0 && <span className="text-lexis-ink/20" aria-hidden="true">•</span>}
@@ -515,7 +515,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           behind it (flagged in a re-audit: U6). Now links to the actual
           Privacy Policy that explains what that claim means. */}
       <footer className="lexis-band w-full">
-       <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-5 text-xs text-lexis-ink/60">
+       <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-5 text-xs text-lexis-ink/75">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-teal-600" aria-hidden="true" />
           <span>{c.footerTrust}</span>

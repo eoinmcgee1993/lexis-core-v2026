@@ -118,7 +118,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
     <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <header className="w-full max-w-3xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10">
         <AppLink
-          to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors"
+          to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/70 hover:text-lexis-ink transition-colors"
           >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>{t.home}</span>
@@ -131,7 +131,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
         </div>
         <AppLink
           to={lang === 'en' ? thUrl.replace(SITE_URL, '') : enUrl.replace(SITE_URL, '')} navigateTo={navigateTo} aria-label={lang === 'en' ? 'Switch page language to Thai' : 'Switch page language to English'}
-          className="flex items-center gap-1 text-xs text-lexis-ink/50 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
+          className="flex items-center gap-1 text-xs text-lexis-ink/70 hover:text-lexis-ink transition-colors min-h-[44px] px-1"
           >
           <Globe className="w-4 h-4 text-teal-700" aria-hidden="true" />
           <span>{lang === 'en' ? 'ไทย' : 'EN'}</span>
@@ -173,7 +173,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
             </div>
             <div>
               <h2 className="font-display font-semibold text-lg text-lexis-ink">{t.goalHeading}</h2>
-              <p className="mt-2 text-sm text-lexis-ink/60 leading-relaxed">{t.goalBody}</p>
+              <p className="mt-2 text-sm text-lexis-ink/75 leading-relaxed">{t.goalBody}</p>
             </div>
           </div>
 
@@ -218,7 +218,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
         </div>
       </section>
 
-      <footer className="w-full max-w-3xl mx-auto p-6 border-t border-lexis-ink/10 flex items-center justify-between text-xs text-lexis-ink/40">
+      <footer className="w-full max-w-3xl mx-auto p-6 border-t border-lexis-ink/10 flex items-center justify-between text-xs text-lexis-ink/65">
         <div>© 2026 LEXIS</div>
         <AppLink to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">
           {t.footerPricing}

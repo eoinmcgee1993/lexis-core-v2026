@@ -167,7 +167,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
     <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <header className="w-full max-w-6xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10 gap-2">
         <AppLink
-          to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors flex-shrink-0"
+          to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/70 hover:text-lexis-ink transition-colors flex-shrink-0"
           >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>{t.home}</span>
@@ -205,8 +205,8 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             Checked across all 14 prerendered routes; /pricing and
             /th/pricing were the only two with a broken outline. */}
         <h1 className="font-display font-semibold text-3xl md:text-[2.5rem] leading-[1.15] text-center mb-4 text-lexis-ink text-balance">{t.heading}</h1>
-        <p className="text-center text-base text-lexis-ink/60 max-w-xl mx-auto">{t.sub}</p>
-        <p className="text-center text-xs text-lexis-ink/40 mt-2 mb-12 md:mb-16">
+        <p className="text-center text-base text-lexis-ink/75 max-w-xl mx-auto">{t.sub}</p>
+        <p className="text-center text-xs text-lexis-ink/65 mt-2 mb-12 md:mb-16">
           {t.vat}
         </p>
 
@@ -227,7 +227,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between lexis-lift-hover">
             <div>
               <h2 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.freeTrialTitle}</h2>
-              <p className="text-sm text-lexis-ink/55 mb-6">{t.freeTrialSub(TRIAL.minutes)}</p>
+              <p className="text-sm text-lexis-ink/70 mb-6">{t.freeTrialSub(TRIAL.minutes)}</p>
               <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿0</div>
               {/* The free card had two bullets against the paid cards' three
                   plus a note, so in an equal-height 3-up grid it rendered
@@ -260,7 +260,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             </span>
             <div>
               <h2 className="font-display font-semibold text-xl text-lexis-action-dark mb-2">{t.weeklyTitle}</h2>
-              <p className="text-sm text-lexis-ink/55 mb-6">{t.weeklySub(FAIR_USE.weekly.minutes)}</p>
+              <p className="text-sm text-lexis-ink/70 mb-6">{t.weeklySub(FAIR_USE.weekly.minutes)}</p>
               <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿{PRICING.weekly.thb} <span className="font-sans text-xs font-normal text-lexis-ink/45 tracking-normal">{t.perWeek}</span></div>
               <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenew}</p>
               <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
@@ -282,7 +282,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           <div className="bg-white border border-lexis-ink/10 p-7 md:p-8 rounded-3xl flex flex-col justify-between lexis-lift-hover">
             <div>
               <h2 className="font-display font-semibold text-xl text-teal-700 mb-2">{t.monthlyTitle}</h2>
-              <p className="text-sm text-lexis-ink/55 mb-6">{t.monthlySub(FAIR_USE.monthly.minutes)}</p>
+              <p className="text-sm text-lexis-ink/70 mb-6">{t.monthlySub(FAIR_USE.monthly.minutes)}</p>
               <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿{PRICING.monthly.thb} <span className="font-sans text-xs font-normal text-lexis-ink/45 tracking-normal">{t.perMonth}</span></div>
               <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenewMonthly}</p>
               <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
@@ -309,7 +309,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             cannot outlive the purchase that started it. Deliberately
             plan-agnostic here since the checkbox is above all three cards,
             not inside one. */}
-        <label className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mt-8 px-6 text-center text-xs text-lexis-ink/60 cursor-pointer">
+        <label className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mt-8 px-6 text-center text-xs text-lexis-ink/75 cursor-pointer">
           <input
             type="checkbox"
             checked={sponsorAdd}
@@ -338,18 +338,18 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
             So this line no longer repeats the numbers, which are three
             inches above it. It says the thing the numbers do not: that the
             ceiling is real, and what actually happens when you hit it. */}
-        <p className="text-center text-xs text-lexis-ink/40 mt-4">
+        <p className="text-center text-xs text-lexis-ink/65 mt-4">
           {t.fairUse()}
         </p>
 
         {!session && (
-          <p className="text-center text-xs text-lexis-ink/40 mt-4">
+          <p className="text-center text-xs text-lexis-ink/65 mt-4">
             {t.signInNote}
           </p>
         )}
       </section>
 
-      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/40">
+      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/65">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-teal-600" aria-hidden="true" />
           <span>{t.footerTrust}</span>

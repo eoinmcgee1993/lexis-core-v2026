@@ -18,7 +18,7 @@ export default function TopicStage({ onBack, onPickTopic }) {
   return (
     <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
       <div className="w-full max-w-4xl mx-auto flex items-center p-4 md:p-6">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm text-lexis-ink/50 hover:text-lexis-ink transition-colors">
+        <button onClick={onBack} className="flex items-center gap-2 text-sm text-lexis-ink/70 hover:text-lexis-ink transition-colors">
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>Back</span>
         </button>
@@ -28,7 +28,7 @@ export default function TopicStage({ onBack, onPickTopic }) {
         <h1 className="font-display font-semibold text-2xl md:text-3xl text-center text-balance">
           What do you want to practice today?
         </h1>
-        <p className="mt-2 text-sm text-lexis-ink/50 text-center">
+        <p className="mt-2 text-sm text-lexis-ink/70 text-center">
           Pick a topic to steer today's conversation, or skip straight in.
         </p>
 
@@ -44,7 +44,7 @@ export default function TopicStage({ onBack, onPickTopic }) {
               </div>
               <div>
                 <div className="font-semibold text-sm">{label}</div>
-                <div className="text-xs text-lexis-ink/50 mt-0.5">{desc}</div>
+                <div className="text-xs text-lexis-ink/70 mt-0.5">{desc}</div>
               </div>
             </button>
           ))}
