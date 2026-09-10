@@ -128,7 +128,27 @@ reachable without an attacker, so returning "no cap" there would lift the ceilin
 on the one account already in a bad state.
 
 RLS on `profiles` grants SELECT only. There is deliberately no client UPDATE
-policy, so usage counters cannot be tampered with through PostgREST.
+policy, so usage counters cannot be tampered with through PostgREST *directly*
+— but RLS is only half of it. The `SECURITY DEFINER` functions bypass RLS by
+design, and PostgREST exposes every function in `public` as an RPC, so their
+EXECUTE grants are the other half of the same boundary.
+
+That half had failed. On 10 Sep 2026 production was found with
+`record_heartbeat` still executable by PUBLIC, `anon` and `authenticated`,
+while the other three functions were correctly locked to `service_role`. The
+REVOKE was in this repo's schema and had simply never been run against the
+live database — `record_heartbeat` is created with `DROP FUNCTION` +
+`CREATE FUNCTION` rather than `CREATE OR REPLACE`, and a DROP discards the
+grants while the CREATE hands EXECUTE back to PUBLIC by default. Anyone with
+the publishable anon key could call it against any `user_id`, and
+`increment_seconds` was added unchecked, so a negative value subtracted from
+the counters: unlimited Realtime minutes at the owner's expense.
+
+Both halves are fixed and the increment is now clamped with `GREATEST(...,0)`.
+The check is one query — Supabase's own linter reports it as **"Public Can
+Execute SECURITY DEFINER Function"** — and it is worth running after any
+schema application, because applying only part of the file is exactly how it
+drifted.
 
 ## Testing
 
