@@ -101,6 +101,21 @@ t('free_trial is not paid access', m.paidAccessActive({ subscription_status: 'fr
 // Fails closed: a non-null value we cannot read is not proof of a live pass.
 t('unparseable expiry is not active', m.paidAccessActive({ subscription_status: 'active', access_expires_at: 'nope' }), false);
 
+// A legacy subscriber who buys one pass must not be locked out when it
+// lapses. redeem_pass overwrites their NULL expiry with a real timestamp and
+// nothing ever writes NULL back, so before 10 Sep 2026 that single purchase
+// ended their access permanently while Stripe kept billing them weekly.
+// stripe_subscription_id is the surviving signal: only a pre-2 Sep 2026
+// subscription sets it, and customer.subscription.deleted clears it.
+t('lapsed pass + still-billing legacy subscription', m.paidAccessActive({ subscription_status: 'active', access_expires_at: ago(3), stripe_subscription_id: 'sub_legacy' }), true);
+t('lapsed pass, no subscription, stays expired',     m.paidAccessActive({ subscription_status: 'active', access_expires_at: ago(3), stripe_subscription_id: null }),        false);
+// The status gate still comes first — a subscription Stripe reports as
+// unhealthy is not access, id or no id.
+t('past_due + subscription id is not access', m.paidAccessActive({ subscription_status: 'past_due', access_expires_at: ago(3), stripe_subscription_id: 'sub_legacy' }), false);
+t('canceled + subscription id is not access', m.paidAccessActive({ subscription_status: 'canceled', access_expires_at: ago(3), stripe_subscription_id: 'sub_legacy' }), false);
+// A live pass is unaffected either way.
+t('live pass + subscription id still active', m.paidAccessActive({ subscription_status: 'active', access_expires_at: inDays(2), stripe_subscription_id: 'sub_legacy' }), true);
+
 // A pass IS one fair-use period, so these two must not drift apart.
 t('weekly pass is one weekly window',  m.passDays('weekly'),  7);
 t('monthly pass is one monthly window', m.passDays('monthly'), 30);

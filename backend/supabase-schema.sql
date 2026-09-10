@@ -370,7 +370,20 @@ BEGIN
   END IF;
 
   -- Keep the longer tier while a pass is still live; see the header.
-  IF NOT (v_expires IS NOT NULL AND v_expires > now() AND v_tier = 'monthly') THEN
+  --
+  -- The NULL case is why this is not simply `v_expires > now()` (10 Sep
+  -- 2026). A NULL expiry means a LEGACY monthly subscriber, whose liveness
+  -- Stripe reports rather than this column — and the original test required
+  -- v_expires IS NOT NULL, so for them it was false and the tier was
+  -- overwritten. A monthly subscriber who bought a weekly pass was therefore
+  -- downgraded from 450 minutes to 150 and from a 30-day window to a 7-day
+  -- one, as a consequence of spending MORE money: exactly the outcome the
+  -- header says this guard exists to prevent, just through the door the
+  -- header did not check.
+  --
+  -- Only a legacy subscriber can be 'monthly' with a NULL expiry; a new
+  -- profile starts at 'free', and every pass writes a concrete timestamp.
+  IF NOT (v_tier = 'monthly' AND (v_expires IS NULL OR v_expires > now())) THEN
     v_tier := p_tier;
   END IF;
 

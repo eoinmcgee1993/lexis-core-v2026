@@ -20,6 +20,26 @@ import { trackEvent } from '../lib/analytics';
 import { reportError } from '../lib/errorReporting';
 import { analyseFrame, emptyVisemes } from '../lib/visemes';
 
+import { hasLiveAccess } from '../lib/entitlement';
+
+// True when two mouth frames differ enough to be worth a re-render.
+//
+// 1/256 is below what a viewer can see on a 320px face and well above the
+// float noise that makes two visually identical frames compare unequal, so
+// it collapses silence to zero renders without ever holding back a shape
+// change that is actually visible.
+const MOUTH_EPSILON = 1 / 256;
+function mouthChanged(prev, next) {
+  if (!prev || !next) return true;
+  if (Math.abs((prev.openness || 0) - (next.openness || 0)) > MOUTH_EPSILON) return true;
+  const a = prev.visemes || {};
+  const b = next.visemes || {};
+  for (const key of Object.keys(b)) {
+    if (Math.abs((a[key] || 0) - (b[key] || 0)) > MOUTH_EPSILON) return true;
+  }
+  return false;
+}
+
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 // Which language the student is learning ('en' = Thai speaker learning
@@ -188,6 +208,8 @@ export default function LexisApp({ navigateTo }) {
   const [audioBlocked, setAudioBlocked] = useState(false);
 
   // References
+  // Last mouth frame actually pushed into state — see mouthChanged above.
+  const lastMouthRef = useRef(null);
   const pcRef = useRef(null);
   // Poll handle for the playout-lag measurement in setupDualVisualizers;
   // held here so teardown can clear it like the other visualizer handles.
@@ -277,6 +299,31 @@ export default function LexisApp({ navigateTo }) {
     return () => { abandoned = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // The Stripe redirect can beat its own webhook. `profile` is fetched once
+  // when the session loads and nothing refetched it afterwards, so a card
+  // buyer whose webhook landed a moment late was shown "we're waiting for
+  // your bank to confirm" and left there — the copy told them to refresh the
+  // page by hand, and nothing would have changed it if they didn't.
+  //
+  // So poll, briefly. Backing off 1s, 1.6s, 2.6s … over six tries covers
+  // about 26 seconds, which is far longer than a card takes and far shorter
+  // than PromptPay, where the wait really is the bank's and the existing
+  // message is the honest one. The effect re-runs on every `profile` change,
+  // which is what chains one attempt to the next, and stops itself the
+  // moment access appears.
+  const paidPollsRef = useRef(0);
+  useEffect(() => {
+    if (!justPaid) return undefined;
+    if (hasLiveAccess(profile)) return undefined;
+    if (paidPollsRef.current >= 6) return undefined;
+    const wait = Math.round(1000 * Math.pow(1.6, paidPollsRef.current));
+    const timer = setTimeout(() => {
+      paidPollsRef.current += 1;
+      refreshProfile();
+    }, wait);
+    return () => clearTimeout(timer);
+  }, [justPaid, profile, refreshProfile]);
 
   // Spacebar toggles session start/end, but only when focus is on the page
   // body (not while typing in a field elsewhere — not that this page has
@@ -553,7 +600,18 @@ export default function LexisApp({ navigateTo }) {
         setTutorLevel(Math.min(100, Math.round((heard.level / 128) * 100)));
         // The mouth data rides the SAME delayed sample, so the shape and the
         // opening are never a frame out of step with each other.
-        setTutorMouth(heard.mouth);
+        //
+        // Guarded because analyseFrame allocates a fresh object per frame, so
+        // the reference always differs and React can never bail out the way
+        // it does for setTutorLevel's number. Unguarded, this re-rendered
+        // LexisApp and the whole live stage at frame rate for the entire
+        // call — including silence, where every value is identical and the
+        // old level-only path did nothing at all. Comparing the values
+        // restores that: an idle mouth stops costing renders.
+        if (mouthChanged(lastMouthRef.current, heard.mouth)) {
+          lastMouthRef.current = heard.mouth;
+          setTutorMouth(heard.mouth);
+        }
 
         // Render Canvas Waveform Ring
         const canvas = canvasRef.current;
