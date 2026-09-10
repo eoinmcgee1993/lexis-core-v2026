@@ -233,7 +233,7 @@ BEGIN
   -- Per-heartbeat telemetry row (usage_logs was otherwise write-only-in-name —
   -- defined with a SELECT policy but nothing ever inserted into it).
   INSERT INTO public.usage_logs (user_id, duration_seconds)
-  VALUES (user_id_param, increment_seconds);
+  VALUES (user_id_param, GREATEST(increment_seconds, 0));
 
   SELECT subscription_status, subscription_tier, period_started_at
     INTO v_status, v_tier, v_period_start
@@ -269,10 +269,21 @@ BEGIN
     WHERE id = user_id_param;
   END IF;
 
+  -- GREATEST(...,0): increment_seconds is metering, and metering only ever
+  -- goes up. Without this, a negative value SUBTRACTS from both counters,
+  -- which is unlimited free Realtime minutes at the owner's expense.
+  --
+  -- That was not hypothetical. Production was found on 10 Sep 2026 with
+  -- EXECUTE on this function still granted to PUBLIC, anon and authenticated
+  -- — the REVOKE below had been written here but never applied — so the call
+  -- was reachable by anyone holding the publishable anon key, against any
+  -- user_id, via PostgREST's /rest/v1/rpc/record_heartbeat. The grant is
+  -- fixed; this clamp means the same mistake cannot be worth anything a
+  -- second time, and it costs one function call.
   UPDATE public.profiles
   SET
-    seconds_used = seconds_used + increment_seconds,
-    period_seconds_used = period_seconds_used + increment_seconds,
+    seconds_used = seconds_used + GREATEST(increment_seconds, 0),
+    period_seconds_used = period_seconds_used + GREATEST(increment_seconds, 0),
     updated_at = timezone('utc'::text, now())
   WHERE id = user_id_param
   RETURNING seconds_used, max_allowed_seconds, subscription_status, period_seconds_used
@@ -408,6 +419,12 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 -- default unless revoked — lock them down.
 REVOKE EXECUTE ON FUNCTION public.increment_sessions(UUID) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.increment_sessions(UUID) TO service_role;
+-- These are not decoration. On 10 Sep 2026 production was found with this
+-- one still granted to PUBLIC, anon and authenticated while the other three
+-- were correctly restricted — the lines existed here and had never been run
+-- against the live database. Re-applying this file is what closes that, and
+-- Supabase's own linter reports it as
+-- "Public Can Execute SECURITY DEFINER Function" if it drifts again.
 REVOKE EXECUTE ON FUNCTION public.record_heartbeat(UUID, INT) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.record_heartbeat(UUID, INT) TO service_role;
 -- redeem_pass grants paid access, so an exposed EXECUTE would be a free
