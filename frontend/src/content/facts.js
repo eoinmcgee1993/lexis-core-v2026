@@ -137,7 +137,7 @@ export const MONTHLY_MINUTES_MULTIPLE = Math.round(
 // English-language display strings built from the numbers above, so
 // every page renders the identical sentence rather than each hand-typing
 // its own phrasing of the same facts.
-export const PRICING_TEASER_EN = `Free ${TRIAL.minutes}-minute trial, then ฿${PRICING.weekly.thb} for ${PRICING.weekly.days} days or ฿${PRICING.monthly.thb} for ${PRICING.monthly.days}.`;
+export const PRICING_TEASER_EN = `Free ${TRIAL.minutes}-minute trial, then ฿${PRICING.weekly.thb} for ${PRICING.weekly.days} days or ฿${PRICING.monthly.thb} for ${PRICING.monthly.days} days.`;
 export const PRICING_TEASER_TH = `ทดลองฟรี ${TRIAL.minutes} นาที จากนั้น ฿${PRICING.weekly.thb} ใช้ได้ ${PRICING.weekly.days} วัน หรือ ฿${PRICING.monthly.thb} ใช้ได้ ${PRICING.monthly.days} วัน`;
 
 // Kept under 160 characters so Google does not truncate them in results.

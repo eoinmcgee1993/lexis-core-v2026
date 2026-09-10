@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { Mic, LogOut, AlertCircle, CreditCard, Clock, X, History } from 'lucide-react';
 import LexisMark from '../LexisMark';
+import { passDaysLeft, hasLiveAccess } from '../../lib/entitlement';
 
 function formatUsageLabel(profile) {
   if (profile.subscription_status === 'active') {
@@ -46,27 +47,6 @@ function formatUsageLabel(profile) {
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
   return `${mins}m ${secs}s left in trial`;
-}
-
-// Whole days remaining on a one-off pass, or null when this profile has no
-// pass (never paid, or on one of the pre-2 Sep 2026 recurring plans, which
-// leave access_expires_at NULL because Stripe reports their liveness
-// instead). Rounded UP so the last partial day still reads as "1 day left"
-// rather than "ends today" while the pass is genuinely still usable.
-function passDaysLeft(profile) {
-  if (!profile?.access_expires_at) return null;
-  const expiresAt = Date.parse(profile.access_expires_at);
-  if (!Number.isFinite(expiresAt)) return null;
-  return Math.max(0, Math.ceil((expiresAt - Date.now()) / 86400000));
-}
-
-// Mirrors paidAccessActive() in backend/app.mjs. The backend is the only
-// authority on entitlement; this exists purely so the UI doesn't announce
-// something the backend hasn't agreed to yet.
-function hasLiveAccess(profile) {
-  if (profile?.subscription_status !== 'active') return false;
-  const daysLeft = passDaysLeft(profile);
-  return daysLeft === null || daysLeft > 0;
 }
 
 // currentPeriodEnd comes straight from Stripe's subscription object — a
@@ -334,8 +314,16 @@ export default function WelcomeStage({
           {/* Hidden below md: at phone width she would push the CTA under
               the fold, and the decision has to stay reachable without a
               scroll. */}
-          <div className="hidden md:block relative flex-shrink-0">
-            <div className="lexis-stage" aria-hidden="true" />
+          {/* lexis-stage WRAPS the portrait rather than sitting beside it as
+              an empty div (fixed 10 Sep 2026). Its ::before uses
+              `inset: -12% 0`, and a vertical percentage inset resolves
+              against the containing block's height — which for a childless
+              div is 0, so the glow was a zero-height box painting nothing at
+              all. It only ever worked on LandingPage because there the class
+              is on a wrapper with content in it. `.lexis-stage > *` is what
+              lifts the picture above the glow, so the picture has to be a
+              child for the layering to work either. */}
+          <div className="hidden md:block lexis-stage flex-shrink-0">
             <picture>
               <source
                 type="image/avif"

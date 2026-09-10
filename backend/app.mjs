@@ -376,11 +376,33 @@ function periodSecondsUsed(profile) {
 // as valid: we cannot show the pass is still good, and the column is a
 // timestamptz written by Postgres, so this is unreachable short of a
 // schema change.
+//
+// The last clause repairs a one-way door (10 Sep 2026). redeem_pass writes a
+// concrete access_expires_at, and for a LEGACY subscriber that overwrites the
+// NULL that meant "Stripe reports liveness" — permanently, because nothing
+// ever writes NULL back. So a legacy subscriber who bought a single pass lost
+// all access the moment that pass lapsed, while Stripe went on billing them
+// every week. Nothing would have surfaced it: they simply stop being able to
+// start a session, and the subscription keeps charging.
+//
+// stripe_subscription_id is the signal that survives, and it is trustworthy
+// in exactly this direction: nothing sold since 2 Sep 2026 sets it, checkout
+// in payment mode has no subscription to record, and redeem_pass writes only
+// stripe_customer_id — so a non-null value here can only be a subscription
+// created before the switch. customer.subscription.deleted clears it
+// unconditionally (that update carries no live-pass guard, deliberately), so
+// once Stripe says the subscription is gone this clause stops applying. A
+// cancelled or past_due subscription is already excluded by the status check
+// above.
+//
+// Read it as: a lapsed pass does not revoke access that a still-billing
+// subscription is paying for.
 function paidAccessActive(profile) {
   if (profile.subscription_status !== 'active') return false;
   if (!profile.access_expires_at) return true;
   const expiresAt = Date.parse(profile.access_expires_at);
-  return Number.isFinite(expiresAt) && expiresAt > Date.now();
+  if (Number.isFinite(expiresAt) && expiresAt > Date.now()) return true;
+  return Boolean(profile.stripe_subscription_id);
 }
 
 function requireEntitlement(req, res, next) {
@@ -403,7 +425,12 @@ function requireEntitlement(req, res, next) {
       // "upgrade your pass" prompt and a pricing link.
       return res.status(403).json({
         error: 'FAIR_USE_REACHED',
-        message: `You've reached this period's fair-use limit of ${Math.round(cap / 60)} minutes. It resets at the start of your next billing period.`
+        // "next billing period" was left over from subscriptions. Passes do
+        // not renew and there is no next period — the allowance belongs to
+        // the pass, so the only way to more minutes is another pass. Saying
+        // otherwise tells someone to wait for a reset that never arrives,
+        // and contradicts both the Terms and PricingPage's fair-use line.
+        message: `You've reached this pass's fair-use limit of ${Math.round(cap / 60)} minutes. Passes don't renew, so buy another one whenever you'd like to keep going.`
       });
     }
   }

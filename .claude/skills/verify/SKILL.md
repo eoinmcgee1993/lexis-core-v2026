@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Run LEXIS's full verification chain — syntax gate, both test suites, the production build including prerender, and the checks that have actually caught bugs here (Tailwind classes that generate no CSS, horizontal overflow, page errors per route). Use before committing anything that touches app.mjs, a page component, or index.css, and whenever asked to verify, health check, or confirm work is sound.
+description: Run LEXIS's full verification chain — syntax gate, all three test suites, the production build including prerender, and the checks that have actually caught bugs here (Tailwind classes and opacity steps that generate no CSS, horizontal overflow, page errors per route). Use before committing anything that touches app.mjs, a page component, or index.css, and whenever asked to verify, health check, or confirm work is sound.
 ---
 
 # Verify
@@ -21,22 +21,42 @@ node --check backend/app.mjs
 `app.mjs` is ~1500 lines and holds all backend logic. A syntax error here
 takes down checkout, the webhook and the realtime token mint at once.
 
-## 2. Both test suites
+## 2. All three test suites
 
 ```bash
-node backend/test/fair-use.test.mjs
+cd backend && npm test        # fair-use.test.mjs && checkout.test.mjs
 node frontend/scripts/visemes.test.mjs
 ```
 
-`fair-use.test.mjs` extracts helpers out of `app.mjs` **by source text**, so
-renaming `fairUseCapSeconds`, `periodSecondsUsed`, `passDays` or
-`paidAccessActive` fails it loudly. That is intentional — do not "fix" the
-test by loosening the match, fix the call sites.
+Expect `30 passed, 0 failed`, then `22 passed, 0 failed`, then the viseme
+counts. The two backend suites test `app.mjs` from opposite directions and
+you need both:
+
+- `fair-use.test.mjs` extracts helpers out of `app.mjs` **by source text**,
+  so renaming `fairUseCapSeconds`, `periodSecondsUsed`, `passDays` or
+  `paidAccessActive` fails it loudly. That is intentional — do not "fix" the
+  test by loosening the match, fix the call sites.
+- `checkout.test.mjs` imports `app.mjs` for real and drives the handlers
+  against local fake Stripe and Supabase servers, so what it pins is the
+  params object those handlers actually build. It will tell you if the
+  Community add-on stops being offered, if both of its mutually exclusive
+  paths ever fire at once, or if `optional_items` gets carried into the
+  branding-failure retry — which runs on the SDK's pinned `2024-06-20` and
+  cannot accept it.
+
+`checkout.test.mjs` prints a `StripeInvalidRequestError` and a stack trace
+partway through. That is the branding-rejection case working as designed, not
+a failure — read the counts at the end, not the scariest thing on screen.
+
+Both backend suites also run in CI on every PR and on pushes to `main`
+(`.github/workflows/test.yml`). The viseme suite does not; nothing but you
+runs that one.
 
 There is a PostToolUse hook (`.claude/hooks/run-affected-tests.sh`) that runs
-whichever suite covers a file you just edited, silently on success. It only
-fires on Write/Edit — a change made through Bash will not trigger it, so run
-these by hand after any `sed`/`python` patch.
+whichever suites cover a file you just edited, silently on success — editing
+`app.mjs` runs both backend suites. It only fires on Write/Edit, so a change
+made through Bash will not trigger it: run these by hand after any
+`sed`/`python` patch.
 
 ## 3. Production build, including prerender
 
@@ -69,7 +89,16 @@ for (const c of process.argv.slice(1)) {
 " lexis-lift lexis-lift-soft lexis-band lexis-stage lexis-clip-x
 ```
 
-Add whatever classes the change introduced to that argument list.
+Add whatever classes the change introduced to that argument list. This is not
+only about the `lexis-*` utilities — **arbitrary opacity steps are the same
+trap**. A contrast pass on 9 Sep 2026 moved 83 occurrences of body text to
+`/65`, `/70` and `/75`; those three had never been used in this project
+before, and a step Tailwind does not generate produces no rule at all rather
+than an error. Check the built stylesheet for the literal declaration:
+
+```bash
+cd frontend && grep -o 'text-lexis-ink\\/65{[^}]*}' dist/assets/*.css | head -1
+```
 
 ## 5. Routes: page errors and horizontal overflow
 

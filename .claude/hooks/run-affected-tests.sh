@@ -3,7 +3,7 @@
 # PostToolUse hook — runs the test suite that covers whatever file was just
 # edited, and reports back only when something fails.
 #
-# Why this exists. Both suites in this repo are plain node scripts with no
+# Why this exists. The suites in this repo are plain node scripts with no
 # runner and no watch mode, so they only run when somebody remembers to run
 # them. That is a real risk here rather than a theoretical one: the viseme
 # suite caught four genuine bugs in its own module's first implementation,
@@ -11,6 +11,11 @@
 # SOURCE TEXT, so renaming fairUseCapSeconds, periodSecondsUsed, passDays or
 # paidAccessActive breaks it instantly — exactly the kind of change whose
 # author has no reason to think "tests" while making it.
+#
+# CI now runs the two backend suites too (.github/workflows/test.yml, 9 Sep
+# 2026), which does not make this redundant: CI reports after a push, this
+# reports inside the edit that caused it, while the reason is still on
+# screen. It also still covers the viseme suite, which CI does not run.
 #
 # Deliberately NOT run-everything-on-every-edit. Only the two files each
 # suite actually depends on trigger it, so editing a page component doesn't
@@ -40,6 +45,20 @@ case "$file" in
     suites+=("backend/test/fair-use.test.mjs") ;;
 esac
 case "$file" in
+  # checkout.test.mjs is sensitive to app.mjs in a different way from
+  # fair-use: it imports it and drives the real handlers, so what it pins is
+  # the params object those handlers build — the Stripe API version, the
+  # add-on's two mutually exclusive paths, and the branding fallback that
+  # must not carry optional_items onto the SDK's older pinned version.
+  # Editing app.mjs therefore runs both backend suites, not one.
+  #
+  # The loader and shim are how the suite substitutes a local Stripe for the
+  # real SDK. Break either and the suite fails for a reason that has nothing
+  # to do with the code under test, so they trigger it too.
+  */backend/app.mjs|*/backend/test/checkout.test.mjs|*/backend/test/stripe-local-loader.mjs|*/backend/test/stripe-local-shim.mjs)
+    suites+=("backend/test/checkout.test.mjs") ;;
+esac
+case "$file" in
   */frontend/src/lib/visemes.js|*/frontend/scripts/visemes.test.mjs)
     suites+=("frontend/scripts/visemes.test.mjs") ;;
 esac
@@ -50,9 +69,20 @@ failures=""
 for suite in "${suites[@]}"; do
   [ -f "$suite" ] || continue
   if ! output=$(node "$suite" 2>&1); then
-    # Keep the tail: these suites print one line per case and the summary
-    # last, so the end of the output is the part worth reading.
-    failures+="$suite failed:"$'\n'"$(printf '%s' "$output" | tail -25)"$'\n\n'
+    # Pull out the FAIL lines and the count summary rather than tailing
+    # blindly. All three suites print "FAIL  <name>" at the start of a line
+    # and "N passed, M failed" last, so this is the whole story in two greps.
+    #
+    # The tail this replaced looked fine until checkout.test.mjs existed:
+    # that suite provokes a Stripe rejection ON PURPOSE to prove the branding
+    # fallback works, and the resulting stack trace fills a 25-line window and
+    # pushes the real failing assertion out of it. The report then showed PASS
+    # lines and an expected error, which reads as "nothing actually wrong".
+    # Falls back to the tail if a suite dies before printing any of its own
+    # output — a crash on import has no FAIL line to find.
+    detail=$(printf '%s' "$output" | grep -E '^(FAIL|[0-9]+ passed)' | head -25)
+    [ -n "$detail" ] || detail=$(printf '%s' "$output" | tail -25)
+    failures+="$suite failed:"$'\n'"$detail"$'\n\n'
   fi
 done
 

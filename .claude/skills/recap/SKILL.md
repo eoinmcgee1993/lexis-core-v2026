@@ -37,10 +37,16 @@ report the SHA each is on — not just "deployed".
 
 ## The trap to check every time
 
-**A PR still flagged `draft` is not merged and will not merge.** This has
-already happened once here: work was reported as merged, `main` had not moved,
-and the cause was the draft flag. If `draft: true`, say so as the headline,
-not as a footnote.
+**A PR still flagged `draft` is not merged and will not merge.** This keeps
+happening — #98, #99, #101 and #102 all had to be un-drafted before they would
+merge, and the first time, work was reported as merged when `main` had not
+moved. If `draft: true`, say so as the headline, not as a footnote.
+
+**A squash-merged PR leaves this branch conflicted.** `main` gets one squashed
+commit while the branch still carries the originals, so the next PR opens as
+`mergeable_state: dirty` even when the trees are identical. That is not a real
+conflict to agonise over: merge `origin/main` in, take the newer side, and
+check `git diff <pre-merge-sha> HEAD` comes back empty.
 
 ## Report
 
@@ -63,3 +69,14 @@ Known standing items, unless resolved since:
   end to end. Nothing in this repo can substitute for it.
 - The Mobbin connector returns `requires a paid plan` for every query. It is
   account-level, not transient — do not present it as a retry away.
+- Stripe has never accepted a live Checkout Session carrying `optional_items`
+  (the Community add-on on Stripe's own page). The MCP key can create Products
+  and Prices on this account but is denied `PostCheckoutSessions`, so this is
+  not verifiable from here. The first real purchase is the test; if Stripe
+  refuses the parameter the branding fallback swallows it, the sale still
+  completes, and the charge is stamped `checkout_branding: account-fallback`
+  in the dashboard. Report it as unproven, never as working.
+- The live promotion code `LEXISLIVETEST` (coupon `87n7iRTg`, 100% off,
+  expires 2026) is deliberately still active so a real purchase can be run for
+  free. It is a live discount on a live account — flag it every recap until
+  the owner says testing is done, then delete both.
