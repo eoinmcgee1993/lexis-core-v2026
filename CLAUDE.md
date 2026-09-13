@@ -68,7 +68,13 @@ Consequences that are easy to break:
 - Checkout runs in `mode: 'payment'` with **one-time** prices. A recurring price
   here is a hard Stripe error. The env var names carry an `_ONETIME` suffix
   specifically so a stale `STRIPE_PRICE_WEEKLY` can't silently point at the old
-  recurring price.
+  recurring price. As of 11 Sep 2026 that naming is no longer the only guard:
+  the three legacy recurring prices are archived in live Stripe, so there is
+  nothing left on either product for a stale env var to resolve to. Archiving
+  them first required repointing each product's `default_price` — both still
+  pointed at the *recurring* price, which Stripe refuses to archive while it
+  holds that slot, and which anything resolving a product rather than a price
+  would have picked up. Both products now carry exactly one active price.
 - `payment_method_types` is deliberately **not** set. Which methods appear is
   decided in the Stripe Dashboard; naming any method here silently overrides it.
 - Entitlement is `profiles.access_expires_at`, checked by `paidAccessActive()`.
