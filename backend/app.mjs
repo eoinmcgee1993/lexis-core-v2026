@@ -225,6 +225,36 @@ const ANALYTICS_EVENTS = new Set([
   'plan_cancelled'
 ]);
 
+// The allowlist above stops an unrecognised EVENT NAME; it says nothing
+// about what's inside `metadata`, which was being written into a JSONB
+// column as-is. Every current caller (grep trackEvent( across frontend/src)
+// sends exactly the keys below — this mirrors that, not a guess. Unknown
+// keys are dropped silently rather than rejected: pageview fires on every
+// navigation, and a 400 on an unrecognised key would take analytics down
+// account-wide the day someone adds a field to one call site and forgets
+// this map, which is a worse failure than losing that one new field.
+const ANALYTICS_METADATA_SCHEMA = {
+  checkout_started: { planTier: 'string', sponsorAdd: 'boolean' },
+  checkout_completed: { planTier: 'string', sponsorAdd: 'boolean' },
+  session_connected: { direction: 'string', subscriptionStatus: 'string' },
+  plan_cancelled: { planTier: 'string' }
+  // pageview and signup_completed carry no metadata today — absent from
+  // this map, so sanitiseMetadata() returns {} for both regardless of
+  // what a caller sends.
+};
+
+function sanitiseMetadata(event, raw) {
+  const schema = ANALYTICS_METADATA_SCHEMA[event];
+  if (!schema || !raw || typeof raw !== 'object') return {};
+  const out = {};
+  for (const [key, expectedType] of Object.entries(schema)) {
+    const value = raw[key];
+    if (typeof value !== expectedType) continue;
+    out[key] = typeof value === 'string' ? value.slice(0, 100) : value;
+  }
+  return out;
+}
+
 /* ─────────────────────────────────────────────────────────────────────── */
 /* 5. AUTH MIDDLEWARE                                                      */
 /*                                                                          */
@@ -583,8 +613,12 @@ app.get('/api/me', authenticate, (req, res) => {
 app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, async (req, res) => {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
+    // No salt: req.user.id is a Supabase-issued UUID, already ~122 bits of
+    // entropy, so a salt added nothing a real per-account secret couldn't
+    // already do better — it was never resistant to anything a UUID alone
+    // isn't. One less env var to keep in sync across Railway/Vercel/local.
     const safetyIdentifier = crypto.createHash('sha256')
-      .update(req.user.id + (process.env.LEXIS_SALT || 'lexis_salt'))
+      .update(req.user.id)
       .digest('hex').substring(0, 32);
     const direction = req.body?.direction === 'th' ? 'th' : 'en';
     // Optional — set by the Topics stage (frontend/src/components/stages/
@@ -1526,7 +1560,7 @@ app.post('/api/analytics/event', analyticsRateLimiter, async (req, res) => {
       lang: typeof lang === 'string' ? lang.slice(0, 10) : null,
       session_id: sessionId,
       user_id: userId,
-      metadata: metadata && typeof metadata === 'object' ? metadata : {}
+      metadata: sanitiseMetadata(event, metadata)
     });
     if (error) throw error;
 
@@ -1584,7 +1618,18 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
-    console.error('[LEXIS Webhook Signature Error]', err.message);
+    // bodyLength and a signature prefix turn "did something upstream parse
+    // the body before this route got the raw buffer?" into a one-line
+    // platform-log answer instead of a guess. That's the actual common
+    // cause of a signature failure that isn't a rotated secret: a JSON
+    // body-parser mounted above the `/api/stripe/webhook` check at the top
+    // of this file (section 2) consumes the raw bytes constructEvent needs,
+    // and the symptom looks identical to a bad STRIPE_WEBHOOK_SECRET
+    // without this line.
+    console.error('[LEXIS Webhook Signature Error]', err.message, {
+      bodyLength: req.body ? req.body.length : 0,
+      sigPrefix: sig ? `${sig.slice(0, 12)}…` : '(missing)'
+    });
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
