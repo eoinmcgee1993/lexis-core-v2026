@@ -49,6 +49,7 @@ const TEXT = {
     badge: 'LEXIS Community',
     h1: 'Speaking opens doors.',
     intro: "A confident conversation can lead to an interview. An interview can lead to a job. A job can lead to a whole different life. LEXIS Community exists so that door isn't only open to people who can afford to walk through it, funded entirely by the people already using LEXIS every day.",
+    videoLabel: 'Lexis, in her own words',
     bigLine: "Your practice can open someone else's door.",
     fundedHeading: "How it's funded",
     fundedBody: `At checkout, anyone buying a pass can choose to add ฿${SPONSOR_ADDON_THB} to it, no lecture, no guilt trip, just one optional tap. It's part of the same single payment, so there's never a separate charge to think about and nothing keeps charging you afterwards. Do that, and you're not just paying for your own practice anymore, you're funding someone else's first conversation too.`,
@@ -71,6 +72,7 @@ const TEXT = {
     badge: 'LEXIS Community',
     h1: 'การพูดเปิดประตูได้',
     intro: 'บทสนทนาที่มั่นใจนำไปสู่การสัมภาษณ์ได้ การสัมภาษณ์นำไปสู่งานได้ งานนำไปสู่ชีวิตที่ต่างออกไปได้ LEXIS Community มีอยู่เพื่อให้ประตูบานนั้นไม่ได้เปิดเฉพาะคนที่จ่ายไหวเท่านั้น ทุนทั้งหมดมาจากคนที่ใช้ LEXIS อยู่ทุกวันนี้เอง',
+    videoLabel: 'ฟังจากเลกซิสเอง',
     bigLine: 'การฝึกของคุณเปิดประตูให้คนอื่นได้',
     fundedHeading: 'ทุนมาจากไหน',
     fundedBody: `ตอนชำระเงิน ทุกคนที่ซื้อแพ็กเกจเลือกเพิ่ม ฿${SPONSOR_ADDON_THB} เข้าไปได้ ไม่มีการสอน ไม่มีการกดดัน แค่แตะเลือกเพิ่มเติมครั้งเดียว รวมอยู่ในการจ่ายครั้งเดียวกัน จึงไม่มีการเรียกเก็บแยกให้ต้องคิดถึง และไม่มีการเรียกเก็บซ้ำในภายหลัง ทำแบบนั้นแล้ว คุณไม่ได้จ่ายแค่เพื่อการฝึกของตัวเองอีกต่อไป แต่กำลังสนับสนุนบทสนทนาแรกของคนอื่นด้วย`,
@@ -149,6 +151,27 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
         <p className="mt-6 text-lg text-lexis-ink/70 leading-relaxed max-w-2xl mx-auto md:mx-0">
           {t.intro}
         </p>
+      </section>
+
+      {/* Lexis narrating the mission herself — a spoken statement, not
+          ambient decoration, so this stays a real <video> with controls
+          rather than an autoplaying loop. Doesn't touch LandingPage's hero
+          (a live avatar was deliberately replaced there with the actual
+          product demo, 26 Aug 2026 re-audit) — this is a different page,
+          about the mission itself rather than the product's live-voice
+          pitch, so a to-camera clip fits without reopening that call. */}
+      <section className="w-full max-w-3xl mx-auto px-6 pb-10 flex justify-center md:justify-start">
+        <div className="w-full max-w-xs">
+          <video
+            className="w-full rounded-2xl border border-lexis-ink/10 shadow-sm"
+            controls
+            preload="metadata"
+            poster="/marketing/lexis-community-intro-poster.jpg"
+          >
+            <source src="/marketing/lexis-community-intro.mp4" type="video/mp4" />
+          </video>
+          <p className="mt-2 text-xs text-lexis-ink/50">{t.videoLabel}</p>
+        </div>
       </section>
 
       <section className="w-full py-16 bg-lexis-ink">

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Mic, ShieldCheck, Zap, Globe, ArrowRight, ChevronDown, MessageCircle, TrendingUp, Heart, Gauge } from 'lucide-react';
+import { Mic, ShieldCheck, Zap, Globe, ArrowRight, ChevronDown, MessageCircle, TrendingUp, Gauge, Play } from 'lucide-react';
 import LexisMark from '../components/LexisMark';
 import WaveRule from '../components/WaveRule';
 import HeroLiveDemo from '../components/HeroLiveDemo';
@@ -456,11 +456,32 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           heading — so the eye skipped it entirely and it read as a caption
           rather than a section. Given a tinted card, a heading that holds
           its own, and body copy at readable contrast. */}
+      {/* Icon badge swapped for a thumbnail of Lexis (16 Sep 2026, direct
+          request to give Community "more of a spotlight") — same card,
+          same copy, same single CTA link; only the icon became a face. Not
+          a "delete the cards" reversal: that call was about four identical
+          icon chips repeating one fact each, not this one distinct section.
+          Links through to /community rather than playing inline, so this
+          stays a lightweight image on the landing page, not a second video
+          player — the actual clip lives where its content is, on
+          CommunityPage.jsx. */}
       <section className="w-full max-w-6xl mx-auto px-6 py-20 md:py-24">
         <div className="rounded-3xl border border-teal-600/20 bg-teal-600/[0.06] p-8 md:p-12 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 text-center md:text-left lexis-lift-soft">
-          <span className="flex-shrink-0 w-12 h-12 rounded-2xl bg-teal-600/10 border border-teal-600/20 flex items-center justify-center">
-            <Heart className="w-5 h-5 text-teal-600" aria-hidden="true" />
-          </span>
+          <AppLink
+            to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border border-teal-600/20 group"
+            aria-label={c.communityCta}
+          >
+            <img
+              src="/marketing/lexis-community-intro-poster.jpg"
+              alt=""
+              className="w-full h-full object-cover"
+            />
+            <span className="absolute inset-0 flex items-center justify-center bg-lexis-navy/10 group-hover:bg-lexis-navy/20 transition-colors">
+              <span className="w-9 h-9 rounded-full bg-white/95 flex items-center justify-center shadow-sm">
+                <Play className="w-3.5 h-3.5 text-teal-600 ml-0.5" fill="currentColor" aria-hidden="true" />
+              </span>
+            </span>
+          </AppLink>
           <div className="flex-1">
             <h2 className="font-display font-semibold text-2xl md:text-3xl text-lexis-ink">{c.communityHeading}</h2>
             <p className="mt-3 text-sm md:text-base text-lexis-ink/75 leading-relaxed max-w-xl">{c.communityBody}</p>
