@@ -471,11 +471,34 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border border-teal-600/20 group"
             aria-label={c.communityCta}
           >
-            <img
-              src="/marketing/lexis-community-intro-poster.jpg"
-              alt=""
-              className="w-full h-full object-cover"
-            />
+            {/* Sized variants rather than the raw render still: the still is
+                1529x2048 / 409KB and this badge is 96px square, so the
+                original cost every landing-page visit ~400KB to paint a
+                thumbnail. Same fix, same widths discipline, as the hero
+                <picture> above — see scripts/images/
+                generate_community_poster_srcset.mjs. Lazy, not eager: this
+                section sits far below the fold, unlike the hero. */}
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/marketing/lexis-community-intro-poster-192.avif 192w, /marketing/lexis-community-intro-poster-384.avif 384w"
+                sizes="96px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/marketing/lexis-community-intro-poster-192.webp 192w, /marketing/lexis-community-intro-poster-384.webp 384w"
+                sizes="96px"
+              />
+              <img
+                src="/marketing/lexis-community-intro-poster-192.jpg"
+                width="96"
+                height="96"
+                loading="lazy"
+                decoding="async"
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            </picture>
             <span className="absolute inset-0 flex items-center justify-center bg-lexis-navy/10 group-hover:bg-lexis-navy/20 transition-colors">
               <span className="w-9 h-9 rounded-full bg-white/95 flex items-center justify-center shadow-sm">
                 <Play className="w-3.5 h-3.5 text-teal-600 ml-0.5" fill="currentColor" aria-hidden="true" />

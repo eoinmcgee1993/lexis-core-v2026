@@ -162,11 +162,16 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
           pitch, so a to-camera clip fits without reopening that call. */}
       <section className="w-full max-w-3xl mx-auto px-6 pb-10 flex justify-center md:justify-start">
         <div className="w-full max-w-xs">
+          {/* poster is the 768-wide variant, not the 1529x2048 original:
+              this column is max-w-xs (320px), so 768 covers ~2.4x DPR and
+              costs 42KB instead of 409KB. A poster cannot take a srcset —
+              <video> has no such attribute — so one size has to serve
+              every density, and this is the honest middle. */}
           <video
             className="w-full rounded-2xl border border-lexis-ink/10 shadow-sm"
             controls
             preload="metadata"
-            poster="/marketing/lexis-community-intro-poster.jpg"
+            poster="/marketing/lexis-community-intro-poster-768.jpg"
           >
             <source src="/marketing/lexis-community-intro.mp4" type="video/mp4" />
           </video>
