@@ -2,6 +2,15 @@
 
 name: Manual workflow
 
+# Same read-only token as test.yml, and for a stronger reason: this workflow
+# echoes a string and nothing else, so every write scope in the default token
+# is authority with no use. Added alongside test.yml's block (22 Sep 2026)
+# rather than waiting for CodeQL to flag this file too — the alert fires on
+# changed lines, and nothing changes here, so it would have sat unflagged
+# indefinitely.
+permissions:
+  contents: read
+
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
 on:
