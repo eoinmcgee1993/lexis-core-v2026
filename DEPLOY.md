@@ -161,7 +161,7 @@ Run these against the actual deployed Railway/Vercel/Supabase/Stripe stack befor
 - [ ] `STRIPE_WEBHOOK_SECRET` is set — without it the server won't boot, and `/api/stripe/webhook` never trusts an unsigned body
 - [ ] `ALLOWED_ORIGINS` restricts CORS to production domain only
 - [ ] `.env` / `.env.local` files are in `.gitignore` and never committed
-- [ ] `OpenAI-Safety-Identifier` headers are active (hashed Supabase user id + salt)
+- [ ] `OpenAI-Safety-Identifier` headers are active (plain SHA-256 of the Supabase user id, truncated to 32 hex chars — see `backend/app.mjs`'s `/api/session`). There is deliberately **no salt** and no `LEXIS_SALT` env var: the id is already a Supabase-issued UUID (~122 bits), so a salt bought nothing a UUID alone didn't, and it was one more value to keep in sync across Railway/Vercel/local. Re-adding one would also diverge from OpenAI's own spec for the field.
 - [ ] Rate limiting is active (10 req/min per IP on `/api/session`, 6 req/min on `/api/heartbeat`)
 - [ ] RLS is enabled on `public.profiles`/`public.usage_logs` with **no client-facing `UPDATE` policy on `profiles`** — a `USING`-only update policy (no `WITH CHECK`) would let any signed-in user `PATCH` their own row directly via Supabase's REST API to `subscription_status: 'active'`, bypassing this backend entirely. All billing/usage writes happen server-side via the service-role key, which doesn't need a client policy to work.
 - [ ] `/api/stripe/checkout` and `/api/me` require only a valid session (not an active plan) — a user whose trial just expired must still be able to reach checkout

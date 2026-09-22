@@ -383,6 +383,21 @@ function fairUseCapSeconds(tier) {
 // — so the same elapsed-window test has to run here too, or their first
 // session of a new period would be refused by a count that no longer
 // applies.
+//
+// Read-only on purpose. An external audit (21 Sep 2026) read the missing
+// write-back as a "window-roll race that refunds consumed minutes" and
+// proposed rolling the row from requireEntitlement before the cap check.
+// Rejected, on three counts. Forgiving the previous period's seconds once
+// the window has elapsed is the semantics, not a leak — the roll is
+// whole-window and self-healing, and record_heartbeat performs the
+// identical arithmetic against the same 7/30-day interval on the next
+// beat, so the two never disagree about which period a second belongs to.
+// Writing it here instead would put that arithmetic in a THIRD place that
+// has to stay in lockstep with PERIOD_DAYS and record_heartbeat's INTERVAL
+// (see this file's PERIOD_DAYS comment for why that pairing is already
+// delicate), and would add a profiles UPDATE to the hot path of every
+// /api/session, /api/heartbeat and /api/translate call — racing the very
+// function that owns the write.
 function periodSecondsUsed(profile) {
   const startedAt = profile.period_started_at ? Date.parse(profile.period_started_at) : NaN;
   if (!Number.isFinite(startedAt)) return 0;
@@ -1187,6 +1202,17 @@ const sponsorLineItem = () => (
 // a payment-mode Checkout Session is a hard Stripe error — so a stale
 // value would silently break every checkout. New names mean an unset
 // variable falls through to the correct default instead.
+//
+// Which is also why the fallback stays. An external audit (21 Sep 2026)
+// proposed adding STRIPE_PRICE_WEEKLY / STRIPE_PRICE_MONTHLY to
+// requiredEnv and deleting the `||` defaults, to stop a preview deploy
+// charging real cards. Rejected: those two names are the LEGACY recurring
+// ones, so requiring them forces every environment to set exactly the
+// variable the rename existed to stop being read. The failure it guards
+// against is also the wrong shape — a preview deploy only charges a real
+// card if it holds a LIVE STRIPE_SECRET_KEY, and with a test key these
+// live price IDs are rejected by Stripe rather than honoured. The secret
+// key is the boundary; the price ID is not.
 const STRIPE_PRICES = {
   weekly: process.env.STRIPE_PRICE_WEEKLY_ONETIME || 'price_1UBKYIF1FdEsYK5EmoapMorw',   // LEXIS Weekly Pass — 7-day, THB 199
   monthly: process.env.STRIPE_PRICE_MONTHLY_ONETIME || 'price_1UBKYMF1FdEsYK5EMo7f5rVQ'  // LEXIS Monthly Immersion — 30-day, THB 599
