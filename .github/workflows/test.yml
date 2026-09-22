@@ -33,6 +33,20 @@
 # minutes nobody has to spend reading a Vercel dashboard to trust a green tick.
 name: Tests
 
+# Read-only token. Neither job writes anything back to the repository — they
+# check out, install, and run tests and a build — so the default token, which
+# carries write scopes on contents, issues, pull requests and more, is far
+# more authority than either needs.
+#
+# CodeQL flagged this on PR #114 ("Workflow does not contain permissions",
+# one medium alert) against the job added there, and it was right: the
+# workflow had never declared a permissions block at all, so the frontend job
+# simply inherited the same over-broad default the backend job already had.
+# Declared once at workflow level rather than per job so a job added later
+# inherits read-only instead of silently re-opening this.
+permissions:
+  contents: read
+
 # main plus pull requests, rather than every branch: a PR branch would
 # otherwise run the same commit twice, once for the push and once for the PR.
 on:
