@@ -1652,8 +1652,11 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
     // of this file (section 2) consumes the raw bytes constructEvent needs,
     // and the symptom looks identical to a bad STRIPE_WEBHOOK_SECRET
     // without this line.
+    const bodyLength = Buffer.isBuffer(req.body)
+      ? req.body.length
+      : (typeof req.body === 'string' ? Buffer.byteLength(req.body) : 0);
     console.error('[LEXIS Webhook Signature Error]', err.message, {
-      bodyLength: req.body ? req.body.length : 0,
+      bodyLength,
       sigPrefix: sig ? `${sig.slice(0, 12)}…` : '(missing)'
     });
     return res.status(400).send(`Webhook Error: ${err.message}`);
