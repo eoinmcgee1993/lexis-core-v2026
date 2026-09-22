@@ -179,11 +179,19 @@ branding fallback, and it fails loudly if `optional_items` is ever carried into
 that fallback, where the SDK's pinned API version cannot accept it.
 
 Both suites run in CI on every pull request and on pushes to `main`
-(`.github/workflows/test.yml`). Nothing else does: the build is left to
-Vercel, which already runs it on both projects and reports each as a commit
-status, and the workflow needs no secrets because neither suite reaches a real
-service. The repo's other workflow, `manual.yml`, is GitHub's stock
-dispatch template and does nothing.
+(`.github/workflows/test.yml`), alongside a second job that runs the frontend's
+real `npm ci && npm run build`, prerender included. The workflow needs no
+secrets: neither suite reaches a real service and the build reads none.
+
+The build job was added 22 Sep 2026 after PR #113 (vite 5 → 8) showed why
+"Vercel already builds it" was not enough. Its Vercel build failed at install
+on the `@vitejs/plugin-react` peer range, and the PR's check runs were
+`backend` ✅, `Vercel Preview Comments` ✅ and `CodeQL` neutral — a failing
+Vercel **build** surfaces as no check run at all, so the PR page a human reads
+before merging showed three green ticks on a frontend that would not install.
+
+The repo's other workflow, `manual.yml`, is GitHub's stock dispatch template
+and does nothing.
 
 For SQL, the established pattern is to exercise a function against production
 inside a `DO $$ ... RAISE EXCEPTION $$` block — the exception carries the results

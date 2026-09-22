@@ -1,4 +1,5 @@
-# Runs the two backend suites on every push and pull request.
+# Runs the two backend suites and the real frontend production build on
+# every push to main and every pull request.
 #
 # It exists because until now nothing did. The repo's only other workflow is
 # GitHub's stock manual-dispatch template, so CI on a pull request showed two
@@ -7,11 +8,29 @@
 # PR that broke the fair-use cap or the Stripe checkout params would have gone
 # green.
 #
-# Deliberately just the tests. Vercel already builds both the frontend and the
-# backend on every push to this repo and reports each as a commit status, so
-# repeating `npm run build` here would add several minutes, pull headless
-# Chromium for the prerender step, and tell us nothing Vercel has not already
-# said. Tests are the whole gap.
+# The frontend job was deliberately left out at first, on the reasoning that
+# Vercel already builds both projects on every push and reports each as a
+# commit status, so repeating `npm run build` here would add minutes and tell
+# us nothing Vercel had not already said.
+#
+# That was wrong, and PR #113 (vite 5 -> 8) is the proof. Its Vercel build
+# failed outright at install —
+#
+#   npm error ERESOLVE could not resolve
+#   npm error Found: vite@8.3.0
+#   npm error peer vite@"^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0"
+#                from @vitejs/plugin-react@4.7.0
+#   Error: Command "npm install" exited with 1
+#
+# — and the PR's check runs were `backend` (success), `Vercel Preview
+# Comments` (success) and `CodeQL` (neutral). Three green checks, and not one
+# of them was the build that failed. A failing Vercel BUILD does not surface
+# as a check run at all, so "Vercel already reports it" was never true in the
+# place it mattered: the PR page a human looks at before merging. A dependency
+# bump that makes the site unbuildable looked mergeable.
+#
+# So the frontend builds here too, `npm ci` and all, and the cost is a few
+# minutes nobody has to spend reading a Vercel dashboard to trust a green tick.
 name: Tests
 
 # main plus pull requests, rather than every branch: a PR branch would
@@ -57,3 +76,56 @@ jobs:
       # on placeholder env.
       - name: Tests
         run: npm test
+
+  # A separate job, not a second step on the backend one: the two share no
+  # lockfile, no node_modules and no failure mode, and a backend test failure
+  # should not hide a broken bundle (or the reverse). They also run in
+  # parallel this way, so adding this costs wall-clock time only when the
+  # frontend is genuinely slower than the suites.
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # `npm ci`, not `npm install`: it installs the lockfile exactly and
+      # fails on a lockfile that disagrees with package.json, which is the
+      # precise shape of the #113 failure this job exists to catch.
+      - run: npm ci
+
+      # `npm run build`, not `build:vite-only`. The prerender half is where
+      # the marketing and legal routes actually get their indexable HTML —
+      # seventeen routes driven through a real headless Chromium — so a
+      # prerender that silently stops producing them is a production SEO
+      # regression that a bundle-only check would wave through.
+      #
+      # scripts/prerender.mjs picks its browser at runtime: @sparticuz/
+      # chromium on Vercel, PUPPETEER_EXECUTABLE_PATH if set, then a
+      # playwright-core fallback. playwright-core ships no binary of its own
+      # and GitHub's runner image has no Playwright browser cache, so that
+      # last path has nothing to launch here — point the script at the Google
+      # Chrome the ubuntu-latest image already carries instead of downloading
+      # a second browser on every run. Resolved rather than hardcoded so the
+      # job fails with "no Chrome found" rather than a launch error thirty
+      # seconds later if the image ever drops it.
+      - name: Resolve a Chrome for the prerender step
+        run: |
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          if [ -z "$CHROME" ]; then
+            echo "No Chrome/Chromium on the runner image; prerender cannot run." >&2
+            exit 1
+          fi
+          echo "Using $CHROME"
+          echo "PUPPETEER_EXECUTABLE_PATH=$CHROME" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: npm run build
