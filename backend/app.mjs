@@ -1244,8 +1244,18 @@ function validateSeedanceTextToVideo(raw) {
   return { value: { prompt, duration, resolution, aspect_ratio: aspectRatio, generate_audio: generateAudio } };
 }
 
+// `path` is the endpoint as a constant, and it is what the submit URL is
+// built from — never the `model` string the client sent, even though that
+// string has to match a key here first. The lookup alone already made the
+// client's value safe, but CodeQL (js/request-forgery, flagged on PR #121)
+// cannot see a map lookup as a sanitiser, and it is right that the URL
+// should not be assembled from request data at all: with the path coming
+// from this table, no string from the request ever reaches fetch().
 const HF_MODELS = Object.assign(Object.create(null), {
-  'bytedance/seedance-2.0/text-to-video': { validate: validateSeedanceTextToVideo }
+  'bytedance/seedance-2.0/text-to-video': {
+    path: '/bytedance/seedance-2.0/text-to-video',
+    validate: validateSeedanceTextToVideo
+  }
 });
 
 // Only ever send the credential to Higgsfield's own origin. status_url and
@@ -1516,7 +1526,7 @@ app.post('/api/generations', generationSubmitRateLimiter, authenticate, requireG
     claimed = row;
 
     const hook = webhookUrlForSubmission();
-    const submitUrl = `${HF_API_BASE}/${model}${hook ? `?hf_webhook=${encodeURIComponent(hook)}` : ''}`;
+    const submitUrl = `${HF_API_BASE}${spec.path}${hook ? `?hf_webhook=${encodeURIComponent(hook)}` : ''}`;
     const r = await hfFetch(submitUrl, { method: 'POST', body: checked.value, timeoutMs: 30_000 });
 
     if (r.networkError) {
