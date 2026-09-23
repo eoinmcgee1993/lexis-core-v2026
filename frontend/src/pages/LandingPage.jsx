@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Mic, ShieldCheck, Zap, Globe, ArrowRight, ChevronDown, MessageCircle, TrendingUp, Gauge, Play } from 'lucide-react';
 import LexisMark from '../components/LexisMark';
 import WaveRule from '../components/WaveRule';
@@ -7,6 +7,7 @@ import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
 import { FAQS, LANDING_DESCRIPTION_EN, LANDING_DESCRIPTION_TH, PRICING_TEASER_EN, PRICING_TEASER_TH } from '../content/facts';
 import AppLink from '../components/AppLink';
+import { useRevealOnScroll } from '../lib/useRevealOnScroll';
 
 // Same key LexisApp.jsx reads on session start ('en' = practicing English,
 // 'th' = practicing Thai). Setting it here before navigating to /app means
@@ -128,18 +129,37 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
   // this page's own copy is shown in. Independent axes: an English speaker
   // learning Thai and a Thai speaker learning English both toggle `lang` to
   // read the page comfortably regardless of which direction they picked.
+  //
+  // Hero rewritten 23 Sep 2026 for launch. It now leads with the fear of
+  // saying it wrong (ความกลัวพูดผิด) — the actual reason a learner who can
+  // read English freezes when speaking it — and with "no app to install",
+  // which is true and is the difference from Praktika, the app Thai
+  // learners are already being recommended. It replaced "Practice Speaking
+  // English Out Loud with LEXIS" / "not a chatbot or a course"; the new sub
+  // says "AI tutor" outright rather than defining it by what it isn't.
+  //
+  // It came from a pasted conversion-copy draft, most of which was NOT
+  // used, and these must not come back through a later draft:
+  //   - "join thousands of learners": false; the site makes no usage claims
+  //   - "unlimited practice": false, there is a fair-use ceiling (facts.js)
+  //   - "instant pronunciation feedback": LEXIS is told NOT to correct
+  //     accent, after it was reported doing that to Thai speakers (app.mjs)
+  //   - "100% private": audio is streamed to OpenAI; PrivacyPage says so
+  //   - "speak fluently" / "เก่งขึ้น": an outcome promise, not an experience
+  // Trial and price live in pricingTeaser (facts.js), directly under the
+  // button, so heroSub carries no numbers of its own to go stale.
   const content = {
     en: {
       en: {
-        heroTitle: 'Practice Speaking English Out Loud with LEXIS',
-        heroSub: "A real spoken conversation, not a chatbot or a course. She listens, replies instantly, and corrects you gently, live.",
+        heroTitle: 'Practice speaking English without the fear of being judged',
+        heroSub: 'Real spoken conversations with an AI tutor, out loud, right in your browser. She answers, gently corrects your grammar and word choice, and gives you feedback on what you actually said. No app to install.',
         cta: 'Try It Free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
-        heroTitle: 'ฝึกพูดภาษาอังกฤษออกเสียงจริงกับ LEXIS',
-        heroSub: 'บทสนทนาจริง ไม่ใช่แชทบอทหรือคอร์สเรียน เธอฟัง ตอบกลับทันที และช่วยแก้ไขให้อย่างอ่อนโยนแบบสด ๆ',
+        heroTitle: 'ฝึกพูดภาษาอังกฤษ โดยไม่ต้องกลัวพูดผิด',
+        heroSub: 'คุยกับ AI ติวเตอร์ด้วยเสียงจริงผ่านเบราว์เซอร์ เธอตอบกลับ แนะนำการแก้ไวยากรณ์และการใช้คำอย่างอ่อนโยน และสรุปผลจากสิ่งที่คุณพูดจริง ไม่ต้องโหลดแอป',
         cta: 'ลองใช้ฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
@@ -147,15 +167,15 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     },
     th: {
       en: {
-        heroTitle: 'Practice Speaking Thai Out Loud with LEXIS',
-        heroSub: "A real spoken conversation, not a chatbot or a course. She listens, replies instantly, and corrects you gently, live.",
+        heroTitle: 'Practice speaking Thai without the fear of being judged',
+        heroSub: 'Real spoken conversations with an AI tutor, out loud, right in your browser. She answers, gently corrects your grammar and word choice, and gives you feedback on what you actually said. No app to install.',
         cta: 'Try It Free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
-        heroTitle: 'ฝึกพูดภาษาไทยออกเสียงจริงกับ LEXIS',
-        heroSub: 'บทสนทนาจริง ไม่ใช่แชทบอทหรือคอร์สเรียน เธอฟัง ตอบกลับทันที และช่วยแก้ไขให้อย่างอ่อนโยนแบบสด ๆ',
+        heroTitle: 'ฝึกพูดภาษาไทย โดยไม่ต้องกลัวพูดผิด',
+        heroSub: 'คุยกับ AI ติวเตอร์ด้วยเสียงจริงผ่านเบราว์เซอร์ เธอตอบกลับ แนะนำการแก้ไวยากรณ์และการใช้คำอย่างอ่อนโยน และสรุปผลจากสิ่งที่คุณพูดจริง ไม่ต้องโหลดแอป',
         cta: 'ลองใช้ฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
@@ -195,8 +215,15 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     jsonLd: { 'jsonld-faq': faqJsonLd }
   });
 
+  // Below-the-fold sections carry data-reveal and arrive once as they are
+  // scrolled to. The hero does not: it is on screen at load and already
+  // moves (HeroLiveDemo). See useRevealOnScroll.js for the prerender and
+  // no-flicker constraints this is built around.
+  const pageRef = useRef(null);
+  useRevealOnScroll(pageRef);
+
   return (
-    <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans">
+    <div ref={pageRef} className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans">
       {/* Header */}
       <header className="w-full max-w-6xl mx-auto p-4 sm:p-6 flex items-center justify-between border-b border-lexis-ink/10 gap-2">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
@@ -230,7 +257,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           </AppLink>
           <button
             onClick={goPractice}
-            className="px-3 sm:px-5 py-2.5 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-semibold text-xs sm:text-sm rounded-xl transition-all lexis-lift flex items-center gap-1.5 sm:gap-2 min-h-[44px] whitespace-nowrap"
+            className="px-3 sm:px-5 py-2.5 bg-lexis-action hover:bg-lexis-action-dark hover:-translate-y-0.5 active:translate-y-0 motion-safe:active:scale-[0.97] text-lexis-navy font-semibold text-xs sm:text-sm rounded-xl transition-all duration-200 lexis-lift flex items-center gap-1.5 sm:gap-2 min-h-[44px] whitespace-nowrap"
           >
             <span>{c.getStarted}</span>
             <ArrowRight className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
@@ -263,14 +290,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             <button
               onClick={() => selectDirection('en')}
               aria-pressed={direction === 'en'}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'en' ? 'bg-teal-700 text-white' : 'text-lexis-ink/75 hover:text-lexis-ink'}`}
+              className={`px-4 py-2 rounded-full font-semibold transition-all duration-200 motion-safe:active:scale-[0.97] min-h-[44px] ${direction === 'en' ? 'bg-teal-700 text-white' : 'text-lexis-ink/75 hover:text-lexis-ink'}`}
             >
               {c.learnEnglish}
             </button>
             <button
               onClick={() => selectDirection('th')}
               aria-pressed={direction === 'th'}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors min-h-[44px] ${direction === 'th' ? 'bg-teal-700 text-white' : 'text-lexis-ink/75 hover:text-lexis-ink'}`}
+              className={`px-4 py-2 rounded-full font-semibold transition-all duration-200 motion-safe:active:scale-[0.97] min-h-[44px] ${direction === 'th' ? 'bg-teal-700 text-white' : 'text-lexis-ink/75 hover:text-lexis-ink'}`}
             >
               {c.learnThai}
             </button>
@@ -279,7 +306,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <div>
             <button
               onClick={goPractice}
-              className="px-8 py-4 bg-lexis-action hover:bg-lexis-action-dark hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 text-lexis-navy font-display font-semibold text-lg rounded-2xl lexis-lift flex items-center space-x-3 mx-auto md:mx-0"
+              className="px-8 py-4 bg-lexis-action hover:bg-lexis-action-dark hover:-translate-y-0.5 active:translate-y-0 motion-safe:active:scale-[0.97] transition-all duration-200 text-lexis-navy font-display font-semibold text-lg rounded-2xl lexis-lift flex items-center space-x-3 mx-auto md:mx-0"
             >
               <Mic className="w-5 h-5" aria-hidden="true" />
               <span>{t.cta}</span>
@@ -338,7 +365,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           directions, level-adaptive, no scheduling); the "nothing else
           quite like this" impression comes from specificity, not from
           asserting market uniqueness as fact. */}
-      <section className="lexis-band w-full">
+      <section data-reveal className="lexis-band w-full">
        {/* Asymmetric two-column: heading anchors the left, prose occupies
            the right. Unifying the container width fixed the wandering left
            edge but left a narrow measure hugging one side of a wide
@@ -386,7 +413,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           carry the hierarchy instead of a box — nothing bounds the
           content, so the sequence itself (1, 2, 3) is what a visitor's
           eye follows down the page. */}
-      <section className="w-full max-w-6xl mx-auto px-6 py-20 md:py-24">
+      <section data-reveal className="w-full max-w-6xl mx-auto px-6 py-20 md:py-24">
         <div className="flex items-center gap-6 mb-12 md:mb-16">
           <h2 className="font-display font-semibold text-2xl md:text-3xl flex-shrink-0">{c.howItWorks}</h2>
           <WaveRule className="flex-1 min-w-0" />
@@ -432,7 +459,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           iconography — the re-audit's decision. What changed is only the
           density: a 4-column hairline table at text-xs read as a spec sheet
           footnote. Same text, given the room to be read. */}
-      <section className="lexis-band w-full">
+      <section data-reveal className="lexis-band w-full">
         <div className="max-w-6xl mx-auto px-6 py-14 md:py-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-8">
             {c.trust.map((claim) => (
@@ -465,7 +492,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           stays a lightweight image on the landing page, not a second video
           player — the actual clip lives where its content is, on
           CommunityPage.jsx. */}
-      <section className="w-full max-w-6xl mx-auto px-6 py-20 md:py-24">
+      <section data-reveal className="w-full max-w-6xl mx-auto px-6 py-20 md:py-24">
         <div className="rounded-3xl border border-teal-600/20 bg-teal-600/[0.06] p-8 md:p-12 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 text-center md:text-left lexis-lift-soft">
           <AppLink
             to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border border-teal-600/20 group"
@@ -523,7 +550,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           engines (ChatGPT search, Perplexity, Google's AI overviews) as
           much as human visitors — clear, self-contained Q&A is exactly
           the shape those tools quote from. */}
-      <section className="w-full max-w-6xl mx-auto px-6 pb-20 md:pb-28">
+      <section data-reveal className="w-full max-w-6xl mx-auto px-6 pb-20 md:pb-28">
         <div className="grid md:grid-cols-12 gap-x-12 gap-y-8">
         <div className="md:col-span-4">
           <h2 className="font-display font-semibold text-2xl md:text-3xl text-balance">{c.faqHeading}</h2>
