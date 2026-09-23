@@ -3,9 +3,10 @@ import { Mic, ShieldCheck, Zap, Globe, ArrowRight, ChevronDown, MessageCircle, T
 import LexisMark from '../components/LexisMark';
 import WaveRule from '../components/WaveRule';
 import HeroLiveDemo from '../components/HeroLiveDemo';
+import HeroVideo from '../components/HeroVideo';
 import { buildFaqJsonLd, SITE_URL } from '../data/structuredData';
 import { useSeo } from '../lib/useSeo';
-import { FAQS, LANDING_DESCRIPTION_EN, LANDING_DESCRIPTION_TH, PRICING_TEASER_EN, PRICING_TEASER_TH } from '../content/facts';
+import { FAQS, LANDING_DESCRIPTION_EN, LANDING_DESCRIPTION_TH, PRICING_TEASER_EN, PRICING_TEASER_TH, SPONSOR_ADDON_THB } from '../content/facts';
 import AppLink from '../components/AppLink';
 import { useRevealOnScroll } from '../lib/useRevealOnScroll';
 
@@ -51,9 +52,11 @@ const CHROME = {
     meetTitle: 'Real-time voice, built to perform.',
     meetBody: "LEXIS isn't a script or a chatbot with a microphone bolted on. The moment you stop talking, she's already replying, no lag, no waiting your turn. She listens in both English and Thai, adjusts automatically to your level, and corrects you gently mid-conversation, the way a sharp, patient tutor would. Built first for Thailand's English and Thai learners, the same real-time engine works for anyone, anywhere, learning either language out loud.",
     meetSpecs: ['Live, real-time voice', 'Bilingual, both directions', 'Adjusts to your level automatically', 'Available any hour, no booking'],
-    communityHeading: 'More than practice for yourself',
-    communityBody: "At checkout, you can add a small amount to your plan to help fund free and discounted access for students and youth groups who couldn't otherwise afford it. Learn a language, and help open the same door for someone else.",
-    communityCta: 'See how LEXIS Community works',
+    communityBadge: 'LEXIS Community',
+    communityHeading: "Your practice can open someone else's door.",
+    communityBody: `LEXIS Community is our pay-it-forward fund. Add ฿${SPONSOR_ADDON_THB} to any pass at checkout and it goes into one shared pool that will fund free and discounted speaking practice for Thai students who couldn't otherwise afford it.`,
+    communityGoal: "Our first goal: 100 sponsors. We're not there yet, and every add-on gets us closer.",
+    communityCta: 'Watch LEXIS explain it',
     faqHeading: 'Frequently asked questions',
     learnEnglish: 'Learn English',
     learnThai: 'Learn Thai',
@@ -79,9 +82,11 @@ const CHROME = {
     meetTitle: 'เสียงสนทนาแบบเรียลไทม์ สมรรถนะเต็มพิกัด',
     meetBody: 'LEXIS ไม่ใช่สคริปต์หรือแชทบอทที่แปะไมโครโฟนไว้ ทันทีที่คุณพูดจบ เธอตอบกลับทันที ไม่มีอาการหน่วง ไม่ต้องรอคิว เธอฟังได้ทั้งภาษาอังกฤษและภาษาไทย ปรับให้เข้ากับระดับของคุณโดยอัตโนมัติ และช่วยแก้ไขให้อย่างอ่อนโยนระหว่างสนทนา เหมือนติวเตอร์ที่เก่งและใจเย็น สร้างขึ้นมาเพื่อผู้เรียนภาษาอังกฤษและภาษาไทยในไทยเป็นกลุ่มแรก แต่เครื่องยนต์เรียลไทม์ตัวเดียวกันนี้ใช้ได้กับทุกคน ทุกที่ ที่อยากฝึกพูดออกเสียงจริง',
     meetSpecs: ['เสียงสนทนาแบบเรียลไทม์', 'สองภาษา ฝึกได้ทั้งสองทิศทาง', 'ปรับระดับให้อัตโนมัติ', 'ใช้ได้ทุกเวลา ไม่ต้องจอง'],
-    communityHeading: 'มากกว่าการฝึกเพื่อตัวเอง',
-    communityBody: 'ตอนชำระเงิน คุณสามารถเพิ่มจำนวนเงินเล็กน้อยเข้าไปในแพ็กเกจ เพื่อช่วยสนับสนุนการเข้าถึงแบบฟรีและส่วนลดให้นักเรียนและกลุ่มเยาวชนที่ไม่สามารถจ่ายได้ด้วยตัวเอง ฝึกภาษาของคุณ พร้อมช่วยเปิดโอกาสเดียวกันนี้ให้คนอื่นด้วย',
-    communityCta: 'ดูว่า LEXIS Community ทำงานอย่างไร',
+    communityBadge: 'LEXIS Community',
+    communityHeading: 'การฝึกของคุณเปิดประตูให้คนอื่นได้',
+    communityBody: `LEXIS Community คือกองทุนส่งต่อโอกาสของเรา เพิ่ม ฿${SPONSOR_ADDON_THB} ตอนชำระเงินค่าแพ็กเกจใดก็ได้ เงินจะเข้ากองทุนเดียวกัน เพื่อสนับสนุนการฝึกพูดฟรีและลดราคาสำหรับนักเรียนไทยที่ไม่มีโอกาสเข้าถึง`,
+    communityGoal: 'เป้าหมายแรกของเรา: ผู้สนับสนุน 100 คน ตอนนี้ยังไปไม่ถึง แต่ทุกการสนับสนุนช่วยให้ใกล้ขึ้น',
+    communityCta: 'ดู LEXIS อธิบาย',
     faqHeading: 'คำถามที่พบบ่อย',
     learnEnglish: 'เรียนภาษาอังกฤษ',
     learnThai: 'เรียนภาษาไทย',
@@ -130,16 +135,21 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
   // learning Thai and a Thai speaker learning English both toggle `lang` to
   // read the page comfortably regardless of which direction they picked.
   //
-  // Hero rewritten 23 Sep 2026 for launch. It now leads with the fear of
-  // saying it wrong (ความกลัวพูดผิด) — the actual reason a learner who can
-  // read English freezes when speaking it — and with "no app to install",
-  // which is true and is the difference from Praktika, the app Thai
-  // learners are already being recommended. It replaced "Practice Speaking
-  // English Out Loud with LEXIS" / "not a chatbot or a course"; the new sub
-  // says "AI tutor" outright rather than defining it by what it isn't.
+  // Hero, second pass (23 Sep 2026, owner feedback on the first). The
+  // first leads were "without the fear of being judged" and "No app to
+  // install". The owner asked for the fear framing to go and for the page
+  // to hype LEXIS herself and make starting feel exciting; and "no app" was
+  // wrong for a product whose plan is to be an app-store app. So the H1
+  // introduces her, and the sub gives her a personality and three concrete
+  // things to do with her, each a real topic in TopicStage.jsx.
   //
-  // It came from a pasted conversion-copy draft, most of which was NOT
-  // used, and these must not come back through a later draft:
+  // Still held to the copy rule: the experience, never a result. "Warm,
+  // quick and endlessly patient" is her character, not an outcome promise.
+  // "AI tutor" stays in words, now directly beside a photorealistic video of
+  // her talking (HeroVideo.jsx) — the one place it matters most.
+  //
+  // Rejected from a pasted conversion draft earlier the same day, and must
+  // not come back through a later one:
   //   - "join thousands of learners": false; the site makes no usage claims
   //   - "unlimited practice": false, there is a fair-use ceiling (facts.js)
   //   - "instant pronunciation feedback": LEXIS is told NOT to correct
@@ -151,32 +161,32 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
   const content = {
     en: {
       en: {
-        heroTitle: 'Practice speaking English without the fear of being judged',
-        heroSub: 'Real spoken conversations with an AI tutor, out loud, right in your browser. She answers, gently corrects your grammar and word choice, and gives you feedback on what you actually said. No app to install.',
-        cta: 'Try It Free',
+        heroTitle: 'Meet LEXIS, your English speaking partner',
+        heroSub: 'She\'s an AI tutor you talk to out loud: warm, quick and endlessly patient. Chat about your day, rehearse a job interview or plan a trip. She answers instantly, fixes your grammar as you go, and tells you what you did well.',
+        cta: 'Start talking free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
-        heroTitle: 'ฝึกพูดภาษาอังกฤษ โดยไม่ต้องกลัวพูดผิด',
-        heroSub: 'คุยกับ AI ติวเตอร์ด้วยเสียงจริงผ่านเบราว์เซอร์ เธอตอบกลับ แนะนำการแก้ไวยากรณ์และการใช้คำอย่างอ่อนโยน และสรุปผลจากสิ่งที่คุณพูดจริง ไม่ต้องโหลดแอป',
-        cta: 'ลองใช้ฟรี',
+        heroTitle: 'รู้จัก LEXIS คู่ฝึกพูดภาษาอังกฤษของคุณ',
+        heroSub: 'ติวเตอร์ AI ที่คุณคุยด้วยเสียงจริง ใจดี ตอบไว และอดทนเสมอ คุยเรื่องวันของคุณ ซ้อมสัมภาษณ์งาน หรือวางแผนเที่ยว เธอตอบทันที ช่วยแก้ไวยากรณ์ระหว่างคุย และบอกว่าคุณทำอะไรได้ดี',
+        cta: 'เริ่มคุยฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
       }
     },
     th: {
       en: {
-        heroTitle: 'Practice speaking Thai without the fear of being judged',
-        heroSub: 'Real spoken conversations with an AI tutor, out loud, right in your browser. She answers, gently corrects your grammar and word choice, and gives you feedback on what you actually said. No app to install.',
-        cta: 'Try It Free',
+        heroTitle: 'Meet LEXIS, your Thai speaking partner',
+        heroSub: 'She\'s an AI tutor you talk to out loud: warm, quick and endlessly patient. Chat about your day, rehearse a job interview or plan a trip. She answers instantly, fixes your grammar as you go, and tells you what you did well.',
+        cta: 'Start talking free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
-        heroTitle: 'ฝึกพูดภาษาไทย โดยไม่ต้องกลัวพูดผิด',
-        heroSub: 'คุยกับ AI ติวเตอร์ด้วยเสียงจริงผ่านเบราว์เซอร์ เธอตอบกลับ แนะนำการแก้ไวยากรณ์และการใช้คำอย่างอ่อนโยน และสรุปผลจากสิ่งที่คุณพูดจริง ไม่ต้องโหลดแอป',
-        cta: 'ลองใช้ฟรี',
+        heroTitle: 'รู้จัก LEXIS คู่ฝึกพูดภาษาไทยของคุณ',
+        heroSub: 'ติวเตอร์ AI ที่คุณคุยด้วยเสียงจริง ใจดี ตอบไว และอดทนเสมอ คุยเรื่องวันของคุณ ซ้อมสัมภาษณ์งาน หรือวางแผนเที่ยว เธอตอบทันที ช่วยแก้ไวยากรณ์ระหว่างคุย และบอกว่าคุณทำอะไรได้ดี',
+        cta: 'เริ่มคุยฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
       }
@@ -270,7 +280,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           background, which read as generic/faceless. A real depiction of
           who a student is talking to does more for "impressive" than any
           amount of copy polish alone would. */}
-      <section className="lexis-clip-x w-full max-w-6xl mx-auto px-6 pt-14 pb-20 md:pt-20 md:pb-28 grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <section className="lexis-clip-x w-full max-w-6xl mx-auto px-6 pt-8 pb-16 md:pt-20 md:pb-28 grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
         <div className="text-center md:text-left">
           <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-6">
             <Zap className="w-3.5 h-3.5" aria-hidden="true" />
@@ -312,48 +322,104 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
               <span>{t.cta}</span>
             </button>
           </div>
-          <div className="mt-6 flex items-center justify-center md:justify-start space-x-3 text-sm">
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-1 sm:gap-3 text-sm text-center sm:text-left">
             <span className="text-lexis-ink/75">{t.pricingTeaser}</span>
-            <AppLink to="/pricing" navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 font-medium underline underline-offset-2">
+            <AppLink to="/pricing" navigateTo={navigateTo} className="text-teal-700 hover:text-teal-800 font-medium underline underline-offset-2 whitespace-nowrap">
               {t.viewPricing}
             </AppLink>
           </div>
         </div>
 
-        {/* The hero is the conversation, running — interface re-audit
-            recommendation 01, shipped 26 Aug 2026 after running as a
-            preview on PR #80. What stood here before was a generated
-            photorealistic portrait of LEXIS with a "Live voice, ready
-            when you are" badge: a picture of a person who does not
-            exist, standing in for a product that is entirely about the
-            talking. HeroLiveDemo shows the real Live Conversation
-            screen's own visual language instead, with LEXIS's actual
-            synthesized voice behind a tap.
+        {/* LEXIS introducing herself, on video (23 Sep 2026, owner request).
+            This reverses interface re-audit recommendation 01 (26 Aug),
+            which had put HeroLiveDemo here in place of a still portrait;
+            the reasoning for why a video of her talking is a different
+            thing from that portrait, the AI-disclosure decision it
+            touches, and how the clip was cut are all in HeroVideo.jsx.
+            HeroLiveDemo moved to "Meet LEXIS" below, not deleted.
 
-            The portrait and its responsive srcset are deleted rather
-            than commented out — /marketing/lexis-tutor-hero*.{avif,webp,
-            jpg} all still ship (the -og.jpg is still the social card),
-            and this commit is the revert path if the demo has to come
-            back out.
-
-            Note the AI-disclosure caption question is NOT reopened here:
-            it was removed from this page on 20 Aug on direct
-            product-positioning instruction and stays removed. This
-            change happens to reduce the surface of it — the large
-            photorealistic portrait is gone, only the small in-app avatar
-            remains — but that was not the reason for it, and it is still
-            a live decision to make deliberately rather than by side
-            effect. */}
-        {/* lexis-stage puts a contained pool of light under the demo (see
-            index.css). It was rendering as a small dark rectangle floating
-            in the corner despite being the most persuasive thing on the
-            page — the real product, running, with LEXIS's real voice one
-            tap away. */}
-        <div className="lexis-stage flex justify-center md:justify-end">
-          <HeroLiveDemo direction={direction} caption={c.heroDemoCaption} />
+            order-first on phones: the page's whole first screen used to be
+            text, with LEXIS a small circle only after scrolling. On desktop
+            it sits in the right column as before. */}
+        <div className="lexis-stage flex justify-center md:justify-end order-first md:order-none">
+          <HeroVideo lang={lang} className="w-56 sm:w-64 md:w-full md:max-w-sm" />
         </div>
 
       </section>
+
+      {/* LEXIS Community, second on the page (23 Sep 2026, owner: "very
+          little focus on the community aspects, which is a huge main
+          factor"). Was the fifth of six sections, a tinted card with a 96px
+          thumbnail directly above the FAQ, where it read as a footnote.
+
+          Copy is the Community page's own, not new claims: its headline,
+          its shared-pool mechanics, and its public first goal with the
+          "we're not there yet" left in. Partner schools are said to be what
+          the pool WILL fund, because none exist yet (CommunityPage.jsx) —
+          the same line the previous teaser held. The add-on amount comes
+          from facts.js, and "any pass" is true: sponsorAdd is independent
+          of planTier in /api/stripe/checkout.
+
+          Takes the tinted band that "Meet LEXIS" used to have, so the page
+          alternates canvas / band / canvas from the hero down. The image
+          links to /community rather than playing inline: the clip lives
+          where its content is, and this stays one lazy image on a page
+          that now opens with a video. */}
+      <section data-reveal className="lexis-band w-full">
+        <div className="max-w-6xl mx-auto px-6 py-16 md:py-24 grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+          <AppLink
+            to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo}
+            className="md:col-span-4 relative block w-44 sm:w-52 md:w-full max-w-[16rem] mx-auto md:mx-0 aspect-[3/4] rounded-3xl overflow-hidden lexis-lift group"
+            aria-label={c.communityCta}
+          >
+            {/* Same three sized variants as before (generate_community_poster_srcset.mjs);
+                at this size the browser picks 384 or 768 instead of 192. */}
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/marketing/lexis-community-intro-poster-192.avif 192w, /marketing/lexis-community-intro-poster-384.avif 384w, /marketing/lexis-community-intro-poster-768.avif 768w"
+                sizes="(min-width: 768px) 256px, 208px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/marketing/lexis-community-intro-poster-192.webp 192w, /marketing/lexis-community-intro-poster-384.webp 384w, /marketing/lexis-community-intro-poster-768.webp 768w"
+                sizes="(min-width: 768px) 256px, 208px"
+              />
+              <img
+                src="/marketing/lexis-community-intro-poster-384.jpg"
+                width="256"
+                height="341"
+                loading="lazy"
+                decoding="async"
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            </picture>
+            <span className="absolute inset-0 flex items-end justify-center pb-5 bg-gradient-to-t from-lexis-navy/55 via-transparent to-transparent">
+              <span className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 text-lexis-ink text-xs font-semibold shadow-sm group-hover:-translate-y-0.5 transition-transform">
+                <Play className="w-3.5 h-3.5 text-teal-700" fill="currentColor" aria-hidden="true" />
+                {c.communityCta}
+              </span>
+            </span>
+          </AppLink>
+          <div className="md:col-span-8 text-center md:text-left">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-5">
+              <span>{c.communityBadge}</span>
+            </div>
+            <h2 className="font-display font-semibold text-3xl md:text-[2.75rem] leading-[1.1] text-balance text-lexis-ink">{c.communityHeading}</h2>
+            <p className="mt-5 text-base md:text-lg text-lexis-ink/75 leading-relaxed max-w-2xl mx-auto md:mx-0">{c.communityBody}</p>
+            <p className="mt-4 text-sm md:text-base font-semibold text-teal-800">{c.communityGoal}</p>
+            <AppLink
+              to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo}
+              className="mt-6 inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 font-semibold underline underline-offset-4"
+            >
+              {c.communityCta}
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </AppLink>
+          </div>
+        </div>
+      </section>
+
 
       {/* Meet LEXIS — a technical-credibility intro ahead of the 3-step
           "How it works" breakdown, requested directly (20 Aug 2026) as a
@@ -365,15 +431,17 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           directions, level-adaptive, no scheduling); the "nothing else
           quite like this" impression comes from specificity, not from
           asserting market uniqueness as fact. */}
-      <section data-reveal className="lexis-band w-full">
-       {/* Asymmetric two-column: heading anchors the left, prose occupies
-           the right. Unifying the container width fixed the wandering left
-           edge but left a narrow measure hugging one side of a wide
-           section, which is just dead space by another name. A 5/7 split
-           uses the width without letting the line length run past what is
-           comfortable to read. */}
-       <div className="max-w-6xl mx-auto px-6 py-20 md:py-24 grid md:grid-cols-12 gap-x-12 gap-y-8">
-        <div className="md:col-span-5">
+      <section data-reveal className="w-full">
+       {/* 23 Sep 2026: the copy (heading, body, specs) now shares the left
+           half and HeroLiveDemo takes the right, having moved here from the
+           hero when the intro video replaced it. The demo is the real Live
+           Conversation screen running, so it sits beside the section whose
+           whole claim is "real-time voice" — proof next to the promise.
+           Was a 5/7 heading/prose split with no visual at all. Lost its
+           tinted band to Community, which now sits directly above it; two
+           bands back to back read as one. */}
+       <div className="max-w-6xl mx-auto px-6 py-20 md:py-24 grid md:grid-cols-12 gap-x-12 gap-y-12 items-center">
+        <div className="md:col-span-6">
         <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-5">
           <Gauge className="w-3.5 h-3.5" aria-hidden="true" />
           <span>{c.meetHeading}</span>
@@ -383,8 +451,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             distinction is what the old per-section max-w-4xl/5xl/3xl was
             reaching for and getting wrong. */}
         <h2 className="font-display font-semibold text-3xl md:text-[2.75rem] leading-[1.1] text-balance text-lexis-ink">{c.meetTitle}</h2>
-        </div>
-        <div className="md:col-span-7 md:pt-2">
+        <div className="mt-6">
         <p className="text-base md:text-lg text-lexis-ink/70 leading-relaxed mb-8">{c.meetBody}</p>
         {/* 21 Aug 2026 (interface re-audit, "delete the cards" + "icons only
             where they carry meaning"): was four bg-white bordered chips
@@ -399,6 +466,10 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             </React.Fragment>
           ))}
         </div>
+        </div>
+        </div>
+        <div className="md:col-span-6 lexis-stage flex justify-center md:justify-end">
+          <HeroLiveDemo direction={direction} caption={c.heroDemoCaption} />
         </div>
        </div>
       </section>
@@ -469,78 +540,6 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* LEXIS Community teaser — the real, honest version of this lives at
-          /community (CommunityPage.jsx); this is a short pointer to it, not
-          a re-statement. Deliberately doesn't claim partner schools or
-          impact numbers that don't exist yet (see CommunityPage.jsx's own
-          header comment) — only the pay-it-forward checkout add-on, which
-          is actually live today. */}
-      {/* Was a full-width strip with no background, a text-xl heading and
-          body at 60% opacity, sitting directly above the much larger FAQ
-          heading — so the eye skipped it entirely and it read as a caption
-          rather than a section. Given a tinted card, a heading that holds
-          its own, and body copy at readable contrast. */}
-      {/* Icon badge swapped for a thumbnail of Lexis (16 Sep 2026, direct
-          request to give Community "more of a spotlight") — same card,
-          same copy, same single CTA link; only the icon became a face. Not
-          a "delete the cards" reversal: that call was about four identical
-          icon chips repeating one fact each, not this one distinct section.
-          Links through to /community rather than playing inline, so this
-          stays a lightweight image on the landing page, not a second video
-          player — the actual clip lives where its content is, on
-          CommunityPage.jsx. */}
-      <section data-reveal className="w-full max-w-6xl mx-auto px-6 py-20 md:py-24">
-        <div className="rounded-3xl border border-teal-600/20 bg-teal-600/[0.06] p-8 md:p-12 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 text-center md:text-left lexis-lift-soft">
-          <AppLink
-            to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border border-teal-600/20 group"
-            aria-label={c.communityCta}
-          >
-            {/* Sized variants rather than the raw render still: the still is
-                1529x2048 / 409KB and this badge is 96px square, so the
-                original cost every landing-page visit ~400KB to paint a
-                thumbnail. Same fix, same widths discipline, as the hero
-                <picture> above — see scripts/images/
-                generate_community_poster_srcset.mjs. Lazy, not eager: this
-                section sits far below the fold, unlike the hero. */}
-            <picture>
-              <source
-                type="image/avif"
-                srcSet="/marketing/lexis-community-intro-poster-192.avif 192w, /marketing/lexis-community-intro-poster-384.avif 384w"
-                sizes="96px"
-              />
-              <source
-                type="image/webp"
-                srcSet="/marketing/lexis-community-intro-poster-192.webp 192w, /marketing/lexis-community-intro-poster-384.webp 384w"
-                sizes="96px"
-              />
-              <img
-                src="/marketing/lexis-community-intro-poster-192.jpg"
-                width="96"
-                height="96"
-                loading="lazy"
-                decoding="async"
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            </picture>
-            <span className="absolute inset-0 flex items-center justify-center bg-lexis-navy/10 group-hover:bg-lexis-navy/20 transition-colors">
-              <span className="w-9 h-9 rounded-full bg-white/95 flex items-center justify-center shadow-sm">
-                <Play className="w-3.5 h-3.5 text-teal-600 ml-0.5" fill="currentColor" aria-hidden="true" />
-              </span>
-            </span>
-          </AppLink>
-          <div className="flex-1">
-            <h2 className="font-display font-semibold text-2xl md:text-3xl text-lexis-ink">{c.communityHeading}</h2>
-            <p className="mt-3 text-sm md:text-base text-lexis-ink/75 leading-relaxed max-w-xl">{c.communityBody}</p>
-          </div>
-          <AppLink
-            to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="flex-shrink-0 text-teal-700 hover:text-teal-800 font-semibold text-sm underline underline-offset-2 whitespace-nowrap md:mt-1"
-          >
-            {c.communityCta}
-          </AppLink>
         </div>
       </section>
 

@@ -86,6 +86,35 @@ export const BILLING = {
 // STRIPE_PRICES' comment above about the Stripe-side amounts.
 export const SPONSOR_ADDON_THB = 50;
 
+// Launch promotion (23 Sep 2026, owner chose "option A"). Stripe is the
+// source of truth: coupon zPOrJOMC / promotion code LEXIS50 on the Clearmark
+// account, 50% off, restricted to the Weekly Pass product, 100 redemptions,
+// expiring 2026-10-23 23:59 Bangkok. This mirrors it for display, the same
+// hand-kept way SPONSOR_ADDON_THB mirrors backend/app.mjs — change one,
+// change the other in the same commit.
+//
+// launchOfferActive() gates every mention of it, so the pricing page stops
+// advertising the code the moment it expires rather than whenever someone
+// remembers to delete a banner. It cannot know how many of the 100 remain
+// (that would need a live Stripe read), which is why the copy says "first
+// 100" and "while codes last" rather than a count.
+//
+// There is no "per day" or "best value" figure anywhere in it on purpose:
+// see MONTHLY_SAVINGS_VS_WEEKLY_PCT below for why those were removed.
+export const LAUNCH_OFFER = {
+  code: 'LEXIS50',
+  percentOff: 50,
+  tier: 'weekly',
+  maxRedemptions: 100,
+  endsAt: '2026-10-23T23:59:59+07:00'
+};
+export const launchOfferActive = (now = Date.now()) => now < Date.parse(LAUNCH_OFFER.endsAt);
+// ฿99.50 today. Two decimals only when there are satang to show.
+export const LAUNCH_OFFER_PRICE_THB = (() => {
+  const v = (PRICING[LAUNCH_OFFER.tier].thb * (100 - LAUNCH_OFFER.percentOff)) / 100;
+  return Number.isInteger(v) ? String(v) : v.toFixed(2);
+})();
+
 // Confirmed directly by Eoin (remediation brief §7.3) — no VAT applies
 // because the business isn't VAT-registered. Distinct from "VAT is
 // included in the displayed price," which would be a different claim.

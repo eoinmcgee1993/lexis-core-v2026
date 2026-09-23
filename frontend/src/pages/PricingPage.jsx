@@ -6,7 +6,7 @@ import { buildBreadcrumbJsonLd, buildOffersJsonLd, SITE_URL } from '../data/stru
 import { useSeo } from '../lib/useSeo';
 import { trackEvent } from '../lib/analytics';
 import { reportError } from '../lib/errorReporting';
-import { FAIR_USE, MONTHLY_MINUTES_MULTIPLE, PRICING, PRICING_DESCRIPTION_EN, PRICING_DESCRIPTION_TH, SPONSOR_ADDON_THB, TRIAL, VAT } from '../content/facts';
+import { FAIR_USE, LAUNCH_OFFER, LAUNCH_OFFER_PRICE_THB, launchOfferActive, MONTHLY_MINUTES_MULTIPLE, PRICING, PRICING_DESCRIPTION_EN, PRICING_DESCRIPTION_TH, SPONSOR_ADDON_THB, TRIAL, VAT } from '../content/facts';
 import AppLink from '../components/AppLink';
 
 // Display-language chrome strings for this page — Stage 4 (real /th and
@@ -28,7 +28,15 @@ const TEXT = {
     weeklyTitle: 'Weekly Pass',
     weeklySub: (mins) => `${mins} Minutes of Practice, ${PRICING.weekly.days} Days`,
     perWeek: `one-off · ${PRICING.weekly.days} days`,
-    mostPopular: 'Most Popular',
+    // "Most Popular" stood here until 23 Sep 2026. It was a claim about
+    // other buyers with no buyers behind it (zero paid purchases at the
+    // time), which facts.js's rule makes a false statement, not phrasing.
+    // The featured card now says something true about itself instead.
+    badgeOffer: `Launch offer · ${LAUNCH_OFFER.percentOff}% off`,
+    badgeStart: 'Start here',
+    offerPrice: (price, code) => `฿${price} with code ${code}`,
+    offerBanner: (pct, code, max) => `Launch offer: ${pct}% off your first Weekly Pass with code ${code}. First ${max} buyers, while codes last, until 23 October.`,
+    offerHow: 'Enter the code on the payment page.',
     weeklyFeature1: 'Use it in one sitting or across the week',
     weeklyFeature2: 'Full conversation history',
     weeklyFeature3: "LEXIS adjusts to your level as you go",
@@ -66,7 +74,11 @@ const TEXT = {
     weeklyTitle: 'แพ็กเกจรายสัปดาห์',
     weeklySub: (mins) => `ฝึกพูดได้ ${mins} นาที ใน ${PRICING.weekly.days} วัน`,
     perWeek: `จ่ายครั้งเดียว · ${PRICING.weekly.days} วัน`,
-    mostPopular: 'ยอดนิยม',
+    badgeOffer: `โปรเปิดตัว ลด ${LAUNCH_OFFER.percentOff}%`,
+    badgeStart: 'เริ่มต้นที่นี่',
+    offerPrice: (price, code) => `฿${price} เมื่อใช้โค้ด ${code}`,
+    offerBanner: (pct, code, max) => `โปรเปิดตัว: ลด ${pct}% สำหรับแพ็กเกจรายสัปดาห์แรกของคุณ ด้วยโค้ด ${code} เฉพาะ ${max} คนแรกเท่านั้น ถึง 23 ตุลาคม`,
+    offerHow: 'ใส่โค้ดในหน้าชำระเงิน',
     weeklyFeature1: 'ใช้รวดเดียวหรือแบ่งใช้ทั้งสัปดาห์ก็ได้',
     weeklyFeature2: 'ประวัติการสนทนาแบบเต็ม',
     weeklyFeature3: 'LEXIS ปรับให้เหมาะกับระดับของคุณไปเรื่อย ๆ',
@@ -96,6 +108,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 export default function PricingPage({ navigateTo, lang = 'en' }) {
   const { session } = useAuth();
   const [loadingTier, setLoadingTier] = useState(null); // 'weekly' | 'monthly' | null
+  const offerOn = launchOfferActive();
   const [error, setError] = useState('');
   const [sponsorAdd, setSponsorAdd] = useState(false);
   const t = TEXT[lang];
@@ -210,6 +223,16 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           {t.vat}
         </p>
 
+        {/* Launch offer (facts.js LAUNCH_OFFER). Real discount, real cap,
+            real deadline: the only urgency on the page, and it switches
+            itself off at endsAt. Amber because it is a call to act. */}
+        {offerOn && (
+          <div className="mb-8 md:mb-10 mx-auto max-w-2xl px-5 py-4 rounded-2xl bg-lexis-action/10 border border-lexis-action/40 text-center">
+            <p className="text-sm md:text-base font-semibold text-lexis-ink">{t.offerBanner(LAUNCH_OFFER.percentOff, LAUNCH_OFFER.code, LAUNCH_OFFER.maxRedemptions)}</p>
+            <p className="mt-1 text-xs md:text-sm text-lexis-ink/70">{t.offerHow}</p>
+          </div>
+        )}
+
         {cancelled && (
           <div className="mb-6 px-4 py-3 bg-lexis-action/10 border border-lexis-action/30 rounded-xl text-lexis-action-dark text-sm text-center">
             {t.cancelled}
@@ -310,12 +333,15 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           {/* Weekly Pass (Featured) */}
           <div className="bg-white border-2 border-lexis-action p-7 md:p-8 rounded-3xl flex flex-col justify-between relative lexis-lift md:-translate-y-3">
             <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lexis-action text-lexis-navy font-bold text-[10px] uppercase tracking-wider px-3.5 py-1 rounded-full whitespace-nowrap">
-              {t.mostPopular}
+              {offerOn ? t.badgeOffer : t.badgeStart}
             </span>
             <div>
               <h2 className="font-display font-semibold text-xl text-lexis-action-dark mb-2">{t.weeklyTitle}</h2>
               <p className="text-sm text-lexis-ink/70 mb-6">{t.weeklySub(FAIR_USE.weekly.minutes)}</p>
               <div className="font-display font-semibold text-5xl text-lexis-ink mb-2 tracking-tight">฿{PRICING.weekly.thb} <span className="font-sans text-xs font-normal text-lexis-ink/45 tracking-normal">{t.perWeek}</span></div>
+              {offerOn && (
+                <p className="text-sm font-semibold text-lexis-action-dark mb-2">{t.offerPrice(LAUNCH_OFFER_PRICE_THB, LAUNCH_OFFER.code)}</p>
+              )}
               <p className="text-[11px] leading-snug text-lexis-ink/45 mb-5">{t.noRenew}</p>
               <ul className="text-sm space-y-3.5 text-lexis-ink/75 mb-8">
                 <li className="flex items-start gap-2.5"><Check className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" aria-hidden="true" /><span>{t.weeklyFeature1}</span></li>
