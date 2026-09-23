@@ -195,6 +195,16 @@ const historyRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 20, message:
 
 const cancelRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 5, message: 'Rate limit exceeded. Please wait a moment.' });
 
+// Higgsfield generation (section 7, "HIGGSFIELD GENERATION"). Submitting
+// spends real credits and a user can only have one in flight anyway, so a
+// handful a minute is already generous. Status reads are the client's
+// polling loop (2s backing off to 10s), so ~30/min is one tab polling at
+// its fastest with headroom. The webhook is called by Higgsfield itself,
+// with retries, from a small set of IPs — wide, but not unbounded.
+const generationSubmitRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 5, message: 'Too many generation requests. Please wait a minute.' });
+const generationReadRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 60, message: 'Rate limit exceeded. Please wait a moment.' });
+const higgsfieldWebhookRateLimiter = makeRateLimiter({ windowMs: 60_000, max: 120, message: 'Rate limit exceeded.' });
+
 // The success page reads this exactly once per purchase, so anything past
 // a handful in a minute is a loop or a probe. Low because each call is a
 // billable outbound Stripe request made on behalf of whoever asked.
@@ -1121,6 +1131,571 @@ app.get('/api/history', historyRateLimiter, authenticate, async (req, res) => {
   } catch (err) {
     logError('History Error', err);
     res.status(500).json({ error: 'Failed to load session history.' });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────────────── */
+/* HIGGSFIELD GENERATION (23 Sep 2026)                                     */
+/*                                                                          */
+/* Text-to-video through Higgsfield's API, starting with Seedance 2.0.      */
+/* Written against docs.higgsfield.ai as read on 23 Sep 2026 — auth,        */
+/* requests, polling, webhooks, errors, rate limits, and the model page     */
+/* for bytedance/seedance-2.0/text-to-video, whose JSON schema the          */
+/* validator below mirrors field for field.                                 */
+/*                                                                          */
+/* Direct REST, not the @higgsfield/client SDK. The SDK's value is          */
+/* subscribe()/withPolling — a call that blocks until the video exists.     */
+/* This app also runs as a Vercel function, which cannot sit polling a      */
+/* multi-minute render, so the lifecycle has to live in our own table       */
+/* either way; what is left for the SDK to do is one POST and one GET,      */
+/* which is not worth a dependency in a backend that also takes payments.   */
+/*                                                                          */
+/* The shape:                                                               */
+/*   POST /api/generations      claims a row, submits, stores request_id    */
+/*   GET  /api/generations/:id  the client's poll; refreshes from           */
+/*                              Higgsfield at most every 2s per row         */
+/*   POST /api/generations/:id/cancel   only while still queued             */
+/*   POST /api/higgsfield/webhook       completion push, when configured    */
+/* Polling is the source of truth and the webhook is a shortcut, which is   */
+/* what the docs recommend ("keep polling as a recovery path") and also     */
+/* what the webhook's lack of a signature forces — see that route.          */
+/*                                                                          */
+/* WHO CAN USE IT. Each render is billed to the account's Higgsfield        */
+/* credits and nothing a learner pays covers it, so this is allowlisted by  */
+/* email and FAILS CLOSED: with HIGGSFIELD_ALLOWED_EMAILS unset, nobody can */
+/* submit. Same instinct as fairUseCapSeconds — a cost with no ceiling is   */
+/* not a default this file ships.                                           */
+/*                                                                          */
+/* Missing HF credentials take down only these routes (503), not the app:   */
+/* they are deliberately not in requiredEnv, which gates every request.     */
+/* ─────────────────────────────────────────────────────────────────────── */
+const HF_API_BASE = (process.env.HIGGSFIELD_API_BASE || 'https://api.higgsfield.ai').replace(/\/+$/, '');
+const HF_API_ORIGIN = new URL(HF_API_BASE).origin;
+const HF_TERMINAL = new Set(['completed', 'failed', 'nsfw', 'canceled']);
+const GENERATION_ACTIVE = ['submitting', 'queued', 'in_progress'];
+// Rows in any of these can still change: the three above, plus timed_out,
+// which is only OUR give-up and can still be resolved by a webhook or read.
+const GENERATION_REFRESHABLE = new Set(['queued', 'in_progress', 'timed_out']);
+// Statuses Higgsfield does not charge for (docs: failed and nsfw are
+// refunded, a cancel is refunded) plus ours that never reached them.
+const GENERATION_UNBILLED = ['failed', 'nsfw', 'canceled', 'submit_failed'];
+
+function envInt(name, fallback, min, max) {
+  const n = Number(process.env[name]);
+  return Number.isInteger(n) && n >= min && n <= max ? n : fallback;
+}
+// Per-user renders per rolling 24h, counting only ones that could be billed.
+const GENERATION_DAILY_LIMIT = envInt('HIGGSFIELD_DAILY_LIMIT', 5, 0, 1000);
+// How long an unfinished render may hold the user's one active slot. Not a
+// verdict on the render — Higgsfield may still finish it — just when we
+// stop letting it block the next one.
+const GENERATION_TIMEOUT_MS = envInt('HIGGSFIELD_TIMEOUT_MINUTES', 30, 1, 24 * 60) * 60_000;
+// A 'submitting' row older than this means the process died between the
+// insert and recording Higgsfield's answer.
+const GENERATION_SUBMIT_STALE_MS = 2 * 60_000;
+// Docs: start polling at 2s. Also the floor on how often one row may be
+// re-fetched from Higgsfield, however fast a client polls us.
+const GENERATION_POLL_FLOOR_MS = 2_000;
+
+function higgsfieldConfigured() {
+  return Boolean(process.env.HF_API_KEY_ID && process.env.HF_API_KEY_SECRET);
+}
+
+function generationAllowedFor(user) {
+  const list = (process.env.HIGGSFIELD_ALLOWED_EMAILS || '')
+    .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
+  const email = (user?.email || '').toLowerCase();
+  return Boolean(email) && list.includes(email);
+}
+
+// Model registry. The client names a model by its Higgsfield endpoint id,
+// and only ids listed here are ever turned into a URL — so the path we POST
+// to is always one of ours, never a string from the request.
+const SEEDANCE_RESOLUTIONS = ['480p', '720p', '1080p', '4k'];
+const SEEDANCE_ASPECT_RATIOS = ['16:9', '4:3', '1:1', '3:4', '9:16', '21:9'];
+const PROMPT_MAX_CHARS = 2000; // ours; the schema only sets minLength 1
+
+function validateSeedanceTextToVideo(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { error: 'input must be an object.' };
+  // The schema has additionalProperties: false, so an unknown key would be
+  // a 422 from Higgsfield anyway. Refusing it here gives a clear message
+  // instead of a provider error, and costs nothing.
+  const allowed = new Set(['prompt', 'duration', 'resolution', 'aspect_ratio', 'generate_audio']);
+  const unknown = Object.keys(raw).filter((k) => !allowed.has(k));
+  if (unknown.length) return { error: `Unknown field(s): ${unknown.join(', ')}.` };
+
+  const prompt = typeof raw.prompt === 'string' ? raw.prompt.trim() : '';
+  if (!prompt) return { error: 'prompt is required.' };
+  if (prompt.length > PROMPT_MAX_CHARS) return { error: `prompt must be ${PROMPT_MAX_CHARS} characters or fewer.` };
+
+  const duration = raw.duration ?? 5;
+  if (!Number.isInteger(duration) || duration < 4 || duration > 15) {
+    return { error: 'duration must be a whole number of seconds from 4 to 15.' };
+  }
+  const resolution = raw.resolution ?? '720p';
+  if (!SEEDANCE_RESOLUTIONS.includes(resolution)) return { error: `resolution must be one of ${SEEDANCE_RESOLUTIONS.join(', ')}.` };
+  const aspectRatio = raw.aspect_ratio ?? '16:9';
+  if (!SEEDANCE_ASPECT_RATIOS.includes(aspectRatio)) return { error: `aspect_ratio must be one of ${SEEDANCE_ASPECT_RATIOS.join(', ')}.` };
+  const generateAudio = raw.generate_audio ?? true;
+  if (typeof generateAudio !== 'boolean') return { error: 'generate_audio must be true or false.' };
+
+  // Every field sent explicitly, defaults included, so the stored row
+  // records exactly what was requested even if Higgsfield's defaults move.
+  return { value: { prompt, duration, resolution, aspect_ratio: aspectRatio, generate_audio: generateAudio } };
+}
+
+// `path` is the endpoint as a constant, and it is what the submit URL is
+// built from — never the `model` string the client sent, even though that
+// string has to match a key here first. The lookup alone already made the
+// client's value safe, but CodeQL (js/request-forgery, flagged on PR #121)
+// cannot see a map lookup as a sanitiser, and it is right that the URL
+// should not be assembled from request data at all: with the path coming
+// from this table, no string from the request ever reaches fetch().
+const HF_MODELS = Object.assign(Object.create(null), {
+  'bytedance/seedance-2.0/text-to-video': {
+    path: '/bytedance/seedance-2.0/text-to-video',
+    validate: validateSeedanceTextToVideo
+  }
+});
+
+// Only ever send the credential to Higgsfield's own origin. status_url and
+// cancel_url come back in Higgsfield's responses and the docs say to use
+// them rather than build our own — but they are still strings from a
+// response, and following one blindly would attach our API key to whatever
+// host it named. Anything off-origin falls back to the documented path.
+function hfUrl(candidate, fallbackPath) {
+  try {
+    if (candidate) {
+      const u = new URL(candidate);
+      if (u.origin === HF_API_ORIGIN) return u.toString();
+    }
+  } catch { /* fall through */ }
+  return `${HF_API_BASE}${fallbackPath}`;
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// One outbound call. Resolves to { status, body, correlationId } for any
+// HTTP answer, and to { networkError } when there was none (timeout, DNS,
+// reset) — the caller has to treat those differently, because a POST that
+// got no answer may still have been accepted.
+async function hfFetch(url, { method = 'GET', body, timeoutMs = 20_000 } = {}) {
+  if (new URL(url).origin !== HF_API_ORIGIN) throw new Error('Refusing to send Higgsfield credentials off-origin.');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        Authorization: `Key ${process.env.HF_API_KEY_ID}:${process.env.HF_API_KEY_SECRET}`,
+        ...(body ? { 'Content-Type': 'application/json' } : {})
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal
+    });
+    const text = await res.text();
+    let parsed = null;
+    try { parsed = text ? JSON.parse(text) : null; } catch { parsed = null; }
+    return { status: res.status, body: parsed, correlationId: res.headers.get('x-correlation-id') };
+  } catch (err) {
+    return { networkError: err };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Higgsfield's errors use FastAPI's { detail }, where detail is a string or,
+// for validation, a list. The docs warn against making business decisions on
+// the wording; the one exception is concurrency, which is only
+// distinguishable from a bad request by it (both are 400).
+function hfDetail(body) {
+  const d = body?.detail;
+  if (typeof d === 'string') return d.slice(0, 300);
+  if (Array.isArray(d)) return d.map((e) => e?.msg || JSON.stringify(e)).join('; ').slice(0, 300);
+  return '';
+}
+
+// Maps a refused submission to what the user is told and which status we
+// answer with. Credentials and credit problems are the operator's to fix
+// and say nothing to the user about why.
+function mapHfSubmitError(status, body) {
+  const detail = hfDetail(body);
+  if (status === 400 && /concurren/i.test(detail)) {
+    return { http: 429, message: 'The video service is busy with other renders. Try again in a minute.' };
+  }
+  if (status === 400 || status === 422) return { http: 400, message: detail ? `Rejected by the video service: ${detail}` : 'The video service rejected these settings.' };
+  if (status === 401) return { http: 503, message: 'Video generation is not available right now.', operator: 'Higgsfield rejected the API credentials (401).' };
+  if (status === 403) return { http: 503, message: 'Video generation is not available right now.', operator: 'Higgsfield account is out of credits (403).' };
+  if (status === 404 || status === 423 || status === 503) {
+    return { http: 503, message: 'This video model is unavailable right now. Try again later.', operator: `Model unavailable to this account (${status}).` };
+  }
+  return { http: 502, message: 'The video service had a problem. Try again shortly.', operator: `Unexpected Higgsfield status ${status}.` };
+}
+
+// The one field a completed request's media lives under depends on the
+// model's output type (docs, "Completed output"). Webhooks nest it under
+// `payload`; the status endpoint does not.
+function hfOutputUrl(body) {
+  const src = body?.payload && typeof body.payload === 'object' ? body.payload : body;
+  const url = src?.video?.url || src?.images?.[0]?.url || src?.audio?.url || null;
+  if (typeof url !== 'string') return null;
+  try { return new URL(url).protocol === 'https:' ? url : null; } catch { return null; }
+}
+
+// What the browser sees. No request_id, no provider URLs, no user_id.
+function publicGeneration(row) {
+  return {
+    id: row.id,
+    model: row.model,
+    status: row.status,
+    terminal: HF_TERMINAL.has(row.status) || row.status === 'submit_failed',
+    // Holding the user's one active slot. Not the same as !terminal:
+    // timed_out is neither — it can still resolve, but it no longer blocks
+    // a new render, and the UI must not lock the form on it.
+    active: GENERATION_ACTIVE.includes(row.status),
+    input: row.input,
+    outputUrl: row.output_url || null,
+    error: row.error || null,
+    createdAt: row.created_at,
+    completedAt: row.completed_at || null
+  };
+}
+
+// Writes a status Higgsfield reported. Never moves a row that is already
+// terminal: duplicate webhooks and a webhook racing a poll both arrive here,
+// and the first terminal answer wins.
+async function applyHfStatus(row, hfBody, correlationId) {
+  const status = hfBody?.status;
+  if (!['queued', 'in_progress', 'completed', 'failed', 'nsfw', 'canceled'].includes(status)) return row;
+  if (HF_TERMINAL.has(row.status)) return row;
+
+  const now = new Date().toISOString();
+  // A timed_out row has already given up its active slot, and the user may
+  // have started another render since. Moving it back to queued/in_progress
+  // would collide with that one on the one-active-per-user index, so it
+  // only ever leaves timed_out for a terminal status.
+  if (row.status === 'timed_out' && !HF_TERMINAL.has(status)) {
+    await supabase.from('generations').update({ last_polled_at: now }).eq('id', row.id);
+    return { ...row, last_polled_at: now };
+  }
+  const patch = { status, updated_at: now, last_polled_at: now };
+  if (correlationId) patch.correlation_id = correlationId;
+  if (status === 'completed') {
+    const url = hfOutputUrl(hfBody);
+    if (!url) {
+      // Completed with nothing we can show is a failure from the user's
+      // point of view, and worth an operator's attention.
+      logError('Higgsfield Completed Without Output', new Error('No usable output URL'), { generationId: row.id });
+      patch.status = 'failed';
+      patch.error = 'The video finished but no file came back.';
+    } else {
+      patch.output_url = url;
+    }
+    patch.completed_at = now;
+  } else if (status === 'failed') {
+    patch.error = (typeof hfBody.error === 'string' && hfBody.error.slice(0, 300)) || 'Generation failed.';
+    patch.completed_at = now;
+  } else if (status === 'nsfw') {
+    patch.error = 'This prompt or its result was blocked by content moderation.';
+    patch.completed_at = now;
+  } else if (status === 'canceled') {
+    patch.completed_at = now;
+  }
+
+  const { data, error } = await supabase
+    .from('generations')
+    .update(patch)
+    .eq('id', row.id)
+    .not('status', 'in', `(${[...HF_TERMINAL].join(',')})`)
+    .select('*')
+    .maybeSingle();
+  if (error) throw error;
+  // null: someone else wrote a terminal status first. Re-read so the
+  // caller returns whatever actually won.
+  if (!data) {
+    const { data: current } = await supabase.from('generations').select('*').eq('id', row.id).maybeSingle();
+    return current || row;
+  }
+  return data;
+}
+
+// One status check against Higgsfield, if this row is due one. Failures to
+// reach Higgsfield leave the row as it was — the client keeps polling and
+// the next read tries again, which is the docs' advice for 5xx and network
+// errors on status reads.
+async function refreshGeneration(row, { force = false } = {}) {
+  if (!row.request_id || !GENERATION_REFRESHABLE.has(row.status)) return row;
+  const last = row.last_polled_at ? Date.parse(row.last_polled_at) : 0;
+  if (!force && Date.now() - last < GENERATION_POLL_FLOOR_MS) return row;
+
+  const r = await hfFetch(hfUrl(row.status_url, `/requests/${row.request_id}/status`));
+  if (r.networkError || r.status >= 500) return row;
+  if (r.status === 401) {
+    logError('Higgsfield Status Unauthorized', new Error('Higgsfield rejected the API credentials (401)'), { generationId: row.id });
+    return row;
+  }
+  if (r.status === 404) {
+    // Docs: stop polling — the id is unknown to this account. Nothing will
+    // ever resolve it, so close it rather than poll it forever.
+    const { data } = await supabase.from('generations')
+      .update({ status: 'failed', error: 'The video service has no record of this request.', completed_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq('id', row.id).select('*').maybeSingle();
+    return data || row;
+  }
+  if (r.status !== 200) return row;
+  const updated = await applyHfStatus(row, r.body, r.correlationId);
+  if (updated === row && !HF_TERMINAL.has(row.status)) {
+    // Still in flight: record that we looked, so the poll floor holds.
+    await supabase.from('generations').update({ last_polled_at: new Date().toISOString() }).eq('id', row.id);
+  }
+  return updated;
+}
+
+// Releases the user's active slot from rows that can no longer be making
+// progress, so one stuck render cannot block every future one.
+async function releaseStaleGenerations(userId) {
+  const now = Date.now();
+  await supabase.from('generations')
+    .update({ status: 'submit_failed', error: 'Submission did not complete. It may not have been sent.', updated_at: new Date(now).toISOString() })
+    .eq('user_id', userId).eq('status', 'submitting')
+    .lt('created_at', new Date(now - GENERATION_SUBMIT_STALE_MS).toISOString());
+  await supabase.from('generations')
+    .update({ status: 'timed_out', error: 'Still not finished after the time limit. It may complete later.', updated_at: new Date(now).toISOString() })
+    .eq('user_id', userId).in('status', ['queued', 'in_progress'])
+    .lt('created_at', new Date(now - GENERATION_TIMEOUT_MS).toISOString());
+}
+
+function webhookUrlForSubmission() {
+  const base = (process.env.HIGGSFIELD_WEBHOOK_BASE_URL || '').replace(/\/+$/, '');
+  const secret = process.env.HIGGSFIELD_WEBHOOK_SECRET || '';
+  // Both or neither, and only over HTTPS — the docs require a publicly
+  // reachable HTTPS endpoint, and a webhook without the secret would be an
+  // unauthenticated door into our status writes.
+  if (!base.startsWith('https://') || secret.length < 24) return null;
+  return `${base}/api/higgsfield/webhook?token=${encodeURIComponent(secret)}`;
+}
+
+// Gate shared by every user-facing generation route.
+function requireGenerationAccess(req, res, next) {
+  if (!higgsfieldConfigured()) {
+    return res.status(503).json({ error: 'Video generation is not configured on this server.', code: 'not_configured' });
+  }
+  if (!generationAllowedFor(req.user)) {
+    return res.status(403).json({ error: 'Video generation is not enabled for this account.', code: 'not_enabled' });
+  }
+  next();
+}
+
+app.post('/api/generations', generationSubmitRateLimiter, authenticate, requireGenerationAccess, async (req, res) => {
+  let claimed = null;
+  try {
+    const { model, input } = req.body || {};
+    const spec = typeof model === 'string' ? HF_MODELS[model] : undefined;
+    if (!spec) return res.status(400).json({ error: 'Unknown model.' });
+    const checked = spec.validate(input);
+    if (checked.error) return res.status(400).json({ error: checked.error });
+
+    await releaseStaleGenerations(req.user.id);
+
+    if (GENERATION_DAILY_LIMIT >= 0) {
+      const since = new Date(Date.now() - 24 * 60 * 60_000).toISOString();
+      const { count, error: countError } = await supabase.from('generations')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', req.user.id)
+        .gte('created_at', since)
+        .not('status', 'in', `(${GENERATION_UNBILLED.join(',')})`);
+      if (countError) throw countError;
+      if ((count ?? 0) >= GENERATION_DAILY_LIMIT) {
+        return res.status(429).json({ error: `Daily limit reached (${GENERATION_DAILY_LIMIT} videos per 24 hours).`, code: 'daily_limit' });
+      }
+    }
+
+    // Claim the user's one active slot BEFORE spending anything. A second
+    // submit (double-click, second tab, client retry) fails here on the
+    // partial unique index instead of reaching Higgsfield.
+    const { data: row, error: insertError } = await supabase.from('generations')
+      .insert({ user_id: req.user.id, model, input: checked.value, status: 'submitting' })
+      .select('*')
+      .single();
+    if (insertError) {
+      if (insertError.code === '23505') {
+        return res.status(409).json({ error: 'You already have a video generating. Wait for it to finish.', code: 'already_active' });
+      }
+      throw insertError;
+    }
+    claimed = row;
+
+    const hook = webhookUrlForSubmission();
+    const submitUrl = `${HF_API_BASE}${spec.path}${hook ? `?hf_webhook=${encodeURIComponent(hook)}` : ''}`;
+    const r = await hfFetch(submitUrl, { method: 'POST', body: checked.value, timeoutMs: 30_000 });
+
+    if (r.networkError) {
+      // No answer. Higgsfield may or may not have accepted it, and the docs
+      // are explicit that a submission must not be blindly repeated because
+      // there is no idempotency key. Say so rather than guess.
+      await supabase.from('generations').update({
+        status: 'submit_failed',
+        error: 'No response from the video service. It may still have been accepted — check your Higgsfield dashboard before trying again.',
+        updated_at: new Date().toISOString()
+      }).eq('id', row.id);
+      logError('Higgsfield Submit No Response', r.networkError, { generationId: row.id });
+      return res.status(504).json({ error: 'The video service did not respond. It may still have been accepted, so wait a minute before trying again.', code: 'ambiguous' });
+    }
+
+    const requestId = r.body?.request_id;
+    if (r.status >= 200 && r.status < 300 && typeof requestId === 'string' && UUID_RE.test(requestId)) {
+      const initial = ['queued', 'in_progress'].includes(r.body.status) ? r.body.status : 'queued';
+      const { data: saved, error: saveError } = await supabase.from('generations').update({
+        status: initial,
+        request_id: requestId,
+        status_url: hfUrl(r.body.status_url, `/requests/${requestId}/status`),
+        cancel_url: hfUrl(r.body.cancel_url, `/requests/${requestId}/cancel`),
+        correlation_id: r.correlationId,
+        updated_at: new Date().toISOString()
+      }).eq('id', row.id).select('*').single();
+      if (saveError) {
+        // Accepted and billed, but we failed to record the id. Log it with
+        // the id so it can be reconciled by hand; do not tell the user it
+        // failed, because it did not.
+        logError('Higgsfield Accepted But Not Saved', saveError, { generationId: row.id, requestId, correlationId: r.correlationId });
+        return res.status(202).json({ generation: publicGeneration({ ...row, status: initial }) });
+      }
+      return res.status(202).json({ generation: publicGeneration(saved) });
+    }
+
+    const mapped = r.status >= 200 && r.status < 300
+      ? { http: 502, message: 'The video service gave an unexpected answer.', operator: 'Accepted response without a request_id.' }
+      : mapHfSubmitError(r.status, r.body);
+    await supabase.from('generations').update({
+      status: 'submit_failed', error: mapped.message, correlation_id: r.correlationId, updated_at: new Date().toISOString()
+    }).eq('id', row.id);
+    if (mapped.operator) {
+      logError('Higgsfield Submit Refused', new Error(mapped.operator), { generationId: row.id, status: r.status, detail: hfDetail(r.body), correlationId: r.correlationId });
+    }
+    return res.status(mapped.http).json({ error: mapped.message });
+  } catch (err) {
+    logError('Generation Submit Error', err, { generationId: claimed?.id });
+    // Never leave a claimed slot locked by our own failure.
+    if (claimed) {
+      await supabase.from('generations')
+        .update({ status: 'submit_failed', error: 'Internal error while submitting.', updated_at: new Date().toISOString() })
+        .eq('id', claimed.id).eq('status', 'submitting');
+    }
+    res.status(500).json({ error: 'Failed to start the video.' });
+  }
+});
+
+app.get('/api/generations', generationReadRateLimiter, authenticate, requireGenerationAccess, async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('generations')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (error) throw error;
+    res.json({
+      generations: (data || []).map(publicGeneration),
+      limits: { daily: GENERATION_DAILY_LIMIT, promptMaxChars: PROMPT_MAX_CHARS }
+    });
+  } catch (err) {
+    logError('Generation List Error', err);
+    res.status(500).json({ error: 'Failed to load your videos.' });
+  }
+});
+
+// Ownership is the WHERE clause: a row id that belongs to someone else is
+// indistinguishable from one that does not exist, so both are 404.
+async function loadOwnGeneration(req) {
+  if (!UUID_RE.test(req.params.id || '')) return null;
+  const { data, error } = await supabase.from('generations')
+    .select('*').eq('id', req.params.id).eq('user_id', req.user.id).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+app.get('/api/generations/:id', generationReadRateLimiter, authenticate, requireGenerationAccess, async (req, res) => {
+  try {
+    const row = await loadOwnGeneration(req);
+    if (!row) return res.status(404).json({ error: 'Not found.' });
+    const current = await refreshGeneration(row);
+    res.json({ generation: publicGeneration(current) });
+  } catch (err) {
+    logError('Generation Read Error', err);
+    res.status(500).json({ error: 'Failed to load this video.' });
+  }
+});
+
+app.post('/api/generations/:id/cancel', generationSubmitRateLimiter, authenticate, requireGenerationAccess, async (req, res) => {
+  try {
+    const row = await loadOwnGeneration(req);
+    if (!row) return res.status(404).json({ error: 'Not found.' });
+    if (row.status !== 'queued' || !row.request_id) {
+      return res.status(409).json({ error: 'Only a video that has not started yet can be cancelled.' });
+    }
+    const r = await hfFetch(hfUrl(row.cancel_url, `/requests/${row.request_id}/cancel`), { method: 'POST' });
+    if (r.networkError || r.status >= 500) return res.status(502).json({ error: 'Could not reach the video service. Try again.' });
+    if (r.status === 400) {
+      // Docs: 400 means processing already started. Refresh so the client
+      // sees in_progress rather than a stale queued.
+      const current = await refreshGeneration(row, { force: true });
+      return res.status(409).json({ error: 'It has already started rendering and can no longer be cancelled.', generation: publicGeneration(current) });
+    }
+    if (r.status !== 202 && r.status !== 200) return res.status(502).json({ error: 'The video service refused the cancellation.' });
+    const updated = await applyHfStatus(row, { status: 'canceled' }, r.correlationId);
+    res.json({ generation: publicGeneration(updated) });
+  } catch (err) {
+    logError('Generation Cancel Error', err);
+    res.status(500).json({ error: 'Failed to cancel.' });
+  }
+});
+
+// Higgsfield's completion push. Higgsfield documents NO signature on these
+// deliveries, so the body is never trusted for what it claims: it is used
+// only as a hint about which request_id to look at, and the status is then
+// fetched from the authenticated status endpoint, same as a poll. A forged
+// delivery can therefore at most make us check a real request early.
+//
+// The shared secret in the query string keeps strangers from making us do
+// even that. Compared in constant time.
+//
+// Response codes follow the docs' delivery rules: 2xx once handled
+// (duplicates included), 4xx for a body that is not the documented envelope
+// (not retried), 5xx only when WE failed and a retry could succeed.
+app.post('/api/higgsfield/webhook', higgsfieldWebhookRateLimiter, async (req, res) => {
+  try {
+    const secret = process.env.HIGGSFIELD_WEBHOOK_SECRET || '';
+    const token = typeof req.query.token === 'string' ? req.query.token : '';
+    const a = Buffer.from(token);
+    const b = Buffer.from(secret);
+    if (!secret || a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+      return res.status(401).json({ error: 'Unauthorized.' });
+    }
+    if (!higgsfieldConfigured()) return res.status(503).json({ error: 'Not configured.' });
+
+    const { request_id: requestId, status } = req.body || {};
+    if (typeof requestId !== 'string' || !UUID_RE.test(requestId) || !['completed', 'failed', 'nsfw'].includes(status)) {
+      return res.status(400).json({ error: 'Unrecognised payload.' });
+    }
+
+    const { data: row, error } = await supabase.from('generations')
+      .select('*').eq('request_id', requestId).maybeSingle();
+    if (error) throw error;
+    // Not one of ours (or from before the row was saved): nothing to do,
+    // and retrying would not change that.
+    if (!row) return res.json({ received: true });
+    if (HF_TERMINAL.has(row.status)) return res.json({ received: true, duplicate: true });
+
+    const updated = await refreshGeneration(row, { force: true });
+    if (!HF_TERMINAL.has(updated.status)) {
+      // The status endpoint did not confirm a terminal state (unreachable,
+      // or disagrees with the push). 5xx so Higgsfield retries; polling
+      // covers it regardless.
+      return res.status(503).json({ error: 'Could not confirm status yet.' });
+    }
+    res.json({ received: true });
+  } catch (err) {
+    logError('Higgsfield Webhook Error', err);
+    res.status(500).json({ error: 'Webhook handler failed.' });
   }
 });
 
