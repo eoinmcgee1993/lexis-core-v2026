@@ -335,3 +335,39 @@ html {
     animation: none !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Scroll reveal (23 Sep 2026, launch).
+
+   Set by src/lib/useRevealOnScroll.js, never by markup — see that file for
+   why the hidden state must not exist until JS has checked the section is
+   genuinely off screen. One transition per section, ever: .lexis-reveal is
+   the starting pose, .is-in the resting one, and nothing here loops, so
+   this is not one of the decorative loops the reduced-motion block above
+   exists to stop.
+
+   Vertical only. A horizontal offset would put sideways scroll on the page
+   while a section waits, which is the overflow bug /verify checks for.
+
+   Outside @layer on purpose: these class names are added from JS, and
+   plain CSS here is emitted unconditionally rather than depending on the
+   content scan finding the string.
+   ───────────────────────────────────────────────────────────────────── */
+.lexis-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.lexis-reveal.is-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.7s ease-out, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* The hook already skips reduced-motion visitors. This covers the setting
+   being switched on after a section was hidden, so it can never strand one. */
+@media (prefers-reduced-motion: reduce) {
+  .lexis-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
