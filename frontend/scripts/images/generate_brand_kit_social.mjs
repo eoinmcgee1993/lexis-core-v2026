@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 // onto all 14 templates after the trial was halved to 15 (PR #92).
 // facts.js is a plain constants module with no React imports, so a Node
 // script can read it directly.
-import { TRIAL as TRIAL_FACT, PRICING } from '../../src/content/facts.js';
+import { TRIAL as TRIAL_FACT, PRICING, FAIR_USE } from '../../src/content/facts.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONTEND = path.join(__dirname, '..', '..');
@@ -137,9 +137,212 @@ body{background:${bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
   console.log('  ' + file);
 }
 
+// ---- INSTAGRAM CAROUSELS (22 Sep 2026, launch push).
+//
+// 1080x1350, Instagram's 4:5 portrait feed format: the tallest a feed post
+// can be, so the most screen a carousel slide gets. The rest of this kit is
+// 1080 square or 9:16 story, and neither is a carousel — a carousel is read
+// as a sequence, so it is built as one: a hook, the problem, what LEXIS is,
+// how a session goes, the feeling, the price, the ask.
+//
+// Every product claim below was checked against the code before it was
+// written, because copy here is a factual assertion (CLAUDE.md):
+//   - the four topics are TopicStage.jsx's own labels
+//   - "English or Thai" is /api/session's `direction`
+//   - "corrects you as you go" is LANDING_DESCRIPTION_EN's "gentle
+//     real-time corrections"
+//   - "feedback on what you actually said" is /api/feedback, which grades
+//     the session's real transcript and refuses to score one too short
+// Same rule as LINES: the experience, never a result. No fluency promise,
+// no "in N weeks", no learner outcomes, no "unlimited".
+//
+// The price slide states the fair-use ceilings. PRICE_EN above does not,
+// and facts.js is explicit that an enforced but undisclosed usage limit is
+// the thing it exists to end. A slide that sells a pass should say what the
+// pass holds. It reads as more concrete, not less.
+const CAROUSEL = {
+  en: {
+    font: 'd', swipe: 'Swipe →', link: 'Link in bio', cta: 'Try it free',
+    hook: 'You understand<br>English. So why<br>does it disappear<br>when you have<br>to speak?',
+    problem: LINES.textbook,
+    problemSub: 'Speaking is practised by speaking — and that needs someone on the other side.',
+    whatHead: 'LEXIS is someone<br>to talk to.',
+    whatBody: 'A voice tutor you speak with out loud, in English or in Thai. No typing. No audience.',
+    howHead: 'How a session goes',
+    how: [
+      ['Pick a topic', 'Everyday talk, work & business, travel & culture — or just talk.'],
+      ['Talk out loud', 'LEXIS listens, answers, and gently corrects you as you go.'],
+      ['See what you said', 'Feedback on your actual conversation: what went well, what to work on.']
+    ],
+    feel: LINES.room,
+    feelSub: 'Practise the conversation before you have to have it.',
+    priceHead: 'Start free.',
+    trial: `${TRIAL} minutes free`, trialSub: 'No card needed',
+    week: `฿${WEEK}`, weekDays: `${PRICING.weekly.days} days`, weekCap: `Up to ${FAIR_USE.weekly.minutes} min of practice`,
+    month: `฿${MONTH}`, monthDays: `${PRICING.monthly.days} days`, monthCap: `Up to ${FAIR_USE.monthly.minutes} min of practice`,
+    priceFoot: 'One-off payments — nothing renews on its own. Card or PromptPay.',
+    close: LINES.stranger
+  },
+  th: {
+    font: 't', swipe: 'ปัดเพื่อดูต่อ →', link: 'ลิงก์อยู่ในโปรไฟล์', cta: 'ลองใช้ฟรี',
+    hook: 'คุณเข้าใจ<br>ภาษาอังกฤษ<br>แต่ทำไมพอต้องพูด<br>ถึงนึกไม่ออก?',
+    problem: LINES.th_ask,
+    problemSub: 'การพูดต้องฝึกด้วยการพูด และต้องมีคนคุยด้วย',
+    whatHead: 'LEXIS คือคู่สนทนา<br>ที่คุณคุยด้วยได้จริง',
+    whatBody: 'ติวเตอร์เสียงที่คุณพูดคุยด้วยออกเสียงจริง ทั้งภาษาอังกฤษและภาษาไทย ไม่ต้องพิมพ์ ไม่มีใครฟังอยู่',
+    howHead: 'ฝึกหนึ่งครั้งเป็นอย่างไร',
+    how: [
+      ['เลือกหัวข้อ', 'บทสนทนาทั่วไป งานและธุรกิจ ท่องเที่ยวและวัฒนธรรม หรือจะคุยอิสระก็ได้'],
+      ['พูดออกเสียง', 'LEXIS ฟัง ตอบ และแนะนำการแก้ไขอย่างอ่อนโยนระหว่างคุย'],
+      ['ดูสิ่งที่คุณพูด', 'สรุปผลจากบทสนทนาจริงของคุณ ว่าทำได้ดีตรงไหนและควรฝึกอะไรต่อ']
+    ],
+    feel: LINES.th_room,
+    feelSub: 'ฝึกบทสนทนาก่อนที่คุณจะต้องพูดจริง',
+    priceHead: 'เริ่มต้นฟรี',
+    trial: `ทดลองฟรี ${TRIAL} นาที`, trialSub: 'ไม่ต้องผูกบัตร',
+    week: `฿${WEEK}`, weekDays: `${PRICING.weekly.days} วัน`, weekCap: `ฝึกได้สูงสุด ${FAIR_USE.weekly.minutes} นาที`,
+    month: `฿${MONTH}`, monthDays: `${PRICING.monthly.days} วัน`, monthCap: `ฝึกได้สูงสุด ${FAIR_USE.monthly.minutes} นาที`,
+    priceFoot: 'จ่ายครั้งเดียว ไม่ต่ออายุอัตโนมัติ จ่ายด้วยบัตรหรือพร้อมเพย์',
+    close: LINES.th_first
+  }
+};
+
+async function carousels() {
+  const W = 1080, H = 1350, N = 7;
+  for (const [lang, c] of Object.entries(CAROUSEL)) {
+    console.log(`\ncarousel/${lang}/ — 4:5, ${N} slides`);
+    // Thai headlines set in IBM Plex Sans Thai: Fraunces has no Thai glyphs,
+    // and a serif fallback for Thai reads as a rendering fault.
+    const hd = (size, color) => c.font === 't'
+      ? `class="t" lang="th" style="font-weight:600;font-size:${Math.round(size * 0.86)}px;color:${color};line-height:1.42"`
+      : `class="d" style="font-size:${size}px;color:${color};line-height:1.14"`;
+    // Thai body copy reads smaller than Latin at the same px size (shorter
+    // x-height, stacked tone marks), so it gets a size bump rather than a
+    // separate set of numbers per slide.
+    const bd = (size, color, op = 1) =>
+      `${c.font === 't' ? 'class="t" lang="th"' : ''} style="font-size:${Math.round(size * (c.font === 't' ? 1.1 : 1))}px;color:${color};opacity:${op};line-height:1.5"`;
+    const counter = (i, color) =>
+      `<div style="font-size:22px;color:${color};opacity:.5;letter-spacing:.08em">${String(i).padStart(2, '0')} / ${String(N).padStart(2, '0')}</div>`;
+    const top = (i, dark) => `<div style="position:absolute;top:60px;left:64px;right:64px;
+      display:flex;justify-content:space-between;align-items:center">
+      ${lockup(34, dark ? '#fff' : INK, TEAL)}${counter(i, dark ? '#fff' : INK)}</div>`;
+    const rule = `<div style="width:58px;height:3px;background:${TEAL};margin-bottom:30px"></div>`;
+    const K = (n, body, bg) => shot(`carousel/${lang}/${String(n).padStart(2, '0')}.png`, W, H, body, bg);
+
+    // 1 — hook. Photo-led; the swipe cue is the only call to action here.
+    await K(1, `<div style="position:relative;width:100%;height:100%;background:${BLACK}">
+      <img class="fill" src="${await photo('02-portrait-black-speaking')}" style="object-position:50% 22%"/>
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,
+        rgba(0,0,0,.95) 0%, rgba(0,0,0,.78) 38%, rgba(0,0,0,.1) 66%, rgba(0,0,0,.45) 100%)"></div>
+      ${top(1, true)}
+      <div style="position:absolute;left:64px;right:64px;bottom:72px">
+        ${rule}<div ${hd(72, '#fff')}>${c.hook}</div>
+        <div style="margin-top:34px;text-align:right;font-size:26px;color:${TEAL};letter-spacing:.04em"
+          ${c.font === 't' ? 'class="t"' : ''}>${c.swipe}</div>
+      </div></div>`, BLACK);
+
+    // 2 — the problem. Type-led, black, a small portrait so it is still her.
+    await K(2, `<div style="position:relative;width:100%;height:100%;background:${BLACK};padding:0 64px">
+      ${top(2, true)}
+      <div style="position:absolute;left:64px;right:64px;top:50%;transform:translateY(-46%)">
+        <div style="width:150px;height:150px;border-radius:50%;overflow:hidden;border:2px solid ${TEAL};margin-bottom:56px">
+          <img src="${await photo('10-closecrop-black')}" style="width:100%;height:100%;object-fit:cover"/></div>
+        <div ${hd(80, '#fff')}>${c.problem}</div>
+        <div style="margin-top:44px;max-width:820px"><div ${bd(30, TEAL)}>${c.problemSub}</div></div>
+      </div></div>`, BLACK);
+
+    // 3 — what LEXIS is. Cream: the first light slide, so the swipe changes
+    // temperature exactly where the carousel turns from problem to answer.
+    await K(3, `<div style="position:relative;width:100%;height:100%;background:${CANVAS}">
+      ${top(3, false)}
+      <div style="position:absolute;left:0;right:0;top:150px;height:640px;overflow:hidden">
+        <img class="fill" src="${await photo('03-portrait-cream-listening')}" style="object-position:50% 26%"/></div>
+      <div style="position:absolute;left:64px;right:64px;bottom:76px">
+        ${rule}<div ${hd(66, INK)}>${c.whatHead}</div>
+        <div style="margin-top:26px"><div ${bd(29, INK, .72)}>${c.whatBody}</div></div>
+      </div></div>`, CANVAS);
+
+    // 4 — how a session goes. Three real steps from the four-stage flow.
+    const steps = c.how.map(([h, t], i) => `
+      <div style="display:flex;gap:34px;align-items:flex-start;padding:46px 0;
+        ${i ? 'border-top:1px solid rgba(255,255,255,.12);' : ''}">
+        <div class="d" style="font-size:66px;color:${AMBER};line-height:1;min-width:58px">${i + 1}</div>
+        <div><div ${hd(52, '#fff')}>${h}</div>
+          <div style="margin-top:14px"><div ${bd(31, '#fff', .66)}>${t}</div></div></div>
+      </div>`).join('');
+    await K(4, `<div style="position:relative;width:100%;height:100%;background:${lexisNavy()}">
+      ${top(4, true)}
+      <div style="position:absolute;left:64px;right:64px;top:54%;transform:translateY(-50%)">
+        ${rule}<div ${hd(68, '#fff')}>${c.howHead}</div>
+        <div style="margin-top:36px">${steps}</div>
+      </div></div>`, lexisNavy());
+
+    // 5 — the feeling. The one line the rest of the kit already leads with.
+    await K(5, `<div style="position:relative;width:100%;height:100%;background:${BLACK}">
+      <img class="fill" src="${await photo('13-portrait-black-smile-alt')}" style="object-position:50% 20%"/>
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,
+        rgba(0,0,0,.94) 0%, rgba(0,0,0,.7) 36%, rgba(0,0,0,.08) 64%, rgba(0,0,0,.4) 100%)"></div>
+      ${top(5, true)}
+      <div style="position:absolute;left:64px;right:64px;bottom:80px">
+        ${rule}<div ${hd(76, '#fff')}>${c.feel}</div>
+        <div style="margin-top:30px"><div ${bd(29, '#fff', .66)}>${c.feelSub}</div></div>
+      </div></div>`, BLACK);
+
+    // 6 — price. Cream, every number from facts.js, ceilings stated.
+    const pass = (price, days, cap) => `<div style="flex:1;background:#fff;border-radius:26px;
+      padding:48px 40px;box-shadow:0 1px 0 rgba(30,41,59,.06),0 18px 40px -24px rgba(30,41,59,.25)">
+      <div class="d" style="font-size:92px;color:${INK};line-height:1">${price}</div>
+      <div style="margin-top:14px"><div ${bd(34, INK)}>${days}</div></div>
+      <div style="margin-top:26px;padding-top:24px;border-top:1px solid rgba(30,41,59,.1)">
+        <div ${bd(27, INK, .62)}>${cap}</div></div></div>`;
+    await K(6, `<div style="position:relative;width:100%;height:100%;background:${CANVAS}">
+      ${top(6, false)}
+      <div style="position:absolute;left:64px;right:64px;top:54%;transform:translateY(-50%)">
+        ${rule}<div ${hd(84, INK)}>${c.priceHead}</div>
+        <div style="margin-top:48px;background:${TEAL};border-radius:28px;padding:52px 48px;color:#fff">
+          <div ${hd(64, '#fff')}>${c.trial}</div>
+          <div style="margin-top:10px"><div ${bd(31, '#fff', .82)}>${c.trialSub}</div></div></div>
+        <div style="margin-top:28px;display:flex;gap:28px">
+          ${pass(c.week, c.weekDays, c.weekCap)}${pass(c.month, c.monthDays, c.monthCap)}</div>
+        <div style="margin-top:44px"><div ${bd(28, INK, .62)}>${c.priceFoot}</div></div>
+      </div></div>`, CANVAS);
+
+    // 7 — the ask. The only amber on the whole carousel is this button.
+    await K(7, `<div style="position:relative;width:100%;height:100%;background:${BLACK}">
+      <img class="fill" src="${await photo('01-portrait-black-smile')}" style="object-position:50% 18%"/>
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,
+        rgba(0,0,0,.96) 0%, rgba(0,0,0,.8) 44%, rgba(0,0,0,.12) 70%, rgba(0,0,0,.45) 100%)"></div>
+      ${top(7, true)}
+      <div style="position:absolute;left:64px;right:64px;bottom:76px">
+        ${rule}<div ${hd(68, '#fff')}>${c.close}</div>
+        <div style="margin-top:46px;display:flex;align-items:center;gap:30px">
+          <div style="background:${AMBER};color:#fff;font-size:34px;font-weight:700;
+            padding:26px 50px;border-radius:18px" ${c.font === 't' ? 'class="t"' : ''}>${c.cta}</div>
+          <div><div style="font-size:30px;color:#fff;letter-spacing:.03em">${SITE}</div>
+            <div style="margin-top:6px"><div ${bd(22, '#fff', .55)}>${c.link}</div></div></div>
+        </div>
+      </div></div>`, BLACK);
+  }
+}
+// lexis-navy is reserved for "inside the conversation" in the product
+// (scripts/design/lexis-visual-system.md). The how-it-works slide IS the
+// conversation, described, so it borrows that meaning deliberately — the
+// only slide that does.
+function lexisNavy() { return '#050B14'; }
+
 async function main() {
   await loadFonts();
   browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+
+  await carousels();
+  // `--only=carousel` regenerates just the carousels. Without it the whole
+  // kit is rebuilt as before. The flag exists so adding a carousel slide
+  // doesn't rewrite fourteen unrelated template PNGs in the same commit.
+  if (process.argv.includes('--only=carousel')) {
+    await browser.close();
+    console.log('\nCarousels rebuilt (--only=carousel; rest of the kit untouched).');
+    return;
+  }
 
   // ---- LAYOUT A: photo-led. Full bleed, scrim, headline sitting low-left.
   console.log('\ntemplates/ — layout A, photo-led');
