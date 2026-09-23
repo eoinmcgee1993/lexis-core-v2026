@@ -13,6 +13,7 @@ import InterviewEnglishPage from './pages/InterviewEnglishPage';
 import EverydayEnglishPage from './pages/EverydayEnglishPage';
 import TravelEnglishPage from './pages/TravelEnglishPage';
 import BusinessEnglishPage from './pages/BusinessEnglishPage';
+import StudioPage from './pages/StudioPage';
 
 // Seven routes still don't warrant a full router dependency. Every page
 // receives navigateTo(path). Auth-gating for /app lives here, once,
@@ -57,7 +58,10 @@ function RouteController() {
   // behind the initial Supabase session check means every marketing visitor
   // — the entire point of a landing page — sees a blank loading spinner
   // before the hero ever paints, for an auth check they don't need.
-  if (currentPath === '/app') {
+  // /studio (Higgsfield video generation, 23 Sep 2026) is gated exactly
+  // like /app: signed out shows the sign-in form. Whether the signed-in
+  // account may actually generate is the backend's call, not this router's.
+  if (currentPath === '/app' || currentPath === '/studio') {
     if (loading) {
       return (
         <div className="min-h-[100dvh] bg-slate-950 text-slate-400 font-mono text-xs flex items-center justify-center">
@@ -65,7 +69,8 @@ function RouteController() {
         </div>
       );
     }
-    return user ? <LexisApp navigateTo={navigateTo} /> : <AuthPage navigateTo={navigateTo} />;
+    if (!user) return <AuthPage navigateTo={navigateTo} />;
+    return currentPath === '/studio' ? <StudioPage navigateTo={navigateTo} /> : <LexisApp navigateTo={navigateTo} />;
   }
 
   switch (currentPath) {

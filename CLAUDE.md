@@ -29,6 +29,7 @@ cd backend
 npm test                       # runs both suites below in sequence
 node test/fair-use.test.mjs    # there is no runner; each suite is a plain script
 node test/checkout.test.mjs    # boots app.mjs against local fake Stripe/Supabase
+node test/higgsfield.test.mjs  # same, against fake Higgsfield + in-memory PostgREST
 npm run dev                    # node --watch server.mjs (needs backend/.env)
 node --check app.mjs           # fast syntax gate before committing
 
@@ -101,6 +102,38 @@ new column must also be added to the commented migration block at the bottom of
 the file** — otherwise re-running the schema recreates the functions against
 columns that don't exist, and plpgsql resolves those names at execution, so it
 reports success and then every call 500s.
+
+## Higgsfield video generation (/studio)
+
+Text-to-video (Seedance 2.0) through Higgsfield's REST API, added 23 Sep 2026.
+All of it is in `app.mjs` under "HIGGSFIELD GENERATION"; the page is
+`frontend/src/pages/StudioPage.jsx`; the table is `generations` (schema
+section 9). Things that are easy to break:
+
+- **Allowlisted and fail-closed.** Every render bills the Higgsfield account
+  and no learner payment covers it. `HIGGSFIELD_ALLOWED_EMAILS` empty means
+  nobody can generate. Missing `HF_API_KEY_ID`/`HF_API_KEY_SECRET` 503s only
+  these routes; they are deliberately not in `requiredEnv`.
+- **The row is the lock.** The `generations` row is inserted as `submitting`
+  *before* Higgsfield is called, and the partial unique index (one active row
+  per user) is what stops a double-submit from paying twice. Higgsfield takes
+  no idempotency key, so a POST with no response is never retried; it is
+  recorded as `submit_failed` with an "ambiguous" message.
+- **The webhook is unsigned.** Higgsfield documents no signature, so a
+  delivery is only a hint: the handler re-fetches the status from the
+  authenticated API before writing anything. Keep it that way. The shared
+  secret in the URL only stops strangers from triggering lookups.
+- **The API key only goes to `HIGGSFIELD_API_BASE`'s origin.** `status_url`
+  and `cancel_url` come from responses and are checked before use.
+- Polling is the source of truth (client backs off 2s→10s; the server refreshes
+  a row at most every 2s). `timed_out` is our give-up, not Higgsfield's, and
+  can still resolve later.
+- Output URLs are Higgsfield's and last at least seven days. The frontend CSP
+  therefore has `media-src 'self' https:`, because their CDN host is not
+  documented.
+- Docs used: docs.higgsfield.ai (llms.txt index), fetched 23 Sep 2026. Re-read
+  the model page before adding a model or field. The validator mirrors its
+  JSON schema, including `additionalProperties: false`.
 
 ## Facts live in exactly one place
 

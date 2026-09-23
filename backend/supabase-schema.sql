@@ -432,6 +432,71 @@ GRANT EXECUTE ON FUNCTION public.record_heartbeat(UUID, INT) TO service_role;
 REVOKE EXECUTE ON FUNCTION public.redeem_pass(UUID, TEXT, INT, TEXT, TEXT) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.redeem_pass(UUID, TEXT, INT, TEXT, TEXT) TO service_role;
 
+-- 9. Generations — Higgsfield media generation (23 Sep 2026)
+--
+-- One row per generation a user asks for. Written only by the backend
+-- (service_role) through POST /api/generations and the Higgsfield webhook;
+-- the row exists BEFORE Higgsfield is called, as status 'submitting', so
+-- that the partial unique index below is the lock that stops a double-click
+-- or a second tab from paying for the same video twice. Higgsfield's own
+-- docs say submissions take no idempotency key, so the guard has to be ours.
+--
+-- request_id is Higgsfield's id, set once the submission is accepted. It is
+-- UNIQUE because it is what the webhook looks rows up by, and it is never
+-- sent to the browser: every client read goes through our own row id with
+-- user_id in the WHERE clause, which is the ownership check.
+--
+-- A brand-new table, so CREATE TABLE IF NOT EXISTS genuinely creates it on
+-- an existing database — nothing for the migration block at the bottom.
+CREATE TABLE IF NOT EXISTS public.generations (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  provider TEXT NOT NULL DEFAULT 'higgsfield',
+  model TEXT NOT NULL,
+  -- Exactly what was sent, after validation and defaults — so the row
+  -- records what was billed, not what the form happened to contain.
+  input JSONB NOT NULL,
+  status TEXT NOT NULL CHECK (status IN (
+    'submitting',                                              -- ours: row claimed, POST not yet answered
+    'queued', 'in_progress',                                   -- Higgsfield, non-terminal
+    'completed', 'failed', 'nsfw', 'canceled',                 -- Higgsfield, terminal
+    'submit_failed',                                           -- ours: never accepted (or ambiguous — see error)
+    'timed_out'                                                -- ours: past the app timeout; a later webhook or read can still resolve it
+  )),
+  request_id UUID UNIQUE,
+  status_url TEXT,
+  cancel_url TEXT,
+  output_url TEXT,
+  error TEXT,
+  -- X-Correlation-ID from Higgsfield's last response. Their support asks
+  -- for it alongside request_id.
+  correlation_id TEXT,
+  last_polled_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+-- At most ONE unfinished generation per user. This is the duplicate-
+-- submission guard (the insert of a second 'submitting' row fails with
+-- 23505) and also keeps any one user from eating the account's whole
+-- Higgsfield concurrency allowance.
+CREATE UNIQUE INDEX IF NOT EXISTS generations_one_active_per_user_idx
+  ON public.generations(user_id)
+  WHERE status IN ('submitting', 'queued', 'in_progress');
+
+CREATE INDEX IF NOT EXISTS generations_user_id_created_at_idx
+  ON public.generations(user_id, created_at DESC);
+
+-- Read-only for clients, same shape as session_history: the app reads
+-- through the backend, but a user reading their own rows directly is
+-- harmless. No INSERT/UPDATE/DELETE policy — status and output_url are
+-- written only with the service_role key.
+ALTER TABLE public.generations ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can read own generations" ON public.generations;
+CREATE POLICY "Users can read own generations" ON public.generations
+  FOR SELECT USING ((select auth.uid()) = user_id);
+
 -- ============================================================================
 -- Migrating from the earlier supabase/schema.sql (sessions_used, no
 -- usage_logs/stripe_subscription_id/past_due/canceled)? Run this once:
