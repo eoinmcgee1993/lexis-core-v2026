@@ -371,3 +371,18 @@ html {
     transition: none !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Hero video captions (23 Sep 2026). HeroVideo.jsx plays muted by default,
+   so the captions are how a visitor hears her at all. The browser default
+   is small grey-on-black-box text that reads as a system overlay; this is
+   the brand's ink-navy at the same translucency as the sound button, with
+   size set in the video's own terms so it scales with the player.
+   ───────────────────────────────────────────────────────────────────── */
+video::cue {
+  background-color: rgba(5, 11, 20, 0.72);
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'IBM Plex Sans Thai', sans-serif;
+  font-size: 0.95em;
+  line-height: 1.35;
+}
