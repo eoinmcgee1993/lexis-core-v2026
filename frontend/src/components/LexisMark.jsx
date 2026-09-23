@@ -1,75 +1,78 @@
 // frontend/src/components/LexisMark.jsx
 //
-// LEXIS's brand mark. Used as the logo badge in LandingPage/PricingPage/
-// AuthPage/LegalPageShell and mirrored in public/favicon.svg and the three
-// PWA icons.
+// LEXIS's brand mark: the navy tile with a white L and two amber sound
+// waves ("L, speaking"). Geometry and colours live in src/brand/lexisMark.js,
+// which public/favicon.svg, the PWA icons and every brand-kit generator are
+// built from too — this component only turns that data into JSX.
 //
-// WHAT IT IS AND WHY IT STAYS A WAVEFORM
+// HISTORY, kept because each version was a deliberate decision
 //
-// It replaced lucide-react's Sparkles icon (18-19 Aug 2026) because a
-// four-point sparkle reads as generic-AI-product iconography rather than as
-// anything specific to LEXIS, and that undercuts the trust a voice product
-// needs from a skeptical audience — the same parents the hero photo's
-// AI-disclosure caption exists for. That reasoning is unchanged and the
-// waveform stays: LEXIS's entire product is a live voice conversation, and
-// this is the one form that says so. It is also the shape the live session
-// screen already uses for its audio-level meter.
+//   18-19 Aug 2026  lucide's Sparkles replaced by a five-bar waveform: a
+//                   four-point sparkle is generic-AI iconography and says
+//                   nothing about a voice product.
+//   4 Sep 2026      waveform redrawn from a mirrored 8/14/20/14/8 to the
+//                   7/13/21/16/10 envelope of a spoken syllable, with the
+//                   owner's agreement, because the mirror was the stock
+//                   equalizer glyph.
+//   23 Sep 2026     rebrand to direction B, chosen by the owner from four
+//                   rendered directions. Even redrawn, a five-bar waveform is
+//                   the default "audio" icon of every voice and podcast app;
+//                   it could not be owned. The L is whose voice it is, the
+//                   waves are the voice. The waveform's form lives on in
+//                   WaveRule.jsx and the live session's audio meter.
 //
-// WHAT CHANGED, 4 SEP 2026, AND WHY
+// WHY THE COMPONENT NOW DRAWS ITS OWN TILE
 //
-// Redrawn with the owner's explicit agreement, recorded here because the
-// version it replaces was itself a deliberate decision.
+// The old mark was a bare glyph in currentColor, and every one of its nine
+// call sites wrapped it in the same hand-copied teal chip
+// (p-2 bg-teal-600/10 border ... rounded-xl text-teal-700). B *is* a tile —
+// navy, white, amber are part of the mark, not a theme applied to it — so
+// the tile is drawn here and the call sites just size it. One copy of the
+// badge instead of nine.
 //
-// The old geometry was five bars at heights 8, 14, 20, 14, 8 — a perfect
-// mirror, evenly stepped. That is the stock equalizer glyph shipped with
-// every icon set and used by most of the voice apps LEXIS sits beside; the
-// mark said "audio" but said nothing about LEXIS. The brief was a
-// higher-end interface, and a logo that is indistinguishable from the
-// category's default is the first place that fails.
-//
-// So the contour is now 7, 13, 21, 16, 10: a fast rise into the peak and a
-// slower fall away from it. That is not an arbitrary asymmetry — it is the
-// envelope of an actual spoken syllable, which has a sharp onset and a
-// longer release. The mark now describes speech rather than a level meter,
-// which is the distinction the whole product rests on.
-//
-// Constraints the redraw had to respect, and did:
-//   - 16px legibility. Eight of nine call sites render this at 20px and one
-//     at 16px. The shortest bar is 7/24, i.e. 4.7px tall at 16px, so it
-//     survives; an earlier draft used 5 (3.3px) and vanished.
-//   - Uniform bar width and full stadium caps (rx = half the width). Varying
-//     the widths was tried and reads as a rendering fault at 16px, not as
-//     rhythm.
-//   - Five bars. Four stops reading as a waveform; six turn to mush small.
-//   - Vertically centred on y=12, so the mark's optical centre matches the
-//     text baseline it sits beside.
-//
-// public/favicon.svg reuses these exact rect coordinates under a single
-// transform rather than restating them, so the two cannot drift apart.
+// variant="glyph" drops the tile, for dark surfaces where a navy tile
+// disappears into the background.
 //
 // ACCESSIBILITY
 //
-// Decorative by default. All nine call sites place this immediately beside
-// a <span>LEXIS</span>, so a role="img" + aria-label="LEXIS" here — which is
-// what it used to carry — made every page announce "LEXIS LEXIS". The label
-// prop exists for a future standalone use where the mark is the only thing
-// naming the product; passing it opts back into being an image with a name.
-export default function LexisMark({ className, label }) {
+// Decorative by default. Every call site places this immediately beside a
+// <span>LEXIS</span>, so labelling it made pages announce "LEXIS LEXIS".
+// Pass `label` only where the mark is the only thing naming the product.
+import { MARK_COLORS, MARK_GEOMETRY } from '../brand/lexisMark.js';
+
+export default function LexisMark({ className, label, variant = 'tile' }) {
   const decorative = !label;
+  const g = MARK_GEOMETRY;
   return (
     <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
+      viewBox={g.viewBox}
       className={className}
       {...(decorative
         ? { 'aria-hidden': 'true', focusable: 'false' }
         : { role: 'img', 'aria-label': label })}
     >
-      <rect x="1.5" y="8.5" width="3" height="7" rx="1.5" />
-      <rect x="6" y="5.5" width="3" height="13" rx="1.5" />
-      <rect x="10.5" y="1.5" width="3" height="21" rx="1.5" />
-      <rect x="15" y="4" width="3" height="16" rx="1.5" />
-      <rect x="19.5" y="7" width="3" height="10" rx="1.5" />
+      {variant === 'tile' && (
+        <rect width="100" height="100" rx={g.tileRadius} fill={MARK_COLORS.tile} />
+      )}
+      <path
+        d={g.letter.d}
+        fill="none"
+        stroke={MARK_COLORS.letter}
+        strokeWidth={g.letter.strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {g.waves.map((w) => (
+        <path
+          key={w.d}
+          d={w.d}
+          fill="none"
+          stroke={MARK_COLORS.waves}
+          strokeWidth={w.strokeWidth}
+          strokeLinecap="round"
+          opacity={w.opacity < 1 ? w.opacity : undefined}
+        />
+      ))}
     </svg>
   );
 }

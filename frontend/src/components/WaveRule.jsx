@@ -4,9 +4,11 @@
 // sections carries LEXIS's own identity instead of being a generic 1px
 // grey line.
 //
-// Same visual language as LexisMark (five bars, tallest in the middle) and
-// as the live session screen's audio ring — this page is selling a voice
-// product, and the one shape that says so is a waveform. The bars decay
+// Same visual language as the live session screen's audio ring — this page
+// is selling a voice product, and the one shape that says so is a waveform.
+// It used to echo LexisMark too, which was a five-bar waveform until the
+// 23 Sep 2026 rebrand; the mark is now an L with two sound waves, and the
+// waveform lives on here and in the session meter rather than in the logo. The bars decay
 // outward from the centre and fade into the rule at both ends, which is
 // also what stops it reading as a chart.
 //

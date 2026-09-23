@@ -237,9 +237,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
       {/* Header */}
       <header className="w-full max-w-6xl mx-auto p-4 sm:p-6 flex items-center justify-between border-b border-lexis-ink/10 gap-2">
         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-          <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700 flex-shrink-0">
-            <LexisMark className="w-6 h-6" />
-          </div>
+          <LexisMark className="w-10 h-10 flex-shrink-0" />
           <span className="text-lg sm:text-xl font-display font-semibold text-lexis-ink whitespace-nowrap">
             LEXIS
           </span>
