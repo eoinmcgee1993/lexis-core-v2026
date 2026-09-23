@@ -33,10 +33,16 @@ Decisions currently on the record, at least:
 - **The tutor is a face, not an abstraction.** "A live avatar was the actual
   point of the product — an abstract pulsing ring never was." Replacing the
   avatar with a waveform or a ring undoes that.
-- **The brand mark is a five-bar waveform, not a sparkle.** The sparkle read
-  as generic-AI iconography; the waveform is literal — the product is a live
-  voice conversation. `LexisMark.jsx`, `public/favicon.svg` and `WaveRule.jsx`
-  all speak that one language and must stay in step.
+- **The brand mark is "L, speaking": a navy tile, white L, two amber sound
+  waves** (owner's pick, 23 Sep 2026, from four rendered directions). It
+  replaced the five-bar waveform, which had replaced a sparkle: the sparkle
+  read as generic-AI iconography, and the waveform — however literal — was
+  the stock "audio" icon of every voice app and could not be owned. The
+  geometry lives only in `src/brand/lexisMark.js`; `LexisMark.jsx`, the
+  favicon, the PWA icons and every brand-kit generator are built from it.
+  Change the mark there and re-run the generators, never by hand.
+  `WaveRule.jsx` keeps the waveform as a divider; it no longer mirrors the
+  logo.
 - **Icons only where they carry meaning.** No borrowed trust-badge
   iconography, no icon standing in for a word.
 - **One content edge.** `max-w-6xl` everywhere, with the measure constrained

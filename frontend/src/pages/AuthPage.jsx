@@ -106,9 +106,7 @@ export default function AuthPage({ navigateTo }) {
 
       <div className="w-full max-w-sm bg-white border border-lexis-ink/10 rounded-2xl p-8 shadow-sm">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="p-2 bg-teal-600/10 border border-teal-600/20 rounded-xl text-teal-700">
-            <LexisMark className="w-5 h-5" />
-          </div>
+          <LexisMark className="w-9 h-9" />
           <span className="text-lg font-display font-semibold text-lexis-ink">
             LEXIS
           </span>

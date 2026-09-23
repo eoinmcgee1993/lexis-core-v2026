@@ -89,15 +89,14 @@ export default function WelcomeStage({
             arguably. Every other surface (Landing, Pricing, Auth,
             LegalPageShell) pairs LexisMark with the wordmark; the app, the
             thing people actually pay for, was the one place shipping a bare
-            text button. Same teal-tinted rounded badge those four use, at
-            the smaller scale this compact header wants. */}
+            text button. Same tile those pages use (LexisMark draws its own
+            since the 23 Sep rebrand), at the smaller scale this compact
+            header wants. */}
         <button
           onClick={onGoHome}
           className="group flex items-center gap-2.5 text-sm font-display font-semibold text-lexis-ink/80 hover:text-lexis-ink transition-colors"
         >
-          <span className="p-1.5 bg-teal-600/10 border border-teal-600/20 rounded-lg text-teal-700 transition-colors group-hover:bg-teal-600/15">
-            <LexisMark className="w-4 h-4 block" />
-          </span>
+          <LexisMark className="w-7 h-7 block motion-safe:transition-transform motion-safe:group-hover:scale-105" />
           LEXIS
         </button>
         <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2">

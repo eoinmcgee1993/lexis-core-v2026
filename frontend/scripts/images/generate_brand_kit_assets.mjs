@@ -8,7 +8,7 @@
 // Regenerates the ENTIRE brand kit in brand-kit/ from sources that
 // already exist in this repo:
 //
-//   - public/favicon.svg          the one real brand mark (five-bar waveform)
+//   - src/brand/lexisMark.js      the one real brand mark ("L, speaking", 23 Sep 2026)
 //   - public/avatar/lexis-tutor-photo.jpg   the one real depiction of LEXIS
 //   - public/fonts/fraunces-600-var.woff2       the real display face (variable, optical size live)
 //   - public/fonts/ibm-plex-sans-thai-*.woff2   the real Thai face
@@ -23,8 +23,14 @@
 // SVG wordmark would either need the Fraunces outlines converted to paths
 // (no such tool in this repo) or would reference a font family by name and
 // silently fall back to Georgia on any machine without Fraunces installed,
-// which is worse than a raster in a brand kit. The MARK itself is pure
-// rectangles, so it ships as real, editable SVG.
+// which is worse than a raster in a brand kit.
+//
+// logo/ and the mark avatars are NOT written here any more; their one owner
+// is generate_brand_kit_mark.mjs. This script kept its own copy of the
+// mark's geometry, and that copy was still drawing the pre-4-Sep mirrored
+// waveform when the mark was replaced on 23 Sep — the drift the shared
+// module in src/brand/ exists to end. The lockups and templates below take
+// the mark from that module too.
 //
 // Run with: node scripts/images/generate_brand_kit_assets.mjs
 import sharp from 'sharp';
@@ -33,6 +39,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TRIAL as TRIAL_FACT, PRICING } from '../../src/content/facts.js';
+import { markSvg } from '../../src/brand/lexisMark.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONTEND = path.join(__dirname, '..', '..');
@@ -72,27 +79,6 @@ const TERMS_EN = `Free ${TRIAL_MINUTES}-minute trial. No card required.`;
 const PRICE_EN = `฿${WEEKLY_THB} for ${PRICING.weekly.days} days or ฿${MONTHLY_THB} for ${PRICING.monthly.days}. One-off.`;
 const SITE = 'learnwithlexis.com';
 
-// --- the mark, as real SVG -------------------------------------------
-// Five bars, same geometry as public/favicon.svg and LexisMark.jsx.
-const BARS = [
-  { x: 1.5, y: 8, h: 8 },
-  { x: 6, y: 5, h: 14 },
-  { x: 10.5, y: 2, h: 20 },
-  { x: 15, y: 5, h: 14 },
-  { x: 19.5, y: 8, h: 8 }
-];
-
-function markSvg({ fill, badge = null }) {
-  const bars = BARS.map((b) =>
-    `  <rect x="${b.x}" y="${b.y}" width="3" height="${b.h}" rx="1.5" fill="${fill}" />`
-  ).join('\n');
-  const bg = badge ? `  <rect width="24" height="24" rx="6" fill="${badge}" />\n` : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="LEXIS">
-${bg}${bars}
-</svg>
-`;
-}
-
 // --- HTML canvas rendering -------------------------------------------
 let fontCss = '';
 async function loadFontCss() {
@@ -131,15 +117,14 @@ body{background:${bg};display:flex;align-items:center;justify-content:center;
 </style></head><body>${body}</body></html>`;
 }
 
-// Inline mark for use inside rendered HTML.
-function inlineMark(size, fill, badge = null, radius = null) {
-  const bars = BARS.map((b) =>
-    `<rect x="${b.x}" y="${b.y}" width="3" height="${b.h}" rx="1.5" fill="${fill}"/>`
-  ).join('');
-  const bg = badge
-    ? `<rect width="24" height="24" rx="${radius ?? 6}" fill="${badge}"/>`
-    : '';
-  return `<svg class="mark" width="${size}" height="${size}" viewBox="0 0 24 24">${bg}${bars}</svg>`;
+// Inline mark for use inside rendered HTML. The 23 Sep mark is a
+// fixed-colour tile, so the old fill/badge arguments are gone.
+// `dark` adds a hairline edge so the navy tile does not vanish on a dark
+// surface — same treatment, same reason, as generate_brand_kit_social.mjs.
+function inlineMark(size, dark = false) {
+  const svg = markSvg({ variant: 'tile', size }).replace('<svg ', '<svg class="mark" ');
+  if (!dark) return svg;
+  return `<div style="border-radius:${Math.round(size * 0.23)}px;box-shadow:0 0 0 ${Math.max(1, Math.round(size / 34))}px rgba(255,255,255,.28)">${svg}</div>`;
 }
 
 let browser;
@@ -157,40 +142,11 @@ async function shot(file, { w, h, body, bg = 'transparent', scale = 1, pad = 0 }
   console.log('  ' + file);
 }
 
-async function writeSvg(file, svg) {
-  const out = path.join(KIT, file);
-  await fs.mkdir(path.dirname(out), { recursive: true });
-  await fs.writeFile(out, svg, 'utf8');
-  console.log('  ' + file);
-}
-
-async function pngFromSvg(file, svg, size) {
-  const out = path.join(KIT, file);
-  await fs.mkdir(path.dirname(out), { recursive: true });
-  await sharp(Buffer.from(svg)).resize(size, size).png().toFile(out);
-  console.log('  ' + file);
-}
-
 async function main() {
   await loadFontCss();
   browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 
-  // ================================================================
-  console.log('\nlogo/ — the mark');
-  // ================================================================
-  const badgeSvg = markSvg({ fill: '#FFFFFF', badge: TEAL });
-  await writeSvg('logo/lexis-mark-badge.svg', badgeSvg);
-  await writeSvg('logo/lexis-mark-teal.svg', markSvg({ fill: TEAL }));
-  await writeSvg('logo/lexis-mark-white.svg', markSvg({ fill: '#FFFFFF' }));
-  await writeSvg('logo/lexis-mark-black.svg', markSvg({ fill: INK }));
-  await writeSvg('logo/lexis-mark-badge-navy.svg', markSvg({ fill: '#FFFFFF', badge: NAVY }));
-
-  for (const s of [1024, 512, 256, 192, 180, 128, 64, 32]) {
-    await pngFromSvg(`logo/lexis-mark-badge-${s}.png`, badgeSvg, s);
-  }
-  await pngFromSvg('logo/lexis-mark-teal-1024.png', markSvg({ fill: TEAL }), 1024);
-  await pngFromSvg('logo/lexis-mark-white-1024.png', markSvg({ fill: '#FFFFFF' }), 1024);
-  await pngFromSvg('logo/lexis-mark-black-1024.png', markSvg({ fill: INK }), 1024);
+  // logo/ — owned by generate_brand_kit_mark.mjs, see the header.
 
   // ================================================================
   console.log('\nwordmark/ — text logos and lockups');
@@ -205,22 +161,22 @@ async function main() {
   }
 
   // Horizontal lockup: mark + wordmark.
-  const hLockup = (color, markFill, badge) => `
+  const hLockup = (color) => `
     <div style="display:flex;align-items:center;gap:44px">
-      ${inlineMark(180, markFill, badge)}
+      ${inlineMark(180, color === '#FFFFFF')}
       <div class="display" style="font-size:190px;color:${color};line-height:1">LEXIS</div>
     </div>`;
   await shot('wordmark/lexis-lockup-horizontal-light.png', {
-    w: 1200, h: 320, body: hLockup(INK, '#FFFFFF', TEAL), scale: 2
+    w: 1200, h: 320, body: hLockup(INK), scale: 2
   });
   await shot('wordmark/lexis-lockup-horizontal-dark.png', {
-    w: 1200, h: 320, body: hLockup('#FFFFFF', '#FFFFFF', TEAL), scale: 2
+    w: 1200, h: 320, body: hLockup('#FFFFFF'), scale: 2
   });
 
   // Stacked lockup with the verified one-line pitch.
   const vLockup = (color, sub) => `
     <div style="display:flex;flex-direction:column;align-items:center;gap:34px;text-align:center">
-      ${inlineMark(200, '#FFFFFF', TEAL)}
+      ${inlineMark(200, color === '#FFFFFF')}
       <div class="display" style="font-size:170px;color:${color};line-height:1">LEXIS</div>
       <div style="font-size:40px;color:${color};opacity:.62;letter-spacing:.01em">${sub}</div>
     </div>`;
@@ -233,7 +189,7 @@ async function main() {
   await shot('wordmark/lexis-lockup-stacked-th.png', {
     w: 1200, h: 900,
     body: `<div style="display:flex;flex-direction:column;align-items:center;gap:34px;text-align:center">
-      ${inlineMark(200, '#FFFFFF', TEAL)}
+      ${inlineMark(200)}
       <div class="display" style="font-size:170px;color:${INK};line-height:1">LEXIS</div>
       <div class="thai" lang="th" style="font-size:38px;color:${INK};opacity:.62">${PITCH_TH}</div>
     </div>`,
@@ -301,11 +257,8 @@ async function main() {
     await writeAvatar(`avatars/lexis-photo-ring-${size}.png`, photoRing, size);
   }
 
-  // The mark as an avatar, for a brand-voice account rather than a
-  // persona account. See the README on choosing between the two.
-  for (const size of [1024, 512, 400, 180, 128]) {
-    await pngFromSvg(`avatars/lexis-mark-avatar-${size}.png`, badgeSvg, size);
-  }
+  // Mark avatars (avatars/lexis-mark-avatar-*) are owned by
+  // generate_brand_kit_mark.mjs.
 
   // ================================================================
   // covers/ — deliberately NOT written here.
@@ -323,7 +276,7 @@ async function main() {
     <div style="width:100%;height:100%;background:${CANVAS};display:flex;flex-direction:column;
       justify-content:space-between;padding:96px">
       <div style="display:flex;align-items:center;gap:20px">
-        ${inlineMark(56, '#FFFFFF', TEAL)}
+        ${inlineMark(56)}
         <div class="display" style="font-size:58px;color:${INK};line-height:1">LEXIS</div>
       </div>
       <div class="display" style="font-size:80px;color:${INK};line-height:1.2">${headline}</div>
@@ -346,7 +299,7 @@ async function main() {
     body: `<div style="width:100%;height:100%;background:${CANVAS};display:flex;flex-direction:column;
         justify-content:space-between;padding:96px">
         <div style="display:flex;align-items:center;gap:20px">
-          ${inlineMark(56, '#FFFFFF', TEAL)}
+          ${inlineMark(56)}
           <div class="display" style="font-size:58px;color:${INK};line-height:1">LEXIS</div>
         </div>
         <div class="thai" lang="th" style="font-size:66px;font-weight:600;color:${INK};line-height:1.35">${PITCH_TH_LINES}</div>

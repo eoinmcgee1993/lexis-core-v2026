@@ -77,7 +77,7 @@ worth deciding deliberately rather than by default:
   was made about the website. It was not a decision about social profile
   photos, and it does not automatically extend to them.
 
-**The safe default, and my recommendation:** use the waveform mark
+**The safe default, and my recommendation:** use the mark
 (`avatars/lexis-mark-avatar-*`) as the profile photo for the brand
 account, and use LEXIS's face inside the content, where the surrounding
 post makes it obvious she is the product's tutor persona rather than a
@@ -89,25 +89,31 @@ refusal.
 
 ## 1. Logo
 
-The mark is a literal five-bar audio waveform, not a generic sparkle or
-abstract icon, deliberate since LEXIS's entire product is a live voice
-conversation (see `frontend/src/components/LexisMark.jsx`'s own header
-comment for the reasoning). It's the same shape used as the favicon, the
-header badge on every page, and every social avatar in this kit.
+The mark is **"L, speaking"**: a white L on a navy tile with two amber
+sound waves leaving it (rebrand of 23 Sep 2026; it replaced a five-bar
+waveform, which was the stock "audio" icon of every voice app and could not
+be owned). The L is whose voice it is; the waves are the voice. It's the
+favicon, the installed-app icon, the header badge on every page, and every
+avatar and lockup in this kit.
+
+Its geometry lives in exactly one place, `frontend/src/brand/lexisMark.js`.
+Everything below is generated from it by
+`frontend/scripts/images/generate_brand_kit_mark.mjs` — change the mark
+there and re-run, never edit these files by hand.
 
 ### `logo/` — the mark
 
-Real, editable SVG (the mark is pure rectangles), plus PNG exports.
+Real, editable SVG, plus PNG exports.
 
-| File | What it is |
+| File | Use |
 |---|---|
-| `lexis-mark-badge.svg` | White mark on the teal rounded square. The primary form: favicon, app icon, profile photo. |
-| `lexis-mark-badge-navy.svg` | Same, on navy. For placement on teal or on a busy photo. |
-| `lexis-mark-teal.svg` | Bare teal mark, transparent background. On cream/white surfaces. |
-| `lexis-mark-white.svg` | Bare white mark, transparent. On navy, teal, or photography. |
-| `lexis-mark-black.svg` | Bare ink mark, transparent. One-colour print, faxes, embroidery, anywhere colour is unavailable. |
-| `lexis-mark-badge-{1024,512,256,192,180,128,64,32}.png` | Raster badge at every size a platform asks for. 180 is Apple touch icon, 192/512 are PWA. |
-| `lexis-mark-{teal,white,black}-1024.png` | Raster of each bare colourway, transparent background. |
+| `lexis-mark.svg` | The tile: navy, white L, amber waves. The primary form — favicon, app icon, headers. |
+| `lexis-mark-square.svg` | Same, full-bleed square. For platforms that apply their own corner mask. |
+| `lexis-mark-glyph-light.svg` | No tile: navy L, amber waves, transparent. On cream/white surfaces. |
+| `lexis-mark-glyph-dark.svg` | No tile: white L, amber waves, transparent. On navy or dark photography, where the navy tile would vanish. |
+| `lexis-mark-mono-ink.svg` / `lexis-mark-mono-white.svg` | One colour, outer wave solid rather than tinted. Print, embroidery, stamps — anywhere colour is unavailable. |
+| `lexis-mark-{1024,512,256,192,180,128,64,32}.png` | Raster tile at every size a platform asks for. 180 is Apple touch icon, 192/512 are PWA. |
+| `lexis-mark-{square,glyph-light,glyph-dark,mono-ink,mono-white}-1024.png` | Raster of each other variant, transparent background. |
 
 ### `wordmark/` — text logos and lockups
 
@@ -137,7 +143,7 @@ centred for that crop.
 
 | File | What it is |
 |---|---|
-| `lexis-mark-avatar-{1024,512,400,180,128}.png` | The waveform badge. **The recommended profile photo, see §0.** |
+| `lexis-mark-avatar-{1024,512,400,180,128}.png` | The mark, full-bleed navy, glyph inset so a circular crop never clips a wave. **The recommended profile photo, see §0.** |
 | `lexis-photo-circle-{1024,512,400,180,128}.png` | LEXIS's portrait, circular, transparent corners. |
 | `lexis-photo-navy-{1024,512,400}.png` | Same portrait on a navy square, for anywhere shown square rather than circular. |
 | `lexis-photo-ring-{1024,512,400}.png` | Same portrait with the teal ring the live conversation screen uses. The most on-brand of the three. |
@@ -200,8 +206,11 @@ To change the copy on any of these, edit the strings at the top of
 **Usage rules for the mark:**
 - Don't recolour it outside the combinations shipped above.
 - Don't stretch it off 1:1. Every export already is square.
-- Leave clear space around it at least equal to one bar's width on every
-  side; the exports build this in.
+- Don't recolour it: navy, white and amber are part of the mark. On a dark
+  surface use `glyph-dark` or the tile with a hairline edge (as the social
+  pieces do), not a recoloured tile.
+- Leave clear space around the tile at least equal to the L's stroke width
+  on every side.
 
 ## 2. Color
 
@@ -210,7 +219,7 @@ the same values the live site uses, not a separate "marketing palette."
 
 | Token | Hex | Use |
 |---|---|---|
-| Teal (live accent) | `#0D9488` | The brand's identifying color — logo, links, the live/voice accent. Tailwind's stock `teal-600`, not a custom token. |
+| Teal (live accent) | `#0D9488` | Links and the live/voice accent. (It was also the logo colour until the 23 Sep 2026 rebrand; the mark is now navy + amber.) Tailwind's stock `teal-600`, not a custom token. |
 | Amber (action) | `#FF9E00` | The *only* action/CTA color sitewide — every "Try It Free" / "Get Started" button. Don't use it for anything that isn't a primary action; that discipline is why it still reads as "go" everywhere it appears. |
 | Navy (deep canvas) | `#050B14` | Reserved for the live conversation screen and now this kit's cover/banner assets — deliberately never used as a marketing-page background (see the interface audit this kit's design choices follow). |
 | Ink (text) | `#1E293B` | Primary text on light surfaces. |
@@ -324,9 +333,8 @@ for an unsubstantiated claim.
 
 ## 7. What's deliberately not in this kit
 
-- **No new logo or mascot.** The waveform mark already exists and is used
-  consistently sitewide; inventing a second logo for social specifically
-  would fragment the brand rather than extend it.
+- **No second logo or mascot.** The one mark (§1) is used everywhere;
+  inventing a social-only logo would fragment the brand rather than extend it.
 - **No fabricated social proof.** No follower counts, review scores, or
   "as seen in" claims — none of that exists yet. Add it here the day it's
   real.

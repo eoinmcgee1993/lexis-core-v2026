@@ -1,79 +1,81 @@
 // frontend/scripts/images/generate_brand_kit_mark.mjs
 //
-// Regenerates every brand-kit asset DERIVED FROM THE MARK — the five logo
-// SVGs, the badge PNG ladder, the three flat-colour PNGs and the mark
-// avatars — from the single set of rect coordinates in
-// src/components/LexisMark.jsx.
+// Regenerates every brand-kit asset that IS the mark — brand-kit/logo/ and
+// the mark avatars in brand-kit/avatars/ — from src/brand/lexisMark.js, the
+// module the site's LexisMark component and favicon are built from.
 //
-// Why it is separate from generate_brand_kit_assets.mjs. That script covers
-// the whole kit including the photography and the Fraunces wordmark
-// lockups, and it imports `sharp`, which is NOT in this project's
-// node_modules any more — running it today fails at the import. The
-// photo-derived assets are unaffected by a mark change, so rather than
-// resurrect a dependency to rebuild things that did not change, this does
-// the mark-derived subset through playwright-core and the preinstalled
-// Chromium, which the repo does have. Never run `playwright install`.
+// This script is the only owner of those files. generate_brand_kit_assets.mjs
+// used to write them too, with its own copy of the geometry; that copy had
+// already drifted once (it still drew the pre-4-Sep mirrored waveform), so
+// since the 23 Sep rebrand it no longer touches logo/ at all.
 //
-// Why it exists at all. The mark was redrawn on 4 Sep 2026, and ~30 files
-// in brand-kit/ carried the previous one. A brand kit that disagrees with
-// the product's own favicon is worse than no brand kit, because it is the
-// thing handed to a designer or a VA who will then use the wrong logo in
-// good faith. Nothing here invents a colour or a variant that did not
-// already exist — it is a re-render of the same set.
+// Rendered through playwright-core + the preinstalled Chromium, no sharp, so
+// it runs on a bare checkout. Never run `playwright install`.
 //
-// Coordinates are READ from LexisMark.jsx rather than restated, for the
-// same reason favicon.svg reuses them under a transform: three copies of a
-// logo's geometry is three chances to drift.
+// THE SET (23 Sep 2026, direction B "L, speaking")
+//
+//   lexis-mark.svg               the tile: navy, white L, amber waves. The
+//                                primary form — favicon, app icon, headers.
+//   lexis-mark-square.svg        same, full-bleed. For platforms that apply
+//                                their own corner mask.
+//   lexis-mark-glyph-light.svg   no tile, navy L + amber waves. On cream or
+//                                white, where a tile would be one box too many.
+//   lexis-mark-glyph-dark.svg    no tile, white L + amber waves. On navy or
+//                                dark photography.
+//   lexis-mark-mono-{ink,white}.svg  one colour, outer wave solid rather than
+//                                tinted — print, embroidery, stamps.
+//   lexis-mark-{32..1024}.png    the tile at every size a platform asks for.
+//   lexis-mark-<variant>-1024.png  raster of each other variant.
+//   avatars/lexis-mark-avatar-*  full-bleed square with the glyph at 0.8, so
+//                                a circular profile crop never clips the
+//                                outer wave.
+//
+// Files from the retired waveform set (lexis-mark-badge*, -teal, -black,
+// -white) are deleted, not left beside the new ones: a kit handed to a
+// designer or a VA gets used in good faith, and an old logo sitting in the
+// folder will get used.
 //
 // Run with: node scripts/images/generate_brand_kit_mark.mjs
 import { chromium } from 'playwright-core';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { markSvg, MARK_COLORS } from '../../src/brand/lexisMark.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const root = join(here, '..', '..', '..');
-const kit = join(root, 'brand-kit');
+const kit = join(here, '..', '..', '..', 'brand-kit');
+const INK = '#1E293B';
 
-const src = readFileSync(join(root, 'frontend/src/components/LexisMark.jsx'), 'utf8');
-const rects = src.match(/<rect x="[^"]+"[^>]*\/>/g);
-if (!rects || rects.length !== 5) {
-  throw new Error(`Expected 5 <rect>s in LexisMark.jsx, found ${rects ? rects.length : 0}`);
+const label = 'LEXIS';
+const svgs = {
+  'logo/lexis-mark.svg': markSvg({ variant: 'tile', label }),
+  'logo/lexis-mark-square.svg': markSvg({ variant: 'square', label }),
+  'logo/lexis-mark-glyph-light.svg': markSvg({ variant: 'glyph', letter: MARK_COLORS.tile, label }),
+  'logo/lexis-mark-glyph-dark.svg': markSvg({ variant: 'glyph', label }),
+  'logo/lexis-mark-mono-ink.svg': markSvg({ variant: 'glyph', letter: INK, waves: INK, solid: true, label }),
+  'logo/lexis-mark-mono-white.svg': markSvg({ variant: 'glyph', letter: '#FFFFFF', waves: '#FFFFFF', solid: true, label })
+};
+
+const retired = /^lexis-mark-(badge|teal|black|white)/;
+for (const f of readdirSync(join(kit, 'logo'))) {
+  if (retired.test(f)) { unlinkSync(join(kit, 'logo', f)); console.log(`removed brand-kit/logo/${f}`); }
 }
 
-const TEAL = '#0D9488';
-const NAVY = '#050B14';
-
-const bars = (fill) => rects.map((r) => `  ${r.replace('/>', `fill="${fill}" />`)}`).join('\n');
-const plain = (fill) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="LEXIS">\n${bars(fill)}\n</svg>\n`;
-const badge = (bg) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="LEXIS">\n` +
-  `  <rect width="24" height="24" rx="6" fill="${bg}" />\n${bars('#FFFFFF')}\n</svg>\n`;
-
-const svgs = {
-  'logo/lexis-mark-teal.svg': plain(TEAL),
-  'logo/lexis-mark-black.svg': plain(NAVY),
-  'logo/lexis-mark-white.svg': plain('#FFFFFF'),
-  'logo/lexis-mark-badge.svg': badge(TEAL),
-  'logo/lexis-mark-badge-navy.svg': badge(NAVY)
-};
 for (const [rel, body] of Object.entries(svgs)) {
-  writeFileSync(join(kit, rel), body);
+  writeFileSync(join(kit, rel), body + '\n');
   console.log(`wrote brand-kit/${rel}`);
 }
 
-// PNG ladder. Sizes are exactly the ones already in the kit — this replaces
-// what is there, it does not add or drop a size.
+const avatar = markSvg({ variant: 'square', scale: 0.8 });
 const pngs = [
   ...[32, 64, 128, 180, 192, 256, 512, 1024].map((s) => ({
-    rel: `logo/lexis-mark-badge-${s}.png`, size: s, svg: svgs['logo/lexis-mark-badge.svg'], flat: true
+    rel: `logo/lexis-mark-${s}.png`, size: s, svg: svgs['logo/lexis-mark.svg']
   })),
-  { rel: 'logo/lexis-mark-teal-1024.png', size: 1024, svg: svgs['logo/lexis-mark-teal.svg'] },
-  { rel: 'logo/lexis-mark-black-1024.png', size: 1024, svg: svgs['logo/lexis-mark-black.svg'] },
-  { rel: 'logo/lexis-mark-white-1024.png', size: 1024, svg: svgs['logo/lexis-mark-white.svg'] },
+  ...['square', 'glyph-light', 'glyph-dark', 'mono-ink', 'mono-white'].map((v) => ({
+    rel: `logo/lexis-mark-${v}-1024.png`, size: 1024, svg: svgs[`logo/lexis-mark-${v}.svg`]
+  })),
   ...[128, 180, 400, 512, 1024].map((s) => ({
-    rel: `avatars/lexis-mark-avatar-${s}.png`, size: s, svg: svgs['logo/lexis-mark-badge.svg'], flat: true
+    rel: `avatars/lexis-mark-avatar-${s}.png`, size: s, svg: avatar
   }))
 ];
 

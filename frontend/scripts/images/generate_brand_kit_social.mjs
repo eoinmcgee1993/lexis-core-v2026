@@ -2,7 +2,8 @@
 //
 // Builds the composed social pieces in brand-kit/ from the photography in
 // brand-kit/photography/. Companion to generate_brand_kit_assets.mjs, which
-// builds the logo, wordmark and avatar files from favicon.svg.
+// builds the logo, wordmark and avatar files (the mark-derived subset is now
+// generate_brand_kit_mark.mjs, from src/brand/lexisMark.js).
 //
 // Why this is a separate, later pass (27 Aug 2026): the first version of the
 // composed creative was one navy template stretched across six aspect ratios,
@@ -31,6 +32,7 @@ import { fileURLToPath } from 'node:url';
 // facts.js is a plain constants module with no React imports, so a Node
 // script can read it directly.
 import { TRIAL as TRIAL_FACT, PRICING, FAIR_USE } from '../../src/content/facts.js';
+import { markSvg } from '../../src/brand/lexisMark.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONTEND = path.join(__dirname, '..', '..');
@@ -100,18 +102,26 @@ async function photo(name) {
   return photoCache.get(name);
 }
 
-const BARS = [
-  { x: 1.5, y: 8, h: 8 }, { x: 6, y: 5, h: 14 }, { x: 10.5, y: 2, h: 20 },
-  { x: 15, y: 5, h: 14 }, { x: 19.5, y: 8, h: 8 }
-];
-function mark(size, fill, badge) {
-  const bars = BARS.map(b => `<rect x="${b.x}" y="${b.y}" width="3" height="${b.h}" rx="1.5" fill="${fill}"/>`).join('');
-  const bg = badge ? `<rect width="24" height="24" rx="6" fill="${badge}"/>` : '';
-  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="display:block">${bg}${bars}</svg>`;
+// The mark comes from src/brand/lexisMark.js, the same module the site's
+// LexisMark component and favicon are built from. This file used to carry
+// its own BARS array — and by the 4 Sep redraw it was already the wrong
+// one (the old mirrored 8/14/20/14/8), which is exactly the drift the
+// shared module exists to end. The 23 Sep mark is a fixed-colour tile
+// (navy, white L, amber waves), so lockup()'s `badge` argument no longer
+// recolours it; it is left in the call sites below, unused.
+//
+// On dark surfaces (a white wordmark) the tile gets a hairline edge. First
+// render without it: on the near-black photography the navy tile vanished
+// and a 34px lockup read as a 19px glyph floating beside the wordmark.
+function mark(size, dark = false) {
+  const svg = markSvg({ variant: 'tile', size }).replace('<svg ', '<svg style="display:block" ');
+  if (!dark) return svg;
+  const r = Math.round(size * 0.23);
+  return `<div style="border-radius:${r}px;box-shadow:0 0 0 ${Math.max(1, size / 34)}px rgba(255,255,255,.28)">${svg}</div>`;
 }
 function lockup(size, color, badge) {
   return `<div style="display:flex;align-items:center;gap:${Math.round(size * 0.42)}px">
-    ${mark(size, badge ? '#fff' : color, badge)}
+    ${mark(size, color === '#fff')}
     <div class="d" style="font-size:${Math.round(size * 1.06)}px;color:${color};line-height:1">LEXIS</div>
   </div>`;
 }
