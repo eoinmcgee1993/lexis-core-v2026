@@ -25,7 +25,8 @@ export const SITE_URL = 'https://learnwithlexis.com';
 export const ORG_ID = `${SITE_URL}/#organization`;
 export const APP_ID = `${SITE_URL}/#software`;
 
-// The Organization + SoftwareApplication graph is sitewide-appropriate
+// The Organization + WebSite graph (WebSite replaced SoftwareApplication
+// there on 25 Sep 2026, see buildOffersJsonLd) is sitewide-appropriate
 // (per the re-audit: "can stay") and lives as a static <script> directly
 // in index.html, NOT injected by this module — it needs to be present
 // even for crawlers/social unfurlers that never execute JS, which is the
@@ -53,13 +54,15 @@ const OFFER_TEXT = {
     freeTrial: 'Free trial',
     freeTrialDesc: (minutes) => `${minutes} minutes of free practice, no card required to start.`,
     weekly: 'Weekly pass',
-    monthly: 'Monthly pass'
+    monthly: 'Monthly pass',
+    appDesc: 'A voice conversation partner for practicing spoken English and Thai in real time.'
   },
   th: {
     freeTrial: 'ทดลองใช้ฟรี',
     freeTrialDesc: (minutes) => `ฝึกฝนฟรี ${minutes} นาที ไม่ต้องผูกบัตรเพื่อเริ่มต้น`,
     weekly: 'แพ็กเกจรายสัปดาห์',
-    monthly: 'แพ็กเกจรายเดือน'
+    monthly: 'แพ็กเกจรายเดือน',
+    appDesc: 'คู่สนทนาด้วยเสียงสำหรับฝึกพูดภาษาอังกฤษและภาษาไทยแบบเรียลไทม์'
   }
 };
 
@@ -89,6 +92,16 @@ export function buildOffersJsonLd(lang = 'en') {
     '@type': 'SoftwareApplication',
     '@id': APP_ID,
     name: 'LEXIS',
+    // The full node lives here, not split with index.html (25 Sep 2026).
+    // The sitewide graph used to hold these app fields under the same @id
+    // while this held the offers, and validators read the two halves as two
+    // incomplete items. See index.html's JSON-LD comment.
+    alternateName: 'Learn with LEXIS',
+    applicationCategory: 'EducationApplication',
+    operatingSystem: 'Web',
+    url: `${SITE_URL}/`,
+    description: text.appDesc,
+    inLanguage: lang,
     publisher: { '@id': ORG_ID },
     offers: [
       {
