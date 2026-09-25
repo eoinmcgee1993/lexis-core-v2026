@@ -40,6 +40,34 @@ why — and it's the right trade until you have real numbers.
 
 ---
 
+## Staged in Gmail, 25 Sep 2026 (drafts, not sent)
+
+Nine drafts built from templates 31, 33 and 34, each with one line specific
+to the recipient. The addresses are the organisations' own public contact
+addresses, scraped from their sites that day. None is a personal inbox found
+through a data broker. Each link carries `?ref=<slug>`, so a visit from the
+email shows up under that slug in `analytics_events`.
+
+| Recipient | Address | Angle | ref |
+|---|---|---|---|
+| Teach For Thailand | info@teachforthailand.org | Community partner | teachforthailand |
+| Mercy Centre (Klong Toey) | info@mercycentre.org | Community partner | mercycentre |
+| Thai Child Development Foundation | tcdfoffice@gmail.com | Community partner | tcdf |
+| Education for Development Foundation | info@edfthai.org | Community partner | edf |
+| IH Bangkok | info@ihbangkok.com | Between-classes practice | ihbangkok |
+| Insight English | info@insightenglish.com | Between-classes practice | insightenglish |
+| Modulo | contact@modulo.school | Between-classes practice | modulo |
+| GEOS Thailand | enquiry@geosthai.com | Between-classes practice | geos |
+| Chulalongkorn University Language Institute | culi.iadept@gmail.com | University (template 33) | culi |
+
+The Community drafts offer a *conversation* about sponsored access, not free
+passes. Every free minute is a real OpenAI cost, so how much to give away
+is the owner's decision once a partner says yes. The school drafts offer "a
+code for your students", which is the `PARTNER-CODES.md` flow: create the
+code only after the school replies.
+
+---
+
 # SECTION 1 — X / Twitter (10 posts)
 
 **1.** Most "AI English practice" is a chatbot with a speaker bolted on.
@@ -111,8 +139,10 @@ something you can't pronounce — all of it happens fast, out loud, with a
 stranger. Practise it before you're standing there.
 learnwithlexis.com/practice/travel-english
 
-**16.** ฿199 a week. Talk as much as you want.
+**16.** ฿199 a week for 150 minutes of spoken practice.
 Or try 15 minutes free first — no card needed.
+(Was "talk as much as you want" until 25 Sep 2026. Passes now carry a
+disclosed fair-use allowance, so that line became false.)
 
 **17.** LEXIS listens in both English and Thai and adjusts to your level as
 you go. Total beginner or nearly fluent, you start from wherever you
@@ -368,8 +398,9 @@ minutes of exactly that, free, no card.
 **47.** Not a course. Not a chatbot. A conversation. You talk, she replies
 out loud in real time, and corrects you gently as you go. English or Thai.
 
-**48.** ฿199/week for unlimited speaking practice. Or 15 minutes free first,
-no card, to see if it actually helps.
+**48.** ฿199 for a week of speaking practice, 150 minutes of it. Or 15
+minutes free first, no card, to see if it actually helps.
+(Was "unlimited" until 25 Sep 2026; see #16.)
 
 **49.** ฝึกพูดภาษาอังกฤษออกเสียงจริง ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
 คุยจริง แก้ไขให้ทันทีระหว่างสนทนา

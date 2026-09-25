@@ -243,14 +243,23 @@ const ANALYTICS_EVENTS = new Set([
 // navigation, and a 400 on an unrecognised key would take analytics down
 // account-wide the day someone adds a field to one call site and forgets
 // this map, which is a worse failure than losing that one new field.
+//
+// SOURCE_KEYS ride on every event: where this visit came from (utm_*,
+// a ?ref= partner tag, or the referring site's hostname), captured once per
+// visit by frontend/src/lib/analytics.js. Added 25 Sep 2026 for the launch
+// push: 26 pageviews a week and six accounts ever means the question is
+// which channel brings anyone at all, and with no source on the row every
+// post, ad and outreach email lands in the same undifferentiated count.
+// They are labels chosen by whoever built the link, never an identifier,
+// so they are held to a short slug alphabet rather than trusted as text.
+const SOURCE_KEYS = { src: 'string', med: 'string', cmp: 'string', refHost: 'string' };
 const ANALYTICS_METADATA_SCHEMA = {
-  checkout_started: { planTier: 'string', sponsorAdd: 'boolean' },
-  checkout_completed: { planTier: 'string', sponsorAdd: 'boolean' },
-  session_connected: { direction: 'string', subscriptionStatus: 'string' },
-  plan_cancelled: { planTier: 'string' }
-  // pageview and signup_completed carry no metadata today — absent from
-  // this map, so sanitiseMetadata() returns {} for both regardless of
-  // what a caller sends.
+  pageview: { ...SOURCE_KEYS },
+  signup_completed: { ...SOURCE_KEYS },
+  checkout_started: { planTier: 'string', sponsorAdd: 'boolean', ...SOURCE_KEYS },
+  checkout_completed: { planTier: 'string', sponsorAdd: 'boolean', ...SOURCE_KEYS },
+  session_connected: { direction: 'string', subscriptionStatus: 'string', ...SOURCE_KEYS },
+  plan_cancelled: { planTier: 'string', ...SOURCE_KEYS }
 };
 
 function sanitiseMetadata(event, raw) {
@@ -260,6 +269,11 @@ function sanitiseMetadata(event, raw) {
   for (const [key, expectedType] of Object.entries(schema)) {
     const value = raw[key];
     if (typeof value !== expectedType) continue;
+    if (key in SOURCE_KEYS) {
+      const slug = value.toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 60);
+      if (slug) out[key] = slug;
+      continue;
+    }
     out[key] = typeof value === 'string' ? value.slice(0, 100) : value;
   }
   return out;
