@@ -35,6 +35,38 @@ function getSessionId() {
   }
 }
 
+// Where this visit came from, read once per visit and then reused, so a
+// signup three pages later still carries the source of the link that
+// brought the visitor in. utm_* for ads and posts, ?ref= for partners and
+// outreach emails, otherwise the referring site's hostname (never its full
+// URL, which can carry someone else's search terms or ids). Kept in
+// sessionStorage like the session id: it ends with the tab, it is a label
+// on a link, not an identifier for a person.
+const SOURCE_KEY = 'lexis_visit_source';
+
+function getVisitSource() {
+  try {
+    const stored = sessionStorage.getItem(SOURCE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch { /* fall through and derive it again */ }
+
+  const source = {};
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const src = params.get('utm_source') || params.get('ref');
+    if (src) source.src = src;
+    if (params.get('utm_medium')) source.med = params.get('utm_medium');
+    if (params.get('utm_campaign')) source.cmp = params.get('utm_campaign');
+    if (document.referrer) {
+      const host = new URL(document.referrer).hostname;
+      if (host && host !== window.location.hostname) source.refHost = host;
+    }
+  } catch { /* malformed referrer: the visit is simply unattributed */ }
+
+  try { sessionStorage.setItem(SOURCE_KEY, JSON.stringify(source)); } catch { /* private mode */ }
+  return source;
+}
+
 // Fire-and-forget by design — telemetry must never surface an error to
 // the user or block whatever real action (checkout, cancel, sign-up)
 // triggered it. `keepalive: true` lets the request actually complete even
@@ -64,7 +96,7 @@ export function trackEvent(event, { path, lang, metadata } = {}) {
     fetch(`${BACKEND_URL}/api/analytics/event`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeader },
-      body: JSON.stringify({ event, path, lang, sessionId: getSessionId(), metadata }),
+      body: JSON.stringify({ event, path, lang, sessionId: getSessionId(), metadata: { ...getVisitSource(), ...metadata } }),
       keepalive: true
     }).catch(() => {});
   })();

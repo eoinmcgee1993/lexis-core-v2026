@@ -14,9 +14,10 @@ connected, no budget is set. This is the asset, not the campaign.
    `frontend/src/content/facts.js`: a free 15-minute trial, no card required,
    ฿199/week or ฿599/month after that.
 2. **No volume promise.** Nothing says "unlimited", "as much as you want" or
-   "talk all day". The product has no stated fair-use ceiling and a paid ad is
-   the worst possible place for a customer to discover one. See
-   `LAUNCH-ACTION-PLAN.md` risk 1.
+   "talk all day". Each pass now carries a disclosed fair-use allowance
+   (150 minutes a week, 450 a month, from `facts.js`); an ad that implies
+   more is a claim the product will contradict. Quote the minutes, or say
+   nothing about volume.
 3. **No outcome promise.** Nothing claims fluency, a score, a job, or a
    timeframe to any of them. Those need evidence nobody has yet.
 4. **No superlatives and no social proof.** No "best", "#1", "trusted by",
@@ -29,12 +30,11 @@ connected, no budget is set. This is the asset, not the campaign.
 
 Three things from `LAUNCH-ACTION-PLAN.md` that gate paid media, in order:
 
-- **Unit economics.** See `UNIT-ECONOMICS.md`. This is now the hard gate,
-  not analytics. At $0.20/min of Realtime audio the free trial costs about
-  $6 per signup and the ฿599 plan breaks even at 2.5 minutes of practice a
-  day, with no fair-use cap in the code to stop it. Until you have measured
-  your real per-minute rate, paid acquisition may lose money on contact,
-  before a single baht of ad spend.
+- **Unit economics.** See `UNIT-ECONOMICS.md`. At $0.20/min of Realtime
+  audio the free trial costs about $3 per signup (15 minutes). Paid passes
+  are now bounded by the fair-use cap, so a heavy user can no longer run a
+  pass at an open-ended loss, but the real per-minute rate is still an
+  estimate until the OpenAI invoice for a measured period is in.
 - **Analytics.** Already built, contrary to an earlier version of this file
   that said there was none — that was wrong. `frontend/src/lib/analytics.js`
   posts first-party events to `/api/analytics/event` and they land in the
@@ -47,6 +47,68 @@ Three things from `LAUNCH-ACTION-PLAN.md` that gate paid media, in order:
   **Sign in** form.~~ **Fixed** in PR #90 — `AuthPage.jsx` now opens on
   "Create your account" for anyone without a prior sign-in on the device,
   and only defaults to sign-in for returning visitors. No longer a gate.
+
+- **Attribution.** Every ad URL must carry UTM tags, or its traffic is
+  invisible in `analytics_events` (source capture added 25 Sep 2026; see
+  "Link tagging" below).
+
+---
+
+## Launch offer set (runs until 23 Oct 2026)
+
+`LEXIS50`: 50% off the Weekly Pass, ฿99.50 instead of ฿199, 100 uses, ends
+23 Oct 2026 (`LAUNCH_OFFER` in `facts.js`). **Pull every ad in this block
+the day it ends or the uses run out.** An ad for a code that no longer
+works is the fastest way to turn a click into a complaint.
+
+### Meta
+- **LN-1 Primary:** Launch week: your first Weekly Pass is half price with code LEXIS50. Start with 15 free minutes, no card.
+- **Headline:** Half price launch week
+- **Description:** Code LEXIS50
+- **LN-TH Primary:** เปิดตัว LEXIS: ใช้โค้ด LEXIS50 ลด 50% สำหรับ Weekly Pass เริ่มจากทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
+- **Headline:** ลดครึ่งราคาช่วงเปิดตัว
+- **Description:** โค้ด LEXIS50
+
+### TikTok
+- Launch offer: code LEXIS50 halves your first Weekly Pass. Try 15 min free.
+- **TH:** โค้ด LEXIS50 ลด 50% Weekly Pass ทดลองฟรี 15 นาทีก่อน
+
+### Google RSA extra lines
+- Headline: Launch Code LEXIS50
+- Headline: Weekly Pass ฿99.50
+- Description: Launch offer: code LEXIS50 takes 50% off your first Weekly Pass, until 23 Oct.
+
+---
+
+## Link tagging
+
+Use these exact tags so the numbers group cleanly. Lowercase, no spaces.
+
+| Where | Link |
+|---|---|
+| Meta ads | `https://learnwithlexis.com/?utm_source=meta&utm_medium=paid&utm_campaign=launch` |
+| TikTok ads | `https://learnwithlexis.com/?utm_source=tiktok&utm_medium=paid&utm_campaign=launch` |
+| Google ads | `https://learnwithlexis.com/?utm_source=google&utm_medium=paid&utm_campaign=launch` |
+| Instagram bio / posts | `https://learnwithlexis.com/?utm_source=instagram&utm_medium=social` |
+| TikTok bio | `https://learnwithlexis.com/?utm_source=tiktok&utm_medium=social` |
+| Facebook groups | `https://learnwithlexis.com/?utm_source=facebook&utm_medium=community` |
+| LINE | `https://learnwithlexis.com/th?utm_source=line&utm_medium=social` |
+| Partner / outreach email | `https://learnwithlexis.com/?ref=<partner-slug>` |
+
+Read it back with:
+
+```sql
+select coalesce(metadata->>'src', metadata->>'refHost', 'direct') source,
+       count(distinct session_id) filter (where event_name='pageview') visits,
+       count(*) filter (where event_name='signup_completed') signups,
+       count(*) filter (where event_name='checkout_started') checkouts
+from analytics_events where created_at > now() - interval '7 days'
+group by 1 order by 2 desc;
+```
+
+Signups happen after an email confirmation, often in a new tab, so a
+signup can lose its source. For a purchase, the per-channel promo code in
+Stripe is the reliable attribution (`PARTNER-CODES.md`).
 
 ---
 
@@ -69,7 +131,7 @@ roughly 40; description at roughly 27. Everything below is inside those.
 
 ### EN-3 — the trial
 - **Primary:** Fifteen minutes, free, no card. Find out whether you can actually hold a conversation in English.
-- **Headline:** Thirty free minutes
+- **Headline:** Fifteen free minutes
 - **Description:** Then ฿199/week
 - **Creative:** `post-b-find.png`
 
