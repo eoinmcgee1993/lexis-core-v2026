@@ -26,6 +26,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/:route(app|studio|auth)", "destination": "/app-shell.html" },
+    { "source": "/:route(app|studio|auth)/", "destination": "/app-shell.html" }
   ]
 }
