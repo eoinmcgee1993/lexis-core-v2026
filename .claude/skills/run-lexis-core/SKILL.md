@@ -4,11 +4,12 @@ description: Build, run, and drive LEXIS's frontend (Vite/React) and backend (Ex
 ---
 
 LEXIS is two separately-deployed pieces from one repo (see the root
-`CLAUDE.md`): `frontend/` (Vite/React SPA) and `backend/` (Express). Both
-boot fine locally with placeholder secrets — real Supabase/Stripe/OpenAI
-calls fail at that call, which is normally far enough to prove a change.
-`voice-service/` is a separate, undeployed Python/torch experiment; this
-skill doesn't cover it.
+`CLAUDE.md`): `frontend/` (Vite/React SPA — marketing site, the `/app`
+tutor, and `/studio`, a Higgsfield text-to-video tool) and `backend/`
+(Express). Both boot fine locally with placeholder secrets — real
+Supabase/Stripe/OpenAI/Higgsfield calls fail at that call, which is
+normally far enough to prove a change. `voice-service/` is a separate,
+undeployed Python/torch experiment; this skill doesn't cover it.
 
 Drive the frontend with the Playwright REPL at
 `.claude/skills/run-lexis-core/driver.mjs`, headless Chromium, no
@@ -49,6 +50,16 @@ STRIPE_SECRET_KEY=sk_test_placeholder
 STRIPE_WEBHOOK_SECRET=whsec_placeholder
 ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4173
 PORT=3001
+# Higgsfield (/studio, /api/generations*) is optional — leave these blank
+# and the app still boots fine; those routes just answer 503/401. See
+# Gotchas.
+HF_API_KEY_ID=
+HF_API_KEY_SECRET=
+HIGGSFIELD_ALLOWED_EMAILS=
+HIGGSFIELD_DAILY_LIMIT=5
+HIGGSFIELD_TIMEOUT_MINUTES=30
+HIGGSFIELD_WEBHOOK_BASE_URL=
+HIGGSFIELD_WEBHOOK_SECRET=
 EOF
 
 cat > frontend/.env <<'EOF'
@@ -83,6 +94,8 @@ curl -s http://localhost:3001/health
 # {"status":"Operational","system":"LEXIS Commerce v2026.3","timestamp":"..."}
 curl -s http://localhost:3001/api/me
 # 401 {"error":"Unauthorized: Missing authorization header."} — expected, no token
+curl -s http://localhost:3001/api/generations
+# 401, same shape — the Higgsfield routes sit behind `authenticate` same as everything else
 ```
 
 Every other route in `app.mjs` needs a Supabase-issued bearer token
@@ -143,6 +156,21 @@ tmux send-keys -t lexis 'wait-for text=7 days' Enter
 tmux send-keys -t lexis 'screenshot pricing' Enter
 ```
 
+### Verified example: `/studio` (auth-gated route)
+
+`/studio` (Higgsfield text-to-video, added 23 Sep 2026) is gated exactly
+like `/app` — signed out, it renders the sign-up form, not the studio UI.
+Confirmed by navigating straight to it with no session:
+
+```bash
+tmux send-keys -t lexis 'nav http://localhost:5173/studio' Enter
+tmux send-keys -t lexis 'wait-for body' Enter
+tmux send-keys -t lexis 'screenshot studio-gated' Enter
+```
+
+Zero console errors either way. There's no local path to the signed-in
+studio UI itself without a real Supabase session — see Gotchas.
+
 ## Run (human path)
 
 ```bash
@@ -153,8 +181,12 @@ cd frontend && npm run dev    # vite, opens nothing headless-useful on its own
 ## Test
 
 ```bash
-cd backend && npm test        # fair-use.test.mjs + checkout.test.mjs, ~22+ assertions, no real Stripe/Supabase reached
+cd backend && npm test        # fair-use + checkout + higgsfield suites, 65 assertions, no real Stripe/Supabase/Higgsfield reached
 ```
+
+`higgsfield.test.mjs` runs a local mock HTTP server standing in for
+`api.higgsfield.ai` — it needs no real `HF_API_KEY_ID`/`HF_API_KEY_SECRET`
+and passes fully with the placeholder `backend/.env` above.
 
 Frontend has no standalone test command; `npm run build` (full prerender)
 is its closest correctness check and needs a working Supabase URL shape
@@ -194,6 +226,18 @@ enough since prerender doesn't make live Supabase calls, just imports
   `page.evaluate(el => el.value = '...')` sets the DOM value without
   firing React's `onChange`, so the app's state never updates — use the
   `fill` command, which goes through Playwright's real input pipeline.
+- **Leaving the Higgsfield vars blank doesn't break anything — it's the
+  designed-in state.** `backend/.env.example`'s own comment says so:
+  unset `HF_API_KEY_ID`/`HF_API_KEY_SECRET` means `/api/generations*`
+  answers 503 and "nothing else in the app is affected." Don't invent
+  placeholder-looking values for these the way the other providers get
+  `sk-proj-placeholder` etc. — blank is the correct local-dev value, not
+  a gap to fill in.
+- **The signed-in `/studio` UI itself isn't reachable locally without a
+  real Supabase session** — same as the rest of `/app`. The gated
+  sign-up-form view (this skill's verified example) is as far as the
+  driver gets without real Supabase creds in `backend/.env` /
+  `frontend/.env`.
 
 ## Troubleshooting
 
