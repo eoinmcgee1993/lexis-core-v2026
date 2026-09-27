@@ -89,10 +89,12 @@ refusal.
 
 ## 1. Logo
 
-The mark is **"L, speaking"**: a white L on a navy tile with two amber
-sound waves leaving it (rebrand of 23 Sep 2026; it replaced a five-bar
-waveform, which was the stock "audio" icon of every voice app and could not
-be owned). The L is whose voice it is; the waves are the voice. It's the
+The mark is **"L, speaking"**: a filled navy L on an amber gradient tile
+with two white sound waves leaving it. The idea dates from the rebrand of
+23 Sep 2026, which replaced a five-bar waveform (the stock "audio" icon of
+every voice app, which could not be owned); that first version was a thin
+white L with amber waves on a navy tile, made heavier and warmer on 27 Sep
+2026 after the owner found it weak. The L is whose voice it is; the waves are the voice. It's the
 favicon, the installed-app icon, the header badge on every page, and every
 avatar and lockup in this kit.
 
@@ -107,10 +109,10 @@ Real, editable SVG, plus PNG exports.
 
 | File | Use |
 |---|---|
-| `lexis-mark.svg` | The tile: navy, white L, amber waves. The primary form — favicon, app icon, headers. |
+| `lexis-mark.svg` | The tile: amber gradient, navy L, white waves. The primary form — favicon, app icon, headers. |
 | `lexis-mark-square.svg` | Same, full-bleed square. For platforms that apply their own corner mask. |
 | `lexis-mark-glyph-light.svg` | No tile: navy L, amber waves, transparent. On cream/white surfaces. |
-| `lexis-mark-glyph-dark.svg` | No tile: white L, amber waves, transparent. On navy or dark photography, where the navy tile would vanish. |
+| `lexis-mark-glyph-dark.svg` | No tile: amber L, white waves, transparent. On navy or dark photography. |
 | `lexis-mark-mono-ink.svg` / `lexis-mark-mono-white.svg` | One colour, outer wave solid rather than tinted. Print, embroidery, stamps — anywhere colour is unavailable. |
 | `lexis-mark-{1024,512,256,192,180,128,64,32}.png` | Raster tile at every size a platform asks for. 180 is Apple touch icon, 192/512 are PWA. |
 | `lexis-mark-{square,glyph-light,glyph-dark,mono-ink,mono-white}-1024.png` | Raster of each other variant, transparent background. |

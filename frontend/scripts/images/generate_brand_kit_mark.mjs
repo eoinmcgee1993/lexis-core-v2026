@@ -14,7 +14,7 @@
 //
 // THE SET (23 Sep 2026, direction B "L, speaking")
 //
-//   lexis-mark.svg               the tile: navy, white L, amber waves. The
+//   lexis-mark.svg               the tile: amber gradient, navy L, white waves. The
 //                                primary form — favicon, app icon, headers.
 //   lexis-mark-square.svg        same, full-bleed. For platforms that apply
 //                                their own corner mask.
