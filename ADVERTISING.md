@@ -12,7 +12,9 @@ connected, no budget is set. This is the asset, not the campaign.
 
 1. **Every claim is a verified product fact**, taken from
    `frontend/src/content/facts.js`: a free 15-minute trial, no card required,
-   ฿199/week or ฿599/month after that.
+   then a one-off ฿199 pass for 7 days or ฿599 for 30 days. Nothing renews,
+   so no copy may say "/week", "a month" or "per week": that advertises a
+   recurring charge (facts.js BILLING).
 2. **No volume promise.** Nothing says "unlimited", "as much as you want" or
    "talk all day". Each pass now carries a disclosed fair-use allowance
    (150 minutes a week, 450 a month, from `facts.js`); an ad that implies
@@ -65,9 +67,11 @@ works is the fastest way to turn a click into a complaint.
 - **LN-1 Primary:** Launch week: your first Weekly Pass is half price with code LEXIS50. Start with 15 free minutes, no card.
 - **Headline:** Half price launch week
 - **Description:** Code LEXIS50
+- **Creative:** `ads/launch-en-1080x1350.png`, story `ads/launch-en-story-1080x1920.png`
 - **LN-TH Primary:** เปิดตัว LEXIS: ใช้โค้ด LEXIS50 ลด 50% สำหรับ Weekly Pass เริ่มจากทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
 - **Headline:** ลดครึ่งราคาช่วงเปิดตัว
 - **Description:** โค้ด LEXIS50
+- **Creative:** `ads/launch-th-1080x1350.png`, story `ads/launch-th-story-1080x1920.png`
 
 ### TikTok
 - Launch offer: code LEXIS50 halves your first Weekly Pass. Try 15 min free.
@@ -121,31 +125,31 @@ roughly 40; description at roughly 27. Everything below is inside those.
 - **Primary:** You already know the words. Saying them out loud is the hard part. LEXIS is a voice partner you can practise with.
 - **Headline:** Practise speaking, out loud
 - **Description:** Free 15-min trial
-- **Creative:** `post-a-words.png`
+- **Creative:** `ads/meta-en-1-words-1080x1350.png` (4:5 feed); `post-a-words.png` for square placements
 
 ### EN-2 — against courses
 - **Primary:** You don't need another course. You need someone to talk to. Talk to LEXIS out loud and get gentle corrections.
 - **Headline:** A partner, not a course
 - **Description:** No card required
-- **Creative:** `post-a-course.png`
+- **Creative:** `ads/meta-en-2-course-1080x1350.png` (4:5 feed); `post-a-course.png` for square
 
 ### EN-3 — the trial
 - **Primary:** Fifteen minutes, free, no card. Find out whether you can actually hold a conversation in English.
 - **Headline:** Fifteen free minutes
-- **Description:** Then ฿199/week
-- **Creative:** `post-b-find.png`
+- **Description:** Then ฿199 for 7 days
+- **Creative:** `ads/meta-en-3-find-1080x1350.png` (4:5 feed); `post-b-find.png` for square
 
 ### TH-1
 - **Primary:** คุณรู้คำศัพท์อยู่แล้ว แค่ยังไม่ได้พูดออกมา ฝึกพูดกับ LEXIS ได้ทุกเมื่อ
 - **Headline:** ฝึกพูดออกเสียงจริง
 - **Description:** ทดลองฟรี 15 นาที
-- **Creative:** `post-b-th.png`
+- **Creative:** `ads/meta-th-1-words-1080x1350.png` (4:5 feed); `post-b-th.png` for square
 
 ### TH-2
 - **Primary:** บทสนทนาแรกของคุณไม่ควรเป็นกับคนแปลกหน้า ฝึกกับ LEXIS ก่อน
 - **Headline:** ฝึกก่อนใช้จริง
 - **Description:** ไม่ต้องผูกบัตร
-- **Creative:** `post-d-th.png`
+- **Creative:** `ads/meta-th-2-first-1080x1350.png` (4:5 feed); `post-d-th.png` for square
 
 ---
 
@@ -170,7 +174,7 @@ headline has to stand alone and none may contradict another.
 1. Talk out loud and get gentle corrections as you speak. Free 15-minute trial.
 2. Not a course. A voice partner you can practise a real conversation with.
 3. Reading English is not speaking English. Practise the part that is hard.
-4. Free 15 minutes, no card. Then ฿199 a week or ฿599 a month.
+4. Free 15 minutes, no card. Then ฿199 for 7 days or ฿599 for 30. One-off.
 
 ---
 
@@ -199,6 +203,26 @@ layouts in a feed; six black squares in a row reads as a wall.
 | D, light | `post-d-textbook`, `post-d-stranger`, `post-d-th` | Warm cream, portrait right. Air in the grid. |
 
 Vertical: `story-en.png`, `story-th.png`.
+
+### Paid formats, `brand-kit/ads/` (25 Sep 2026)
+
+Meta gives a 4:5 portrait the most feed space, and a square in a 4:5 slot
+is letterboxed, so every Meta ad above has its own 4:5 piece whose headline
+is that ad's primary line.
+
+| File | Use |
+|---|---|
+| `meta-{en-1,en-2,en-3,th-1,th-2}-*-1080x1350.png` | Meta feed ads EN-1 to TH-2 |
+| `landscape-{en,th}-1200x628.png` | Meta link ads; Google Responsive Display landscape slot |
+| `launch-{en,th}-1080x1350.png` | Launch offer, feed |
+| `launch-{en,th}-story-1080x1920.png` | Launch offer, Stories/Reels/TikTok |
+
+The launch pieces print code, price, strike price and end date, all read
+from `LAUNCH_OFFER` in `facts.js`. **They expire with the offer on 23 Oct
+2026.** Delete them from every ad set that day.
+
+Regenerate with `node scripts/images/generate_brand_kit_social.mjs --only=ads`
+from `frontend/`.
 
 To change any line, edit `LINES` at the top of
 `frontend/scripts/images/generate_brand_kit_social.mjs` and re-run it. Never

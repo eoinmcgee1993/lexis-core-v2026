@@ -278,7 +278,7 @@ the same values the live site uses, not a separate "marketing palette."
 ## 5. Social bios
 
 Every bio below states the same real facts (voice-first, English + Thai,
-free 15-minute trial with no card, ฿199/week or ฿599/month after that),
+free 15-minute trial with no card, then a one-off ฿199 7-day or ฿599 30-day pass that never renews),
 sized to fit each platform's own limit. Swap in the right link
 (`learnwithlexis.com`) in whichever field each platform gives you for one —
 none of these bios below try to cram the URL into the text itself.
@@ -294,9 +294,9 @@ none of these bios below try to cram the URL into the text itself.
 **TH:** ฝึกพูดอังกฤษ-ไทยออกเสียงจริง คุยสด แก้ให้อย่างอ่อนโยน ทดลองฟรี 15 นาที
 
 ### Facebook Page (short description, ~255 characters)
-**EN:** LEXIS is a voice conversation partner for practicing spoken English and Thai. Talk out loud, get gentle real-time corrections, and see what to work on next. Free 15-minute trial, no card required. ฿199/week or ฿599/month after that.
+**EN:** LEXIS is a voice conversation partner for practicing spoken English and Thai. Talk out loud, get gentle real-time corrections, and see what to work on next. Free 15-minute trial, no card required. Then a one-off pass: ฿199 for 7 days or ฿599 for 30.
 
-**TH:** LEXIS คือคู่สนทนาสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย พูดออกเสียงจริง รับคำแนะนำแบบเรียลไทม์อย่างอ่อนโยน แล้วดูว่าควรฝึกอะไรต่อ ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร หลังจากนั้น ฿199/สัปดาห์ หรือ ฿599/เดือน
+**TH:** LEXIS คือคู่สนทนาสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย พูดออกเสียงจริง รับคำแนะนำแบบเรียลไทม์อย่างอ่อนโยน แล้วดูว่าควรฝึกอะไรต่อ ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร หลังจากนั้นจ่ายครั้งเดียว ฿199 ใช้ได้ 7 วัน หรือ ฿599 ใช้ได้ 30 วัน
 
 ### LINE Official Account (short intro)
 *I don't have hands-on LINE OA admin experience to confirm its exact field limits — treat this as a starting draft to fit into whatever field LINE gives you at setup, not a verified-to-fit string the way the others above are.*
