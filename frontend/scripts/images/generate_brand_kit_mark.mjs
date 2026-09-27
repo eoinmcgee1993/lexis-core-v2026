@@ -14,13 +14,13 @@
 //
 // THE SET (23 Sep 2026, direction B "L, speaking")
 //
-//   lexis-mark.svg               the tile: navy, white L, amber waves. The
+//   lexis-mark.svg               the tile: amber gradient, navy L, white waves. The
 //                                primary form — favicon, app icon, headers.
 //   lexis-mark-square.svg        same, full-bleed. For platforms that apply
 //                                their own corner mask.
 //   lexis-mark-glyph-light.svg   no tile, navy L + amber waves. On cream or
 //                                white, where a tile would be one box too many.
-//   lexis-mark-glyph-dark.svg    no tile, white L + amber waves. On navy or
+//   lexis-mark-glyph-dark.svg    no tile, amber L + white waves. On navy or
 //                                dark photography.
 //   lexis-mark-mono-{ink,white}.svg  one colour, outer wave solid rather than
 //                                tinted — print, embroidery, stamps.
@@ -50,7 +50,7 @@ const label = 'LEXIS';
 const svgs = {
   'logo/lexis-mark.svg': markSvg({ variant: 'tile', label }),
   'logo/lexis-mark-square.svg': markSvg({ variant: 'square', label }),
-  'logo/lexis-mark-glyph-light.svg': markSvg({ variant: 'glyph', letter: MARK_COLORS.tile, label }),
+  'logo/lexis-mark-glyph-light.svg': markSvg({ variant: 'glyph', ...MARK_COLORS.glyphOnLight, label }),
   'logo/lexis-mark-glyph-dark.svg': markSvg({ variant: 'glyph', label }),
   'logo/lexis-mark-mono-ink.svg': markSvg({ variant: 'glyph', letter: INK, waves: INK, solid: true, label }),
   'logo/lexis-mark-mono-white.svg': markSvg({ variant: 'glyph', letter: '#FFFFFF', waves: '#FFFFFF', solid: true, label })

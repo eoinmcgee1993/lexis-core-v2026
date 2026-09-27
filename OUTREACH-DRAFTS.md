@@ -60,6 +60,14 @@ email shows up under that slug in `analytics_events`.
 | GEOS Thailand | enquiry@geosthai.com | Between-classes practice | geos |
 | Chulalongkorn University Language Institute | culi.iadept@gmail.com | University (template 33) | culi |
 
+**27 Sep 2026: the four language-school drafts were deleted** (IH Bangkok,
+Insight English, Modulo, GEOS) on the owner's call. Language schools and
+tutors sell speaking practice themselves, so pitching them asks a competitor
+to send us their students. Five drafts remain: the four Community charities
+and Chulalongkorn's language institute. The same rule is in Future's Thai
+outreach guide: no tutors, private teachers or language schools; companies
+(HR / training) were added in their place.
+
 The Community drafts offer a *conversation* about sponsored access, not free
 passes. Every free minute is a real OpenAI cost, so how much to give away
 is the owner's decision once a partner says yes. The school drafts offer "a

@@ -11,8 +11,9 @@
 // deleted — it moved to the "Meet LEXIS" section, where it proves the
 // real-time claim that section makes.
 //
-// AI disclosure: the hero copy beside this video says "AI tutor" in words
-// (LandingPage.jsx). That is the deliberate answer to the question the old
+// AI disclosure: the hero copy beside this video says "virtual tutor" in
+// words (LandingPage.jsx; it said "AI tutor" until 27 Sep 2026, when the
+// owner asked for the word AI to go, and "virtual" kept the disclosure). That is the deliberate answer to the question the old
 // hero comment flagged as open, not a side effect: a photorealistic face
 // speaking in first person must never be left to imply a human. No
 // separate caption badge was reintroduced; that was removed on 20 Aug on

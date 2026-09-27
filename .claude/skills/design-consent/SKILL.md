@@ -33,7 +33,9 @@ Decisions currently on the record, at least:
 - **The tutor is a face, not an abstraction.** "A live avatar was the actual
   point of the product — an abstract pulsing ring never was." Replacing the
   avatar with a waveform or a ring undoes that.
-- **The brand mark is "L, speaking": a navy tile, white L, two amber sound
+- **The brand mark is "L, speaking": an amber gradient tile, a filled navy L,
+  two white sound waves (heavier and warmer version, 27 Sep 2026, after the
+  owner called the stroked navy one weak). Before that: a navy tile, white L, two amber sound
   waves** (owner's pick, 23 Sep 2026, from four rendered directions). It
   replaced the five-bar waveform, which had replaced a sparkle: the sparkle
   read as generic-AI iconography, and the waveform — however literal — was
