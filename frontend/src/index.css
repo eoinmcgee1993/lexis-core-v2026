@@ -216,6 +216,31 @@ html {
     background-color: rgba(255, 255, 255, 0.6);
   }
 
+  /* 27 Sep 2026, "still a bit bleak". Three grounds and one text fill,
+     all full-bleed or inline, none of them a card (see the 21 Aug note
+     above). The gradients are the mark's own amber (#FFB23A to #FF6A1A,
+     src/brand/lexisMark.js), so the page and the logo are one palette. */
+  .lexis-hero-glow {
+    background:
+      radial-gradient(ellipse 45% 55% at 12% 22%, rgba(255, 178, 58, 0.20), transparent 70%),
+      radial-gradient(ellipse 40% 50% at 88% 55%, rgba(255, 106, 26, 0.12), transparent 72%);
+  }
+  .lexis-night {
+    background:
+      radial-gradient(ellipse 55% 70% at 88% 30%, rgba(13, 148, 136, 0.30), transparent 70%),
+      radial-gradient(ellipse 45% 60% at 8% 95%, rgba(255, 122, 26, 0.20), transparent 70%),
+      #050B14;
+  }
+  .lexis-warm {
+    background: linear-gradient(180deg, #FFF4E1 0%, #FFE6BF 100%);
+  }
+  .lexis-text-amber {
+    background: linear-gradient(100deg, #FF9E00 0%, #FF6A1A 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
   /* The dark stage the hero demo sits on. The demo is the single most
      persuasive asset on the page (the real product, running, with real
      audio) and it was rendering as a small dark rectangle floating in the

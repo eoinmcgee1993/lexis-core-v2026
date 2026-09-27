@@ -58,6 +58,8 @@ const CHROME = {
     communityGoal: "Our first goal: 100 sponsors. We're not there yet, and every add-on gets us closer.",
     communityCta: 'Watch LEXIS explain it',
     faqHeading: 'Frequently asked questions',
+    finalTitle: 'Your first conversation starts now.',
+    finalSub: 'Say hello to LEXIS and find out how it feels to speak English with nobody judging, nothing booked and nothing to lose.',
     learnEnglish: 'Learn English',
     learnThai: 'Learn Thai',
     heroDemoCaption: 'What a real LEXIS session looks like',
@@ -88,6 +90,8 @@ const CHROME = {
     communityGoal: 'เป้าหมายแรกของเรา: ผู้สนับสนุน 100 คน ตอนนี้ยังไปไม่ถึง แต่ทุกการสนับสนุนช่วยให้ใกล้ขึ้น',
     communityCta: 'ดู LEXIS อธิบาย',
     faqHeading: 'คำถามที่พบบ่อย',
+    finalTitle: 'บทสนทนาแรกของคุณเริ่มได้เลยตอนนี้',
+    finalSub: 'ทักทาย LEXIS แล้วลองพูดดูโดยไม่มีใครตัดสิน ไม่ต้องนัดเวลา และไม่มีอะไรต้องเสีย',
     learnEnglish: 'เรียนภาษาอังกฤษ',
     learnThai: 'เรียนภาษาไทย',
     heroDemoCaption: 'ตัวอย่างบทสนทนาจริงกับ LEXIS',
@@ -158,18 +162,25 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
   //   - "speak fluently" / "เก่งขึ้น": an outcome promise, not an experience
   // Trial and price live in pricingTeaser (facts.js), directly under the
   // button, so heroSub carries no numbers of its own to go stale.
+  // "virtual tutor" / "ติวเตอร์ดิจิทัล" replaced "AI tutor" / "ติวเตอร์ AI"
+  // on 27 Sep 2026: the owner wants the word AI nowhere on the landing
+  // page. The reason the hero said "AI tutor" at all still stands (see
+  // HeroVideo.jsx): a photorealistic face speaking in first person must
+  // never be left to imply a human you are booking. "Virtual" keeps that
+  // disclosure without the word. Do not drop the adjective entirely; "a
+  // tutor you talk to" beside that video reads as a person.
   const content = {
     en: {
       en: {
         heroTitle: 'Meet LEXIS, your English speaking partner',
-        heroSub: 'She\'s an AI tutor you talk to out loud: warm, quick and endlessly patient. Chat about your day, rehearse a job interview or plan a trip. She answers instantly, fixes your grammar as you go, and tells you what you did well.',
+        heroSub: 'She\'s a virtual tutor you talk to out loud: warm, quick and endlessly patient. Chat about your day, rehearse a job interview or plan a trip. She answers instantly, fixes your grammar as you go, and tells you what you did well.',
         cta: 'Start talking free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
         heroTitle: 'รู้จัก LEXIS คู่ฝึกพูดภาษาอังกฤษของคุณ',
-        heroSub: 'ติวเตอร์ AI ที่คุณคุยด้วยเสียงจริง ใจดี ตอบไว และอดทนเสมอ คุยเรื่องวันของคุณ ซ้อมสัมภาษณ์งาน หรือวางแผนเที่ยว เธอตอบทันที ช่วยแก้ไวยากรณ์ระหว่างคุย และบอกว่าคุณทำอะไรได้ดี',
+        heroSub: 'ติวเตอร์ดิจิทัลที่คุณคุยด้วยเสียงจริง ใจดี ตอบไว และอดทนเสมอ คุยเรื่องวันของคุณ ซ้อมสัมภาษณ์งาน หรือวางแผนเที่ยว เธอตอบทันที ช่วยแก้ไวยากรณ์ระหว่างคุย และบอกว่าคุณทำอะไรได้ดี',
         cta: 'เริ่มคุยฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
@@ -178,14 +189,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
     th: {
       en: {
         heroTitle: 'Meet LEXIS, your Thai speaking partner',
-        heroSub: 'She\'s an AI tutor you talk to out loud: warm, quick and endlessly patient. Chat about your day, rehearse a job interview or plan a trip. She answers instantly, fixes your grammar as you go, and tells you what you did well.',
+        heroSub: 'She\'s a virtual tutor you talk to out loud: warm, quick and endlessly patient. Chat about your day, rehearse a job interview or plan a trip. She answers instantly, fixes your grammar as you go, and tells you what you did well.',
         cta: 'Start talking free',
         pricingTeaser: PRICING_TEASER_EN,
         viewPricing: 'View full pricing'
       },
       th: {
         heroTitle: 'รู้จัก LEXIS คู่ฝึกพูดภาษาไทยของคุณ',
-        heroSub: 'ติวเตอร์ AI ที่คุณคุยด้วยเสียงจริง ใจดี ตอบไว และอดทนเสมอ คุยเรื่องวันของคุณ ซ้อมสัมภาษณ์งาน หรือวางแผนเที่ยว เธอตอบทันที ช่วยแก้ไวยากรณ์ระหว่างคุย และบอกว่าคุณทำอะไรได้ดี',
+        heroSub: 'ติวเตอร์ดิจิทัลที่คุณคุยด้วยเสียงจริง ใจดี ตอบไว และอดทนเสมอ คุยเรื่องวันของคุณ ซ้อมสัมภาษณ์งาน หรือวางแผนเที่ยว เธอตอบทันที ช่วยแก้ไวยากรณ์ระหว่างคุย และบอกว่าคุณทำอะไรได้ดี',
         cta: 'เริ่มคุยฟรี',
         pricingTeaser: PRICING_TEASER_TH,
         viewPricing: 'ดูแพ็กเกจทั้งหมด'
@@ -278,14 +289,24 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           background, which read as generic/faceless. A real depiction of
           who a student is talking to does more for "impressive" than any
           amount of copy polish alone would. */}
-      <section className="lexis-clip-x w-full max-w-6xl mx-auto px-6 pt-8 pb-16 md:pt-20 md:pb-28 grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
+      <section className="lexis-clip-x lexis-hero-glow w-full max-w-6xl mx-auto px-6 pt-8 pb-16 md:pt-20 md:pb-28 grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
         <div className="text-center md:text-left">
           <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-6">
             <Zap className="w-3.5 h-3.5" aria-hidden="true" />
             <span>{c.heroBadge}</span>
           </div>
-          <h1 className="font-display font-semibold text-4xl md:text-5xl tracking-tight mb-6 text-lexis-ink leading-tight text-balance">
-            {t.heroTitle}
+          {/* 27 Sep 2026 ("still a bit bleak"): the product name carries the
+              brand's amber, the same gradient as the mark's tile, so the
+              first thing read on the page is also the most coloured. Split
+              on the name rather than a second string per language, so the
+              four heroTitle variants stay the only copy. */}
+          <h1 className="font-display font-semibold text-4xl md:text-6xl tracking-tight mb-6 text-lexis-ink leading-[1.05] text-balance">
+            {t.heroTitle.split('LEXIS').map((part, i, all) => (
+              <React.Fragment key={i}>
+                {part}
+                {i < all.length - 1 && <span className="lexis-text-amber">LEXIS</span>}
+              </React.Fragment>
+            ))}
           </h1>
           <p className="text-lg md:text-xl text-lexis-ink/75 mb-6 max-w-xl mx-auto md:mx-0 leading-relaxed">
             {t.heroSub}
@@ -429,7 +450,14 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           directions, level-adaptive, no scheduling); the "nothing else
           quite like this" impression comes from specificity, not from
           asserting market uniqueness as fact. */}
-      <section data-reveal className="w-full">
+      {/* 27 Sep 2026: the one dark band on the page. The owner found the
+          page bleak: canvas, white band, canvas, white band, every section
+          the same pale ground. This section's claim is "real-time voice"
+          and its visual is the dark Live Conversation screen, so it is the
+          natural place to switch the ground to the navy that screen already
+          uses, and the demo stops being a dark rectangle on cream. Still a
+          full-bleed band, not a card (21 Aug re-audit). */}
+      <section data-reveal className="lexis-night w-full">
        {/* 23 Sep 2026: the copy (heading, body, specs) now shares the left
            half and HeroLiveDemo takes the right, having moved here from the
            hero when the intro video replaced it. The demo is the real Live
@@ -440,7 +468,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
            bands back to back read as one. */}
        <div className="max-w-6xl mx-auto px-6 py-20 md:py-24 grid md:grid-cols-12 gap-x-12 gap-y-12 items-center">
         <div className="md:col-span-6">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-5">
+        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-white/10 border border-white/15 rounded-full text-xs text-teal-200 mb-5">
           <Gauge className="w-3.5 h-3.5" aria-hidden="true" />
           <span>{c.meetHeading}</span>
         </div>
@@ -448,18 +476,18 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
             content edge stays put while line length stays readable. That
             distinction is what the old per-section max-w-4xl/5xl/3xl was
             reaching for and getting wrong. */}
-        <h2 className="font-display font-semibold text-3xl md:text-[2.75rem] leading-[1.1] text-balance text-lexis-ink">{c.meetTitle}</h2>
+        <h2 className="font-display font-semibold text-3xl md:text-[2.75rem] leading-[1.1] text-balance text-white">{c.meetTitle}</h2>
         <div className="mt-6">
-        <p className="text-base md:text-lg text-lexis-ink/70 leading-relaxed mb-8">{c.meetBody}</p>
+        <p className="text-base md:text-lg text-white/75 leading-relaxed mb-8">{c.meetBody}</p>
         {/* 21 Aug 2026 (interface re-audit, "delete the cards" + "icons only
             where they carry meaning"): was four bg-white bordered chips
             each repeating the same Zap icon — the icon carried no distinct
             information four times over. A plain dot-separated row states
             the same four facts without dressing each one up as an object. */}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-medium text-lexis-ink/75">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-medium text-white/80">
           {c.meetSpecs.map((spec, i) => (
             <React.Fragment key={spec}>
-              {i > 0 && <span className="text-lexis-ink/20" aria-hidden="true">•</span>}
+              {i > 0 && <span className="text-lexis-action" aria-hidden="true">•</span>}
               <span>{spec}</span>
             </React.Fragment>
           ))}
@@ -482,7 +510,11 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           carry the hierarchy instead of a box — nothing bounds the
           content, so the sequence itself (1, 2, 3) is what a visitor's
           eye follows down the page. */}
-      <section data-reveal className="w-full max-w-6xl mx-auto px-6 py-20 md:py-24">
+      {/* 27 Sep 2026: a warm amber ground, full-bleed, so the page reads
+          canvas / band / navy / amber / band instead of five pale grounds
+          in a row. The numerals and the no-box rule are unchanged. */}
+      <section data-reveal className="lexis-warm w-full">
+       <div className="max-w-6xl mx-auto px-6 py-20 md:py-24">
         <div className="flex items-center gap-6 mb-12 md:mb-16">
           <h2 className="font-display font-semibold text-2xl md:text-3xl flex-shrink-0">{c.howItWorks}</h2>
           <WaveRule className="flex-1 min-w-0" />
@@ -495,20 +527,21 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           {HOW_IT_WORKS[lang].map(({ icon: Icon, title, desc }, i) => (
             <div key={title} className="relative sm:pt-8">
               <div
-                className="hidden sm:block absolute top-0 left-0 right-0 h-px bg-lexis-ink/10"
+                className="hidden sm:block absolute top-0 left-0 right-0 h-px bg-lexis-action/40"
                 aria-hidden="true"
               />
               <div className="flex items-baseline gap-3 mb-4">
-                <span className="font-display font-semibold text-5xl md:text-6xl text-lexis-action-dark leading-none tabular-nums">
+                <span className="font-display font-semibold text-5xl md:text-7xl lexis-text-amber leading-none tabular-nums">
                   {i + 1}
                 </span>
                 <Icon className="w-5 h-5 text-teal-700 self-center" aria-hidden="true" />
               </div>
               <div className="font-display font-semibold text-lg text-lexis-ink mb-2">{title}</div>
-              <div className="text-sm md:text-base text-lexis-ink/65 leading-relaxed max-w-xs">{desc}</div>
+              <div className="text-sm md:text-base text-lexis-ink/75 leading-relaxed max-w-xs">{desc}</div>
             </div>
           ))}
         </div>
+       </div>
       </section>
 
       {/* Trust strip — four short bullets, not three. The fourth
@@ -533,7 +566,7 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-8">
             {c.trust.map((claim) => (
               <div key={claim} className="flex items-start gap-3">
-                <span className="mt-2 w-1.5 h-1.5 rounded-full bg-teal-600/70 flex-shrink-0" aria-hidden="true" />
+                <span className="mt-2 w-1.5 h-1.5 rounded-full bg-lexis-action flex-shrink-0" aria-hidden="true" />
                 <span className="text-sm text-lexis-ink/70 leading-relaxed">{claim}</span>
               </div>
             ))}
@@ -579,13 +612,34 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
         </div>
       </section>
 
+      {/* Closing call to action, added 27 Sep 2026. The page used to end on
+          the FAQ and a footer, so a visitor who had read everything and was
+          convinced had to scroll back to the top to act. Same button, same
+          handler and same price line as the hero; a full-bleed band, not a
+          card. */}
+      <section data-reveal className="lexis-night w-full">
+        <div className="max-w-6xl mx-auto px-6 py-20 md:py-28 text-center">
+          <LexisMark className="w-14 h-14 mx-auto mb-8" />
+          <h2 className="font-display font-semibold text-3xl md:text-5xl leading-[1.1] text-balance text-white max-w-3xl mx-auto">{c.finalTitle}</h2>
+          <p className="mt-5 text-base md:text-lg text-white/75 leading-relaxed max-w-2xl mx-auto">{c.finalSub}</p>
+          <button
+            onClick={goPractice}
+            className="mt-10 px-9 py-4 bg-lexis-action hover:bg-lexis-action-dark hover:-translate-y-0.5 active:translate-y-0 motion-safe:active:scale-[0.97] transition-all duration-200 text-lexis-navy font-display font-semibold text-lg rounded-2xl lexis-lift inline-flex items-center gap-3"
+          >
+            <Mic className="w-5 h-5" aria-hidden="true" />
+            <span>{t.cta}</span>
+          </button>
+          <p className="mt-5 text-sm text-white/65">{t.pricingTeaser}</p>
+        </div>
+      </section>
+
       {/* Footer — the "Private & secure" claim used to have nothing
           behind it (flagged in a re-audit: U6). Now links to the actual
           Privacy Policy that explains what that claim means. */}
-      <footer className="lexis-band w-full">
-       <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-5 text-xs text-lexis-ink/75">
+      <footer className="bg-lexis-navy w-full border-t border-white/10">
+       <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-5 text-xs text-white/70">
         <div className="flex items-center space-x-2">
-          <ShieldCheck className="w-4 h-4 text-teal-600" aria-hidden="true" />
+          <ShieldCheck className="w-4 h-4 text-teal-300" aria-hidden="true" />
           <span>{c.footerTrust}</span>
         </div>
         <div className="flex items-center gap-4">
@@ -595,10 +649,10 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
               text held for a separate translation pass — see those
               pages' own scope notes), so those three still point at
               their single English URL regardless of display language. */}
-          <AppLink to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{c.community}</AppLink>
-          <AppLink to="/privacy" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{c.privacy}</AppLink>
-          <AppLink to="/terms" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{c.terms}</AppLink>
-          <AppLink to="/refund" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{c.refunds}</AppLink>
+          <AppLink to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="hover:text-white transition-colors">{c.community}</AppLink>
+          <AppLink to="/privacy" navigateTo={navigateTo} className="hover:text-white transition-colors">{c.privacy}</AppLink>
+          <AppLink to="/terms" navigateTo={navigateTo} className="hover:text-white transition-colors">{c.terms}</AppLink>
+          <AppLink to="/refund" navigateTo={navigateTo} className="hover:text-white transition-colors">{c.refunds}</AppLink>
           <span>© 2026 LEXIS</span>
         </div>
        </div>

@@ -1,6 +1,6 @@
 // frontend/src/components/LexisMark.jsx
 //
-// LEXIS's brand mark: the navy tile with a white L and two amber sound
+// LEXIS's brand mark: the amber tile with a navy L and two white sound
 // waves ("L, speaking"). Geometry and colours live in src/brand/lexisMark.js,
 // which public/favicon.svg, the PWA icons and every brand-kit generator are
 // built from too — this component only turns that data into JSX.
@@ -20,6 +20,10 @@
 //                   it could not be owned. The L is whose voice it is, the
 //                   waves are the voice. The waveform's form lives on in
 //                   WaveRule.jsx and the live session's audio meter.
+//   27 Sep 2026     same idea, heavier and warmer: amber gradient tile,
+//                   filled navy L, white waves. The owner found the stroked
+//                   version weak and the site bleak; the rejected concepts
+//                   and the reasons are in src/brand/lexisMark.js.
 //
 // WHY THE COMPONENT NOW DRAWS ITS OWN TILE
 //
@@ -30,19 +34,25 @@
 // the tile is drawn here and the call sites just size it. One copy of the
 // badge instead of nine.
 //
-// variant="glyph" drops the tile, for dark surfaces where a navy tile
-// disappears into the background.
+// variant="glyph" drops the tile: amber L and white waves, for dark
+// surfaces.
 //
 // ACCESSIBILITY
 //
 // Decorative by default. Every call site places this immediately beside a
 // <span>LEXIS</span>, so labelling it made pages announce "LEXIS LEXIS".
 // Pass `label` only where the mark is the only thing naming the product.
+import { useId } from 'react';
 import { MARK_COLORS, MARK_GEOMETRY } from '../brand/lexisMark.js';
 
 export default function LexisMark({ className, label, variant = 'tile' }) {
   const decorative = !label;
   const g = MARK_GEOMETRY;
+  // Every instance needs its own gradient id: several marks can be on one
+  // page, and a duplicate id makes the browser resolve all of them to the
+  // first definition, which breaks the moment that one unmounts.
+  const gradientId = `lexis-tile-${useId().replace(/:/g, '')}`;
+  const colors = variant === 'glyph' ? MARK_COLORS.glyphOnDark : MARK_COLORS;
   return (
     <svg
       viewBox={g.viewBox}
@@ -52,14 +62,21 @@ export default function LexisMark({ className, label, variant = 'tile' }) {
         : { role: 'img', 'aria-label': label })}
     >
       {variant === 'tile' && (
-        <rect width="100" height="100" rx={g.tileRadius} fill={MARK_COLORS.tile} />
+        <>
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor={MARK_COLORS.tileFrom} />
+              <stop offset="1" stopColor={MARK_COLORS.tileTo} />
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" rx={g.tileRadius} fill={`url(#${gradientId})`} />
+        </>
       )}
       <path
         d={g.letter.d}
-        fill="none"
-        stroke={MARK_COLORS.letter}
-        strokeWidth={g.letter.strokeWidth}
-        strokeLinecap="round"
+        fill={colors.letter}
+        stroke={colors.letter}
+        strokeWidth={g.letter.round}
         strokeLinejoin="round"
       />
       {g.waves.map((w) => (
@@ -67,7 +84,7 @@ export default function LexisMark({ className, label, variant = 'tile' }) {
           key={w.d}
           d={w.d}
           fill="none"
-          stroke={MARK_COLORS.waves}
+          stroke={colors.waves}
           strokeWidth={w.strokeWidth}
           strokeLinecap="round"
           opacity={w.opacity < 1 ? w.opacity : undefined}
