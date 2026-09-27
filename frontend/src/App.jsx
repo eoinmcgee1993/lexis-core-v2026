@@ -12,6 +12,7 @@ import CommunityPage from './pages/CommunityPage';
 import InterviewEnglishPage from './pages/InterviewEnglishPage';
 import EverydayEnglishPage from './pages/EverydayEnglishPage';
 import TravelEnglishPage from './pages/TravelEnglishPage';
+import HospitalityEnglishPage from './pages/HospitalityEnglishPage';
 import BusinessEnglishPage from './pages/BusinessEnglishPage';
 import StudioPage from './pages/StudioPage';
 
@@ -103,6 +104,8 @@ function RouteController() {
       return <TravelEnglishPage navigateTo={navigateTo} />;
     case '/practice/business-english':
       return <BusinessEnglishPage navigateTo={navigateTo} />;
+    case '/practice/hospitality-english':
+      return <HospitalityEnglishPage navigateTo={navigateTo} />;
     // Five more real Thai routes (22 Aug 2026, direct request — "there
     // shoukd be a language toggle on each page too"): same pattern as
     // /th and /th/pricing above, same components, lang="th" prop. Terms/
@@ -119,6 +122,8 @@ function RouteController() {
       return <TravelEnglishPage navigateTo={navigateTo} lang="th" />;
     case '/th/practice/business-english':
       return <BusinessEnglishPage navigateTo={navigateTo} lang="th" />;
+    case '/th/practice/hospitality-english':
+      return <HospitalityEnglishPage navigateTo={navigateTo} lang="th" />;
     default:
       return <LandingPage navigateTo={navigateTo} />;
   }

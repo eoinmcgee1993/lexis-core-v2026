@@ -6,12 +6,15 @@
 // the backend (backend/app.mjs) for the whole session. "Just Talk" sends
 // no topic at all, which falls through to LEXIS's original open rotation.
 import React from 'react';
-import { ArrowLeft, MessageCircle, Briefcase, Plane } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Briefcase, Plane, ConciergeBell } from 'lucide-react';
 
 const TOPICS = [
   { key: 'everyday', label: 'Everyday Talk', desc: 'Real conversations: daily life, friends, hobbies', icon: MessageCircle },
   { key: 'work', label: 'Work & Business', desc: 'Meetings, emails, interviews, small talk', icon: Briefcase },
-  { key: 'travel', label: 'Travel & Culture', desc: 'Hotels, directions, ordering food, getting help', icon: Plane }
+  { key: 'travel', label: 'Travel & Culture', desc: 'Hotels, directions, ordering food, getting help', icon: Plane },
+  // 27 Sep 2026: the staff side of the hotel desk. LEXIS plays the guest
+  // (TOPIC_CURRICULA.hospitality in backend/app.mjs).
+  { key: 'hospitality', label: 'Hotel & Hospitality', desc: 'Serve guests: check-ins, orders, requests', icon: ConciergeBell }
 ];
 
 export default function TopicStage({ onBack, onPickTopic }) {

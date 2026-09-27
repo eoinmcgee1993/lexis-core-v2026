@@ -50,6 +50,7 @@ const ROUTES = [
   { path: '/practice/everyday-english', outFile: 'practice/everyday-english/index.html' },
   { path: '/practice/travel-english', outFile: 'practice/travel-english/index.html' },
   { path: '/practice/business-english', outFile: 'practice/business-english/index.html' },
+  { path: '/practice/hospitality-english', outFile: 'practice/hospitality-english/index.html' },
   // Real Thai routes (Stage 4) — same directory-style output rule as
   // every other route here: dist/th/index.html and dist/th/pricing/
   // index.html get served directly by Vercel's filesystem check for
@@ -62,7 +63,8 @@ const ROUTES = [
   { path: '/th/practice/interview-english', outFile: 'th/practice/interview-english/index.html' },
   { path: '/th/practice/everyday-english', outFile: 'th/practice/everyday-english/index.html' },
   { path: '/th/practice/travel-english', outFile: 'th/practice/travel-english/index.html' },
-  { path: '/th/practice/business-english', outFile: 'th/practice/business-english/index.html' }
+  { path: '/th/practice/business-english', outFile: 'th/practice/business-english/index.html' },
+  { path: '/th/practice/hospitality-english', outFile: 'th/practice/hospitality-english/index.html' }
 ];
 
 const MIME_TYPES = {

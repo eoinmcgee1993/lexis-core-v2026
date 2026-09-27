@@ -525,8 +525,19 @@ function requireEntitlement(req, res, next) {
 const TOPIC_CURRICULA = {
   everyday: 'everyday conversation — daily routine, family and friends, hobbies and interests, food, weather and plans',
   work: 'work and business — meetings, emails, small talk with colleagues, describing your job, job interviews',
-  travel: 'travel — hotels, asking for directions, ordering food, getting help, airports and transport'
+  travel: 'travel — hotels, asking for directions, ordering food, getting help, airports and transport',
+  // Added 27 Sep 2026. Thailand's largest English-speaking workforce is the
+  // hotel, restaurant and tourism staff who serve foreign guests, and none
+  // of the three topics above practises their side of the counter: travel
+  // is the guest's side. LEXIS takes the guest's role here so the student
+  // rehearses the staff lines they actually say at work.
+  hospitality: 'hospitality work, with you playing a foreign guest or customer and the student playing the staff member — welcoming guests and checking them in, taking food and drink orders, handling requests and complaints politely, recommending places and giving directions, explaining prices, bookings and checkout'
 };
+
+// The one list of valid topic keys. /api/session and /api/feedback both
+// validated against a hand-copied ['everyday', 'work', 'travel'], which a
+// new topic would have had to be added to in three places.
+const TOPIC_KEYS = Object.keys(TOPIC_CURRICULA);
 
 function buildTutorInstructions(direction, topic) {
   const learningThai = direction === 'th';
@@ -664,7 +675,7 @@ app.post('/api/session', sessionRateLimiter, authenticate, requireEntitlement, a
     // TopicStage.jsx). Anything not a recognized key (including "Just
     // Talk"'s undefined/null) falls through TOPIC_CURRICULA to LEXIS's
     // original open topic rotation inside buildTutorInstructions.
-    const topic = ['everyday', 'work', 'travel'].includes(req.body?.topic) ? req.body.topic : undefined;
+    const topic = TOPIC_KEYS.includes(req.body?.topic) ? req.body.topic : undefined;
 
     // gpt-4o-realtime-preview-2024-12-17 (an old default here) 404s on
     // POST /v1/realtime/calls — that dated preview snapshot isn't routable
@@ -998,7 +1009,7 @@ app.post('/api/feedback', feedbackRateLimiter, authenticate, async (req, res) =>
     const direction = req.body?.direction === 'th' ? 'th' : 'en';
     // Purely for session_history's own record — doesn't affect grading.
     // Same validation as /api/session's topic param.
-    const topic = ['everyday', 'work', 'travel'].includes(req.body?.topic) ? req.body.topic : null;
+    const topic = TOPIC_KEYS.includes(req.body?.topic) ? req.body.topic : null;
     const targetLabel = direction === 'th' ? 'Thai' : 'English';
     // Same convention as buildTutorInstructions above — the language the
     // student is comfortable in, i.e. NOT the one they're learning.

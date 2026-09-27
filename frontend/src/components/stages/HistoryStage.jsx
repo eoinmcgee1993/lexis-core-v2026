@@ -12,7 +12,8 @@ import { ArrowLeft, ChevronDown, CheckCircle2, Loader2 } from 'lucide-react';
 const TOPIC_LABELS = {
   everyday: 'Everyday Talk',
   work: 'Work & Business',
-  travel: 'Travel & Culture'
+  travel: 'Travel & Culture',
+  hospitality: 'Hotel & Hospitality'
 };
 
 function formatDate(iso) {
