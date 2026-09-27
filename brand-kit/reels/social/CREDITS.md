@@ -1,0 +1,47 @@
+# Photo credits
+
+Background photos in the travel and topic reels are from Unsplash (Unsplash License, free for commercial use). Credit them in the post caption where there is room.
+
+- `grand_palace`: Jochen van Wylick (https://unsplash.com/@jochenvw), https://unsplash.com/photos/7MY-XJEalCU
+- `wat_arun`: SHAN LU (https://unsplash.com/@toyamakanna), https://unsplash.com/photos/8KVnMbjkOoY
+- `wat_pho`: Martijn Vonk (https://unsplash.com/@vonkm737), https://unsplash.com/photos/Ls3ATunm9Ow
+- `chao_phraya`: Polina Kuzovkova (https://unsplash.com/@p_kuzovkova), https://unsplash.com/photos/Jh2UTlV2CAE
+- `chatuchak`: Cecelia Chang (https://unsplash.com/@ceceliaccc), https://unsplash.com/photos/Lkg3WubzmII
+- `chinatown`: Mario Scheibl (https://unsplash.com/@aguyonecam), https://unsplash.com/photos/wj8_hFKte5o
+- `jim_thompson`: Nicolas Spehler (https://unsplash.com/@nspehler), https://unsplash.com/photos/HYyFxQApVMk
+- `lumphini`: Catherine Zaidova (https://unsplash.com/@k_zaidova), https://unsplash.com/photos/r9DjkQwoj9A
+- `rooftop`: Alfonso Scarpa (https://unsplash.com/@lucidistortephoto), https://unsplash.com/photos/xRYym4LZXj0
+- `floating_market`: Benjamin Dillon (https://unsplash.com/@bendillon), https://unsplash.com/photos/uey7HzT7lqM
+- `doi_suthep`: Supasit Chantranon (https://unsplash.com/@supasitc), https://unsplash.com/photos/17DLTOYrxmI
+- `chedi_luang`: YingChu Chen (https://unsplash.com/@ycchen), https://unsplash.com/photos/JPLLB7gFEAc
+- `cm_market`: Yoav Aziz (https://unsplash.com/@yoavaziz), https://unsplash.com/photos/MfclH8S0mqI
+- `doi_inthanon`: Jacob Vizek (https://unsplash.com/@jakevizek), https://unsplash.com/photos/a7mddZZsbuk
+- `elephant_cm`: Rock Vincent Guitard (https://unsplash.com/@rvguitard), https://unsplash.com/photos/egZo0rddu3A
+- `khao_soi`: Kix Chains (https://unsplash.com/@kixchainss), https://unsplash.com/photos/QM1oDAHZ5w8
+- `cm_cafe`: alizy xiao (https://unsplash.com/@alizyxiao), https://unsplash.com/photos/0xvbybrVu1k
+- `wat_phan_tao`: Stefan Meier (https://unsplash.com/@okokstefan), https://unsplash.com/photos/TqYGyA_QK7A
+- `white_temple`: Sacha Jittananusart (https://unsplash.com/@sachajittananusart), https://unsplash.com/photos/1PEHFdZrZ-k
+- `yi_peng`: sayan Nath (https://unsplash.com/@hiresayan), https://unsplash.com/photos/IgDtMnJxYMg
+- `big_buddha`: abdullah ali (https://unsplash.com/@adbullahx), https://unsplash.com/photos/eA59PzXybzY
+- `old_phuket`: Sadiq Ahmad (https://unsplash.com/@dearsadiq), https://unsplash.com/photos/IE-7gOreRpg
+- `phang_nga`: Martti Salmi (https://unsplash.com/@marttisalmi), https://unsplash.com/photos/Bt9-NDuH-WU
+- `phi_phi`: Spenser Sembrat (https://unsplash.com/@spensersembrat), https://unsplash.com/photos/rJiuHbe5NTM
+- `promthep`: Ethan Hoover (https://unsplash.com/@ethanchoover), https://unsplash.com/photos/ya2U2oceAsI
+- `kamala`: Max Bvp (https://unsplash.com/@maxbvp), https://unsplash.com/photos/NueFr-8knFw
+- `wat_chalong`: Guille Sánchez (https://unsplash.com/@guillesanchez), https://unsplash.com/photos/t4K3Y4mlRmo
+- `krathing`: Flow Kanso (https://unsplash.com/@flowkanso), https://unsplash.com/photos/jMpox_UdfKs
+- `similan`: Aziz Homaily (https://unsplash.com/@homaily), https://unsplash.com/photos/MCw0L3UWjZM
+- `muay_thai`: Nick Wang (https://unsplash.com/@nickwang14), https://unsplash.com/photos/E7RaGpEXntI
+- `bkk_skyline`: Tan Kaninthanond (https://unsplash.com/@12tan34), https://unsplash.com/photos/417FF0HwyIM
+- `thai_flag`: Honney Artkongharn (https://unsplash.com/@honney), https://unsplash.com/photos/K4fYO9x6vA4
+- `monks`: Daniel Pelaez Duque (https://unsplash.com/@danielpelaezduque), https://unsplash.com/photos/2vAf8Q-cqhE
+- `songkran`: CJ (https://unsplash.com/@c_j_), https://unsplash.com/photos/ZwUVmUu8RhM
+- `elephant`: Pixelbrain Studio Inc. (https://unsplash.com/@matkrizmanich), https://unsplash.com/photos/vo2bFbso868
+- `tuk_tuk`: Mos Sukjaroenkraisri (https://unsplash.com/@mossuk), https://unsplash.com/photos/SHOP_CkCb6w
+- `street_food`: Markus Winkler (https://unsplash.com/@markuswinkler), https://unsplash.com/photos/PcBmNPteF_0
+- `pad_thai`: John Aledia (https://unsplash.com/@johnaledja), https://unsplash.com/photos/_wBJ0cvKhIE
+- `hotel_desk`: Madeline Liu (https://unsplash.com/@madeline_sd), https://unsplash.com/photos/ocbPifoMxnM
+- `interview`: charlesdeluvio (https://unsplash.com/@charlesdeluvio), https://unsplash.com/photos/rRWiVQzLm7k
+- `airport`: Harm van de Ven (https://unsplash.com/@harm_van_de_ven), https://unsplash.com/photos/TWk7Mv0p_dM
+- `office`: Muhammad Faiz Zulkeflee (https://unsplash.com/@fzeo), https://unsplash.com/photos/alw-CwGFmwQ
+- `friends`: Toa Heftiba (https://unsplash.com/@heftiba), https://unsplash.com/photos/l_ExpFwwOEg

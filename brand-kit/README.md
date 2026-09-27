@@ -349,8 +349,13 @@ for an unsubstantiated claim.
   change a string or a colour at the top of it and re-run. If a designer
   later needs true layered files, they should rebuild from the mark SVG
   and the tokens in §2/§3 rather than tracing these PNGs.
-- **No video, motion or audiogram templates.** Worth having for TikTok
-  and Reels, but they are a different craft from static layout and would
-  need a real editing pass, not a generated still.
+- **Video lives in `reels/`, not here.** `reels/build_reels.py` makes the
+  two 9:16 hero cuts; `reels/social/build_social.py` makes the rest (hook
+  cuts, 1:1 feed cuts, Community cuts, one reel per practice topic in EN and
+  TH, and an English-language Thailand travel series built on Unsplash
+  photos, credited in `reels/social/CREDITS.md`). Both scripts read prices,
+  trial length and page copy from the site's own source, so re-run them
+  after changing `facts.js` or a page's prompts. The travel reels ship
+  silent on purpose: add licensed audio in the app when posting.
 - **No second face or alternate persona.** One LEXIS, the one already in
   the product. See §0 on where it is and isn't appropriate to use her.
