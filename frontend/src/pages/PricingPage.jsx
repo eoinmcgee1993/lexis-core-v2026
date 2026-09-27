@@ -209,7 +209,7 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
           across the board: a pricing page whose headline is text-2xl and
           whose feature list is text-xs reads as a settings screen, not as
           the page where someone decides to pay. */}
-      <section className="flex-1 w-full max-w-6xl mx-auto px-6 py-16 md:py-20">
+      <section className="lexis-clip-x lexis-hero-glow flex-1 w-full max-w-6xl mx-auto px-6 py-16 md:py-20">
         {/* The three plan names below are h2, not h3 (4 Sep 2026). They were
             h3 under this h1 with no h2 anywhere on the page, so the outline
             jumped a level: a screen reader announces a missing rank, and a
@@ -407,21 +407,25 @@ export default function PricingPage({ navigateTo, lang = 'en' }) {
         )}
       </section>
 
-      <footer className="w-full max-w-6xl mx-auto p-6 border-t border-lexis-ink/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-lexis-ink/65">
+      {/* Navy footer, 27 Sep 2026: every page LEXIS sends a buyer through
+          (home, community, pricing) now ends on the same ground. */}
+      <footer className="bg-lexis-navy w-full border-t border-white/10">
+       <div className="max-w-6xl mx-auto p-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/70">
         <div className="flex items-center space-x-2">
-          <ShieldCheck className="w-4 h-4 text-teal-600" aria-hidden="true" />
+          <ShieldCheck className="w-4 h-4 text-teal-300" aria-hidden="true" />
           <span>{t.footerTrust}</span>
         </div>
         <div className="flex items-center gap-4">
           {/* Community now has a real /th route too (22 Aug 2026) — link
               destination follows lang like everywhere else on this page.
               Terms/Privacy/Refund still English-only, unchanged. */}
-          <AppLink to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{t.community}</AppLink>
-          <AppLink to="/privacy" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{t.privacy}</AppLink>
-          <AppLink to="/terms" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{t.terms}</AppLink>
-          <AppLink to="/refund" navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">{t.refunds}</AppLink>
+          <AppLink to={lang === 'th' ? '/th/community' : '/community'} navigateTo={navigateTo} className="hover:text-white transition-colors">{t.community}</AppLink>
+          <AppLink to="/privacy" navigateTo={navigateTo} className="hover:text-white transition-colors">{t.privacy}</AppLink>
+          <AppLink to="/terms" navigateTo={navigateTo} className="hover:text-white transition-colors">{t.terms}</AppLink>
+          <AppLink to="/refund" navigateTo={navigateTo} className="hover:text-white transition-colors">{t.refunds}</AppLink>
           <span>© 2026 LEXIS</span>
         </div>
+       </div>
       </footer>
     </div>
   );
