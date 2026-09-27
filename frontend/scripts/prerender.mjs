@@ -199,7 +199,39 @@ function stripHtmlComments(html) {
   return html.replace(/<!--[\s\S]*?-->/g, '');
 }
 
+// The un-prerendered build output, captured before anything overwrites
+// dist/index.html, is what the client-only routes (/app, /studio, /auth)
+// and real 404s get served (25 Sep 2026). vercel.json used to rewrite
+// every unmatched path to /index.html, which by then was the PRERENDERED
+// homepage: /app, /auth and any made-up URL answered 200 with the home
+// page's canonical and hreflang in their raw HTML. Crawlers that don't run
+// JS never saw the noindex useSeo adds, a Semrush audit counted the
+// resulting non-self-referencing hreflang as conflicts, and every typo URL
+// was a soft 404 duplicating the homepage.
+//
+// noindex is baked into the shell because nothing served from it should
+// be indexed. useSeo only ever sets robots, never removes it, so a
+// client-side navigation from /app to a public page keeps the noindex in
+// the live DOM. That was already true of /app's own runtime noindex, and it
+// has no effect on crawlers, which load every URL fresh.
+function writeShells() {
+  const bare = fs.readFileSync(path.join(DIST_DIR, 'index.html'), 'utf8');
+  if (/rel="canonical"|hreflang=/.test(bare)) {
+    throw new Error('dist/index.html already carries canonical/hreflang, so it is not the bare build. Refusing to write a shell from it.');
+  }
+  const shell = bare.replace(/<head>/, '<head>\n    <meta name="robots" content="noindex, nofollow" />');
+  if (shell === bare) throw new Error('could not insert robots meta into the shell');
+  fs.writeFileSync(path.join(DIST_DIR, 'app-shell.html'), shell);
+  // Vercel serves 404.html, with a 404 status, for any path that matches no
+  // file and no rewrite. Same shell: the SPA still mounts (its default route
+  // is the landing page, which is what visitors saw before), but the status
+  // and the noindex now tell crawlers the URL does not exist.
+  fs.writeFileSync(path.join(DIST_DIR, '404.html'), shell);
+  console.log('[prerender] wrote app-shell.html and 404.html (bare build + noindex)');
+}
+
 async function main() {
+  writeShells();
   console.log('[prerender] serving dist/ …');
   const server = await serveDist();
   console.log(`[prerender] listening on http://localhost:${PORT}`);

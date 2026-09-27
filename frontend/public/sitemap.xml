@@ -20,29 +20,32 @@
      here and their English counterparts' lastmod moves to today — each
      was rewritten in the same change to take a lang prop and carry a
      language toggle. Terms, Privacy and Refund remain English-only and
-     keep their existing dates. -->
+     keep their existing dates.
+     25 Sep 2026: /, /th (practice-topic footer links) and /pricing,
+     /th/pricing (complete SoftwareApplication JSON-LD, descriptive
+     Community link) changed; their lastmod moves to today. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://learnwithlexis.com/</loc>
-    <lastmod>2026-08-21</lastmod>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/pricing</loc>
-    <lastmod>2026-08-21</lastmod>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/th</loc>
-    <lastmod>2026-08-21</lastmod>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://learnwithlexis.com/th/pricing</loc>
-    <lastmod>2026-08-21</lastmod>
+    <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

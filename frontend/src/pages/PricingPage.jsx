@@ -52,7 +52,10 @@ const TEXT = {
     noRenewMonthly: `Your pass ends by itself after ${PRICING.monthly.days} days — it never renews, and there is nothing to cancel.`,
     signInNote: "You'll be asked to sign in before checkout.",
     sponsorLabel: (thb) => `Add ฿${thb} to sponsor a student's practice time through LEXIS Community`,
-    sponsorLearnMore: 'Learn more',
+    // Names its destination (25 Sep 2026): a Semrush Site Audit flagged the
+    // old bare "Learn more" as the site's one non-descriptive anchor. Link
+    // text is what a crawler and a screen-reader link list see out of context.
+    sponsorLearnMore: 'How LEXIS Community works',
     footerTrust: 'Private & secure • Card & PromptPay, handled by Stripe',
     privacy: 'Privacy',
     terms: 'Terms',
@@ -94,7 +97,7 @@ const TEXT = {
     noRenewMonthly: `แพ็กเกจจะสิ้นสุดเองหลังจาก ${PRICING.monthly.days} วัน ไม่มีการต่ออายุอัตโนมัติ และไม่ต้องยกเลิก`,
     signInNote: 'คุณจะต้องเข้าสู่ระบบก่อนชำระเงิน',
     sponsorLabel: (thb) => `เพิ่ม ฿${thb} เพื่อสนับสนุนเวลาฝึกพูดให้นักเรียนผ่าน LEXIS Community`,
-    sponsorLearnMore: 'อ่านเพิ่มเติม',
+    sponsorLearnMore: 'LEXIS Community ทำงานอย่างไร',
     footerTrust: 'ปลอดภัยและเป็นส่วนตัว • บัตรและพร้อมเพย์ ผ่าน Stripe',
     privacy: 'นโยบายความเป็นส่วนตัว',
     terms: 'ข้อกำหนดการใช้งาน',

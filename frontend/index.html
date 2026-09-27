@@ -26,7 +26,11 @@
          on the site — see that file's comment for why this order matters
          most on the homepage specifically. -->
     <title>Practice Speaking English & Thai Out Loud | LEXIS</title>
-    <meta name="description" content="LEXIS is a voice conversation partner for Thai speakers practicing English and English speakers practicing Thai. Talk out loud, get gentle real-time corrections, and see what to work on next. Free 30-minute trial." />
+    <!-- The description placeholder below is filled from facts.js at build/dev time
+         by vite.config.js (25 Sep 2026). The hand-typed copy here still
+         said "Free 30-minute trial" a month after the trial became 15, and
+         it is what /app and /auth serve to any crawler. -->
+    <meta name="description" content="%LANDING_DESCRIPTION_EN%" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -83,8 +87,8 @@
          that actually has that content — see
          frontend/src/data/structuredData.js's buildOffersJsonLd/
          buildFaqJsonLd, and PricingPage.jsx/LandingPage.jsx's useSeo
-         calls. ORG_ID/APP_ID here must match structuredData.js's
-         exported constants if either ever changes — no build step
+         calls. ORG_ID here must match structuredData.js's exported
+         constant if it ever changes — no build step
          generates one from the other yet. No `sameAs` — omitted rather
          than fabricated; add LINE/TikTok/Instagram URLs once they exist.
 
@@ -110,7 +114,18 @@
          field is added here: there isn't a separate legal parent entity to
          name, only the sole trader themselves. foundingDate is left out
          for the same reason every other field here is sourced rather than
-         guessed — no confirmed date exists yet. -->
+         guessed — no confirmed date exists yet.
+
+         WebSite, not SoftwareApplication (25 Sep 2026): this graph used to
+         carry a SoftwareApplication node on every page. Google's software
+         app rules require `offers`, which this static file can't carry
+         (prices live only in facts.js), so it was an invalid item on every
+         page that wasn't /pricing. A Semrush Site Audit counted 12 of them.
+         On /pricing it was worse: two half-nodes sharing one @id, one
+         holding the app fields and the other the offers. The complete
+         SoftwareApplication now comes only from buildOffersJsonLd on the
+         pricing pages, and WebSite (valid sitewide, and what feeds Google's
+         site name) takes its place here. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -126,14 +141,12 @@
           "knowsLanguage": ["en", "th"]
         },
         {
-          "@type": "SoftwareApplication",
-          "@id": "https://learnwithlexis.com/#software",
+          "@type": "WebSite",
+          "@id": "https://learnwithlexis.com/#website",
           "name": "LEXIS",
           "alternateName": "Learn with LEXIS",
-          "applicationCategory": "EducationApplication",
-          "operatingSystem": "Web",
           "url": "https://learnwithlexis.com/",
-          "description": "A voice conversation partner for practicing spoken English and Thai in real time.",
+          "inLanguage": ["en", "th"],
           "publisher": { "@id": "https://learnwithlexis.com/#organization" }
         }
       ]

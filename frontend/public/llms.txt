@@ -38,8 +38,8 @@ there is nothing to cancel; a pass simply ends when its days run out.
 - https://learnwithlexis.com/pricing — full pricing (English)
 - https://learnwithlexis.com/th — home, how it works, FAQ (Thai)
 - https://learnwithlexis.com/th/pricing — full pricing (Thai)
-- https://learnwithlexis.com/community — LEXIS Community: how subscriber
-  sponsorship funds free and discounted access for students and youth groups
+- https://learnwithlexis.com/community — LEXIS Community: how an optional
+  add-on at checkout funds free and discounted access for students and youth groups
 - https://learnwithlexis.com/practice/interview-english — free guided
   spoken English interview-practice questions
 - https://learnwithlexis.com/practice/everyday-english — free guided
@@ -48,6 +48,12 @@ there is nothing to cancel; a pass simply ends when its days run out.
   travel spoken English practice (hotels, directions, ordering food, airports)
 - https://learnwithlexis.com/practice/business-english — free guided
   workplace spoken English practice (meetings, emails, small talk with colleagues)
+- https://learnwithlexis.com/th/community,
+  https://learnwithlexis.com/th/practice/interview-english,
+  https://learnwithlexis.com/th/practice/everyday-english,
+  https://learnwithlexis.com/th/practice/travel-english,
+  https://learnwithlexis.com/th/practice/business-english — Thai versions
+  of the five pages above
 - https://learnwithlexis.com/terms — terms of service
 - https://learnwithlexis.com/privacy — privacy policy, including what
   happens to a user's voice/audio data

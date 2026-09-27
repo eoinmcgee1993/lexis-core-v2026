@@ -67,7 +67,14 @@ const CHROME = {
     privacy: 'Privacy',
     terms: 'Terms',
     refunds: 'Refunds',
-    community: 'Community'
+    community: 'Community',
+    practiceLabel: 'Practice',
+    practiceTopics: [
+      ['/practice/interview-english', 'Interview English'],
+      ['/practice/everyday-english', 'Everyday English'],
+      ['/practice/travel-english', 'Travel English'],
+      ['/practice/business-english', 'Business English']
+    ]
   },
   th: {
     pricing: 'ราคา',
@@ -99,7 +106,14 @@ const CHROME = {
     privacy: 'นโยบายความเป็นส่วนตัว',
     terms: 'ข้อกำหนดการใช้งาน',
     refunds: 'การคืนเงิน',
-    community: 'Community'
+    community: 'Community',
+    practiceLabel: 'ฝึกพูด',
+    practiceTopics: [
+      ['/th/practice/interview-english', 'สัมภาษณ์งาน'],
+      ['/th/practice/everyday-english', 'ชีวิตประจำวัน'],
+      ['/th/practice/travel-english', 'การเดินทาง'],
+      ['/th/practice/business-english', 'การทำงาน']
+    ]
   }
 };
 
@@ -637,7 +651,21 @@ export default function LandingPage({ navigateTo, lang = 'en' }) {
           behind it (flagged in a re-audit: U6). Now links to the actual
           Privacy Policy that explains what that claim means. */}
       <footer className="bg-lexis-navy w-full border-t border-white/10">
-       <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-5 text-xs text-white/70">
+       {/* Practice-topic row (25 Sep 2026). The eight /practice pages were in
+           the sitemap but linked only from their own-language twin, so no
+           crawl from the homepage ever reached them. Semrush reported them
+           as orphaned, and Google treats a sitemap-only page as low
+           priority. Plain text links in the footer's existing treatment,
+           not cards: the landing page's cards were deleted on purpose
+           (21 Aug re-audit) and this must not bring them back. Recoloured
+           for the navy footer on 27 Sep 2026. */}
+       <nav aria-label={c.practiceLabel} className="max-w-6xl mx-auto px-6 pt-10 flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-xs text-white/70">
+         <span className="font-medium text-white">{c.practiceLabel}</span>
+         {c.practiceTopics.map(([to, label]) => (
+           <AppLink key={to} to={to} navigateTo={navigateTo} className="hover:text-white transition-colors">{label}</AppLink>
+         ))}
+       </nav>
+       <div className="max-w-6xl mx-auto px-6 pt-5 pb-10 flex flex-col sm:flex-row items-center justify-between gap-5 text-xs text-white/70">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-teal-300" aria-hidden="true" />
           <span>{c.footerTrust}</span>
