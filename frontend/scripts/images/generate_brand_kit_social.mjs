@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 // onto all 14 templates after the trial was halved to 15 (PR #92).
 // facts.js is a plain constants module with no React imports, so a Node
 // script can read it directly.
-import { TRIAL as TRIAL_FACT, PRICING, FAIR_USE } from '../../src/content/facts.js';
+import { TRIAL as TRIAL_FACT, PRICING, FAIR_USE, LAUNCH_OFFER, LAUNCH_OFFER_PRICE_THB } from '../../src/content/facts.js';
 import { markSvg } from '../../src/brand/lexisMark.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -340,10 +340,132 @@ async function carousels() {
 // only slide that does.
 function lexisNavy() { return '#050B14'; }
 
+
+// ---- PAID ADS (25 Sep 2026). brand-kit/ads/
+//
+// ADVERTISING.md had copy for every Meta ad but pointed each at a 1080
+// square. Meta's feed gives a 4:5 portrait the most screen of any format, and
+// a square in a 4:5 slot is letterboxed, so each Meta ad now has its own 4:5
+// piece whose headline is the ad's own primary line. The 1.91:1 set covers
+// Meta link ads and Google Responsive Display, which require a landscape.
+//
+// The launch-offer pieces print the code, the price and the end date, all
+// from facts.js LAUNCH_OFFER. They carry the date on the creative itself
+// because the ad account will not stop them for us: ADVERTISING.md says to
+// pull them the day the offer ends, and a visible date is the backstop for
+// the day nobody does.
+const OFFER_END = new Date(LAUNCH_OFFER.endsAt);
+const OFFER_END_EN = OFFER_END.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'Asia/Bangkok' });
+const OFFER_END_TH = OFFER_END.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', timeZone: 'Asia/Bangkok' });
+const ADS = {
+  // [file, photo, headline, language]. Headlines are ADVERTISING.md's primary
+  // lines, so the image and the text above it say the same thing.
+  feed: [
+    ['meta-en-1-words', '02-portrait-black-speaking', LINES.words, 'en'],
+    ['meta-en-2-course', '05-vertical-black-headroom', LINES.course, 'en'],
+    ['meta-en-3-find', '12-portrait-black-speaking-alt', LINES.find, 'en'],
+    ['meta-th-1-words', '01-portrait-black-smile', LINES.th_out, 'th'],
+    ['meta-th-2-first', '13-portrait-black-smile-alt', LINES.th_first, 'th']
+  ]
+};
+
+async function ads() {
+  const hd = (lang, size) => lang === 'th'
+    ? `class="t" lang="th" style="font-weight:600;font-size:${Math.round(size * 0.86)}px;color:#fff;line-height:1.42"`
+    : `class="d" style="font-size:${size}px;color:#fff;line-height:1.14"`;
+  const sm = (lang) => lang === 'th' ? 'class="t" lang="th"' : '';
+  const terms = (lang) => lang === 'th' ? TERMS_TH : TERMS;
+  const cta = (lang) => lang === 'th' ? 'ลองใช้ฟรี' : 'Try It Free';
+  const scrim = `<div style="position:absolute;inset:0;background:linear-gradient(to top,
+    rgba(0,0,0,.95) 0%, rgba(0,0,0,.76) 36%, rgba(0,0,0,.1) 64%, rgba(0,0,0,.42) 100%)"></div>`;
+  const rule = `<div style="width:58px;height:3px;background:${TEAL};margin-bottom:30px"></div>`;
+  // Amber is the site's one action colour, so the button on an ad is amber
+  // and is the only amber on it: ad and landing page ask in the same colour.
+  const button = (lang, size = 30) => `<div ${sm(lang)} style="background:${AMBER};color:#fff;font-size:${size}px;
+    font-weight:700;padding:${Math.round(size * 0.72)}px ${Math.round(size * 1.4)}px;border-radius:16px;white-space:nowrap">${cta(lang)}</div>`;
+
+  console.log('\nads/ — Meta feed, 4:5');
+  for (const [file, img, line, lang] of ADS.feed) {
+    await shot(`ads/${file}-1080x1350.png`, 1080, 1350, `
+      <div style="position:relative;width:100%;height:100%;background:${BLACK}">
+        <img class="fill" src="${await photo(img)}" style="object-position:50% 20%"/>${scrim}
+        <div style="position:absolute;top:60px;left:64px">${lockup(38, '#fff', TEAL)}</div>
+        <div style="position:absolute;left:64px;right:64px;bottom:68px">
+          ${rule}<div ${hd(lang, 74)}>${line}</div>
+          <div style="margin-top:44px;display:flex;justify-content:space-between;align-items:center;gap:24px">
+            <div ${sm(lang)} style="font-size:26px;color:#fff;opacity:.66">${terms(lang)}</div>${button(lang)}
+          </div>
+        </div>
+      </div>`, BLACK);
+  }
+
+  console.log('\nads/ — landscape 1.91:1 (Meta link, Google Display)');
+  for (const [lang, line] of [['en', LINES.words], ['th', LINES.th_out]]) {
+    await shot(`ads/landscape-${lang}-1200x628.png`, 1200, 628, `
+      <div style="position:relative;width:100%;height:100%;background:${BLACK}">
+        <img src="${await photo('07-banner-black-right')}" style="position:absolute;right:0;top:0;height:100%;width:62%;object-fit:cover;object-position:70% 25%"/>
+        <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,1) 38%,rgba(0,0,0,.55) 58%,rgba(0,0,0,0) 80%)"></div>
+        <div style="position:absolute;top:44px;left:52px">${lockup(30, '#fff', TEAL)}</div>
+        <div style="position:absolute;left:52px;width:560px;top:50%;transform:translateY(-44%)">
+          ${rule.replace('margin-bottom:30px', 'margin-bottom:22px')}<div ${hd(lang, 48)}>${line.replace(/<br>/g, ' ')}</div>
+        </div>
+        <div style="position:absolute;left:52px;bottom:44px;display:flex;align-items:center;gap:26px">
+          ${button(lang, 24)}<div ${sm(lang)} style="font-size:20px;color:#fff;opacity:.66">${terms(lang)}</div>
+        </div>
+      </div>`, BLACK);
+  }
+
+  // Launch offer. Price struck through beside the offer price, because "half
+  // price" with no reference price is a claim the viewer cannot check.
+  const offer = {
+    en: { head: 'Launch offer', line: `Your first Weekly Pass,<br>half price.`, code: 'Code', ends: `Ends ${OFFER_END_EN} · ${LAUNCH_OFFER.maxRedemptions} uses`, foot: `${PRICING.weekly.days} days, one-off. ${TERMS}` },
+    th: { head: 'ข้อเสนอช่วงเปิดตัว', line: 'Weekly Pass แรกของคุณ<br>ลดครึ่งราคา', code: 'โค้ด', ends: `ถึง ${OFFER_END_TH} · ${LAUNCH_OFFER.maxRedemptions} สิทธิ์`, foot: `${PRICING.weekly.days} วัน จ่ายครั้งเดียว ${TERMS_TH}` }
+  };
+  // The story photo (09) is shot with her low in frame and empty space above,
+  // so on the story the headline goes up there; stacking everything at the
+  // bottom put it across her chest and left the top half blank.
+  const offerBody = (lang, w, h, img, big) => {
+    const o = offer[lang];
+    const headline = `<div ${sm(lang)} style="display:inline-block;border:2px solid ${TEAL};color:${TEAL};font-size:24px;letter-spacing:.06em;
+          padding:10px 20px;border-radius:999px;margin-bottom:30px">${o.head}</div>
+        <div ${hd(lang, big ? 84 : 70)}>${o.line}</div>`;
+    return `<div style="position:relative;width:100%;height:100%;background:${BLACK}">
+      <img class="fill" src="${img}" style="object-position:50% 16%"/>${scrim}
+      <div style="position:absolute;top:${big ? 90 : 60}px;left:64px">${lockup(38, '#fff', TEAL)}</div>
+      ${big ? `<div style="position:absolute;left:64px;right:64px;top:250px">${headline}</div>` : ''}
+      <div style="position:absolute;left:64px;right:64px;bottom:${big ? 150 : 68}px">
+        ${big ? '' : headline}
+        <div style="margin-top:${big ? 0 : 34}px;display:flex;align-items:baseline;gap:22px">
+          <div class="d" style="font-size:110px;color:#fff;line-height:1">฿${LAUNCH_OFFER_PRICE_THB}</div>
+          <div class="d" style="font-size:48px;color:#fff;opacity:.45;text-decoration:line-through">฿${PRICING.weekly.thb}</div>
+        </div>
+        <div style="margin-top:34px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+          <div ${sm(lang)} style="font-size:26px;color:#fff;opacity:.7">${o.code}</div>
+          <div style="border:2px dashed rgba(255,255,255,.55);color:#fff;font-size:40px;font-weight:700;letter-spacing:.12em;
+            padding:12px 28px;border-radius:14px">${LAUNCH_OFFER.code}</div>
+          ${button(lang)}
+        </div>
+        <div ${sm(lang)} style="margin-top:30px;font-size:24px;color:#fff;opacity:.6;line-height:1.5">${o.ends}<br>${o.foot}</div>
+      </div></div>`;
+  };
+  console.log('\nads/ — launch offer (4:5 feed, 9:16 story)');
+  for (const lang of ['en', 'th']) {
+    await shot(`ads/launch-${lang}-1080x1350.png`, 1080, 1350, offerBody(lang, 1080, 1350, await photo('01-portrait-black-smile'), false), BLACK);
+    await shot(`ads/launch-${lang}-story-1080x1920.png`, 1080, 1920, offerBody(lang, 1080, 1920, await photo('09-story-black-lower'), true), BLACK);
+  }
+}
+
 async function main() {
   await loadFonts();
   browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 
+  // `--only=ads` builds just brand-kit/ads/, for the same reason as below.
+  if (process.argv.includes('--only=ads')) {
+    await ads();
+    await browser.close();
+    console.log('\nAds rebuilt (--only=ads; rest of the kit untouched).');
+    return;
+  }
   await carousels();
   // `--only=carousel` regenerates just the carousels. Without it the whole
   // kit is rebuilt as before. The flag exists so adding a carousel slide
@@ -568,6 +690,7 @@ async function main() {
       </div>
     </div>`, CANVAS);
 
+  await ads();
   await browser.close();
   console.log('\nComposed social pieces rebuilt from the photo library.');
 }
