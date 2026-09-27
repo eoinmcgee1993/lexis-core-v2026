@@ -118,7 +118,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
 
   return (
     <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col">
-      <header className="w-full max-w-3xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10">
+      <header className="w-full max-w-6xl mx-auto p-6 flex items-center justify-between border-b border-lexis-ink/10">
         <AppLink
           to={lang === 'th' ? '/th' : '/'} navigateTo={navigateTo} className="flex items-center space-x-2 text-sm text-lexis-ink/70 hover:text-lexis-ink transition-colors"
           >
@@ -138,19 +138,25 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
         </AppLink>
       </header>
 
-      <section className="w-full max-w-3xl mx-auto px-6 pt-16 pb-10 text-center md:text-left">
+      {/* 27 Sep 2026 (owner: the site is "still a bit bleak"). The intro and
+          LEXIS's own video now sit side by side in the site's one content
+          width, over the same warm glow as the landing hero, instead of
+          stacked in a 3xl column that left two thirds of a desktop screen
+          empty. The video keeps its controls: it is a spoken statement,
+          not decoration (see below). */}
+      <section className="lexis-clip-x lexis-hero-glow w-full max-w-6xl mx-auto px-6 pt-12 md:pt-20 pb-16 grid md:grid-cols-12 gap-10 md:gap-12 items-center">
+        <div className="md:col-span-7 text-center md:text-left">
         <div className="inline-flex items-center space-x-2 px-3 py-1 bg-teal-600/10 border border-teal-600/20 rounded-full text-xs text-teal-700 mb-6">
           <Heart className="w-3.5 h-3.5" aria-hidden="true" />
           <span>{t.badge}</span>
         </div>
-        <h1 className="font-display font-semibold text-5xl md:text-6xl leading-[0.98] text-balance text-lexis-ink">
+        <h1 className="font-display font-semibold text-5xl md:text-7xl leading-[0.98] text-balance text-lexis-ink">
           {t.h1}
         </h1>
-        <p className="mt-6 text-lg text-lexis-ink/70 leading-relaxed max-w-2xl mx-auto md:mx-0">
+        <p className="mt-6 text-lg md:text-xl text-lexis-ink/75 leading-relaxed max-w-2xl mx-auto md:mx-0">
           {t.intro}
         </p>
-      </section>
-
+        </div>
       {/* Lexis narrating the mission herself — a spoken statement, not
           ambient decoration, so this stays a real <video> with controls
           rather than an autoplaying loop. Doesn't touch LandingPage's hero
@@ -158,7 +164,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
           product demo, 26 Aug 2026 re-audit) — this is a different page,
           about the mission itself rather than the product's live-voice
           pitch, so a to-camera clip fits without reopening that call. */}
-      <section className="w-full max-w-3xl mx-auto px-6 pb-10 flex justify-center md:justify-start">
+        <div className="md:col-span-5 lexis-stage flex justify-center md:justify-end">
         <div className="w-full max-w-xs">
           {/* poster is the 768-wide variant, not the 1529x2048 original:
               this column is max-w-xs (320px), so 768 covers ~2.4x DPR and
@@ -166,7 +172,7 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
               <video> has no such attribute — so one size has to serve
               every density, and this is the honest middle. */}
           <video
-            className="w-full rounded-2xl border border-lexis-ink/10 shadow-sm"
+            className="w-full rounded-3xl border border-lexis-ink/10 shadow-xl"
             controls
             preload="metadata"
             poster="/marketing/lexis-community-intro-poster-768.jpg"
@@ -175,16 +181,21 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
           </video>
           <p className="mt-2 text-xs text-lexis-ink/50">{t.videoLabel}</p>
         </div>
+        </div>
       </section>
 
-      <section className="w-full py-16 bg-lexis-ink">
-        <p className="max-w-3xl mx-auto px-6 font-display font-semibold text-3xl md:text-4xl leading-tight text-center text-white text-balance">
+      <section className="lexis-night w-full py-20 md:py-24">
+        <p className="max-w-4xl mx-auto px-6 font-display font-semibold text-3xl md:text-5xl leading-tight text-center text-white text-balance">
           {t.bigLine}
         </p>
       </section>
 
-      <section className="flex-1 w-full max-w-3xl mx-auto px-6 py-14">
-        <div className="space-y-10 text-sm text-lexis-ink/80 leading-relaxed">
+      {/* The body copy on a warm band, in the site's content width with the
+          measure held on the text (max-w-3xl inside max-w-6xl), matching the
+          landing page's "How it works". */}
+      <section className="lexis-warm flex-1 w-full">
+       <div className="max-w-6xl mx-auto px-6 py-16 md:py-20">
+        <div className="max-w-3xl space-y-10 text-sm text-lexis-ink/80 leading-relaxed">
           <div>
             <h2 className="font-display font-semibold text-xl text-lexis-ink pt-2 flex items-center gap-2">
               <Coins className="w-5 h-5 text-teal-600" aria-hidden="true" />
@@ -234,7 +245,13 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
           </div>
         </div>
 
-        <div className="mt-14 text-center">
+       </div>
+      </section>
+
+      {/* Closing call to action on navy, the same band the landing page ends
+          on, so both pages finish the same way. */}
+      <section className="lexis-night w-full">
+        <div className="max-w-6xl mx-auto px-6 py-16 md:py-20 text-center">
           <AppLink
             to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="inline-flex min-h-[44px] items-center gap-2 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-bold text-sm px-8 py-3.5 rounded-xl lexis-lift transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
           >
@@ -244,11 +261,13 @@ export default function CommunityPage({ navigateTo, lang = 'en' }) {
         </div>
       </section>
 
-      <footer className="w-full max-w-3xl mx-auto p-6 border-t border-lexis-ink/10 flex items-center justify-between text-xs text-lexis-ink/65">
+      <footer className="bg-lexis-navy w-full border-t border-white/10">
+       <div className="max-w-6xl mx-auto p-6 flex items-center justify-between text-xs text-white/70">
         <div>© 2026 LEXIS</div>
-        <AppLink to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="hover:text-lexis-ink transition-colors">
+        <AppLink to={lang === 'th' ? '/th/pricing' : '/pricing'} navigateTo={navigateTo} className="hover:text-white transition-colors">
           {t.footerPricing}
         </AppLink>
+       </div>
       </footer>
     </div>
   );
