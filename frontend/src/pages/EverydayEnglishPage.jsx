@@ -4,7 +4,8 @@
 // TravelEnglishPage.jsx and BusinessEnglishPage.jsx (Digital Renaissance
 // re-audit, L10: "8-10 more topic pages"). The audit's number doesn't
 // match what the product actually differentiates: TopicStage.jsx offers
-// exactly three selectable topics ('everyday', 'work', 'travel', each
+// selectable topics (originally 'everyday', 'work', 'travel'; 'hospitality'
+// added 27 Sep 2026 with HospitalityEnglishPage.jsx), each
 // steering backend/app.mjs's buildTutorInstructions via TOPIC_CURRICULA),
 // plus interview-english already carved out of 'work'. Splitting each
 // curriculum's five-item bullet list into its own thin page (a page for

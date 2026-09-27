@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS public.session_history (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   direction TEXT NOT NULL CHECK (direction IN ('en', 'th')),
-  topic TEXT, -- 'everyday' | 'work' | 'travel' | NULL ("Just Talk")
+  topic TEXT, -- 'everyday' | 'work' | 'travel' | 'hospitality' | NULL ("Just Talk"); no CHECK, validated in app.mjs (TOPIC_KEYS)
   -- insufficient=true for a real session too short to grade honestly (see
   -- MIN_FEEDBACK_WORDS/MIN_FEEDBACK_TURNS in backend/app.mjs) — confidence
   -- and the two JSONB arrays stay empty/null in that case rather than

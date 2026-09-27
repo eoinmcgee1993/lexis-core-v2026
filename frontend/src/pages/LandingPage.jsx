@@ -73,7 +73,8 @@ const CHROME = {
       ['/practice/interview-english', 'Interview English'],
       ['/practice/everyday-english', 'Everyday English'],
       ['/practice/travel-english', 'Travel English'],
-      ['/practice/business-english', 'Business English']
+      ['/practice/business-english', 'Business English'],
+      ['/practice/hospitality-english', 'Hotel & Hospitality English']
     ]
   },
   th: {
@@ -112,7 +113,8 @@ const CHROME = {
       ['/th/practice/interview-english', 'สัมภาษณ์งาน'],
       ['/th/practice/everyday-english', 'ชีวิตประจำวัน'],
       ['/th/practice/travel-english', 'การเดินทาง'],
-      ['/th/practice/business-english', 'การทำงาน']
+      ['/th/practice/business-english', 'การทำงาน'],
+      ['/th/practice/hospitality-english', 'งานโรงแรมและบริการ']
     ]
   }
 };
