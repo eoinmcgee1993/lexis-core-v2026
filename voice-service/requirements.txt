@@ -1,5 +1,14 @@
-torch>=2.1.0
-torchaudio>=2.1.0
+# torch floor raised from 2.1.0 on 29 Sep 2026. Anything below 2.6.0 allows
+# the torch.load remote-code-execution bug (GHSA-53q9-r3pm-6pq6, critical);
+# 2.13.0 is the first release with every fixable PyTorch advisory fixed.
+# A few low/moderate advisories have no fixed version at all yet, so an
+# audit will still list those. torchaudio 2.11 (the newest, no advisories)
+# declares no torch dependency at all, so pip pairs it with torch 2.14.0
+# without complaint. That pairing resolves, but nobody has run
+# generate_speech.py on it yet (this service isn't deployed). If torchaudio
+# fails to load, pin torch to the torchaudio minor version (both 2.11).
+torch>=2.13.0
+torchaudio>=2.10.0
 ChatTTS>=0.2.1
 pydub>=0.25.1
 numpy>=1.26.0
