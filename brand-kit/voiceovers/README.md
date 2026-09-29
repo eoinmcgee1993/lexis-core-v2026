@@ -1,13 +1,21 @@
 # Voiceover reels
 
-Two ready-to-post 9:16 reels, about 23 seconds each. The narrator's voice is
-over a slow push-in on the LEXIS story portrait. Rebuild them with
+Six ready-to-post 9:16 reels, 16–23 seconds each. Each is a narrator's voice
+over a slow push-in on a LEXIS portrait. Rebuild all of them with
 `python3 brand-kit/voiceovers/build_vo_reels.py`.
 
-| File | Audience | Voice (ElevenLabs v4) |
-|---|---|---|
-| `lexis-vo-reel-en.mp4` | Anyone practising spoken English | Sarah – Warm & Conversational |
-| `lexis-vo-reel-th.mp4` | Thai hotel, restaurant and tourism staff. Pairs with `/th/practice/hospitality-english` | Aom – Gentle, Confident, Smooth |
+| File | Audience | Links to | Voice (ElevenLabs v4) |
+|---|---|---|---|
+| `lexis-vo-reel-en.mp4` | Anyone practising spoken English | `/` | Sarah – Warm & Conversational |
+| `lexis-vo-reel-th.mp4` | Thai hotel, restaurant and tourism staff | `/th/practice/hospitality-english` | Aom – Gentle, Confident, Smooth |
+| `lexis-vo-reel-th-interview.mp4` | Thai job-seekers | `/th/practice/interview-english` | Aom |
+| `lexis-vo-reel-th-travel.mp4` | Thai travellers | `/th/practice/travel-english` | Malee – Cheerful, Bright, Lively |
+| `lexis-vo-reel-th-work.mp4` | Thai office workers | `/th/practice/business-english` | Aom |
+| `lexis-vo-reel-en-learn-thai.mp4` | English-speaking expats learning Thai | `/` | Sarah |
+
+The exact scripts for the last four are the `prompt` text in each flow on the
+ElevenLabs canvas. The caption text in `build_vo_reels.py` follows them line
+for line.
 
 The `take2` MP3s are alternate reads of the same script. To swap a take in,
 point `audio=` at it in the build script and re-measure the caption cue
@@ -45,6 +53,18 @@ times (see the docstring).
 LEXIS and get gentle corrections as you go. 15 minutes free, no card.
 learnwithlexis.com?utm_source=tiktok&utm_medium=social&utm_campaign=vo_en
 
-**TH:** ทำงานโรงแรม ร้านอาหาร หรือท่องเที่ยว? ซ้อมพูดภาษาอังกฤษกับแขกก่อนเจอของจริง
+**TH hotel:** ทำงานโรงแรม ร้านอาหาร หรือท่องเที่ยว? ซ้อมพูดภาษาอังกฤษกับแขกก่อนเจอของจริง
 LEXIS รับบทเป็นแขก คุณรับบทพนักงาน ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
 learnwithlexis.com/th/practice/hospitality-english?utm_source=tiktok&utm_medium=social&utm_campaign=vo_th_hotel
+
+**TH interview:** สัมภาษณ์งานเป็นภาษาอังกฤษเร็ว ๆ นี้? ซ้อมตอบคำถามออกเสียงจริงกับ LEXIS ก่อน ได้คำแนะนำระหว่างคุย ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
+learnwithlexis.com/th/practice/interview-english?utm_source=tiktok&utm_medium=social&utm_campaign=vo_th_interview
+
+**TH travel:** เที่ยวต่างประเทศครั้งหน้า สั่งอาหาร ถามทาง เช็คอินเองได้ ซ้อมพูดกับ LEXIS ก่อนบิน ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
+learnwithlexis.com/th/practice/travel-english?utm_source=tiktok&utm_medium=social&utm_campaign=vo_th_travel
+
+**TH work:** ประชุมกับทีมต่างชาติแล้วพูดไม่ออก? ซ้อมภาษาอังกฤษที่ใช้ในที่ทำงานกับ LEXIS ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
+learnwithlexis.com/th/practice/business-english?utm_source=tiktok&utm_medium=social&utm_campaign=vo_th_work
+
+**EN learn Thai (expat groups, Facebook, Reddit r/Thailand):** Your Thai still stops at "sawasdee"? Practise speaking Thai out loud with LEXIS, everyday conversations with gentle corrections. 15 minutes free, no card.
+learnwithlexis.com?utm_source=facebook&utm_medium=social&utm_campaign=vo_en_learn_thai
