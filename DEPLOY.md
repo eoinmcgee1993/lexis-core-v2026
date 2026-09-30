@@ -1,7 +1,7 @@
 # LEXIS v2026.3 — Production Deployment Guide
 
 ## Prerequisites
-- Node.js 18+
+- Node.js 20.19+ or 22.12+ for the frontend (Vite 7's floor; CI and Vercel use 22). The backend alone still runs on 18+.
 - OpenAI API key with Realtime API access
 - Supabase project (Auth + Postgres)
 - Stripe account with two **one-time** Prices (Weekly ฿199, Monthly ฿599) — LEXIS sells passes, not subscriptions

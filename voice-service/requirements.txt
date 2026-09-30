@@ -1,5 +1,16 @@
-torch>=2.1.0
-torchaudio>=2.1.0
+# torch/torchaudio raised from >=2.1.0 on 29 Sep 2026. Anything below 2.6.0
+# allows the torch.load remote-code-execution bug (GHSA-53q9-r3pm-6pq6,
+# critical), and 2.1 carried a string of memory-corruption bugs besides.
+#
+# Both are pinned to the SAME minor, deliberately. torchaudio's native
+# extension is built against one torch release, but torchaudio 2.11 declares
+# no torch dependency at all, so with independent >= floors pip happily
+# pairs torch 2.14 with torchaudio 2.11 and generate_speech.py can fail
+# loading the extension. 2.11 is the newest torchaudio. The one torch
+# advisory fixed only after 2.11 (GHSA-rrmf-rvhw-rf47, low) is the cost of
+# a working pair; move both pins together when torchaudio 2.12+ ships.
+torch>=2.11.0,<2.12
+torchaudio>=2.11.0,<2.12
 ChatTTS>=0.2.1
 pydub>=0.25.1
 numpy>=1.26.0
