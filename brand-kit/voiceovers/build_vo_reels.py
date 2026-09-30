@@ -93,12 +93,59 @@ REELS = {
               (8.3, 13.0, "everyday conversations, in real time,\\Nwith gentle corrections"),
               (13.1, 16.0, "No textbook. No typing. Just talk.")],
         end_at=16.1, end="Try 15 minutes free\\Nno card required"),
+    # 30 Sep 2026, Community reels. Every claim is the Community page's own:
+    # an optional ฿50 at checkout, one payment, nothing recurring, into one
+    # shared pool meant to fund free/discounted access through schools and
+    # youth groups. The page says plainly the pool hasn't funded a cohort
+    # yet, so the scripts say "to help fund", never that students already
+    # have been. End cards send people to /community, not the home page.
+    'th-community': dict(
+        photo='lexis-02-portrait-black-speaking.jpg', mode='band', fy=0.43,
+        audio='vo-th-community.mp3', dur=27.6, k=1.3,
+        head="LEXIS Community\\Nการฝึกของคุณเปิดประตูได้",
+        cues=[(0.0, 1.9, "บทสนทนาที่มั่นใจ…"),
+              (2.0, 3.8, "นำไปสู่การสัมภาษณ์"),
+              (3.9, 6.1, "การสัมภาษณ์นำไปสู่งาน"),
+              (6.2, 8.8, "และงาน… เปลี่ยนชีวิตได้"),
+              (9.0, 12.5, "ตอนซื้อแพ็กเกจ LEXIS\\Nเลือกเพิ่ม ฿50 ได้"),
+              (12.6, 15.5, "แค่แตะครั้งเดียว จ่ายรวมในครั้งเดียว"),
+              (15.6, 17.4, "ทุกบาทเข้ากองทุนเดียวกัน"),
+              (17.5, 23.6, "เพื่อช่วยให้นักเรียนที่จ่ายไม่ไหวได้ฝึกพูดฟรี\\Nหรือลดราคา ผ่านโรงเรียนและกลุ่มเยาวชน")],
+        end_at=23.7, end="การฝึกของคุณ\\Nเปิดประตูให้คนอื่นได้",
+        end_url='learnwithlexis.com/th/community'),
+    'en-community': dict(
+        photo='lexis-10-closecrop-black.jpg', mode='band', fy=0.43,
+        audio='vo-en-community.mp3', dur=26.4, k=1.0,
+        head="LEXIS Community",
+        cues=[(0.0, 3.0, "A confident conversation can lead to an interview."),
+              (3.1, 5.3, "An interview can lead to a job…"),
+              (5.4, 8.0, "and a job can change a life."),
+              (8.2, 11.9, "When you buy a LEXIS pass,\\Nyou can choose to add ฿50."),
+              (12.0, 15.0, "One tap. Same payment. Nothing recurring."),
+              (15.1, 17.8, "Every baht goes into one shared pool,"),
+              (17.9, 22.4, "to help fund free and discounted practice\\Nfor students who couldn't otherwise afford it.")],
+        end_at=22.5, end="Your practice can open\\Nsomeone else's door",
+        end_url='learnwithlexis.com/community'),
+    'th-community-partners': dict(
+        photo='lexis-01-portrait-black-smile.jpg', mode='band', fy=0.43,
+        audio='vo-th-community-partners.mp3', dur=22.3, k=1.3,
+        head="โรงเรียนและกลุ่มเยาวชน\\Nร่วมเป็นพันธมิตร",
+        cues=[(0.0, 4.4, "คุณดูแลโรงเรียน ศูนย์เยาวชน\\Nหรือองค์กรชุมชนอยู่หรือเปล่า?"),
+              (4.6, 8.1, "LEXIS Community กำลังมองหาพันธมิตรกลุ่มแรก"),
+              (8.2, 11.4, "ให้นักเรียนได้ฝึกพูดภาษาอังกฤษออกเสียงจริง"),
+              (11.5, 15.7, "ลดราคาพิเศษหรือฟรีทั้งกลุ่ม\\Nทุนมาจากผู้ใช้ LEXIS เอง")],
+        end_at=15.8, end="เราเพิ่งเริ่มต้น\\Nและอยากคุยกับคุณ",
+        end_url='learnwithlexis.com/th/community'),
 }
 
 def ts(s):
     return f"0:{int(s // 60):02d}:{s % 60:05.2f}"
 
+import sys
+ONLY = sys.argv[1:]
 for lang, r in REELS.items():
+    if ONLY and lang not in ONLY:
+        continue
     k, dur = r['k'], r['dur']
     ass = f"""[Script Info]
 ScriptType: v4.00+
@@ -122,7 +169,7 @@ Dialogue: 0,{ts(0)},{ts(dur)},Url,,0,0,0,,learnwithlexis.com
         ass += f"Dialogue: 0,{ts(a)},{ts(b)},Cap,,0,0,0,,{t}\n"
     # amber (#FFB23A) URL on the end card, matching the brand tile
     ass += (f"Dialogue: 1,{ts(r['end_at'])},{ts(dur)},End,,0,0,0,,{{\\fad(250,0)}}{r['end']}"
-            f"\\N{{\\fs{46*k:.0f}\\c&H3AB2FF&}}learnwithlexis.com\n")
+            f"\\N{{\\fs{46*k:.0f}\\c&H3AB2FF&}}{r.get('end_url', 'learnwithlexis.com')}\n")
     ass_path = os.path.join(FONTS, f'{lang}.ass')
     open(ass_path, 'w', encoding='utf8').write(ass)
     frames = int(dur * 30)

@@ -88,7 +88,10 @@ const TEXT = {
     ctaButton: `เพิ่ม ฿${SPONSOR_ADDON_THB} ของคุณ เปิดประตูให้คนอื่น`,
     footerPricing: 'ดูราคา',
     seoTitle: 'LEXIS Community | การพูดเปิดประตูได้',
-    seoDescription: 'LEXIS Community: การสมัครสมาชิกทุกครั้งช่วยสนับสนุนการเข้าถึงการฝึกพูดแบบฟรีและลดราคาให้นักเรียนและกลุ่มเยาวชนที่ไม่สามารถจ่ายได้ด้วยตัวเอง'
+    // "ทุกแพ็กเกจ" (every pass), matching the English "every pass". This
+    // said การสมัครสมาชิก ("subscription") until 30 Sep 2026, a recurring-
+    // billing claim in search results for a product with nothing recurring.
+    seoDescription: 'LEXIS Community: ทุกแพ็กเกจที่ซื้อช่วยสนับสนุนการเข้าถึงการฝึกพูดแบบฟรีและลดราคาให้นักเรียนและกลุ่มเยาวชนที่ไม่สามารถจ่ายได้ด้วยตัวเอง'
   }
 };
 
