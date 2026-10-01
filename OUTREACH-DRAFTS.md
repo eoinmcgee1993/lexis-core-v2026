@@ -64,7 +64,7 @@ email shows up under that slug in `analytics_events`.
 Insight English, Modulo, GEOS) on the owner's call. Language schools and
 tutors sell speaking practice themselves, so pitching them asks a competitor
 to send us their students. Five drafts remain: the four Community charities
-and Chulalongkorn's language institute. The same rule is in Future's Thai
+and Chulalongkorn's language institute. The same rule is in the partner
 outreach guide: no tutors, private teachers or language schools; companies
 (HR / training) were added in their place.
 
