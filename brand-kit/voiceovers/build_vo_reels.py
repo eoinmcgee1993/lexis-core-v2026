@@ -136,6 +136,39 @@ REELS = {
               (11.5, 15.7, "ลดราคาพิเศษหรือฟรีทั้งกลุ่ม\\Nทุนมาจากผู้ใช้ LEXIS เอง")],
         end_at=15.8, end="เราเพิ่งเริ่มต้น\\Nและอยากคุยกับคุณ",
         end_url='learnwithlexis.com/th/community'),
+    # 1 Oct 2026, introduction reels: the owner's call that a new account's
+    # first post should say what LEXIS is, not open on a niche (hotel staff).
+    # "คู่สนทนาเสมือน" / "virtual conversation partner" is deliberate: the
+    # same word the landing hero keeps so nothing implies LEXIS is a person.
+    'th-intro': dict(
+        photo='lexis-05-vertical-black-headroom.jpg', mode='band', fy=0.46,
+        audio='vo-th-intro.mp3', dur=25.2, k=1.3,
+        head="รู้จัก LEXIS\\Nคู่ฝึกพูดของคุณ",
+        cues=[(0.0, 1.3, "สวัสดีค่ะ…"),
+              (1.4, 3.9, "ขอแนะนำให้รู้จัก LEXIS"),
+              (4.0, 7.9, "คู่สนทนาเสมือนสำหรับฝึกพูด\\Nภาษาอังกฤษและภาษาไทย"),
+              (8.0, 10.8, "แค่กดปุ่มเดียว แล้วพูดออกมาจริง ๆ"),
+              (10.9, 15.8, "LEXIS ฟัง ตอบกลับทันที\\Nและช่วยแก้ให้อย่างอ่อนโยนระหว่างคุย"),
+              (15.9, 19.2, "จบแต่ละครั้ง สรุปให้ว่าควรฝึกอะไรต่อ")],
+        end_at=19.3, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    'en-intro': dict(**STORY,
+        audio='vo-en-intro.mp3', dur=24.6, k=1.0,
+        head="Meet LEXIS",
+        cues=[(0.0, 2.3, "Hi… meet LEXIS."),
+              (2.4, 6.6, "A virtual conversation partner\\Nfor practising spoken English and Thai."),
+              (6.7, 9.6, "Tap one button and just talk,"),
+              (9.7, 14.6, "out loud. LEXIS listens, replies in real time,\\Nand gently corrects you as you go."),
+              (14.7, 18.5, "After each session: a plain summary\\Nof what to work on next.")],
+        end_at=18.6, end="Try 15 minutes free\\Nno card required"),
+    'th-3reasons': dict(
+        photo='lexis-13-portrait-black-smile-alt.jpg', mode='band', fy=0.46,
+        audio='vo-th-3reasons.mp3', dur=20.3, k=1.3,
+        head="3 เหตุผล\\Nที่ควรลองฝึกพูดกับ LEXIS",
+        cues=[(0.0, 3.0, "สามเหตุผล ที่ควรลองฝึกพูดกับ LEXIS!"),
+              (3.3, 6.6, "① พูดผิดได้ ไม่มีใครตัดสิน"),
+              (6.7, 10.0, "② ฝึกได้ทุกเวลา ไม่ต้องรอใคร"),
+              (10.1, 14.0, "③ ได้คำแนะนำทันทีระหว่างคุย\\Nไม่ต้องรอจนจบ")],
+        end_at=14.1, end="ลองเลย ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
 }
 
 def ts(s):
