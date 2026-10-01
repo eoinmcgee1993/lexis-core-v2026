@@ -1,0 +1,38 @@
+========================================================
+LEXIS · LINE OFFICIAL ACCOUNT
+========================================================
+RULES FOR EVERY POST
+- Never say LEXIS is a person or a teacher. She is a "virtual conversation partner" (คู่สนทนาเสมือน).
+- Prices are one-off passes: ฿199 for 7 days, ฿599 for 30 days. Never write "per week", "per month" or "subscription".
+- Free trial is 15 minutes, no card. Don't promise anything else (no "fluent in 30 days", no reviews or user numbers).
+
+SETUP (manager.line.biz, sign in with your LINE)
+Account name:   LEXIS ฝึกพูดอังกฤษ
+Status message: ฝึกพูด ฟรี 15 นาที
+Profile photo:  lexis-avatar.png
+Cover:          line-cover.png
+
+GREETING MESSAGE (sent automatically when someone adds you)
+สวัสดีค่ะ ขอบคุณที่เพิ่ม LEXIS เป็นเพื่อนนะคะ
+LEXIS คือคู่สนทนาเสมือนสำหรับฝึกพูดภาษาอังกฤษและภาษาไทยออกเสียงจริง คุยสด และแก้ไขให้อย่างอ่อนโยนระหว่างพูด
+เริ่มทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
+https://learnwithlexis.com/th?utm_source=line&utm_medium=social&utm_campaign=greeting
+หลังจากนั้นจ่ายครั้งเดียว ฿199 ใช้ได้ 7 วัน หรือ ฿599 ใช้ได้ 30 วัน ไม่มีการต่ออายุอัตโนมัติ
+
+BROADCASTS: once a week at most (more and people block you). Attach the video named.
+
+WEEK 1: lexis-vo-reel-th-intro.mp4
+รู้จัก LEXIS แล้วหรือยังคะ? คู่สนทนาเสมือนที่ให้คุณฝึกพูดภาษาอังกฤษออกเสียงจริง ได้คำแนะนำระหว่างคุย
+https://learnwithlexis.com/th?utm_source=line&utm_medium=social&utm_campaign=line_week1
+
+WEEK 2: lexis-vo-reel-th-interview.mp4
+มีสัมภาษณ์งานเป็นภาษาอังกฤษเร็ว ๆ นี้ไหมคะ? ลองซ้อมตอบคำถามกับ LEXIS ก่อน ฟรี 15 นาที
+https://learnwithlexis.com/th/practice/interview-english?utm_source=line&utm_medium=social&utm_campaign=line_week2
+
+WEEK 3: lexis-vo-reel-th.mp4
+ทำงานโรงแรมหรือร้านอาหาร? LEXIS รับบทเป็นแขก ให้คุณซ้อมเช็คอิน รับออร์เดอร์ และรับมือคำร้องเรียน
+https://learnwithlexis.com/th/practice/hospitality-english?utm_source=line&utm_medium=social&utm_campaign=line_week3
+
+WEEK 4: lexis-vo-reel-th-community.mp4
+รู้ไหมคะ ตอนซื้อแพ็กเกจ เลือกเพิ่ม ฿50 ได้ เพื่อช่วยให้นักเรียนได้ฝึกพูดฟรีหรือลดราคา
+https://learnwithlexis.com/th/community?utm_source=line&utm_medium=social&utm_campaign=line_week4
