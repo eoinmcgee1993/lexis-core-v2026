@@ -169,6 +169,72 @@ REELS = {
               (6.7, 10.0, "② ฝึกได้ทุกเวลา ไม่ต้องรอใคร"),
               (10.1, 14.0, "③ ได้คำแนะนำทันทีระหว่างคุย\\Nไม่ต้องรอจนจบ")],
         end_at=14.1, end="ลองเลย ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    # 2 Oct 2026, entertainment batch: funny / travel / culture posts that
+    # earn a follow on their own and mention LEXIS only at the end. Funny
+    # means laughing WITH learners, never at Thai people: the Thinglish reel
+    # says outright that the phrases aren't wrong, just unnatural. The
+    # tongue-twister reel is two voices joined (Sarah, then Aom for the
+    # Thai, then Sarah), because an English voice reading Thai tones is the
+    # one thing that would make a tones reel wrong. Etiquette and nickname
+    # facts are the widely documented basics, nothing a Thai viewer would
+    # dispute; "Mai pen rai" and the nicknames are said by Sarah on purpose,
+    # as a learner would.
+    'th-thinglish': dict(
+        photo='lexis-01-portrait-black-smile.jpg', mode='band', fy=0.43,
+        audio='vo-th-thinglish.mp3', dur=29.6, k=1.3,
+        head="ประโยคที่คนไทยพูดบ่อย\\Nแต่ฝรั่งงง!",
+        cues=[(0.0, 3.9, "ประโยคภาษาอังกฤษที่คนไทยพูดบ่อย…\\Nแต่ฝรั่งฟังแล้วงง!"),
+              (4.6, 10.1, "① \"Open the light\"\\N→ Turn on the light"),
+              (10.2, 15.8, "② \"Close the air\"\\N→ Turn off the AC"),
+              (15.9, 21.0, "③ \"Check bin\"\\N→ Can I have the bill, please?"),
+              (21.1, 24.0, "ไม่ผิดหรอก ฝรั่งก็พอเข้าใจ"),
+              (24.1, 26.8, "อยากพูดให้เป็นธรรมชาติ\\Nซ้อมพูดกับ LEXIS")],
+        end_at=26.9, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    'en-mai-mai': dict(
+        photo='lexis-12-portrait-black-speaking-alt.jpg', mode='band', fy=0.46,
+        audio='vo-en-mai-mai.mp3', dur=30.4, k=1.0,
+        head="Can you say this\\NThai sentence?",
+        cues=[(0.0, 1.9, "Think Thai tones are easy?"),
+              (2.0, 4.2, "Try saying this one…"),
+              (4.3, 8.5, "{\\fs84}ไม้ใหม่ ไม่ไหม้ ใช่ไหม{\\fs52}\\Nmái mài mâi mâi châi mǎi"),
+              (8.6, 13.6, "Six words… almost all of them\\Nsound like \"mai\""),
+              (13.7, 16.9, "\"New wood doesn't burn, does it?\""),
+              (17.0, 20.5, "Get one tone wrong…\\Nthe whole sentence falls apart"),
+              (20.6, 24.7, "The fix: say it out loud,\\Nagain and again"),
+              (24.8, 26.9, "Practise speaking Thai with LEXIS")],
+        end_at=27.0, end="Try 15 minutes free\\Nno card required"),
+    'en-etiquette': dict(
+        photo='lexis-02-portrait-black-speaking.jpg', mode='band', fy=0.43,
+        audio='vo-en-etiquette.mp3', dur=33.6, k=1.0,
+        head="3 things to know\\Nbefore you visit Thailand",
+        cues=[(0.0, 3.1, "Three things to know\\Nbefore you visit Thailand"),
+              (3.2, 10.0, "① The wai: palms together, a small bow.\\NIf someone wais you, wai back."),
+              (10.1, 16.2, "② The head is special.\\NDon't touch anyone's head."),
+              (16.3, 22.5, "③ Feet are the lowest part of the body.\\NDon't point them at people or Buddha images."),
+              (22.6, 26.0, "Got it wrong? Mai pen rai:\\Nnever mind."),
+              (26.1, 30.2, "Want to say more than sawasdee?\\NPractise speaking Thai with LEXIS")],
+        end_at=30.3, end="Try 15 minutes free\\Nno card required"),
+    'en-nicknames': dict(
+        photo='lexis-10-closecrop-black.jpg', mode='band', fy=0.43,
+        audio='vo-en-nicknames.mp3', dur=28.5, k=1.0,
+        head="Why is your colleague\\Ncalled Pancake?",
+        cues=[(0.0, 3.5, "Your colleague might be called… Pancake."),
+              (3.6, 7.7, "Your dentist? Benz.\\NYour landlord? Golf."),
+              (7.8, 14.8, "Thai full names can be long,\\Nso almost everyone has a nickname"),
+              (14.9, 20.5, "Fruits, cars, sports… even drinks.\\NYes, Pepsi is a name."),
+              (20.6, 25.0, "Want to ask someone's nickname in Thai?\\NPractise speaking Thai with LEXIS")],
+        end_at=25.1, end="Try 15 minutes free\\Nno card required"),
+    'th-airport': dict(
+        photo='lexis-11-portrait-teal-overshoulder.jpg', mode='band', fy=0.43,
+        audio='vo-th-airport.mp3', dur=26.0, k=1.3,
+        head="ภาษาอังกฤษ\\Nที่สนามบิน",
+        cues=[(0.0, 3.9, "ไปเที่ยวต่างประเทศ\\Nที่สนามบินต้องพูดอะไรบ้าง?"),
+              (4.0, 8.3, "ขอที่นั่งริมหน้าต่าง\\N\"Can I have a window seat, please?\""),
+              (8.4, 12.4, "หาประตูขึ้นเครื่อง\\N\"Is this the gate for Tokyo?\""),
+              (12.5, 16.1, "กระเป๋าไม่มา\\N\"My bag didn't arrive.\""),
+              (16.2, 19.3, "หาแท็กซี่\\N\"Where can I get a taxi?\""),
+              (19.4, 22.9, "ซ้อมพูดกับ LEXIS\\Nก่อนออกเดินทาง")],
+        end_at=23.0, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร")
 }
 
 def ts(s):
