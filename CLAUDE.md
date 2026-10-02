@@ -230,6 +230,20 @@ For SQL, the established pattern is to exercise a function against production
 inside a `DO $$ ... RAISE EXCEPTION $$` block — the exception carries the results
 out and rolls the transaction back, so nothing is written.
 
+## New services don't go on Supabase
+
+Owner's call, 2 Oct 2026: LEXIS stays on Supabase (auth, profiles, the
+metering and fulfilment functions all live there, and moving them before a
+first customer would mean re-proving payments for no gain). But anything
+**new** — a new project, or a new service that doesn't have to share LEXIS's
+users table — defaults to something else. Current default: **Neon** for
+Postgres and **Clerk** for logins, both on free tiers. Don't split LEXIS
+itself across two databases to follow this; it applies to what's built next.
+
+The 10 Sep grant incident was a schema change that was never applied, not a
+Supabase fault. The real lesson carries over to any database: after applying
+schema, re-check function EXECUTE grants.
+
 ## Conventions
 
 Comments here explain **why**, especially where a line looks wrong or arbitrary:
