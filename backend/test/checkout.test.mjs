@@ -189,6 +189,33 @@ console.log('\n--- reading back what was actually bought ---');
   check('an unauthenticated read is refused', r.status === 401);
 }
 
+// Trial nudge gates (app.mjs, "TRIAL NUDGE EMAIL"). The route sends real
+// email under the LEXIS name, so the two things worth pinning are the ones
+// that keep it from running: no CRON_SECRET means nobody gets in, and
+// without TRIAL_NUDGE_ENABLED=on it does nothing even for the right caller.
+// Both are read per request, so setting them here takes effect.
+{
+  const url = `${BASE}/api/cron/trial-nudge`;
+  delete process.env.CRON_SECRET;
+  let r = await fetch(url, { headers: { Authorization: 'Bearer ' } });
+  check('trial nudge: refused when CRON_SECRET is unset', r.status === 401);
+
+  process.env.CRON_SECRET = 'test-cron-secret';
+  r = await fetch(url);
+  check('trial nudge: refused without the bearer token', r.status === 401);
+  r = await fetch(url, { headers: { Authorization: 'Bearer wrong-secret-xx' } });
+  check('trial nudge: refused with a wrong token', r.status === 401);
+
+  process.env.TRIAL_NUDGE_ENABLED = 'off';
+  process.env.RESEND_API_KEY = 're_placeholder';
+  r = await fetch(url, { headers: { Authorization: 'Bearer test-cron-secret' } });
+  const d = await r.json();
+  check('trial nudge: a no-op while not switched on', r.status === 200 && d.enabled === false && d.sent === 0, JSON.stringify(d));
+  delete process.env.CRON_SECRET;
+  delete process.env.RESEND_API_KEY;
+  delete process.env.TRIAL_NUDGE_ENABLED;
+}
+
 server.close();
 stripeSrv.close();
 supabaseSrv.close();

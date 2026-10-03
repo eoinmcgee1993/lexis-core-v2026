@@ -86,6 +86,23 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // One-tap Google sign-in (3 Oct 2026). Email + password + a confirmation
+  // email is three steps a first-time visitor can abandon at; Google is one.
+  // It is a full-page redirect, so CSP is untouched (navigation isn't
+  // governed by connect-src), and the code exchange on return goes to the
+  // same supabase.co origin connect-src already allows. It lands on /auth,
+  // the URL already in the dashboard's Redirect URLs allowlist for the
+  // email flow, and AuthPage forwards a signed-in session to /app. New
+  // accounts still get a profiles row from the on_auth_user_created
+  // trigger; Google supplies full_name in the user metadata it reads.
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth` }
+    });
+    if (error) throw error;
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -101,6 +118,7 @@ export function AuthProvider({ children }) {
     loading: session === undefined,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
     refreshProfile
   };

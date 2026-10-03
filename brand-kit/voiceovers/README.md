@@ -68,3 +68,41 @@ learnwithlexis.com/th/practice/business-english?utm_source=tiktok&utm_medium=soc
 
 **EN learn Thai (expat groups, Facebook, Reddit r/Thailand):** Your Thai still stops at "sawasdee"? Practise speaking Thai out loud with LEXIS, everyday conversations with gentle corrections. 15 minutes free, no card.
 learnwithlexis.com?utm_source=facebook&utm_medium=social&utm_campaign=vo_en_learn_thai
+
+## Entertainment batch (2 Oct 2026): funny, travel, culture
+
+These five earn a follow on their own and mention LEXIS only at the end.
+Funny means laughing *with* learners: the Thinglish reel says outright the
+phrases aren't wrong, just unnatural. In the tongue-twister reel the Thai
+line is said by Aom (Thai voice), spliced between two Sarah takes, so the
+tones are a native speaker's.
+
+| File | Audience | Voice |
+|---|---|---|
+| `lexis-vo-reel-th-thinglish.mp4` | Thai: "Open the light", "Close the air", "Check bin" → natural English | Malee |
+| `lexis-vo-reel-th-airport.mp4` | Thai travellers: 4 airport sentences | Aom |
+| `lexis-vo-reel-en-mai-mai.mp4` | Expats/tourists: ไม้ใหม่ไม่ไหม้ใช่ไหม tones tongue-twister | Sarah + Aom |
+| `lexis-vo-reel-en-etiquette.mp4` | Visitors: the wai, the head, the feet, mai pen rai | Sarah |
+| `lexis-vo-reel-en-nicknames.mp4` | Expats: why your colleague is called Pancake | Sarah |
+
+### Captions
+
+**TH Thinglish:** ประโยคไหนที่คุณพูดบ่อยที่สุด? 😂 "Open the light" "Close the air" "Check bin" ไม่ผิดนะ ฝรั่งก็พอเข้าใจ แต่ถ้าอยากพูดให้เป็นธรรมชาติ ลองซ้อมพูดกับ LEXIS ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
+learnwithlexis.com/th/practice/everyday-english?utm_source=tiktok&utm_medium=social&utm_campaign=fun_th_thinglish
+#ภาษาอังกฤษ #ฝึกพูดภาษาอังกฤษ #Thinglish #เรียนภาษาอังกฤษ
+
+**TH airport:** เซฟไว้ก่อนบิน ✈️ 4 ประโยคที่ต้องใช้ที่สนามบิน ซ้อมพูดออกเสียงจริงกับ LEXIS ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
+learnwithlexis.com/th/practice/travel-english?utm_source=tiktok&utm_medium=social&utm_campaign=travel_th_airport
+#เที่ยวต่างประเทศ #ภาษาอังกฤษเที่ยว #สนามบิน #ฝึกพูดภาษาอังกฤษ
+
+**EN mai mai:** Six words. Almost all "mai". 😅 ไม้ใหม่ไม่ไหม้ใช่ไหม: "New wood doesn't burn, does it?" Try it out loud and tell us how it went. Practise speaking Thai with LEXIS, 15 minutes free, no card.
+learnwithlexis.com?utm_source=tiktok&utm_medium=social&utm_campaign=fun_en_maimai
+#LearnThai #ThaiLanguage #ThaiTones #Thailand #Expat
+
+**EN etiquette:** Save this before your trip 🇹🇭 The wai, the head, the feet, and the most useful phrase in Thailand: mai pen rai. Want to say more than sawasdee? Practise speaking Thai with LEXIS, 15 minutes free, no card.
+learnwithlexis.com?utm_source=instagram&utm_medium=social&utm_campaign=culture_en_etiquette
+#ThailandTravel #ThaiCulture #LearnThai #Bangkok #TravelTips
+
+**EN nicknames:** Pancake, Benz, Golf, Pepsi 😄 Thai nicknames are the best. What's the funniest one you've heard? Practise speaking Thai with LEXIS, 15 minutes free, no card.
+learnwithlexis.com?utm_source=facebook&utm_medium=social&utm_campaign=culture_en_nicknames
+#ThaiCulture #LearnThai #ExpatLife #Thailand
