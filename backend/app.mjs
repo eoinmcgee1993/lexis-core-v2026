@@ -1248,7 +1248,7 @@ app.get('/api/cron/trial-nudge', async (req, res) => {
     const now = Date.now();
     const { data: candidates, error } = await supabase
       .from('profiles')
-      .select('id, email, full_name, max_allowed_seconds')
+      .select('id, full_name, max_allowed_seconds')
       .eq('subscription_status', 'free_trial')
       .eq('seconds_used', 0)
       // seconds_used only moves on the first 30s heartbeat, so a session
@@ -1264,15 +1264,25 @@ app.get('/api/cron/trial-nudge', async (req, res) => {
     let sent = 0;
     let skipped = 0;
     for (const p of candidates || []) {
+      // Send to the address Auth has confirmed now, not profiles.email:
+      // nothing syncs a later email change into profiles, and a reminder
+      // to a former address would tell its new owner this person signed up.
       const { data: authUser } = await supabase.auth.admin.getUserById(p.id);
-      if (!authUser?.user?.email_confirmed_at || !p.email) { skipped++; continue; }
+      const to = authUser?.user?.email_confirmed_at ? authUser.user.email : null;
+      if (!to) { skipped++; continue; }
 
       // Claim first. If another run got here first, this updates nothing.
+      // The eligibility conditions are repeated here, not just in the SELECT:
+      // the Auth and Resend calls for earlier rows take real time, and a
+      // learner who starts a session meanwhile must drop out at this point.
       const { data: claimed, error: claimErr } = await supabase
         .from('profiles')
         .update({ trial_nudged_at: new Date().toISOString() })
         .eq('id', p.id)
         .is('trial_nudged_at', null)
+        .eq('subscription_status', 'free_trial')
+        .eq('seconds_used', 0)
+        .eq('sessions_count', 0)
         .select('id');
       if (claimErr) throw claimErr;
       if (!claimed?.length) { skipped++; continue; }
@@ -1283,7 +1293,7 @@ app.get('/api/cron/trial-nudge', async (req, res) => {
         const r = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: NUDGE_FROM, to: [p.email], subject, text })
+          body: JSON.stringify({ from: NUDGE_FROM, to: [to], subject, text })
         });
         if (!r.ok) throw new Error(`Resend ${r.status}`);
         sent++;
