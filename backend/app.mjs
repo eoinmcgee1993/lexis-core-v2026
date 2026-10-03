@@ -1251,6 +1251,10 @@ app.get('/api/cron/trial-nudge', async (req, res) => {
       .select('id, email, full_name, max_allowed_seconds')
       .eq('subscription_status', 'free_trial')
       .eq('seconds_used', 0)
+      // seconds_used only moves on the first 30s heartbeat, so a session
+      // shorter than that leaves it at 0. sessions_count is bumped when the
+      // session token is minted, so it catches anyone who started at all.
+      .eq('sessions_count', 0)
       .is('trial_nudged_at', null)
       .lte('created_at', new Date(now - NUDGE_MIN_AGE_H * 3600_000).toISOString())
       .gte('created_at', new Date(now - NUDGE_MAX_AGE_H * 3600_000).toISOString())

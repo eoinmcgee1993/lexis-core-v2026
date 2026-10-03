@@ -31,7 +31,7 @@ export default function PrivacyPage({ navigateTo }) {
   });
 
   return (
-    <LegalPageShell navigateTo={navigateTo} title="Privacy Policy" lastUpdated="19 August 2026">
+    <LegalPageShell navigateTo={navigateTo} title="Privacy Policy" lastUpdated="3 October 2026">
       <p>
         This page describes what LEXIS actually does with your data, based
         on how the product is built today.

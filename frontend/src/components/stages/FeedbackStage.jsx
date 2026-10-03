@@ -87,7 +87,10 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
     try {
       const card = await makeResultCard({ confidence: feedback.confidence, strengths: feedback.strengths, direction });
       const method = await shareResultCard(card);
-      if (method !== 'cancelled') trackEvent('result_card_shared', { metadata: { method, direction } });
+      // Only the native share sheet counts as shared. A desktop download is
+      // a saved file, not a post, and would inflate the one number this
+      // experiment exists to measure.
+      if (method === 'share') trackEvent('result_card_shared', { metadata: { method, direction } });
       if (method === 'download') setShareNote(t.downloaded);
     } catch {
       // Canvas or share-sheet failure: nothing useful to tell the learner
