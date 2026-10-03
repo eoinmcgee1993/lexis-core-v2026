@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: 'Cormorant'; font-weight: 500 600; src: url('assets/fonts/cormorant.woff2') format('woff2'); }
+      @font-face { font-family: 'Inter'; font-weight: 400 600; src: url('assets/fonts/inter.woff2') format('woff2'); }
+      :root { --ink: #0E1116; --ivory: #F4EFE6; --gold: #C9A45C; --muted: rgba(244,239,230,.62); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--ink); }
+      #root { position: relative; width: 100%; height: 100%; font-family: 'Inter', sans-serif; color: var(--ivory);
+        background: radial-gradient(900px 700px at 85% 8%, rgba(201,164,92,.20), transparent 60%),
+                    radial-gradient(800px 800px at 0% 100%, rgba(64,110,140,.22), transparent 60%), var(--ink); }
+      .clip { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 100px; }
+      .serif { font-family: 'Cormorant', serif; font-weight: 600; letter-spacing: .01em; }
+      .kicker { font-size: 30px; letter-spacing: .32em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+      .rule { height: 2px; background: var(--gold); width: 0; }
+      h1 { font-size: 112px; line-height: 1.04; }
+      .card { background: rgba(244,239,230,.06); border: 1px solid rgba(244,239,230,.14); border-radius: 28px; padding: 40px 44px; margin: 22px 0; }
+      .card .where { font-size: 30px; color: var(--muted); letter-spacing: .04em; }
+      .card .what { font-size: 48px; margin-top: 12px; font-weight: 500; }
+      .badge { display: inline-block; margin-top: 22px; font-size: 28px; color: var(--ink); background: var(--gold); border-radius: 999px; padding: 8px 22px; font-weight: 600; opacity: 0; }
+      .step { font-size: 104px; line-height: 1.15; opacity: 0; }
+      .step span { color: var(--gold); }
+      .who { font-size: 76px; line-height: 1.2; opacity: 0; }
+      .bridge { position: relative; height: 520px; margin: 40px 0; }
+      .place { position: absolute; bottom: 0; font-size: 40px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+      .dot { position: absolute; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 30px var(--gold); }
+      .end { align-items: center; text-align: center; }
+      .wordmark { font-size: 170px; letter-spacing: .18em; padding-left: .18em; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="29" data-width="1080" data-height="1920">
+      <audio id="vo" src="assets/vo.mp3" data-start="0" data-duration="27.9" data-volume="1"></audio>
+
+      <!-- S1 0–2.7  "Every client connection, handled." -->
+      <section id="s1" class="clip" data-start="0" data-duration="2.7">
+        <div class="kicker" id="s1k">Phiraya</div>
+        <div class="rule" id="s1r" style="margin:34px 0 40px"></div>
+        <h1 class="serif" id="s1h">Every client<br>connection,<br><em style="color:var(--gold)">handled.</em></h1>
+      </section>
+
+      <!-- S2 2.7–12.7  London 3am, Bangkok lunch, then answered/booked -->
+      <section id="s2" class="clip" data-start="2.7" data-duration="10">
+        <div class="card" id="c1">
+          <div class="where">London · 03:12</div>
+          <div class="what">New enquiry</div>
+          <div class="badge" id="b1">Answered · followed up</div>
+        </div>
+        <div class="card" id="c2">
+          <div class="where">Bangkok · 12:40</div>
+          <div class="what">Booking request</div>
+          <div class="badge" id="b2">Booked</div>
+        </div>
+        <div id="s2t" style="font-size:44px;margin-top:40px;opacity:0;line-height:1.35">In English and in Thai.</div>
+      </section>
+
+      <!-- S3 12.7–16.4  Outreach · Calls · Bookings · Follow-through -->
+      <section id="s3" class="clip" data-start="12.7" data-duration="3.7">
+        <div class="step serif" id="w1"><span>—</span> Outreach</div>
+        <div class="step serif" id="w2"><span>—</span> Calls</div>
+        <div class="step serif" id="w3"><span>—</span> Bookings</div>
+        <div class="step serif" id="w4"><span>—</span> Follow-through</div>
+      </section>
+
+      <!-- S4 16.4–19.95  who it's for -->
+      <section id="s4" class="clip" data-start="16.4" data-duration="3.55">
+        <div class="kicker" style="margin-bottom:40px">Made for</div>
+        <div class="who serif" id="p1">Clinics</div>
+        <div class="who serif" id="p2">Premium services</div>
+        <div class="who serif" id="p3">Growing businesses</div>
+      </section>
+
+      <!-- S5 19.95–24.55  Thailand ↔ the West, day and night -->
+      <section id="s5" class="clip" data-start="19.95" data-duration="4.6">
+        <div class="kicker">Seamless communication</div>
+        <div class="bridge">
+          <svg width="880" height="460" viewBox="0 0 880 460" style="position:absolute;top:0;left:0">
+            <path id="arc" d="M60 420 C 220 40, 660 40, 820 420" fill="none" stroke="rgba(201,164,92,.85)" stroke-width="4" stroke-linecap="round" stroke-dasharray="1200" stroke-dashoffset="1200"/>
+          </svg>
+          <div class="dot" id="dot" style="left:47px;top:407px"></div>
+          <div class="place" style="left:0">Thailand</div>
+          <div class="place" style="right:0">The West</div>
+        </div>
+        <div id="s5t" class="serif" style="font-size:96px;opacity:0">Day &amp; night.</div>
+      </section>
+
+      <!-- S6 24.55–29  end card -->
+      <section id="s6" class="clip end" data-start="24.55" data-duration="4.45">
+        <div class="wordmark serif" id="wm">PHIRAYA</div>
+        <div class="rule" id="s6r" style="margin:40px auto"></div>
+        <div id="s6t" class="serif" style="font-size:72px;opacity:0">Every client connection, <em style="color:var(--gold)">handled.</em></div>
+        <div id="s6s" style="font-size:32px;color:var(--muted);margin-top:36px;letter-spacing:.06em;opacity:0">Thailand · The West · 24/7</div>
+      </section>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const E = 'power3.out';
+      // S1
+      tl.fromTo('#s1k', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .5, ease: E }, .05)
+        .fromTo('#s1r', { width: 0 }, { width: 220, duration: .7, ease: E }, .2)
+        .fromTo('#s1h', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .8, ease: E }, .25)
+        .to('#s1', { opacity: 0, duration: .3 }, 2.4);
+      // S2 (absolute times)
+      tl.fromTo('#c1', { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: .6, ease: E }, 2.85)
+        .fromTo('#c2', { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: .6, ease: E }, 5.45)
+        .fromTo('#b1', { opacity: 0, scale: .8 }, { opacity: 1, scale: 1, duration: .4, ease: 'back.out(2)' }, 8.6)
+        .fromTo('#b2', { opacity: 0, scale: .8 }, { opacity: 1, scale: 1, duration: .4, ease: 'back.out(2)' }, 9.9)
+        .fromTo('#s2t', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .5, ease: E }, 10.9)
+        .to('#s2', { opacity: 0, duration: .3 }, 12.4);
+      // S3
+      [['#w1', 12.85], ['#w2', 13.75], ['#w3', 14.57], ['#w4', 15.44]].forEach(([id, t]) =>
+        tl.fromTo(id, { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: .35, ease: E }, t));
+      tl.to('#s3', { opacity: 0, duration: .25 }, 16.15);
+      // S4
+      [['#p1', 16.55], ['#p2', 17.35], ['#p3', 18.4]].forEach(([id, t]) =>
+        tl.fromTo(id, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .45, ease: E }, t));
+      tl.to('#s4', { opacity: 0, duration: .25 }, 19.7);
+      // S5: arc draws, dot travels Thailand -> West and back
+      tl.fromTo('#s5', { opacity: 0 }, { opacity: 1, duration: .3 }, 19.95)
+        .to('#arc', { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut' }, 20.1)
+        .to('#dot', { keyframes: [
+            { left: 211, top: 193, duration: .45 }, { left: 427, top: 122, duration: .45 },
+            { left: 643, top: 193, duration: .45 }, { left: 807, top: 407, duration: .45 } ], ease: 'none' }, 20.2)
+        .fromTo('#s5t', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .5, ease: E }, 23.3)
+        .to('#s5', { opacity: 0, duration: .25 }, 24.3);
+      // S6
+      tl.fromTo('#wm', { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 1, ease: E }, 24.6)
+        .fromTo('#s6r', { width: 0 }, { width: 260, duration: .7, ease: E }, 25.0)
+        .fromTo('#s6t', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: .6, ease: E }, 25.55)
+        .fromTo('#s6s', { opacity: 0 }, { opacity: 1, duration: .6 }, 27.2);
+      window.__timelines['main'] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
