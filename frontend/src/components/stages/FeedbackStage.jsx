@@ -7,8 +7,10 @@
 // `feedback.insufficient` is a real, distinct state for sessions too short
 // to evaluate honestly, and `feedbackError` covers the call failing
 // outright — neither of those blocks the student from practicing again.
-import React from 'react';
-import { CheckCircle2, RotateCcw, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckCircle2, RotateCcw, Loader2, Share2 } from 'lucide-react';
+import { makeResultCard, shareResultCard } from '../../lib/resultCard';
+import { trackEvent } from '../../lib/analytics';
 
 // The chrome around the report (headings, button labels, loading/error
 // copy) is keyed to `direction`, same as buildTutorInstructions on the
@@ -28,7 +30,9 @@ const UI_STRINGS = {
     strengthsHeading: 'สิ่งที่คุณทำได้ดี',
     improvementsHeading: 'ลองปรับปรุงตรงนี้',
     practiceAgain: 'ฝึกอีกครั้ง',
-    doneForNow: 'พอแค่นี้ก่อน'
+    doneForNow: 'พอแค่นี้ก่อน',
+    share: 'แชร์ผลของฉัน',
+    downloaded: 'บันทึกรูปแล้ว โพสต์ได้เลย!'
   },
   // direction 'th' = English speaker learning Thai -> comfortable in English
   th: {
@@ -39,7 +43,9 @@ const UI_STRINGS = {
     strengthsHeading: 'You did well with',
     improvementsHeading: 'Try improving',
     practiceAgain: 'Practice Again',
-    doneForNow: 'Done for now'
+    doneForNow: 'Done for now',
+    share: 'Share my result',
+    downloaded: 'Image saved, ready to post!'
   }
 };
 
@@ -69,6 +75,27 @@ function ConfidenceRing({ value, label }) {
 
 export default function FeedbackStage({ feedback, feedbackLoading, feedbackError, direction, onPracticeAgain, onDone }) {
   const t = UI_STRINGS[direction] || UI_STRINGS.en;
+  const [sharing, setSharing] = useState(false);
+  const [shareNote, setShareNote] = useState('');
+
+  // Only offered for a real, scored session: there's nothing to share for
+  // "too short to evaluate" or a failed feedback call. See lib/resultCard.js
+  // for what goes on the card and why.
+  const share = async () => {
+    setSharing(true);
+    setShareNote('');
+    try {
+      const card = await makeResultCard({ confidence: feedback.confidence, strengths: feedback.strengths, direction });
+      const method = await shareResultCard(card);
+      if (method !== 'cancelled') trackEvent('result_card_shared', { metadata: { method, direction } });
+      if (method === 'download') setShareNote(t.downloaded);
+    } catch {
+      // Canvas or share-sheet failure: nothing useful to tell the learner
+      // beyond "it didn't work", and the button stays to try again.
+    } finally {
+      setSharing(false);
+    }
+  };
 
   return (
     <div className="min-h-[100dvh] lexis-canvas-gradient text-lexis-ink font-sans flex flex-col items-center justify-center px-6 py-12">
@@ -130,6 +157,19 @@ export default function FeedbackStage({ feedback, feedbackLoading, feedbackError
         )}
 
         <div className="mt-10 flex flex-col items-center gap-3">
+          {!feedbackLoading && !feedbackError && feedback && !feedback.insufficient && (
+            <>
+              <button
+                onClick={share}
+                disabled={sharing}
+                className="px-6 py-3 bg-white border border-lexis-ink/15 hover:border-lexis-ink/30 disabled:opacity-50 text-lexis-ink font-semibold text-sm rounded-2xl transition-all flex items-center gap-2"
+              >
+                {sharing ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Share2 className="w-4 h-4" aria-hidden="true" />}
+                <span>{t.share}</span>
+              </button>
+              {shareNote && <p className="text-xs text-teal-700" role="status">{shareNote}</p>}
+            </>
+          )}
           <button
             onClick={onPracticeAgain}
             className="px-8 py-3.5 bg-lexis-action hover:bg-lexis-action-dark text-lexis-navy font-display font-semibold rounded-2xl lexis-lift transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"

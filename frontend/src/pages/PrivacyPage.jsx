@@ -70,7 +70,10 @@ export default function PrivacyPage({ navigateTo }) {
         <li>Session feedback summaries, as described above (confidence score, strengths, suggested corrections), not transcripts or audio.</li>
         <li>Usage totals: how many seconds of practice you've used, to enforce the free trial and track your plan.</li>
         <li>Payment details are handled entirely by Stripe; LEXIS does not receive or store your card number.</li>
-        <li>Basic first-party analytics (which page you visited, and whether you signed up, started a practice session, checked out, or cancelled a plan, plus where the visit came from: the campaign tag on the link you followed, or the name of the site that linked here), kept only against an anonymous per-visit identifier, not sold or shared with any third party. No third-party analytics or advertising trackers are used anywhere on LEXIS.</li>
+        <li>If you choose "Continue with Google", Google confirms your identity and shares your name and email address with LEXIS. LEXIS never sees your Google password.</li>
+        <li>If you confirm your email but never start a practice session, LEXIS may send you one reminder email a day or two later that your free minutes are still waiting. It is sent through our email provider, Resend, only once, and never again after that.</li>
+        <li>Result cards you choose to share are made on your own device from your session summary; LEXIS doesn't upload or store the image.</li>
+        <li>Basic first-party analytics (which page you visited, and whether you signed up (including whether you chose Google sign-in), started a practice session, shared a result card, checked out, or cancelled a plan, plus where the visit came from: the campaign tag on the link you followed, or the name of the site that linked here), kept only against an anonymous per-visit identifier, not sold or shared with any third party. No third-party analytics or advertising trackers are used anywhere on LEXIS.</li>
         <li>If something breaks, technical error details (what failed and a code-level description of why), used only to fix bugs, not tied to anything you said or did in a session.</li>
       </ul>
 

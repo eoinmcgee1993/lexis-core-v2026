@@ -232,7 +232,14 @@ const ANALYTICS_EVENTS = new Set([
   'session_connected',
   'checkout_started',
   'checkout_completed',
-  'plan_cancelled'
+  'plan_cancelled',
+  // 3 Oct 2026: the two growth experiments. google_signin_started counts
+  // taps (the redirect means signup_completed can't fire for these: the
+  // account is created on Google's round trip, not on our form), and
+  // result_card_shared counts how often a learner posts their card, the
+  // only signal that it brings anyone.
+  'google_signin_started',
+  'result_card_shared'
 ]);
 
 // The allowlist above stops an unrecognised EVENT NAME; it says nothing
@@ -259,7 +266,9 @@ const ANALYTICS_METADATA_SCHEMA = {
   checkout_started: { planTier: 'string', sponsorAdd: 'boolean', ...SOURCE_KEYS },
   checkout_completed: { planTier: 'string', sponsorAdd: 'boolean', ...SOURCE_KEYS },
   session_connected: { direction: 'string', subscriptionStatus: 'string', ...SOURCE_KEYS },
-  plan_cancelled: { planTier: 'string', ...SOURCE_KEYS }
+  plan_cancelled: { planTier: 'string', ...SOURCE_KEYS },
+  google_signin_started: { ...SOURCE_KEYS },
+  result_card_shared: { method: 'string', direction: 'string', ...SOURCE_KEYS }
 };
 
 function sanitiseMetadata(event, raw) {
@@ -1156,6 +1165,134 @@ app.get('/api/history', historyRateLimiter, authenticate, async (req, res) => {
   } catch (err) {
     logError('History Error', err);
     res.status(500).json({ error: 'Failed to load session history.' });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────────────── */
+/* TRIAL NUDGE EMAIL (3 Oct 2026)                                          */
+/*                                                                          */
+/* One reminder, ever, to someone who confirmed their email and then never */
+/* spoke a word: "your free minutes are waiting". Of the six accounts that */
+/* existed when this was written, the ones that never started a session   */
+/* were simply never heard from again; nothing reached back out to them.  */
+/*                                                                          */
+/* Triggered once a day by Vercel Cron (vercel.json) calling GET            */
+/* /api/cron/trial-nudge. Vercel sends `Authorization: Bearer <CRON_SECRET>`*/
+/* when that env var is set, and that header is the only way in: without   */
+/* CRON_SECRET configured the route refuses everything rather than running */
+/* open.                                                                    */
+/*                                                                          */
+/* OFF unless TRIAL_NUDGE_ENABLED=on. The owner approves the wording before */
+/* anything is sent under the LEXIS name, and a deploy is not that          */
+/* approval. RESEND_API_KEY missing is also a clean no-op.                 */
+/*                                                                          */
+/* At-most-once, deliberately: trial_nudged_at is claimed with a guarded   */
+/* UPDATE ... WHERE trial_nudged_at IS NULL before the send, so two         */
+/* overlapping cron runs can't both email the same person, and a failed     */
+/* send is NOT retried. A missed reminder costs nothing; a duplicate one    */
+/* is spam.                                                                 */
+/*                                                                          */
+/* Only CONFIRMED addresses: an unconfirmed sign-up may be a typo of        */
+/* someone else's address, and that person never asked to hear from us.    */
+/* ─────────────────────────────────────────────────────────────────────── */
+const NUDGE_FROM = process.env.TRIAL_NUDGE_FROM || 'LEXIS <hello@learnwithlexis.com>';
+const NUDGE_MIN_AGE_H = 24;   // give people a day to come back on their own
+const NUDGE_MAX_AGE_H = 96;   // older than this, a "your minutes are waiting" email reads as out of the blue
+const NUDGE_BATCH = 50;
+
+function nudgeEmail(fullName, trialMinutes) {
+  // Bilingual because nothing on the profile says which language the
+  // learner is comfortable in (direction is chosen per session, and these
+  // people never started one). Thai first: Thailand is the market.
+  const name = String(fullName || '').trim().split(/\s+/)[0];
+  const hiTh = name ? `สวัสดีค่ะ คุณ${name}` : 'สวัสดีค่ะ';
+  const hiEn = name ? `Hi ${name},` : 'Hi,';
+  const link = 'https://learnwithlexis.com/app?utm_source=email&utm_medium=nudge&utm_campaign=trial_nudge';
+  const subject = `เวลาฝึกพูดฟรี ${trialMinutes} นาทีของคุณยังรออยู่ · Your ${trialMinutes} free minutes are waiting`;
+  const text = [
+    hiTh,
+    '',
+    `คุณสมัคร LEXIS ไว้แล้ว แต่ยังไม่ได้เริ่มพูดเลย เวลาฝึกฟรี ${trialMinutes} นาทีของคุณยังอยู่ครบ`,
+    'แค่กดปุ่มเดียวแล้วพูดออกมา LEXIS คู่สนทนาเสมือนจะตอบกลับทันที และช่วยแก้ให้อย่างอ่อนโยน',
+    'ลองแค่ 2 นาทีก็พอ:',
+    link,
+    '',
+    '—',
+    '',
+    hiEn,
+    '',
+    `You signed up for LEXIS but haven't spoken yet, so all ${trialMinutes} of your free minutes are still there.`,
+    'Tap one button and talk. LEXIS, a virtual conversation partner, replies in real time and gently corrects you as you go.',
+    'Two minutes is enough to see how it feels:',
+    link,
+    '',
+    'นี่เป็นอีเมลเตือนเพียงฉบับเดียว เราจะไม่ส่งซ้ำ · This is the only reminder we will send.',
+    'LEXIS · learnwithlexis.com'
+  ].join('\n');
+  return { subject, text };
+}
+
+app.get('/api/cron/trial-nudge', async (req, res) => {
+  const secret = process.env.CRON_SECRET || '';
+  const given = String(req.headers.authorization || '');
+  const a = Buffer.from(given);
+  const b = Buffer.from(`Bearer ${secret}`);
+  if (!secret || a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+    return res.status(401).json({ error: 'Unauthorized.' });
+  }
+  if (process.env.TRIAL_NUDGE_ENABLED !== 'on' || !process.env.RESEND_API_KEY) {
+    return res.json({ enabled: false, sent: 0 });
+  }
+
+  try {
+    const now = Date.now();
+    const { data: candidates, error } = await supabase
+      .from('profiles')
+      .select('id, email, full_name, max_allowed_seconds')
+      .eq('subscription_status', 'free_trial')
+      .eq('seconds_used', 0)
+      .is('trial_nudged_at', null)
+      .lte('created_at', new Date(now - NUDGE_MIN_AGE_H * 3600_000).toISOString())
+      .gte('created_at', new Date(now - NUDGE_MAX_AGE_H * 3600_000).toISOString())
+      .limit(NUDGE_BATCH);
+    if (error) throw error;
+
+    let sent = 0;
+    let skipped = 0;
+    for (const p of candidates || []) {
+      const { data: authUser } = await supabase.auth.admin.getUserById(p.id);
+      if (!authUser?.user?.email_confirmed_at || !p.email) { skipped++; continue; }
+
+      // Claim first. If another run got here first, this updates nothing.
+      const { data: claimed, error: claimErr } = await supabase
+        .from('profiles')
+        .update({ trial_nudged_at: new Date().toISOString() })
+        .eq('id', p.id)
+        .is('trial_nudged_at', null)
+        .select('id');
+      if (claimErr) throw claimErr;
+      if (!claimed?.length) { skipped++; continue; }
+
+      const minutes = Math.round((Number(p.max_allowed_seconds) || 900) / 60);
+      const { subject, text } = nudgeEmail(p.full_name, minutes);
+      try {
+        const r = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ from: NUDGE_FROM, to: [p.email], subject, text })
+        });
+        if (!r.ok) throw new Error(`Resend ${r.status}`);
+        sent++;
+      } catch (sendErr) {
+        // Claimed and not retried, by design (see banner). Logged so a
+        // broken key or domain shows up instead of failing silently.
+        logError('Trial Nudge Send Error', sendErr);
+      }
+    }
+    res.json({ enabled: true, candidates: candidates?.length || 0, sent, skipped });
+  } catch (err) {
+    logError('Trial Nudge Error', err);
+    res.status(500).json({ error: 'Trial nudge failed.' });
   }
 });
 

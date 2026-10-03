@@ -35,6 +35,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   -- — so the expiry has to be written down at purchase and checked on
   -- every request (paidAccessActive in backend/app.mjs).
   access_expires_at TIMESTAMPTZ,
+  -- When the one-time "your free minutes are waiting" email went out (or
+  -- was claimed to go out; see TRIAL NUDGE EMAIL in backend/app.mjs). NULL
+  -- means never. Set once and never cleared, which is what makes it once.
+  trial_nudged_at TIMESTAMPTZ,
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -537,6 +541,10 @@ CREATE POLICY "Users can read own generations" ON public.generations
 --   -- into its own table the same day; drop the column if you ran the
 --   -- first version of this migration. Nothing reads it.
 --   ALTER TABLE public.profiles DROP COLUMN IF EXISTS last_checkout_session_id;
+--
+--   -- Trial nudge email (3 Oct 2026). Only read by /api/cron/trial-nudge,
+--   -- which is off unless TRIAL_NUDGE_ENABLED=on.
+--   ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS trial_nudged_at TIMESTAMPTZ;
 --
 -- then run sections 3-8 above (usage_logs table, RLS, trigger, RPCs).
 -- ============================================================================
