@@ -1197,8 +1197,15 @@ app.get('/api/history', historyRateLimiter, authenticate, async (req, res) => {
 /* ─────────────────────────────────────────────────────────────────────── */
 const NUDGE_FROM = process.env.TRIAL_NUDGE_FROM || 'LEXIS <hello@learnwithlexis.com>';
 const NUDGE_MIN_AGE_H = 24;   // give people a day to come back on their own
-const NUDGE_MAX_AGE_H = 96;   // older than this, a "your minutes are waiting" email reads as out of the blue
+// 72h gives a daily cron two chances at everyone (first eligible somewhere in
+// 24-48h) and matches the privacy page's "one to three days". Change both
+// together: the disclosure is a factual claim about this number.
+const NUDGE_MAX_AGE_H = 72;
+// Caps SENDS per run, not rows read. Unconfirmed sign-ups are skipped, not
+// claimed, so they stay in the window; limiting the read instead would let
+// a pile of them crowd every confirmed learner out of the batch.
 const NUDGE_BATCH = 50;
+const NUDGE_SCAN = 1000;
 
 function nudgeEmail(fullName, trialMinutes) {
   // Bilingual because nothing on the profile says which language the
@@ -1258,12 +1265,14 @@ app.get('/api/cron/trial-nudge', async (req, res) => {
       .is('trial_nudged_at', null)
       .lte('created_at', new Date(now - NUDGE_MIN_AGE_H * 3600_000).toISOString())
       .gte('created_at', new Date(now - NUDGE_MAX_AGE_H * 3600_000).toISOString())
-      .limit(NUDGE_BATCH);
+      .order('created_at', { ascending: true })
+      .limit(NUDGE_SCAN);
     if (error) throw error;
 
     let sent = 0;
     let skipped = 0;
     for (const p of candidates || []) {
+      if (sent >= NUDGE_BATCH) break;
       // Send to the address Auth has confirmed now, not profiles.email:
       // nothing syncs a later email change into profiles, and a reminder
       // to a former address would tell its new owner this person signed up.
