@@ -35,6 +35,7 @@ left out of the promo on purpose.
 | `promo/` | the HyperFrames project it was rendered from |
 | `promo/assets/vo.mp3` | ElevenLabs eleven_v4, voice "Sarah – Warm & Conversational" |
 | `promo/assets/fonts/` | Cormorant Garamond + Inter (Google Fonts, OFL) |
+| `site/` | one-page website (static `index.html` + `assets/`), same look as the promo; open `site/index.html` in a browser or upload the folder to any static host |
 
 Voiceover script: "Every client connection, handled. A new enquiry from London
 at three a.m. A booking request from Bangkok over lunch. Phiraya answers,
@@ -62,7 +63,11 @@ timeline view, not the render.
 
 1. Is Phiraya people, an AI agent, or both? This decides whether "human" can
    be said anywhere.
-2. Website, LINE ID or booking link for the end card.
+2. Website, LINE ID or booking link for the end card. Nothing exists yet
+   (3 Oct 2026). `phiraya.com` was free at $10.46/yr when checked; not bought.
+   Suggested setup: domain, business email on it, LINE Official Account,
+   WhatsApp Business, Cal.com/Calendly booking page. The contact buttons in
+   `site/index.html` are greyed-out placeholders marked `TODO(owner)`.
 3. "Finish off the Phiraya agent": if this means an AI receptionist, the
    brief needs hours, services, prices, booking method, and what it must
    never say or promise.
