@@ -35,7 +35,10 @@ left out of the promo on purpose.
 | `promo/` | the HyperFrames project it was rendered from |
 | `promo/assets/vo.mp3` | ElevenLabs eleven_v4, voice "Sarah – Warm & Conversational" |
 | `promo/assets/fonts/` | Cormorant Garamond + Inter (Google Fonts, OFL) |
-| `site/` | one-page website (static `index.html` + `assets/`), same look as the promo; open `site/index.html` in a browser or upload the folder to any static host |
+| `site/index.html` | the website: one self-contained file (fonts and portraits inlined, no libraries). Background is a live nonlocal Kuramoto oscillator field (spiral waves drawn as gold isophase lines); pointer = pacemaker ripples, tap = new vortex pair, pinch / ctrl+scroll = zoom, scroll morphs the phase lag |
+| `site/src.html` | editable source of the page; run `python3 site/build.py site` after editing to rebuild `index.html` |
+| `site/assets/phiraya-*-original.jpg` | Phiraya's two portraits as supplied by the owner (6 Oct 2026) |
+| `site/assets/phiraya-standing.webp`, `phiraya-avatar.webp` | background-removed cut-outs made with `site/cutout.py` |
 
 Voiceover script: "Every client connection, handled. A new enquiry from London
 at three a.m. A booking request from Bangkok over lunch. Phiraya answers,
@@ -58,6 +61,12 @@ that is `/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_she
 ffprobe comes from the `ffprobe-static` npm package. `npm run check` flags
 the scene sections as "needs sub-composition", which only affects Studio's
 timeline view, not the render.
+
+## Separation from LEXIS
+
+LEXIS is the English tutor; Phiraya is the business-agent service. They are
+separate brands: never reuse LEXIS assets (its tutor avatar is a different
+person), code, Stripe or Supabase here.
 
 ## Open items for the owner
 

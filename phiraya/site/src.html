@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phiraya | Every Client Connection, Handled</title>
+<meta name="description" content="Phiraya handles outreach, calls, bookings and follow-up for clinics, premium services and growing businesses, in English and Thai, across Thailand and the West.">
+<meta name="theme-color" content="#07090C">
+<style>
+@font-face{font-family:'Cormorant';font-weight:500 600;font-display:swap;src:url(data:font/woff2;base64,__CORMORANT__) format('woff2')}
+@font-face{font-family:'Inter';font-weight:400 600;font-display:swap;src:url(data:font/woff2;base64,__INTER__) format('woff2')}
+:root{--ink:#07090C;--ivory:#F4EFE6;--gold:#C9A45C;--gold-2:#E7CC8F;--teal:#3E8C8A;--muted:rgba(244,239,230,.66);--line:rgba(244,239,230,.14)}
+*{box-sizing:border-box}
+html{background:var(--ink);-webkit-text-size-adjust:100%;overflow-x:hidden}
+body{margin:0;color:var(--ivory);font:400 17px/1.65 'Inter',system-ui,-apple-system,Segoe UI,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--gold);color:var(--ink)}
+.serif{font-family:'Cormorant',Georgia,'Times New Roman',serif;font-weight:600;letter-spacing:.005em;line-height:1.02}
+em{font-style:italic;color:var(--gold-2)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.kicker{font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);font-weight:500;margin:0 0 22px}
+.muted{color:var(--muted)}
+
+/* the field */
+#field{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;touch-action:pan-y;cursor:crosshair}
+.veil{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(120% 90% at 50% 40%,rgba(7,9,12,0) 0%,rgba(7,9,12,.35) 60%,rgba(7,9,12,.85) 100%)}
+main,header,footer{position:relative;z-index:2}
+main{pointer-events:none}
+main a,main button,main .interactive,main canvas.av{pointer-events:auto}
+
+header{position:fixed;top:0;left:0;right:0;z-index:5;padding:18px 0;transition:background .4s,backdrop-filter .4s}
+header.scrolled{background:rgba(7,9,12,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand .mini{position:relative;width:40px;height:40px;display:block}
+.brand canvas{position:absolute;inset:0;width:40px;height:40px;border-radius:50%}
+.brand .mini img{position:absolute;inset:6px;width:28px;height:28px;border-radius:50%;object-fit:cover;object-position:50% 15%}
+.brand span{font-family:'Cormorant',serif;font-weight:600;font-size:22px;letter-spacing:.3em}
+nav{display:flex;gap:30px;align-items:center;font-size:14px}
+nav a{text-decoration:none;color:var(--muted);transition:color .2s}
+nav a:hover{color:var(--ivory)}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--gold);color:var(--ink);text-decoration:none;font-weight:600;padding:14px 26px;border-radius:999px;font-size:15px;border:1px solid var(--gold);transition:transform .2s,background .2s;cursor:pointer;font-family:inherit}
+.btn:hover{transform:translateY(-2px);background:var(--gold-2)}
+.btn.ghost{background:rgba(7,9,12,.35);color:var(--ivory);border-color:var(--line);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.btn.ghost:hover{border-color:var(--gold)}
+nav .btn{padding:9px 20px;color:var(--ink)}
+
+/* hero */
+.hero{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding-top:120px;padding-bottom:calc(7vh + 70px);position:relative;overflow:hidden}
+.hero h1{font-size:clamp(54px,8.4vw,150px);margin:0;text-shadow:0 2px 40px rgba(7,9,12,.7);position:relative;max-width:11ch}
+.hero .kicker,.hero-row,.hint{position:relative}
+.portrait{position:absolute;right:clamp(-20px,1vw,40px);bottom:0;height:min(94vh,1060px);height:min(94svh,1060px);aspect-ratio:760/1140;pointer-events:none;
+  -webkit-mask-image:linear-gradient(180deg,#000 62%,transparent 98%);mask-image:linear-gradient(180deg,#000 62%,transparent 98%)}
+.portrait img{width:100%;height:100%;object-fit:contain;object-position:bottom;filter:drop-shadow(0 0 1px rgba(231,204,143,.55)) drop-shadow(0 0 38px rgba(201,164,92,.28)) saturate(1.04) contrast(1.03)}
+.hero-row .lead{max-width:26em}
+.hero h1 .l2{display:block;padding-left:.9em}
+.hero-row{display:flex;flex-direction:column;align-items:flex-start;gap:30px;margin-top:36px;max-width:min(640px,55%)}
+.hero p.lead{font-size:clamp(17px,1.5vw,20px);max-width:30em;margin:0;text-shadow:0 1px 20px rgba(7,9,12,.9)}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.hint{margin-top:44px;display:flex;gap:26px;flex-wrap:wrap;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.hint b{color:var(--gold);font-weight:500}
+.zh-touch{display:none}
+@media (hover:none){.zh-touch{display:inline}.zh-mouse{display:none}}
+
+/* readout */
+.readout{position:fixed;right:clamp(16px,3vw,32px);bottom:clamp(16px,3vw,28px);text-align:right;z-index:3;font:500 11px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em;color:var(--muted);pointer-events:none;transition:opacity .5s}
+.readout .r{color:var(--gold-2)}
+.readout .bar{display:block;margin:6px 0 0 auto;width:120px;height:1px;background:var(--line);position:relative}
+.readout .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--gold);width:0}
+
+/* sections */
+section{padding:clamp(90px,14vh,170px) 0}
+.panel{background:linear-gradient(180deg,rgba(7,9,12,0) 0%,rgba(7,9,12,.86) 14%,rgba(7,9,12,.9) 86%,rgba(7,9,12,0) 100%)}
+h2{font-size:clamp(44px,6.4vw,96px);margin:0 0 28px}
+.split{display:grid;grid-template-columns:5fr 7fr;gap:clamp(32px,6vw,96px);align-items:start}
+.lede{font-size:clamp(18px,1.6vw,21px);max-width:28em}
+
+.moments{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin-top:56px}
+.moment{background:rgba(7,9,12,.82);padding:clamp(26px,3vw,40px)}
+.moment .t{font:500 12px/1 ui-monospace,Menlo,monospace;letter-spacing:.14em;color:var(--gold)}
+.moment .q{font-family:'Cormorant',serif;font-weight:500;font-size:clamp(26px,2.6vw,36px);line-height:1.15;margin:16px 0 22px}
+.moment .s{display:inline-flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ivory)}
+.moment .s::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
+
+.services{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.services li{display:grid;grid-template-columns:80px 1fr 1.2fr;gap:24px;align-items:baseline;padding:clamp(22px,3vw,34px) 0;border-bottom:1px solid var(--line);transition:padding .35s}
+.services li:hover{padding-left:14px}
+.services .n{font:500 12px/1 ui-monospace,Menlo,monospace;color:var(--gold);letter-spacing:.14em}
+.services h3{font-family:'Cormorant',serif;font-weight:600;font-size:clamp(34px,4vw,58px);margin:0;line-height:1}
+.services p{margin:0;color:var(--muted)}
+
+.who{display:flex;flex-wrap:wrap;gap:12px;margin-top:40px}
+.who span{border:1px solid var(--line);border-radius:999px;padding:12px 22px;font-size:15px;background:rgba(7,9,12,.5)}
+
+.bridge{text-align:center}
+.bridge .arc{display:flex;align-items:center;justify-content:center;gap:clamp(14px,3vw,36px);margin:10px 0 34px;flex-wrap:wrap}
+.bridge .place{font-family:'Cormorant',serif;font-weight:600;font-size:clamp(50px,8.5vw,128px);line-height:1}
+.bridge svg{width:clamp(80px,16vw,220px);height:40px;overflow:visible}
+.bridge p{max-width:34em;margin:0 auto}
+
+/* avatar */
+.meet{display:grid;grid-template-columns:auto 1fr;gap:clamp(32px,6vw,90px);align-items:center}
+.avatar{position:relative;width:clamp(220px,30vw,360px);aspect-ratio:1}
+.avatar canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:50%}
+.avatar img{position:absolute;inset:17%;width:66%;height:66%;object-fit:cover;object-position:50% 20%;border-radius:50%;display:none;pointer-events:none;box-shadow:0 0 0 1px rgba(201,164,92,.35)}
+.avatar.has-photo img{display:block}
+.avatar .cap{position:absolute;left:50%;bottom:-38px;transform:translateX(-50%);white-space:nowrap;font:500 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;color:var(--muted)}
+.traits{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:36px}
+.traits div{border-top:1px solid var(--gold);padding-top:16px}
+.traits b{display:block;font-family:'Cormorant',serif;font-size:26px;font-weight:600;margin-bottom:6px}
+.traits span{color:var(--muted);font-size:15px}
+
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,56px);margin-top:56px;counter-reset:s}
+.steps div{counter-increment:s}
+.steps div::before{content:"0" counter(s);display:block;font-family:'Cormorant',serif;font-size:64px;color:var(--gold);line-height:1;margin-bottom:16px}
+.steps h3{margin:0 0 8px;font-size:18px;font-weight:600}
+.steps p{margin:0;color:var(--muted);font-size:15.5px}
+
+.contact{text-align:center;min-height:90vh;display:flex;align-items:center}
+.contact h2{font-size:clamp(52px,9vw,140px)}
+.channels{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:40px}
+/* TODO(owner): placeholders until the real email, LINE ID, WhatsApp number and booking link exist. */
+.placeholder{opacity:.5;pointer-events:none!important}
+.soon{display:block;font-size:13px;color:var(--muted);margin-top:20px}
+
+.math{font-size:14px;color:var(--muted);max-width:44em}
+.math summary{cursor:pointer;color:var(--ivory);font-size:13px;letter-spacing:.14em;text-transform:uppercase;list-style:none}
+.math summary::-webkit-details-marker{display:none}
+.math summary::before{content:"+ ";color:var(--gold)}
+.math[open] summary::before{content:"− "}
+.math code{font:13px ui-monospace,Menlo,monospace;color:var(--gold-2)}
+
+footer{border-top:1px solid var(--line);padding:36px 0 44px;font-size:14px;color:var(--muted);background:var(--ink)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 1.1s cubic-bezier(.2,.7,.2,1),transform 1.1s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+@media (max-width:900px){
+  .split,.meet{grid-template-columns:1fr}
+  .avatar{margin:0 auto 30px}
+  .services li{grid-template-columns:48px 1fr}
+  .services p{grid-column:2}
+  .steps,.traits{grid-template-columns:1fr}
+}
+@media (max-width:1000px){
+  .portrait{right:-10vw;top:70px;bottom:auto;height:76svh;opacity:.92;-webkit-mask-image:linear-gradient(180deg,#000 38%,transparent 86%);mask-image:linear-gradient(180deg,#000 38%,transparent 86%)}
+}
+@media (max-width:1000px){.hero-row{max-width:none}}
+@media (max-width:640px){
+  .portrait{right:-30vw;height:56svh;top:58px;opacity:.85;-webkit-mask-image:radial-gradient(75% 60% at 62% 34%,#000 45%,transparent 80%);mask-image:radial-gradient(75% 60% at 62% 34%,#000 45%,transparent 80%)}
+  .hero .kicker{max-width:60%}
+  nav a:not(.btn){display:none}
+  .moments{grid-template-columns:1fr}
+  .hero h1 .l2{padding-left:.4em}
+  .readout{display:none}
+}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+<canvas id="field" aria-hidden="true"></canvas>
+<div class="veil"></div>
+
+<header id="hdr">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Phiraya, back to top"><i class="mini"><canvas class="av" data-size="40" data-mini="1" aria-hidden="true"></canvas><img alt="" src="__AVATAR__"></i><span>PHIRAYA</span></a>
+    <nav>
+      <a href="#services">Services</a>
+      <a href="#meet">Meet Phiraya</a>
+      <a href="#how">How it works</a>
+      <a class="btn" href="#contact">Get in touch</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero wrap">
+    <div class="portrait"><img alt="Phiraya" src="__STANDING__" fetchpriority="high"></div>
+    <p class="kicker">Thailand · The West · 24/7</p>
+    <h1 class="serif">Every client connection,<span class="l2"><em>handled.</em></span></h1>
+    <div class="hero-row">
+      <p class="lead muted">Phiraya handles outreach, calls, bookings and follow-up for clinics, premium services and growing businesses, in English and in Thai. Thousands of conversations, kept in step.</p>
+      <div class="cta">
+        <a class="btn" href="#contact">Get in touch</a>
+        <a class="btn ghost" href="#services">What we handle</a>
+      </div>
+    </div>
+    <div class="hint" aria-hidden="true"><span><b>Move</b> to send a ripple</span><span><b>Tap</b> to start a spiral</span><span class="zh-touch"><b>Pinch</b> to zoom</span><span class="zh-mouse"><b>Ctrl + scroll</b> to zoom</span></div>
+  </div>
+
+  <section class="panel">
+    <div class="wrap">
+      <div class="split">
+        <div class="reveal"><p class="kicker">Day and night</p><h2 class="serif">No enquiry left <em>waiting.</em></h2></div>
+        <p class="lede muted reveal">Your clients don't keep your hours, and they aren't all in your time zone. Phiraya answers them, follows up and gets them booked, so every conversation stays in step with your business.</p>
+      </div>
+      <div class="moments reveal">
+        <div class="moment"><div class="t">LONDON · 03:00</div><div class="q">A new enquiry about a consultation.</div><span class="s">Answered</span></div>
+        <div class="moment"><div class="t">BANGKOK · 12:40</div><div class="q">A booking request for next week.</div><span class="s">Booked</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="services" class="panel">
+    <div class="wrap">
+      <p class="kicker reveal">Services</p>
+      <h2 class="serif reveal">What Phiraya <em>handles</em></h2>
+      <ul class="services reveal">
+        <li><span class="n">01</span><h3>Outreach</h3><p>Proactive contact with new and returning clients, in English or Thai.</p></li>
+        <li><span class="n">02</span><h3>Calls</h3><p>Inbound enquiries answered and outbound calls made on your behalf.</p></li>
+        <li><span class="n">03</span><h3>Bookings</h3><p>Appointments scheduled, confirmed and kept in step with your calendar.</p></li>
+        <li><span class="n">04</span><h3>Follow-through</h3><p>Reminders, check-ins and ongoing contact so no one falls through the cracks.</p></li>
+      </ul>
+      <div class="who reveal"><span>Clinics</span><span>Aesthetic &amp; dental</span><span>Wellness</span><span>Hospitality</span><span>Premium services</span><span>Growing businesses</span></div>
+    </div>
+  </section>
+
+  <section class="bridge">
+    <div class="wrap">
+      <p class="kicker reveal">The bridge</p>
+      <div class="arc reveal">
+        <span class="place">Thailand</span>
+        <svg viewBox="0 0 200 40" aria-hidden="true"><path d="M2 30 Q100 -14 198 30" fill="none" stroke="#C9A45C" stroke-width="1.2" stroke-dasharray="3 5"><animate attributeName="stroke-dashoffset" from="0" to="-80" dur="4s" repeatCount="indefinite"/></path><circle r="3" fill="#E7CC8F"><animateMotion dur="4s" repeatCount="indefinite" path="M2 30 Q100 -14 198 30"/></circle></svg>
+        <span class="place">The West</span>
+      </div>
+      <p class="muted reveal">Two languages, two time zones, one rhythm. Your clients get a warm, capable and discreet reply wherever they are.</p>
+    </div>
+  </section>
+
+  <section id="meet" class="panel">
+    <div class="wrap meet">
+      <div class="avatar has-photo reveal interactive" id="avatar" title="Hover or tap to bring her into sync">
+        <canvas class="av" data-size="360" aria-label="Phiraya's avatar: a ring of oscillators that falls into sync"></canvas>
+        <!-- Phiraya's portrait sits inside the Kuramoto ring. Remove class has-photo on #avatar to show the P monogram instead. -->
+        <img alt="Phiraya" src="__AVATAR__">
+        <span class="cap" id="avcap">IN SYNC · r = 0.00</span>
+      </div>
+      <div>
+        <p class="kicker reveal">Meet Phiraya</p>
+        <h2 class="serif reveal">The one who keeps it <em>all in step.</em></h2>
+        <p class="lede muted reveal">Phiraya is the voice your clients meet first: warm, capable, discreet and responsive. She speaks English and Thai, knows your services and your calendar, and never lets a conversation drift.</p>
+        <div class="traits reveal">
+          <div><b>Warm</b><span>Every reply sounds like your business at its best.</span></div>
+          <div><b>Discreet</b><span>Client details stay private and handled with care.</span></div>
+          <div><b>Responsive</b><span>Day and night, across Thailand and the West.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="panel">
+    <div class="wrap">
+      <p class="kicker reveal">How it works</p>
+      <h2 class="serif reveal">In step, in <em>three moves</em></h2>
+      <div class="steps reveal">
+        <div><h3>Tell us about your business</h3><p>Your services, hours, prices and how you like clients to be spoken to.</p></div>
+        <div><h3>We connect your channels</h3><p>Calls, messages and bookings linked to the tools you already use.</p></div>
+        <div><h3>Phiraya takes it from there</h3><p>Every enquiry answered and followed up. You see every booking.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="wrap" style="width:100%">
+      <p class="kicker reveal">Get in touch</p>
+      <h2 class="serif reveal">Let's handle your<br><em>client connections.</em></h2>
+      <p class="muted reveal" style="max-width:34em;margin:0 auto">Tell us about your business and we'll show you how Phiraya would work for you.</p>
+      <div class="channels reveal">
+        <!-- TODO(owner): replace each href/label once the real details exist, then remove the "placeholder" class. -->
+        <a class="btn placeholder" href="#" aria-disabled="true">Email: hello@phiraya.com</a>
+        <a class="btn ghost placeholder" href="#" aria-disabled="true">LINE: @phiraya</a>
+        <a class="btn ghost placeholder" href="#" aria-disabled="true">WhatsApp</a>
+        <a class="btn ghost placeholder" href="#" aria-disabled="true">Book a call</a>
+      </div>
+      <span class="soon reveal">Contact details coming soon.</span>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <details class="math interactive">
+      <summary>About the moving field</summary>
+      <p>The background is a living solution of the <b>nonlocal Kuramoto model</b> with phase lag, the mathematics of how fireflies, heart cells and metronomes fall into step. Each of thousands of points is an oscillator with phase θ that obeys <code>dθ/dt = ω + K·Σ G(x−y)·sin(θ(y) − θ(x) − α)</code>. Neighbours pull each other into rhythm, and the lag α makes the agreement travel as waves. The bright arms are rotating spiral waves, each wound around a phase singularity of topological charge ±1 (the small marks). Your pointer acts as a pacemaker that sends out target waves, a tap creates a new vortex pair, and scrolling slowly changes α. Brightness shows local agreement |Z|; dark cores are where no consensus is possible.</p>
+    </details>
+    <span>PHIRAYA · Every client connection, handled. · Thailand · The West · 24/7</span>
+  </div>
+</footer>
+
+<div class="readout" id="readout" aria-hidden="true">
+  <div>COHERENCE <span class="r" id="ro-r">0.000</span></div>
+  <div>VORTICES <span id="ro-v">+0 / −0</span></div>
+  <div>PHASE LAG α <span id="ro-a">0.00</span></div>
+  <span class="bar"><i id="ro-bar"></i></span>
+</div>
+
+<script>
+(function(){
+'use strict';
+var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- seeded PRNG (mulberry32) ---------- */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+var rand = rng(+(new URLSearchParams(location.search).get('seed')||20261006));
+
+/* ---------- field: nonlocal Kuramoto oscillators on a torus ---------- */
+var cv = document.getElementById('field');
+var ctx = cv.getContext('2d', {alpha:false});
+var UP=2, BW=0, BH=0, ph, rho, X0, X1, FX, Y0, Y1, FY, W=0,H=0,N=0, th, om, cs, sn, zc, zs, tmp, img, buf, off, offx, boost;
+var Q=new URLSearchParams(location.search);
+var R=+(Q.get('R')||3);            // coupling radius in cells (box-blur half width)
+var K=+(Q.get('K')||3), ALPHA0=+(Q.get('a')||0.75), alpha=ALPHA0, DT=0.32, SPREAD=+(Q.get('sp')||0.004), NV=+(Q.get('nv')||4);
+var view={s:1,x:0,y:0};  // zoom: scale and top-left in grid units
+var mouse={x:-1,y:-1,on:false,t:0};
+var lut = new Uint8ClampedArray(256*3);
+
+// cyclic cosine palette tuned to the brand: ink -> deep teal -> gold -> ivory
+(function(){
+  for(var i=0;i<256;i++){
+    var p=i/256*2*Math.PI;
+    var r=0.56+0.44*Math.cos(p+0.00), g=0.48+0.40*Math.cos(p+0.42), b=0.40+0.36*Math.cos(p+1.05);
+    var w=Math.pow(0.5+0.5*Math.cos(p),1.6); // emphasise the crest so wavefronts read as fine gold lines
+    r=r*0.55+w*0.50; g=g*0.50+w*0.42; b=b*0.52+w*0.28;
+    lut[i*3]=Math.min(255,r*255); lut[i*3+1]=Math.min(255,g*255); lut[i*3+2]=Math.min(255,b*255);
+  }
+})();
+
+function setup(){
+  var cw=innerWidth, ch=innerHeight;
+  var cell = cw<700 ? 4.2 : 4.6;
+  W=Math.max(80,Math.round(cw/cell)); H=Math.max(60,Math.round(ch/cell));
+  while(W*H>42000){W=Math.round(W*0.92);H=Math.round(H*0.92);}
+  N=W*H;
+  th=new Float32Array(N); om=new Float32Array(N); cs=new Float32Array(N); sn=new Float32Array(N);
+  zc=new Float32Array(N); zs=new Float32Array(N); tmp=new Float32Array(Math.max(W,H)); boost=new Float32Array(N);
+  BW=W*UP; BH=H*UP; ph=new Float32Array(BW*BH); rho=new Float32Array(N);
+  off=document.createElement('canvas'); off.width=BW; off.height=BH; offx=off.getContext('2d');
+  img=offx.createImageData(BW,BH); buf=img.data;
+  // bilinear sampling tables for the upsampled render buffer (periodic)
+  X0=new Int32Array(BW); X1=new Int32Array(BW); FX=new Float32Array(BW); Y0=new Int32Array(BH); Y1=new Int32Array(BH); FY=new Float32Array(BH);
+  for(var bx=0;bx<BW;bx++){var sx=(bx+0.5)/UP-0.5, fx=Math.floor(sx); FX[bx]=sx-fx; X0[bx]=((fx%W)+W)%W; X1[bx]=(X0[bx]+1)%W;}
+  for(var by=0;by<BH;by++){var sy=(by+0.5)/UP-0.5, fy=Math.floor(sy); FY[by]=sy-fy; Y0[by]=(((fy%H)+H)%H)*W; Y1[by]=((((fy+1)%H)+H)%H)*W;}
+  // natural frequencies: Cauchy (Lorentzian) distribution, the classic Kuramoto choice, softly clipped
+  for(var i=0;i<N;i++){var u=rand()*0.98+0.01; om[i]=0.30+SPREAD*Math.tan(Math.PI*(u-0.5)); if(om[i]>0.6)om[i]=0.6; if(om[i]<0)om[i]=0;}
+  // initial condition: a constellation of phase singularities (sum of windings) plus noise
+  for(var i2=0;i2<N;i2++) th[i2]=(rand()-0.5)*0.3;
+  for(var k=0;k<NV;k++) injectPair(W*(0.15+0.7*rand()), H*(0.15+0.7*rand()), rand()*6.283, Math.min(W,H)*(0.12+0.1*rand()));
+  resize(); view.s=1; view.x=0; view.y=0;
+}
+
+function resize(){
+  var d=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.round(innerWidth*d); cv.height=Math.round(innerHeight*d);
+}
+
+// periodic box blur of a W*H field, horizontal then vertical, radius R, normalised
+function blur(f){
+  var x,y,i,s,inv=1/(2*R+1),row;
+  for(y=0;y<H;y++){
+    row=y*W; s=0;
+    for(i=-R;i<=R;i++) s+=f[row+((i%W)+W)%W];
+    for(x=0;x<W;x++){ tmp[x]=s*inv; s+=f[row+(x+R+1)%W]-f[row+((x-R)%W+W)%W]; }
+    for(x=0;x<W;x++) f[row+x]=tmp[x];
+  }
+  for(x=0;x<W;x++){
+    s=0;
+    for(i=-R;i<=R;i++) s+=f[(((i%H)+H)%H)*W+x];
+    for(y=0;y<H;y++){ tmp[y]=s*inv; s+=f[((y+R+1)%H)*W+x]-f[(((y-R)%H)+H)%H*W+x]; }
+    for(y=0;y<H;y++) f[y*W+x]=tmp[y];
+  }
+}
+
+function step(){
+  var i;
+  for(i=0;i<N;i++){cs[i]=Math.cos(th[i]); sn[i]=Math.sin(th[i]);}
+  zc.set(cs); zs.set(sn); blur(zc); blur(zs); blur(zc); blur(zs); // two passes ≈ smooth (triangular) coupling kernel
+  var ca=Math.cos(alpha), sa=Math.sin(alpha);
+  for(i=0;i<N;i++){
+    // Σ G sin(θj − θi − α) = Zs·cos(θi+α) − Zc·sin(θi+α)
+    var c=cs[i]*ca-sn[i]*sa, s=sn[i]*ca+cs[i]*sa;
+    th[i]+=DT*(om[i]+boost[i]+K*(zs[i]*c-zc[i]*s));
+    if(th[i]>62.83||th[i]<-62.83) th[i]%=6.2831853;
+  }
+}
+
+// pointer as pacemaker: a local region that oscillates faster emits concentric target waves
+function applyBoost(){
+  boost.fill(0);
+  if(!mouse.on) return;
+  var g=toGrid(mouse.x,mouse.y), rp=7, x0=Math.floor(g[0]), y0=Math.floor(g[1]);
+  for(var dy=-rp;dy<=rp;dy++)for(var dx=-rp;dx<=rp;dx++){
+    var d=Math.sqrt(dx*dx+dy*dy); if(d>rp) continue;
+    var x=((x0+dx)%W+W)%W, y=((y0+dy)%H+H)%H, f=1-d/rp;
+    boost[y*W+x]=0.9*f*f;
+  }
+}
+
+// inject a vortex/antivortex pair (net charge 0 keeps the torus consistent)
+function injectPair(gx,gy,ang,sep){
+  sep=sep||5+rand()*4; var ex=Math.cos(ang+Math.PI/2)*sep, ey=Math.sin(ang+Math.PI/2)*sep;
+  var ax=gx+ex, ay=gy+ey, bx=gx-ex, by=gy-ey, rad=Math.min(W,H)*0.45;
+  for(var y=0;y<H;y++)for(var x=0;x<W;x++){
+    var dx=x-gx; dx-=Math.round(dx/W)*W; var dy=y-gy; dy-=Math.round(dy/H)*H;
+    var dd=Math.sqrt(dx*dx+dy*dy); if(dd>rad) continue;
+    var px=gx+dx, py=gy+dy, w=dd<rad*0.6?1:1-(dd-rad*0.6)/(rad*0.4);
+    th[y*W+x]+=w*(Math.atan2(py-ay,px-ax)-Math.atan2(py-by,px-bx));
+  }
+}
+
+function toGrid(px,py){ // css pixels -> grid coords honouring zoom
+  return [view.x+px/innerWidth*W/view.s, view.y+py/innerHeight*H/view.s];
+}
+
+// topological charge: winding of phase around each plaquette
+var cores=[], clusters=[], nPlus=0, nMinus=0;
+function wrap(a){a%=6.2831853; if(a>3.14159265)a-=6.2831853; if(a<-3.14159265)a+=6.2831853; return a;}
+function findCores(){
+  cores.length=0; nPlus=0; nMinus=0;
+  for(var y=0;y<H;y++){var y1=(y+1)%H; for(var x=0;x<W;x++){
+    var x1=(x+1)%W, a=th[y*W+x], b=th[y*W+x1], c=th[y1*W+x1], d=th[y1*W+x];
+    var w=wrap(b-a)+wrap(c-b)+wrap(d-c)+wrap(a-d);
+    if(w>3){cores.push(x+0.5,y+0.5,1);} else if(w<-3){cores.push(x+0.5,y+0.5,-1);}
+  }}
+  // merge defects closer than ~2R into one marker carrying the net charge
+  clusters.length=0; var used=new Uint8Array(cores.length/3), lim=(2*R+2)*(2*R+2);
+  for(var a2=0;a2<cores.length;a2+=3){ if(used[a2/3]) continue; var sxx=cores[a2], syy=cores[a2+1], q=cores[a2+2], n=1; used[a2/3]=1;
+    for(var b2=a2+3;b2<cores.length;b2+=3){ if(used[b2/3]) continue; var ddx=cores[b2]-cores[a2], ddy=cores[b2+1]-cores[a2+1]; ddx-=Math.round(ddx/W)*W; ddy-=Math.round(ddy/H)*H;
+      if(ddx*ddx+ddy*ddy<lim){ used[b2/3]=1; sxx+=cores[a2]+ddx; syy+=cores[a2+1]+ddy; q+=cores[b2+2]; n++; } }
+    if(q!==0){ clusters.push(sxx/n, syy/n, q); if(q>0)nPlus+=q; else nMinus-=q; } }
+}
+
+// Render: bilinearly upsample e^{iθ}, then draw the level sets of the phase.
+// Isophase lines of a spiral wave are its arms; spacing them by |∇θ| keeps every line ~1px wide.
+var TAU=6.2831853, INV=1/6.2831853;
+function render(){
+  var i,Is=0,Ic=0;
+  for(i=0;i<N;i++){ rho[i]=Math.sqrt(zc[i]*zc[i]+zs[i]*zs[i]); Ic+=cs[i]; Is+=sn[i]; }
+  var x,y,o=0;
+  for(y=0;y<BH;y++){
+    var ya=Y0[y], yb=Y1[y], fy=FY[y], gy=1-fy;
+    for(x=0;x<BW;x++){
+      var xa=X0[x], xb=X1[x], fx=FX[x], gx=1-fx;
+      var c=(cs[ya+xa]*gx+cs[ya+xb]*fx)*gy+(cs[yb+xa]*gx+cs[yb+xb]*fx)*fy;
+      var s=(sn[ya+xa]*gx+sn[ya+xb]*fx)*gy+(sn[yb+xa]*gx+sn[yb+xb]*fx)*fy;
+      ph[o++]=Math.atan2(s,c);
+    }
+  }
+  var j=0; o=0;
+  for(y=0;y<BH;y++){
+    var ya2=Y0[y], fy2=FY[y], yb2=Y1[y], yn=(y+1)%BH*BW, row=y*BW;
+    for(x=0;x<BW;x++,o++,j+=4){
+      var p=ph[o], dx=ph[row+(x+1)%BW]-p, dy=ph[yn+x]-p;
+      if(dx>3.1416)dx-=TAU; else if(dx<-3.1416)dx+=TAU;
+      if(dy>3.1416)dy-=TAU; else if(dy<-3.1416)dy+=TAU;
+      var g=Math.sqrt(dx*dx+dy*dy)*INV+1e-4;          // cycles per pixel
+      var u=(p+3.14159265)*INV;                        // phase in [0,1)
+      var r=(rho[ya2+X0[x]]*(1-fy2)+rho[yb2+X0[x]]*fy2); // local coherence |Z|
+      var rr=r*r, coh=rr*r;
+      // primary crest: one bold line per wavelength
+      var d1=u-Math.round(u); d1=d1<0?-d1:d1; var L1=1-d1/(g*1.6); L1=L1>0?L1:0;
+      // fine engraving: 12 isophase lines per wavelength
+      var u2=u*12, d2=u2-Math.round(u2); d2=d2<0?-d2:d2; var L2=1-d2/(g*12*1.0); L2=L2>0?L2*0.55:0;
+      var k=((u*255)|0)*3;
+      var base=0.10+0.22*rr;
+      var R_=lut[k]*base+ (255*L1*1.0+226*L2)*coh, G_=lut[k+1]*base+(214*L1*1.0+196*L2)*coh, B_=lut[k+2]*base+(140*L1*1.0+150*L2)*coh+6;
+      buf[j]=R_; buf[j+1]=G_; buf[j+2]=B_; buf[j+3]=255;
+    }
+  }
+  offx.putImageData(img,0,0);
+  ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+  var sw=W/view.s, sh=H/view.s;
+  drawWrapped(view.x,view.y,sw,sh);
+  // vortex cores, clustered (a spiral's incoherent core can hold several unit defects)
+  var sx=cv.width/sw, sy=cv.height/sh, dpr=cv.width/innerWidth;
+  ctx.lineWidth=1*dpr;
+  for(var c2=0;c2<clusters.length;c2+=3){
+    var gx2=clusters[c2]-view.x, gy2=clusters[c2+1]-view.y; gx2-=Math.floor(gx2/W)*W; gy2-=Math.floor(gy2/H)*H;
+    if(gx2>sw||gy2>sh) continue;
+    var X=gx2*sx, Y=gy2*sy, q=clusters[c2+2], rad=(3.5+1.5*Math.sqrt(view.s))*dpr;
+    ctx.strokeStyle=q>0?'rgba(231,204,143,.6)':'rgba(130,205,200,.55)';
+    ctx.beginPath(); ctx.arc(X,Y,rad,0,TAU); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X-rad*0.45,Y); ctx.lineTo(X+rad*0.45,Y); if(q>0){ctx.moveTo(X,Y-rad*0.45); ctx.lineTo(X,Y+rad*0.45);} ctx.stroke();
+  }
+  return Math.sqrt(Ic*Ic+Is*Is)/N;
+}
+// draw the toroidal offscreen field so that panning/zooming wraps seamlessly
+function drawWrapped(x,y,sw,sh){
+  x-=Math.floor(x/W)*W; y-=Math.floor(y/H)*H;
+  var sx=cv.width/sw, sy=cv.height/sh;
+  for(var oy=0;oy<2;oy++)for(var ox=0;ox<2;ox++){
+    var srcX=ox?0:x, srcY=oy?0:y;
+    var wPart=ox?Math.max(0,x+sw-W):Math.min(sw,W-x), hPart=oy?Math.max(0,y+sh-H):Math.min(sh,H-y);
+    if(wPart<=0||hPart<=0) continue;
+    var dX=ox?(W-x)*sx:0, dY=oy?(H-y)*sy:0;
+    ctx.drawImage(off,srcX*UP,srcY*UP,wPart*UP,hPart*UP,dX,dY,wPart*sx+0.5,hPart*sy+0.5);
+  }
+}
+
+/* ---------- interaction ---------- */
+var pointers={}, pinch=null, down=null;
+cv.addEventListener('pointermove',function(e){
+  mouse.x=e.clientX; mouse.y=e.clientY; mouse.on=true; mouse.t=performance.now();
+  if(pointers[e.pointerId]) pointers[e.pointerId]=[e.clientX,e.clientY];
+  var ids=Object.keys(pointers);
+  if(ids.length===2){
+    var a=pointers[ids[0]], b=pointers[ids[1]], d=Math.hypot(a[0]-b[0],a[1]-b[1]);
+    if(pinch){ zoomAt((a[0]+b[0])/2,(a[1]+b[1])/2,d/pinch); }
+    pinch=d;
+  }
+});
+cv.addEventListener('pointerdown',function(e){
+  pointers[e.pointerId]=[e.clientX,e.clientY];
+  down={x:e.clientX,y:e.clientY,t:performance.now()};
+  mouse.x=e.clientX; mouse.y=e.clientY; mouse.on=true; mouse.t=performance.now();
+});
+function up(e){
+  delete pointers[e.pointerId]; if(Object.keys(pointers).length<2) pinch=null;
+  if(down && performance.now()-down.t<350 && Math.hypot(e.clientX-down.x,e.clientY-down.y)<10){
+    var g=toGrid(e.clientX,e.clientY); injectPair(g[0],g[1],rand()*6.283);
+  }
+  down=null;
+  if(e.pointerType!=='mouse') mouse.on=false;
+}
+cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+cv.addEventListener('pointerleave',function(e){ if(e.pointerType==='mouse') mouse.on=false; });
+// ctrl/cmd + wheel (and trackpad pinch, which browsers report as ctrl+wheel) zooms; plain wheel scrolls the page
+window.addEventListener('wheel',function(e){
+  if(!(e.ctrlKey||e.metaKey)) return;
+  e.preventDefault(); zoomAt(e.clientX,e.clientY,Math.exp(-e.deltaY*0.0035));
+},{passive:false});
+cv.addEventListener('dblclick',function(){ view.s=1; view.x=0; view.y=0; });
+function zoomAt(px,py,f){
+  var g=toGrid(px,py), ns=Math.min(5,Math.max(1,view.s*f));
+  view.x=g[0]-px/innerWidth*W/ns; view.y=g[1]-py/innerHeight*H/ns; view.s=ns;
+  if(ns===1){view.x=0;view.y=0;}
+}
+// a window-level mouse listener so the field still reacts when the cursor is over text
+window.addEventListener('mousemove',function(e){ mouse.x=e.clientX; mouse.y=e.clientY; mouse.on=true; mouse.t=performance.now(); },{passive:true});
+document.addEventListener('mouseleave',function(){ mouse.on=false; });
+
+/* ---------- scroll: phase lag morphs the pattern ---------- */
+var hdr=document.getElementById('hdr'), scrollP=0;
+function onScroll(){
+  var max=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+  scrollP=scrollY/max; hdr.classList.toggle('scrolled',scrollY>30);
+}
+addEventListener('scroll',onScroll,{passive:true});
+
+var ro={r:document.getElementById('ro-r'),v:document.getElementById('ro-v'),a:document.getElementById('ro-a'),bar:document.getElementById('ro-bar')};
+
+/* ---------- main loop ---------- */
+var frame=0, last=0, running=true, globalR=0;
+function loop(t){
+  if(!running) return;
+  requestAnimationFrame(loop);
+  if(reduce && t-last<90) return; last=t;
+  if(mouse.on && performance.now()-mouse.t>1800 && !down) mouse.on=false;
+  var target=ALPHA0+scrollP*0.22; alpha+=(target-alpha)*0.04;
+  applyBoost();
+  var steps=reduce?1:2; for(var s=0;s<steps;s++) step();
+  if(frame%6===0) findCores();
+  globalR=render();
+  if(frame%10===0){
+    ro.r.textContent=globalR.toFixed(3); ro.v.textContent='+'+nPlus+' / −'+nMinus; ro.a.textContent=alpha.toFixed(2);
+    ro.bar.style.width=(globalR*100).toFixed(1)+'%';
+  }
+  frame++;
+}
+document.addEventListener('visibilitychange',function(){ running=!document.hidden; if(running) requestAnimationFrame(loop); });
+var rt; addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ var ow=W,oh=H; resize(); var nw=Math.round(innerWidth/(innerWidth<700?4.2:4.6)); if(Math.abs(nw-ow)>ow*0.25) setup(); },150); });
+
+setup(); onScroll();
+// let the field settle into spirals before the first paint the visitor sees
+for(var w=0;w<60;w++) step(); findCores();
+requestAnimationFrame(loop);
+
+/* ---------- Phiraya's avatar: a globally coupled Kuramoto ring ---------- */
+// 48 oscillators with all-to-all coupling. Below the critical coupling Kc = 2γ they drift apart;
+// hovering raises K past Kc and they lock into one rhythm, the order parameter r → 1.
+var avs=[].slice.call(document.querySelectorAll('canvas.av'));
+var A=48, aph=new Float32Array(A), aom=new Float32Array(A), aK=0.4, aKt=0.4, ar=0;
+for(var q=0;q<A;q++){ aph[q]=rand()*6.283; var u=rand()*0.96+0.02; aom[q]=1.0+0.18*Math.tan(Math.PI*(u-0.5)); }
+var avEl=document.getElementById('avatar'), avcap=document.getElementById('avcap');
+if(avEl){
+  avEl.addEventListener('pointerenter',function(){aKt=2.4;});
+  avEl.addEventListener('pointerleave',function(){aKt=0.4;});
+  avEl.addEventListener('pointerdown',function(){aKt=aKt>1?0.4:2.4;});
+}
+// it also drifts into sync on its own once scrolled into view, so touch visitors see it happen
+var avSeen=false;
+if('IntersectionObserver' in window && avEl){
+  new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting&&!avSeen){avSeen=true; setTimeout(function(){ if(aKt<1) aKt=1.6; },900);} }); },{threshold:.5}).observe(avEl);
+}
+avs.forEach(function(c){ var s=+c.dataset.size, d=Math.min(window.devicePixelRatio||1,2); c.width=c.height=Math.round(s*d); });
+function avStep(dt){
+  aK+=(aKt-aK)*0.03;
+  var C=0,S=0; for(var i=0;i<A;i++){C+=Math.cos(aph[i]);S+=Math.sin(aph[i]);} C/=A; S/=A;
+  ar=Math.sqrt(C*C+S*S); var psi=Math.atan2(S,C);
+  for(var j=0;j<A;j++) aph[j]+=dt*(aom[j]+aK*ar*Math.sin(psi-aph[j])); // mean-field form
+  return psi;
+}
+var t0=performance.now();
+function avDraw(){
+  requestAnimationFrame(avDraw);
+  var now=performance.now(), dt=Math.min(0.05,(now-t0)/1000); t0=now;
+  var psi=avStep(dt*(reduce?0.4:1));
+  for(var n=0;n<avs.length;n++){
+    var c=avs[n], g=c.getContext('2d'), S=c.width, m=S/2, mini=c.dataset.mini;
+    g.clearRect(0,0,S,S);
+    var grd=g.createRadialGradient(m,m*0.85,S*0.05,m,m,m);
+    grd.addColorStop(0,'rgba(201,164,92,'+(0.10+ar*0.22)+')'); grd.addColorStop(0.7,'rgba(14,17,22,.92)'); grd.addColorStop(1,'rgba(7,9,12,1)');
+    g.fillStyle=grd; g.beginPath(); g.arc(m,m,m,0,6.2832); g.fill();
+    g.strokeStyle='rgba(201,164,92,'+(0.25+ar*0.5)+')'; g.lineWidth=S*0.006; g.beginPath(); g.arc(m,m,m-S*0.006,0,6.2832); g.stroke();
+    if(mini){
+      for(var i=0;i<A;i+=2){ var a=i/A*6.2832, rr=m*(0.86+0.08*Math.cos(aph[i]-psi)*(1-ar*0.6));
+        g.fillStyle='rgba(231,204,143,'+(0.5+0.5*Math.cos(aph[i]))*0.9+')'; g.beginPath(); g.arc(m+Math.cos(a)*rr,m+Math.sin(a)*rr,S*0.028,0,6.2832); g.fill(); }
+      continue;
+    }
+    // ring of oscillators: radius breathes with phase; when locked they trace one perfect breathing circle
+    g.save(); g.translate(m,m);
+    g.beginPath();
+    for(var k=0;k<=A;k++){ var ii=k%A, ang=ii/A*6.2832-1.5708, rad=m*(0.80+0.06*Math.cos(aph[ii])); var X=Math.cos(ang)*rad, Y=Math.sin(ang)*rad; k?g.lineTo(X,Y):g.moveTo(X,Y); }
+    g.strokeStyle='rgba(201,164,92,'+(0.15+ar*0.35)+')'; g.lineWidth=S*0.003; g.stroke();
+    for(var p=0;p<A;p++){
+      var an=p/A*6.2832-1.5708, rd=m*(0.80+0.06*Math.cos(aph[p])), lit=0.5+0.5*Math.cos(aph[p]-psi);
+      g.fillStyle='rgba('+(200+55*lit|0)+','+(170+50*lit|0)+','+(110+60*lit|0)+','+(0.35+0.65*lit)+')';
+      g.beginPath(); g.arc(Math.cos(an)*rd,Math.sin(an)*rd,S*(0.006+0.008*lit),0,6.2832); g.fill();
+    }
+    if(c.parentNode.classList.contains('has-photo')){ g.restore(); continue; }
+    // mean-field vector: the collective rhythm, length r
+    g.strokeStyle='rgba(231,204,143,'+(0.2+0.6*ar)+')'; g.lineWidth=S*0.004;
+    g.beginPath(); g.moveTo(0,0); g.lineTo(Math.cos(psi)*m*0.5*ar,Math.sin(psi)*m*0.5*ar); g.stroke();
+    // monogram
+    g.fillStyle='rgba(244,239,230,'+(0.82+0.18*ar)+')'; g.font='600 '+(S*0.30)+'px Cormorant, Georgia, serif'; g.textAlign='center'; g.textBaseline='middle';
+    g.fillText('P',0,S*0.012);
+    g.restore();
+  }
+  if(avcap) avcap.textContent=(ar>0.8?'IN SYNC':ar>0.4?'SYNCING':'LISTENING')+' · r = '+ar.toFixed(2);
+}
+requestAnimationFrame(avDraw);
+
+/* ---------- reveal on scroll ---------- */
+var rv=[].slice.call(document.querySelectorAll('.reveal'));
+if('IntersectionObserver' in window){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.15});
+  rv.forEach(function(el){io.observe(el);});
+} else rv.forEach(function(el){el.classList.add('in');});
+})();
+</script>
+</body>
+</html>
