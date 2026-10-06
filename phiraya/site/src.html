@@ -130,6 +130,36 @@ h2{font-size:clamp(44px,6.4vw,96px);margin:0 0 28px}
 .math[open] summary::before{content:"− "}
 .math code{font:13px ui-monospace,Menlo,monospace;color:var(--gold-2)}
 
+
+/* gallery */
+.gallery{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:clamp(12px,2vw,24px);margin-top:clamp(56px,8vw,96px);align-items:end}
+.gallery figure{margin:0;position:relative;overflow:hidden;border-radius:999px 999px 18px 18px;border:1px solid rgba(201,164,92,.35);background:#111}
+.gallery img{display:block;width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(1.04);transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.gallery figure:hover img{transform:scale(1.04)}
+.gallery figure:nth-child(1),.gallery figure:nth-child(3){aspect-ratio:3/4}
+.gallery figure:nth-child(2){aspect-ratio:2/3}
+.gallery figure:nth-child(2) img{object-position:50% 0}
+.gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:40px 18px 16px;font:500 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;color:var(--ivory);background:linear-gradient(180deg,transparent,rgba(7,9,12,.85))}
+
+/* call demo */
+.call{display:grid;grid-template-columns:minmax(260px,420px) 1fr;gap:clamp(32px,6vw,90px);align-items:center}
+.phone-frame{position:relative;aspect-ratio:1;border-radius:32px;overflow:hidden;border:1px solid rgba(201,164,92,.4);box-shadow:0 40px 100px rgba(0,0,0,.55),0 0 0 8px rgba(201,164,92,.06)}
+.phone-frame video{display:block;width:100%;height:100%;object-fit:cover}
+.phone-frame .live{position:absolute;top:16px;left:16px;display:flex;align-items:center;gap:8px;font:500 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.14em;background:rgba(7,9,12,.6);padding:8px 12px;border-radius:999px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.phone-frame .live i{width:7px;height:7px;border-radius:50%;background:#d9534f;box-shadow:0 0 10px #d9534f}
+.phone-frame .timer{margin-left:4px;color:var(--muted)}
+.phone-frame canvas{position:absolute;left:0;right:0;bottom:0;width:100%;height:90px;pointer-events:none}
+.play{margin-top:28px}
+.play[aria-pressed="true"] .ico::before{content:"❚❚"}
+.play .ico::before{content:"▶"}
+.transcript{margin-top:30px;border-left:1px solid var(--line);padding-left:22px}
+.transcript p{margin:0 0 18px;transition:color .4s,opacity .4s;opacity:.55}
+.transcript p.on{opacity:1}
+.transcript .th{display:block;font-family:'Cormorant',serif;font-size:clamp(22px,2.2vw,30px);line-height:1.25;color:var(--ivory)}
+.transcript .en{display:block;font-size:14px;color:var(--muted);margin-top:4px}
+.transcript p.on .th{color:var(--gold-2)}
+.note{font-size:12.5px;color:var(--muted);margin-top:8px}
+@media (max-width:900px){.call{grid-template-columns:1fr}.gallery{grid-template-columns:1fr 1fr}.gallery figure:nth-child(2){grid-column:span 2;order:-1;aspect-ratio:3/4}}
 footer{border-top:1px solid var(--line);padding:36px 0 44px;font-size:14px;color:var(--muted);background:var(--ink)}
 footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
@@ -168,6 +198,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <nav>
       <a href="#services">Services</a>
       <a href="#meet">Meet Phiraya</a>
+      <a href="#call">Hear a call</a>
       <a href="#how">How it works</a>
       <a class="btn" href="#contact">Get in touch</a>
     </nav>
@@ -245,6 +276,36 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
           <div><b>Discreet</b><span>Client details stay private and handled with care.</span></div>
           <div><b>Responsive</b><span>Day and night, across Thailand and the West.</span></div>
         </div>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="gallery reveal">
+        <figure><img alt="Phiraya in an ivory blazer" src="__IVORY__" loading="lazy"><figcaption>ENGLISH</figcaption></figure>
+        <figure><img alt="Phiraya, full length, in a navy suit" src="__FULL__" loading="lazy"><figcaption>THAI</figcaption></figure>
+        <figure><img alt="Phiraya in a navy blazer" src="__CLOSEUP__" loading="lazy"><figcaption>DAY &amp; NIGHT</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="call" class="panel">
+    <div class="wrap call">
+      <div class="phone-frame reveal interactive">
+        <video id="callv" src="__CALLVIDEO__" poster="__CALLPOSTER__" muted loop playsinline autoplay preload="auto" aria-label="Phiraya on a client call"></video>
+        <span class="live"><i></i>ON A CALL <span class="timer" id="calltimer">00:00</span></span>
+        <canvas id="wave" aria-hidden="true"></canvas>
+      </div>
+      <div>
+        <p class="kicker reveal">Hear her on a call</p>
+        <h2 class="serif reveal">The first hello, <em>in Thai.</em></h2>
+        <p class="lede muted reveal">The opening of a clinic demo call. Press play to hear how Phiraya opens a conversation.</p>
+        <button class="btn play reveal" id="playcall" type="button" aria-pressed="false"><span class="ico" aria-hidden="true"></span> Play the call</button>
+        <audio id="calla" src="__CALLVOICE__" preload="auto"></audio>
+        <div class="transcript reveal" id="transcript">
+          <!-- Transcript of call-voice.mp3. NOTE(owner): the recording says "Phitara" (พิทารา), not "Phiraya". -->
+          <p data-t0="0" data-t1="5.7"><span class="th">สวัสดีค่ะ ดิฉันพิทาราค่ะ ยินดีให้คำแนะนำและช่วยเหลือด้านสุขภาพของคุณค่ะ</span><span class="en">Hello, I'm Phitara. I'm happy to advise and help you with your health.</span></p>
+          <p data-t0="5.7" data-t1="7.8"><span class="th">วันนี้เป็นอย่างไรบ้างคะ</span><span class="en">How are you today?</span></p>
+        </div>
+        <p class="note reveal">Demo recording. English shown as a translation.</p>
       </div>
     </div>
   </section>
@@ -639,6 +700,43 @@ function avDraw(){
   if(avcap) avcap.textContent=(ar>0.8?'IN SYNC':ar>0.4?'SYNCING':'LISTENING')+' · r = '+ar.toFixed(2);
 }
 requestAnimationFrame(avDraw);
+
+
+/* ---------- call demo: synced voice, live waveform and transcript ---------- */
+(function(){
+  var v=document.getElementById('callv'), a=document.getElementById('calla'), b=document.getElementById('playcall');
+  if(!v||!a||!b) return;
+  var cvw=document.getElementById('wave'), wg=cvw.getContext('2d'), tm=document.getElementById('calltimer');
+  var lines=[].slice.call(document.querySelectorAll('#transcript p'));
+  var ac=null, an=null, data=null, start=performance.now();
+  function size(){ var d=Math.min(window.devicePixelRatio||1,2); cvw.width=cvw.clientWidth*d; cvw.height=cvw.clientHeight*d; }
+  size(); addEventListener('resize',size);
+  b.addEventListener('click',function(){
+    if(!a.paused){ a.pause(); b.setAttribute('aria-pressed','false'); b.lastChild.textContent=' Play the call'; return; }
+    try{ if(!ac){ var C=window.AudioContext||window.webkitAudioContext; if(C){ ac=new C(); var src=ac.createMediaElementSource(a); an=ac.createAnalyser(); an.fftSize=256; data=new Uint8Array(an.frequencyBinCount); src.connect(an); an.connect(ac.destination);} } if(ac&&ac.state==='suspended') ac.resume(); }catch(e){ an=null; }
+    if(a.ended||a.currentTime===0){ a.currentTime=0; v.currentTime=0; }
+    v.play().catch(function(){}); a.play().catch(function(){});
+    b.setAttribute('aria-pressed','true'); b.lastChild.textContent=' Pause';
+  });
+  a.addEventListener('ended',function(){ b.setAttribute('aria-pressed','false'); b.lastChild.textContent=' Play again'; lines.forEach(function(l){l.classList.remove('on');}); });
+  function draw(){
+    requestAnimationFrame(draw);
+    var W2=cvw.width, H2=cvw.height; wg.clearRect(0,0,W2,H2);
+    var playing=!a.paused, t=performance.now()/1000;
+    var secs=Math.floor((performance.now()-start)/1000); tm.textContent=('0'+Math.floor(secs/60)).slice(-2)+':'+('0'+secs%60).slice(-2);
+    if(an&&playing) an.getByteFrequencyData(data);
+    var n=48, bw=W2/n;
+    for(var i=0;i<n;i++){
+      var amp = (an&&playing) ? data[Math.min(data.length-1,(i*1.4|0)+2)]/255 : 0.06+0.04*Math.sin(t*2+i*0.5);
+      var h=Math.max(2,amp*H2*0.8);
+      wg.fillStyle='rgba(231,204,143,'+(0.35+amp*0.6)+')';
+      wg.fillRect(i*bw+bw*0.3,H2-h-8,bw*0.4,h);
+    }
+    var ct=a.currentTime;
+    lines.forEach(function(l){ l.classList.toggle('on', playing && ct>=+l.dataset.t0 && ct<+l.dataset.t1); });
+  }
+  draw();
+})();
 
 /* ---------- reveal on scroll ---------- */
 var rv=[].slice.call(document.querySelectorAll('.reveal'));

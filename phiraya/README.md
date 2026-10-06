@@ -39,6 +39,8 @@ left out of the promo on purpose.
 | `site/src.html` | editable source of the page; run `python3 site/build.py site` after editing to rebuild `index.html` |
 | `site/assets/phiraya-*-original.jpg` | Phiraya's two portraits as supplied by the owner (6 Oct 2026) |
 | `site/assets/phiraya-standing.webp`, `phiraya-avatar.webp` | background-removed cut-outs made with `site/cutout.py` |
+| `site/assets/phiraya-{ivory,closeup,full}-original.jpg` | three more portraits from the owner (6 Oct 2026), shown in the arched gallery |
+| `site/assets/call-demo.mp4`, `call-voice.mp3` | owner's call demo: 10s silent MiniMax Hailuo clip + 7.7s Thai greeting, played together in the "Hear a call" section. The voice says **"Phitara"** (พิทารา), not Phiraya, and offers help "with your health" (clinic demo) |
 
 Voiceover script: "Every client connection, handled. A new enquiry from London
 at three a.m. A booking request from Bangkok over lunch. Phiraya answers,
@@ -80,4 +82,6 @@ person), code, Stripe or Supabase here.
 3. "Finish off the Phiraya agent": if this means an AI receptionist, the
    brief needs hours, services, prices, booking method, and what it must
    never say or promise.
-4. Other formats (1:1, 16:9) or a Thai version if wanted.
+4. The call voice says "Phitara". Confirm the brand spelling (Phiraya vs Phitara) and regenerate the voice line if needed. Also check that "advise and help with your health" is something the agent may say.
+5. The owner's `landing.html` (Windows path on their PC) was never uploaded, so it isn't in this branch.
+6. Other formats (1:1, 16:9) or a Thai version if wanted.
