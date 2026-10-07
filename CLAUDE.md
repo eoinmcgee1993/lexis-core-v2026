@@ -1,6 +1,7 @@
 # CLAUDE.md: Phiraya (`phiraya` branch)
 
-This branch holds **Phiraya** only. It is an orphan branch with no shared history with
+This branch holds **Phiraya** only. It is due to move to its own private repo
+(`phiraya`, default branch `main`) once the owner creates it. It is an orphan branch with no shared history with
 LEXIS, which lives on the other branches of this repo. Read `phiraya/README.md` for
 status and open items, and `phiraya/BRIEF-FOR-OTHER-AGENTS.md` for the rules every
 tool must follow.
@@ -54,6 +55,9 @@ phiraya/
 python3 -I site/build.py site
 # Check no placeholder survived
 grep -c "__[A-Z]*__" site/index.html          # must print 0
+# Smoke test (from phiraya/site; needs playwright). Fails on page errors, horizontal
+# overflow, leftover tokens, or banned wording (AI, human, Phitara) in page copy.
+PW_CHROMIUM=/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell node tests/smoke.mjs
 
 # Background cut-out for a new grey-backdrop portrait (needs pillow numpy scipy)
 python3 -I site/cutout.py in.jpg out.png
@@ -109,6 +113,13 @@ on its poster there; audio, waveform and transcript can still be checked.
   the name is pronounced พิรยา before using it.
 - Portrait originals are `site/assets/*-original.jpg`; upload these for new image or video
   jobs rather than relying on expiring links.
+
+## CI
+
+`.github/workflows/phiraya-site.yml` runs on pushes and PRs to `main` (the planned
+standalone Phiraya repo, so it never runs in the LEXIS repo). It rebuilds the site, fails if
+the committed `site/index.html` is stale, and runs `tests/smoke.mjs`. Always commit the
+rebuilt `index.html` together with `src.html` changes.
 
 ## Commits
 

@@ -1,0 +1,36 @@
+name: Phiraya site
+
+# Runs only on the Phiraya repo's main branch, so it never uses LEXIS's Actions.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: phiraya
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rebuild index.html from src.html
+        run: python3 -I site/build.py site
+      - name: Committed index.html must match the build
+        run: git diff --exit-code -- site/index.html || (echo "::error::site/index.html is out of date. Run python3 -I site/build.py site and commit." && exit 1)
+      - name: Install Playwright
+        working-directory: phiraya/site
+        run: npm init -y >/dev/null && npm i --no-save playwright@1 && npx playwright install --with-deps chromium
+      - name: Smoke test
+        working-directory: phiraya/site
+        run: node tests/smoke.mjs
