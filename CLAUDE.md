@@ -21,6 +21,23 @@ Three deployed pieces, from one repo:
 is where essentially all backend logic lives, organised under numbered section
 banners (`1. ENV CHECK` … `7. ROUTES`).
 
+## Scope: LEXIS only
+
+This repo's `main` and feature branches are **LEXIS** (the English/Thai speaking
+tutor at learnwithlexis.com) and nothing else.
+
+- **Phiraya** (the client-communication service for clinics and premium
+  businesses) is a separate business. It lives only on the orphan branch
+  `phiraya`, with its own `CLAUDE.md`. Never merge, cherry-pick or copy between
+  the two, and never reuse LEXIS code, avatars, Stripe, Supabase or other
+  accounts for Phiraya work.
+- Phiraya's backend (`aether`) is not in this repo. The ElevenLabs agent
+  `agent_1501krgcgdq5fhya1msa73x233xa` ("Phiraya") belongs to Phiraya, not LEXIS.
+- Anything LEXIS-facing that talks to the public (copy, agents, scripts) must
+  take prices and trial terms only from `frontend/src/content/facts.js`, must
+  never claim or imply a human is speaking, and never pitches to or mentions
+  tutors or language schools (they are competitors).
+
 ## Commands
 
 ```bash
