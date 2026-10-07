@@ -31,8 +31,9 @@ tutor at learnwithlexis.com) and nothing else.
   `phiraya`, with its own `CLAUDE.md`. Never merge, cherry-pick or copy between
   the two, and never reuse LEXIS code, avatars, Stripe, Supabase or other
   accounts for Phiraya work.
-- Phiraya's backend (`aether`) is not in this repo. The ElevenLabs agent
-  `agent_1501krgcgdq5fhya1msa73x233xa` ("Phiraya") belongs to Phiraya, not LEXIS.
+- `aether` is Phiraya's backend (Phiraya under its engineering name). It is not
+  in this repo. The ElevenLabs agent "Phiraya" (`agent_9701m4b2p2xyf0eszr31vmztf8fj`)
+  belongs to Phiraya, not LEXIS.
 - Anything LEXIS-facing that talks to the public (copy, agents, scripts) must
   take prices and trial terms only from `frontend/src/content/facts.js`, must
   never claim or imply a human is speaking, and never pitches to or mentions
