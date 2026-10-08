@@ -18,7 +18,7 @@
 // (the site's own files, not Google's), teal accent, amber only on the one
 // call to action, as brand-kit/README.md §2 reserves it.
 //
-// Rendering is the same frame-by-frame method as brand-kit/future/hiring/
+// Rendering is the same frame-by-frame method as brand-kit/dr-hiring/hiring/
 // video.mjs: render(t) sets every element for time t, the hero <video> is
 // seeked to the matching frame, each frame is screenshotted, ffmpeg encodes.
 // Only the hero clip's first 8.3s is used: HeroVideo.jsx records a hard cut
