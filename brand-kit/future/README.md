@@ -105,15 +105,19 @@ Rebuild with `node hiring/video.mjs <fonts.css>` (about 2 min per language;
 
 ### LEXIS reads the ad (`hiring/hiring-lexis-reads-en.mp4`)
 
-9:16, 39 s. LEXIS says the ad in her own voice (ElevenLabs eleven_v4,
-"Sarah – Warm & Conversational", the voice of the earlier LEXIS reels),
-framed as a voice call: her portrait, a waveform driven by the real audio,
-word-timed captions, and fact cards that change as she says each point.
-Script and word timings are in `hiring/reads/`; rebuild with
-`node hiring/reads.mjs <fonts.css> en`.
+9:16, 38 s, lip-synced. LEXIS presents the Digital Renaissance role in her own
+voice (ElevenLabs eleven_v4, "Sarah – Warm & Conversational", the voice of
+the earlier LEXIS reels), with word-timed captions and fact cards that change
+as she says each point. Her face is her real landing-page hero footage,
+lip-synced to the new read with MuseTalk v1 run locally on CPU (free; paid
+lip-sync was out of credits on 8 Oct 2026). Rebuild with
+`node hiring/reads.mjs <fonts.css> en`; inputs and how they were made are in
+`hiring/reads.mjs`'s header.
 
-Not lip-synced yet: on 8 Oct 2026 both accounts that can animate her were out
-of credits (Higgsfield 0.25; ElevenLabs 287 of ~30,500 needed for 36 s with
-creatify-aurora). A Thai read also needs ElevenLabs credits (~600 for the
-voice track, voice "Aom"). With credits, the lip-synced clip replaces the
-portrait image and nothing else changes.
+**The role is Digital Renaissance's only** (owner, 8 Oct 2026): the LEXIS
+tutor is a separate project, so no ad here asks the hire to sell LEXIS or puts
+a LEXIS price or commission next to the $5,000. LEXIS appears only as the
+presenter.
+
+Not done: a Thai read needs ~600 ElevenLabs credits for the voice track
+(voice "Aom"), then the same lip-sync run.

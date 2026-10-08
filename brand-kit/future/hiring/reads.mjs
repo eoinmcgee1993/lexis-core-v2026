@@ -86,7 +86,7 @@ const cards = [
   [at('earn'), `<div class=lab>You earn</div><div class=big>30%</div><div class=p>of every month a client pays, for their first 3 months</div>`],
   [at('Just'), `<div class=lab>Two or three clients can change your life</div><div class=rows><div><span>2 clients</span><b>$3,000/mo</b><i>≈ ฿109,500</i></div><div><span>3 clients</span><b>$4,500/mo</b><i>≈ ฿164,250</i></div></div><div class=fine>For each client's first 3 months, at ≈ ฿36.5 per $1</div>`],
   [at('commission'), `<div class=lab>Be clear on this</div><div class=h>Commission only</div><div class=p>No base salary. Nothing is guaranteed: you earn when clients sign and pay.</div>`],
-  [at('To'), `<div class=lab>How to apply</div><div class=h>Message this page</div><div class=p>3–4 lines about you, and one short message inviting someone to try LEXIS.</div>`],
+  [at('To'), `<div class=lab>How to apply</div><div class=h>Message this page</div><div class=p>3–4 lines about you, and one short message introducing Digital Renaissance to a business owner.</div>`],
   [LEAD + voDur + 0.2, `<div class=quote>“Train people well enough so they can leave. Treat them well enough so they don't want to.”<small>Richard Branson. This is how we work.</small></div>`],
 ];
 
