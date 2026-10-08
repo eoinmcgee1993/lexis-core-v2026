@@ -88,9 +88,14 @@ where the CSS is Google Fonts' Prompt + Fraunces with the woff2 URLs inlined as
 data URIs (the script's header comment says why). The build warns if any text
 overflows a slide.
 
-Pay shown is the standing rate (LEXIS 20%, DR 30% × first 3 months), not
+Pay shown is the standing DR rate (30% × each client's first 3 months), not
 Future's 60% launch window. Applications are "send us a message on this page",
 so the ad needs no email address.
+
+Tone (owner, 8 Oct 2026): the pay is framed as "you work for yourself and earn
+in your own time", not "commission only / nothing is guaranteed". Both say the
+same true thing; the old wording read as a warning. The 2–3 clients figures
+stay labelled "example figures" so they are not read as a promise.
 
 ### Video version (`hiring/hiring-video-<lang>.mp4`)
 
@@ -105,7 +110,7 @@ Rebuild with `node hiring/video.mjs <fonts.css>` (about 2 min per language;
 
 ### LEXIS reads the ad (`hiring/hiring-lexis-reads-en.mp4`)
 
-9:16, 38 s, lip-synced. LEXIS presents the Digital Renaissance role in her own
+9:16, ~38 s, lip-synced. LEXIS presents the Digital Renaissance role in her own
 voice (ElevenLabs eleven_v4, "Sarah – Warm & Conversational", the voice of
 the earlier LEXIS reels), with word-timed captions and fact cards that change
 as she says each point. Her face is her real landing-page hero footage,

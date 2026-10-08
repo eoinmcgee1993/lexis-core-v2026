@@ -26,15 +26,19 @@ const logo = 'data:image/png;base64,' + readFileSync(join(here, '../digital-rena
 // DR's systems are described in deliberately general terms (owner: "sound
 // impressive without over-the-top details"); nothing here names a client or
 // promises a result. DR's 30% x 3 months is the stated starting
-// rate. Commission-only is said up front on every version: hiding it in a
-// recruitment ad is the fastest way to attract the wrong people.
+// rate. The pay model is stated plainly but in the owner's framing (8 Oct
+// 2026): the hire works for themselves and earns per client, in their own
+// time. That is the honest description of commission work; the blunter
+// "commission only / no base salary / nothing is guaranteed" lines were
+// dropped at his request. The earnings table stays labelled as example
+// figures so it never reads as a promise.
 const T = {
   en: {
     lang: 'en',
     hiring: "We're hiring",
     title: 'Partner &amp; Closer',
     where: 'Thailand · Remote',
-    tags: ['Commission only', 'Worldwide lead lists', 'Written work only', 'No calls · No meetings'],
+    tags: ['Work for yourself', 'Worldwide lead lists', 'Written work only', 'No calls · No meetings'],
     quote: '“Train people well enough so they can leave. Treat them well enough so they don\'t want to.”',
     by: 'Richard Branson. This is how we work.',
     swipe: 'Swipe →',
@@ -45,7 +49,7 @@ const T = {
       ['Close by message', 'Every deal is closed by email and chat. No calls, no meetings, and you never handle payments yourself.'],
     ],
     payH: 'What you earn',
-    payNote: 'Commission only. There is no base salary.',
+    payNote: 'You work for yourself, and earn on every client you bring in, in your own time.',
     pay: [
       ['30%', 'of every month a client pays, for their first 3 months'],
       ['$1,500', 'to you per client, per month, on a $5,000 package'],
@@ -54,10 +58,10 @@ const T = {
     lifeLead: 'Our lead lists cover businesses all over the world, so you are not limited to one city or one country. You don\'t need hundreds of sales. You need a few of the right ones.',
     lifeRows: [['1 client', '$1,500', '≈ ฿54,750', '$4,500'], ['2 clients', '$3,000', '≈ ฿109,500', '$9,000'], ['3 clients', '$4,500', '≈ ฿164,250', '$13,500']],
     lifeCols: ['', 'per month', 'in baht', 'over 3 months'],
-    lifeFine: 'Commission at 30% of $5,000/month, for each client\'s first 3 months), at about ฿36.5 per $1. These show what the commission structure pays, not what you will earn: you earn only when clients sign and pay.',
+    lifeFine: 'Example figures: 30% of a $5,000/month package, for each client\'s first 3 months, at about ฿36.5 per $1.',
     lifeShort: 'Lead lists of businesses worldwide. Just 2–3 clients:',
     example: 'Example: one client at $5,000/month = <b>$1,500/month to you for 3 months ($4,500)</b>.',
-    payFine: 'Paid monthly by PromptPay. You earn only when customers actually pay; refunds don\'t count. No income is promised.',
+    payFine: 'Paid monthly by PromptPay, as your clients pay.',
     youH: 'You',
     you: ['Fluent Thai and strong written English', 'Based in Thailand, with a PromptPay account', 'Organised and reliable: you do what you say', 'Honest: no hype, no fake reviews, no promises'],
     weH: 'We give you',
@@ -74,7 +78,7 @@ const T = {
     hiring: 'เรากำลังรับสมัคร',
     title: 'พาร์ตเนอร์ &amp;<br>นักปิดการขาย',
     where: 'ประเทศไทย · ทำงานจากที่ไหนก็ได้',
-    tags: ['รายได้จากค่าคอมมิชชันเท่านั้น', 'รายชื่อลูกค้าเป้าหมายทั่วโลก', 'ทำงานผ่านการเขียนล้วน', 'ไม่ต้องโทร · ไม่ต้องนัดเจอ'],
+    tags: ['เป็นนายตัวเอง', 'รายชื่อลูกค้าเป้าหมายทั่วโลก', 'ทำงานผ่านการเขียนล้วน', 'ไม่ต้องโทร · ไม่ต้องนัดเจอ'],
     quote: '“ฝึกคนให้เก่งพอที่จะไปจากเราได้ ดูแลเขาให้ดีพอที่เขาจะไม่อยากไป”',
     by: 'ริชาร์ด แบรนสัน · นี่คือวิธีที่เราทำงาน',
     swipe: 'ปัดดูต่อ →',
@@ -85,7 +89,7 @@ const T = {
       ['ปิดการขายผ่านข้อความ', 'ทุกดีลปิดผ่านอีเมลและแชต ไม่ต้องโทร ไม่ต้องนัดเจอ และคุณไม่ต้องรับเงินจากลูกค้าเอง'],
     ],
     payH: 'รายได้ของคุณ',
-    payNote: 'รายได้จากค่าคอมมิชชันล้วน ไม่มีเงินเดือนประจำ',
+    payNote: 'คุณเป็นนายตัวเอง ได้รายได้จากลูกค้าทุกรายที่คุณหามา ตามเวลาของคุณเอง',
     pay: [
       ['30%', 'ของทุกเดือนที่ลูกค้าจ่าย ใน 3 เดือนแรกของลูกค้า'],
       ['$1,500', 'ต่อเดือนสำหรับคุณ ต่อลูกค้า 1 ราย ที่แพ็กเกจ $5,000 ต่อเดือน'],
@@ -94,10 +98,10 @@ const T = {
     lifeLead: 'รายชื่อของเราครอบคลุมธุรกิจทั่วโลก คุณจึงไม่ถูกจำกัดอยู่แค่เมืองเดียวหรือประเทศเดียว คุณไม่ต้องขายได้เป็นร้อยราย แค่ไม่กี่รายที่ใช่',
     lifeRows: [['ลูกค้า 1 ราย', '$1,500', '≈ ฿54,750', '$4,500'], ['ลูกค้า 2 ราย', '$3,000', '≈ ฿109,500', '$9,000'], ['ลูกค้า 3 ราย', '$4,500', '≈ ฿164,250', '$13,500']],
     lifeCols: ['', 'ต่อเดือน', 'เป็นเงินบาท', 'รวม 3 เดือน'],
-    lifeFine: 'คิดจากค่าคอมมิชชัน (30% ของ $5,000 ต่อเดือน ใน 3 เดือนแรกของลูกค้าแต่ละราย) ที่ประมาณ ฿36.5 ต่อ $1 ตัวเลขนี้แสดงโครงสร้างค่าคอมมิชชัน ไม่ใช่รายได้ที่รับประกัน คุณได้เมื่อลูกค้าเซ็นและจ่ายเงินจริงเท่านั้น',
+    lifeFine: 'ตัวเลขตัวอย่าง: 30% ของแพ็กเกจ $5,000 ต่อเดือน ใน 3 เดือนแรกของลูกค้าแต่ละราย ที่ประมาณ ฿36.5 ต่อ $1',
     lifeShort: 'รายชื่อธุรกิจทั่วโลก ลูกค้าแค่ 2–3 ราย:',
     example: 'ตัวอย่าง: ลูกค้า 1 รายที่ $5,000 ต่อเดือน = <b>คุณได้ $1,500 ต่อเดือน นาน 3 เดือน (รวม $4,500)</b>',
-    payFine: 'จ่ายทุกเดือนผ่านพร้อมเพย์ ได้เมื่อลูกค้าจ่ายเงินจริงเท่านั้น ยอดที่คืนเงินไม่นับ ไม่มีการรับประกันรายได้',
+    payFine: 'จ่ายทุกเดือนผ่านพร้อมเพย์ ตามที่ลูกค้าของคุณชำระ',
     youH: 'คุณ',
     you: ['ภาษาไทยคล่อง และเขียนภาษาอังกฤษได้ดี', 'อยู่ในประเทศไทย มีบัญชีพร้อมเพย์', 'เป็นระเบียบ เชื่อถือได้ พูดแล้วทำ', 'ซื่อตรง ไม่โอ้อวด ไม่มีรีวิวปลอม ไม่สัญญาเกินจริง'],
     weH: 'สิ่งที่เราให้',
@@ -234,7 +238,7 @@ function carousel(t) {
 }
 
 // The single image folds the location into the tag row and keeps only
-// "commission only" and "worldwide lead lists" beside it: "no calls" and
+// "work for yourself" and "worldwide lead lists" beside it: "no calls" and
 // "written only" are already said by the closer card, and the room goes to
 // the 2-3 clients line and the quote.
 function single(t) {

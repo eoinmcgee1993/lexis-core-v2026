@@ -12,10 +12,17 @@
 //                          (10.13-11.24s): the owner made the role Digital
 //                          Renaissance only, so she no longer asks anyone to
 //                          sell her. Cut inside the pauses, 40ms crossfade.
-//   words-<lang>-v2.json   eleven_scribe_v1 word timings, shifted to match v2
+//   vo-<lang>-v3.mp3       v2 with "It's commission only, and nothing is
+//                          guaranteed." (28.64-31.68s) replaced by
+//                          line-<lang>-v3.mp3, "You work for yourself, and
+//                          earn in your own time." (owner, 8 Oct 2026: the
+//                          blunt line read as harsh; working for yourself is
+//                          the true description of the role). Same voice and
+//                          model, cut in the pauses, 30ms crossfades.
+//   words-<lang>-v3.json   eleven_scribe_v1 word timings, shifted to match v3
 //   lexis-lipsync-<lang>.webm her real landing-page hero footage (the
 //                          continuous 8.4-19.2s take, ping-ponged) lip-synced
-//                          to vo-<lang>-v2 with MuseTalk v1 on CPU. Paid
+//                          to vo-<lang>-v3 with MuseTalk v1 on CPU. Paid
 //                          lip-sync (ElevenLabs creatify-aurora, Higgsfield
 //                          wan2_7) was out of credits on 8 Oct 2026.
 //
@@ -39,8 +46,8 @@ const lang = process.argv[3] || 'en';
 const b64 = (p) => readFileSync(p).toString('base64');
 const logo = `data:image/png;base64,${b64(join(here, '../digital-renaissance-logo.png'))}`;
 const face = pathToFileURL(join(here, `reads/lexis-lipsync-${lang}.webm`)).href;
-const vo = join(here, `reads/vo-${lang}-v2.mp3`);
-const words = JSON.parse(readFileSync(join(here, `reads/words-${lang}-v2.json`), 'utf8')).words
+const vo = join(here, `reads/vo-${lang}-v3.mp3`);
+const words = JSON.parse(readFileSync(join(here, `reads/words-${lang}-v3.json`), 'utf8')).words
   .filter((w) => w.type === 'word' && !/^\[|\]$/.test(w.text));
 
 const FPS = 30;
@@ -85,7 +92,7 @@ const cards = [
   [at('All'), `<div class=lab>How you close</div><div class=h>Email &amp; chat only</div><div class=p>No calls · No meetings</div>`],
   [at('earn'), `<div class=lab>You earn</div><div class=big>30%</div><div class=p>of every month a client pays, for their first 3 months</div>`],
   [at('Just'), `<div class=lab>Two or three clients can change your life</div><div class=rows><div><span>2 clients</span><b>$3,000/mo</b><i>≈ ฿109,500</i></div><div><span>3 clients</span><b>$4,500/mo</b><i>≈ ฿164,250</i></div></div><div class=fine>For each client's first 3 months, at ≈ ฿36.5 per $1</div>`],
-  [at('commission'), `<div class=lab>Be clear on this</div><div class=h>Commission only</div><div class=p>No base salary. Nothing is guaranteed: you earn when clients sign and pay.</div>`],
+  [at('work'), `<div class=lab>How you work</div><div class=h>Your own hours</div><div class=p>You work for yourself, and earn on every client you bring in.</div>`],
   [at('To'), `<div class=lab>How to apply</div><div class=h>Message this page</div><div class=p>3–4 lines about you, and one short message introducing Digital Renaissance to a business owner.</div>`],
   [LEAD + voDur + 0.2, `<div class=quote>“Train people well enough so they can leave. Treat them well enough so they don't want to.”<small>Richard Branson. This is how we work.</small></div>`],
 ];
