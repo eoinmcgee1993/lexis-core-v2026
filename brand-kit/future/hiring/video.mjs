@@ -1,8 +1,11 @@
 // Builds the hiring ad as a 9:16 video (1080x1920, 30fps, ~33s), one per
-// language, for Reels / TikTok / Stories. It features LEXIS itself: the
-// landing page's real hero clip (LEXIS introducing herself) plays inside a
-// phone showing the real landing page, with her own audio and burned-in
-// captions, because the recruit's first job is selling that product.
+// language, for Reels / TikTok / Stories. LEXIS presents it: the landing
+// page's real hero clip (LEXIS introducing herself) plays inside a phone
+// showing the real landing page, with her own audio and burned-in captions.
+// She is the presenter only. The role is Digital Renaissance's, and the hire
+// does not sell LEXIS: the owner confirmed on 8 Oct 2026 that the tutor is a
+// separate project, so no LEXIS price or LEXIS commission appears here and the
+// $5,000 never sits on a LEXIS scene.
 //
 // Usage: node video.mjs <fonts.css with data: URIs>   (same fonts as build.mjs)
 //
@@ -48,27 +51,27 @@ const T = {
     hiring: "We're hiring",
     title: 'Partner &amp; Closer',
     sub: 'Thailand · Remote · Commission only',
-    hook: 'Help people around the world speak with confidence. Get paid for it.',
-    p1: 'Product 1',
-    lexisH: 'Refer LEXIS',
-    lexisP: 'A virtual conversation partner for spoken English and Thai.',
-    lexisPrice: '฿199 for 7 days · ฿599 for 30 days · nothing auto-renews',
-    lexisCut: 'You earn <b>20%</b> of what your customers pay',
+    hook: 'Represent premium business systems to clients worldwide. Get paid well for it.',
+    p1: 'Your guide',
+    lexisH: 'Meet LEXIS',
+    lexisP: 'A virtual conversation partner, here to introduce the role.',
+    lexisPrice: '',
+    lexisCut: '<b>Digital Renaissance</b> is hiring',
     caps: [[0, 1.6, "Hi, I'm LEXIS."], [2.65, 4.7, "I'm your voice conversation partner"], [5.65, 8.2, 'for practicing spoken English and Thai.']],
-    p2: 'Product 2',
+    p2: 'The role',
     drH: 'Close Digital Renaissance deals',
     drPrice: '$5,000<small>/month</small>',
-    drP: 'Business systems, closed by <b>email and chat only</b>. No calls. No meetings.',
+    drP: 'Premium online systems that help businesses grow, closed by <b>email and chat only</b>. No calls. No meetings.',
     drCut: 'You earn <b>30%</b> of every month a client pays, for their first 3 months',
     lifeH: 'Two or three clients<br>can change your life',
     rows: [['1 client', 1500, 54750], ['2 clients', 3000, 109500], ['3 clients', 4500, 164250]],
     perMonth: '/month',
     lifeFine: 'Digital Renaissance commission, at ≈ ฿36.5 per $1. Not a guarantee: you earn only when clients sign and pay.',
     giveH: 'We give you',
-    give: ['Lead lists of businesses worldwide', 'Approved email templates', 'A step-by-step manual and training', 'A free 30-day LEXIS pass'],
+    give: ['Lead lists of businesses worldwide', 'Approved email templates', 'A step-by-step manual and training', 'Direct access to the founder'],
     honest: 'Commission only. No base salary.',
     applyH: 'How to apply',
-    apply: 'Send us a message on this page with 3–4 lines about you, and one short message inviting someone to try LEXIS.',
+    apply: 'Send us a message on this page with 3–4 lines about you, and one short message introducing Digital Renaissance to a business owner.',
     quote: '“Train people well enough so they can leave. Treat them well enough so they don\'t want to.”',
     by: 'Richard Branson. This is how we work.',
   },
@@ -76,27 +79,27 @@ const T = {
     hiring: 'เรากำลังรับสมัคร',
     title: 'พาร์ตเนอร์ &amp;<br>นักปิดการขาย',
     sub: 'ประเทศไทย · ทำงานจากที่ไหนก็ได้ · รายได้จากค่าคอมมิชชัน',
-    hook: 'ช่วยให้คนทั่วโลกพูดได้อย่างมั่นใจ แล้วได้รายได้จากสิ่งนั้น',
-    p1: 'สินค้าที่ 1',
-    lexisH: 'แนะนำ LEXIS',
-    lexisP: 'คู่สนทนาเสมือนสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย',
-    lexisPrice: '฿199 ใช้ได้ 7 วัน · ฿599 ใช้ได้ 30 วัน · ไม่ต่ออายุอัตโนมัติ',
-    lexisCut: 'คุณได้ <b>20%</b> ของยอดที่ลูกค้าของคุณจ่าย',
+    hook: 'เป็นตัวแทนระบบธุรกิจระดับพรีเมียมสู่ลูกค้าทั่วโลก พร้อมรายได้ที่คุ้มค่า',
+    p1: 'ผู้แนะนำ',
+    lexisH: 'พบกับ LEXIS',
+    lexisP: 'คู่สนทนาเสมือน ที่จะพาคุณรู้จักตำแหน่งงานนี้',
+    lexisPrice: '',
+    lexisCut: '<b>Digital Renaissance</b> กำลังรับสมัคร',
     caps: [[0, 1.6, 'สวัสดีค่ะ ฉันชื่อ LEXIS'], [2.65, 4.7, 'ฉันคือคู่สนทนาด้วยเสียงของคุณ'], [5.65, 8.2, 'สำหรับฝึกพูดภาษาอังกฤษและภาษาไทย']],
-    p2: 'สินค้าที่ 2',
+    p2: 'ตำแหน่งงาน',
     drH: 'ปิดการขายให้ Digital Renaissance',
     drPrice: '$5,000<small>/เดือน</small>',
-    drP: 'ระบบธุรกิจ ปิดการขายผ่าน<b>อีเมลและแชตเท่านั้น</b> ไม่ต้องโทร ไม่ต้องนัดเจอ',
+    drP: 'ระบบออนไลน์ระดับพรีเมียมที่ช่วยให้ธุรกิจเติบโต ปิดการขายผ่าน<b>อีเมลและแชตเท่านั้น</b> ไม่ต้องโทร ไม่ต้องนัดเจอ',
     drCut: 'คุณได้ <b>30%</b> ของทุกเดือนที่ลูกค้าจ่าย ใน 3 เดือนแรก',
     lifeH: 'ลูกค้าแค่ 2–3 ราย<br>เปลี่ยนชีวิตคุณได้',
     rows: [['ลูกค้า 1 ราย', 1500, 54750], ['ลูกค้า 2 ราย', 3000, 109500], ['ลูกค้า 3 ราย', 4500, 164250]],
     perMonth: '/เดือน',
     lifeFine: 'ค่าคอมมิชชัน Digital Renaissance ที่ประมาณ ฿36.5 ต่อ $1 ไม่ใช่รายได้ที่รับประกัน คุณได้เมื่อลูกค้าเซ็นและจ่ายเงินจริงเท่านั้น',
     giveH: 'สิ่งที่เราให้',
-    give: ['รายชื่อธุรกิจเป้าหมายจากทั่วโลก', 'เทมเพลตอีเมลที่อนุมัติแล้ว', 'คู่มือการทำงานและการฝึกอบรม', 'LEXIS ฟรี 30 วัน'],
+    give: ['รายชื่อธุรกิจเป้าหมายจากทั่วโลก', 'เทมเพลตอีเมลที่อนุมัติแล้ว', 'คู่มือการทำงานและการฝึกอบรม', 'คุยตรงกับผู้ก่อตั้งได้เลย'],
     honest: 'รายได้จากค่าคอมมิชชันล้วน ไม่มีเงินเดือนประจำ',
     applyH: 'วิธีสมัคร',
-    apply: 'ส่งข้อความหาเราที่เพจนี้ พร้อมแนะนำตัว 3–4 บรรทัด และข้อความสั้น ๆ 1 ข้อความชวนคนมาลอง LEXIS',
+    apply: 'ส่งข้อความหาเราที่เพจนี้ พร้อมแนะนำตัว 3–4 บรรทัด และข้อความสั้น ๆ 1 ข้อความแนะนำ Digital Renaissance ให้เจ้าของธุรกิจ',
     quote: '“ฝึกคนให้เก่งพอที่จะไปจากเราได้ ดูแลเขาให้ดีพอที่เขาจะไม่อยากไป”',
     by: 'ริชาร์ด แบรนสัน · นี่คือวิธีที่เราทำงาน',
   },

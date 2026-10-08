@@ -19,9 +19,13 @@ const { chromium } = require('playwright-core');
 const fontsCss = readFileSync(process.argv[2], 'utf8');
 const logo = 'data:image/png;base64,' + readFileSync(join(here, '../digital-renaissance-logo.png')).toString('base64');
 
-// Every figure here comes from ../README.md "Her terms". LEXIS is the standing
-// 20%: the 60% was Future's launch window (1-28 Oct) and ends before anyone
-// hired from this ad would start. DR's 30% x 3 months is the stated starting
+// Every figure here comes from ../README.md "Her terms". This role is
+// Digital Renaissance's only: the owner confirmed on 8 Oct 2026 that the LEXIS
+// tutor is a separate project, so the hire does not sell LEXIS, and the $5,000
+// figure must never sit next to LEXIS where it could read as a LEXIS price.
+// DR's systems are described in deliberately general terms (owner: "sound
+// impressive without over-the-top details"); nothing here names a client or
+// promises a result. DR's 30% x 3 months is the stated starting
 // rate. Commission-only is said up front on every version: hiding it in a
 // recruitment ad is the fastest way to attract the wrong people.
 const T = {
@@ -36,32 +40,32 @@ const T = {
     swipe: 'Swipe →',
     jobH: 'The job, in three parts',
     jobs: [
-      ['Refer LEXIS', 'A virtual conversation partner for practising spoken English and Thai. One-off passes: ฿199 for 7 days, ฿599 for 30 days. Nothing auto-renews.'],
-      ['Email businesses', 'We give you lead lists of businesses worldwide, up to 500 at a time; names fill in automatically. Up to 50 emails a day, one follow-up, then stop.'],
-      ['Close Digital Renaissance deals', 'Our business systems start at $5,000/month. You close by email and chat only. No calls, no meetings.'],
+      ['Reach businesses worldwide', 'Lead lists of up to 500 businesses at a time, names filled in for you. Up to 50 emails a day, one follow-up, then stop.'],
+      ['Represent Digital Renaissance', 'Premium online systems that help businesses grow, across many areas of how they run. Packages from $5,000/month.'],
+      ['Close by message', 'Every deal is closed by email and chat. No calls, no meetings, and you never handle payments yourself.'],
     ],
     payH: 'What you earn',
     payNote: 'Commission only. There is no base salary.',
     pay: [
-      ['20%', 'of what your LEXIS customers pay'],
-      ['30%', 'of each month a Digital Renaissance client pays, for their first 3 months'],
+      ['30%', 'of every month a client pays, for their first 3 months'],
+      ['$1,500', 'to you per client, per month, on a $5,000 package'],
     ],
     lifeH: 'Two or three clients<br>can change your life',
     lifeLead: 'Our lead lists cover businesses all over the world, so you are not limited to one city or one country. You don\'t need hundreds of sales. You need a few of the right ones.',
     lifeRows: [['1 client', '$1,500', '≈ ฿54,750', '$4,500'], ['2 clients', '$3,000', '≈ ฿109,500', '$9,000'], ['3 clients', '$4,500', '≈ ฿164,250', '$13,500']],
     lifeCols: ['', 'per month', 'in baht', 'over 3 months'],
-    lifeFine: 'Digital Renaissance commission only (30% of $5,000/month, for each client\'s first 3 months), at about ฿36.5 per $1. These show what the commission structure pays, not what you will earn: you earn only when clients sign and pay.',
+    lifeFine: 'Commission at 30% of $5,000/month, for each client\'s first 3 months), at about ฿36.5 per $1. These show what the commission structure pays, not what you will earn: you earn only when clients sign and pay.',
     lifeShort: 'Lead lists of businesses worldwide. Just 2–3 clients:',
     example: 'Example: one client at $5,000/month = <b>$1,500/month to you for 3 months ($4,500)</b>.',
     payFine: 'Paid monthly by PromptPay. You earn only when customers actually pay; refunds don\'t count. No income is promised.',
     youH: 'You',
     you: ['Fluent Thai and strong written English', 'Based in Thailand, with a PromptPay account', 'Organised and reliable: you do what you say', 'Honest: no hype, no fake reviews, no promises'],
     weH: 'We give you',
-    we: ['Lead lists and approved email templates', 'A step-by-step work manual and training', 'A free 30-day LEXIS pass to try it yourself', 'Direct access to the founder'],
+    we: ['Lead lists of businesses worldwide', 'Approved email templates', 'A step-by-step work manual and training', 'Direct access to the founder'],
     applyH: 'How to apply',
     applyLead: 'Send us a message on this page with:',
-    apply: ['3–4 lines about you', 'One short message, in English or Thai, inviting someone who wants to speak English with more confidence to try LEXIS'],
-    applyShort: 'a short message, in English or Thai, inviting someone to try LEXIS',
+    apply: ['3–4 lines about you', 'One short message, in English or Thai, introducing Digital Renaissance to a business owner'],
+    applyShort: 'a short message introducing Digital Renaissance to a business owner',
     applyWhy: 'Applications by message only. This job is writing, so your application is the first sample.',
     close: 'We\'ll train you well enough to leave,<br>and treat you well enough to stay.',
   },
@@ -76,32 +80,32 @@ const T = {
     swipe: 'ปัดดูต่อ →',
     jobH: 'งานนี้มี 3 ส่วน',
     jobs: [
-      ['แนะนำ LEXIS', 'คู่สนทนาเสมือนสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย จ่ายครั้งเดียว: ฿199 ใช้ได้ 7 วัน, ฿599 ใช้ได้ 30 วัน ไม่ต่ออายุอัตโนมัติ'],
-      ['ส่งอีเมลหาธุรกิจ', 'เราให้รายชื่อธุรกิจจากทั่วโลก ครั้งละไม่เกิน 500 ราย ชื่อและรายละเอียดเติมให้อัตโนมัติ ส่งไม่เกิน 50 ฉบับต่อวัน ติดตามผลครั้งเดียวแล้วหยุด'],
-      ['ปิดการขายให้ Digital Renaissance', 'ระบบธุรกิจของเราเริ่มต้นที่ $5,000 ต่อเดือน ปิดการขายผ่านอีเมลและแชตเท่านั้น ไม่ต้องโทร ไม่ต้องนัดเจอ'],
+      ['ติดต่อธุรกิจทั่วโลก', 'เราให้รายชื่อธุรกิจครั้งละไม่เกิน 500 ราย ชื่อและรายละเอียดเติมให้อัตโนมัติ ส่งไม่เกิน 50 ฉบับต่อวัน ติดตามผลครั้งเดียวแล้วหยุด'],
+      ['เป็นตัวแทน Digital Renaissance', 'เราสร้างระบบออนไลน์ระดับพรีเมียมที่ช่วยให้ธุรกิจเติบโตในหลายด้าน แพ็กเกจเริ่มต้นที่ $5,000 ต่อเดือน'],
+      ['ปิดการขายผ่านข้อความ', 'ทุกดีลปิดผ่านอีเมลและแชต ไม่ต้องโทร ไม่ต้องนัดเจอ และคุณไม่ต้องรับเงินจากลูกค้าเอง'],
     ],
     payH: 'รายได้ของคุณ',
     payNote: 'รายได้จากค่าคอมมิชชันล้วน ไม่มีเงินเดือนประจำ',
     pay: [
-      ['20%', 'ของยอดที่ลูกค้า LEXIS ของคุณจ่ายจริง'],
-      ['30%', 'ของทุกเดือนที่ลูกค้า Digital Renaissance จ่าย ใน 3 เดือนแรกของลูกค้า'],
+      ['30%', 'ของทุกเดือนที่ลูกค้าจ่าย ใน 3 เดือนแรกของลูกค้า'],
+      ['$1,500', 'ต่อเดือนสำหรับคุณ ต่อลูกค้า 1 ราย ที่แพ็กเกจ $5,000 ต่อเดือน'],
     ],
     lifeH: 'ลูกค้าแค่ 2–3 ราย<br>เปลี่ยนชีวิตคุณได้',
     lifeLead: 'รายชื่อของเราครอบคลุมธุรกิจทั่วโลก คุณจึงไม่ถูกจำกัดอยู่แค่เมืองเดียวหรือประเทศเดียว คุณไม่ต้องขายได้เป็นร้อยราย แค่ไม่กี่รายที่ใช่',
     lifeRows: [['ลูกค้า 1 ราย', '$1,500', '≈ ฿54,750', '$4,500'], ['ลูกค้า 2 ราย', '$3,000', '≈ ฿109,500', '$9,000'], ['ลูกค้า 3 ราย', '$4,500', '≈ ฿164,250', '$13,500']],
     lifeCols: ['', 'ต่อเดือน', 'เป็นเงินบาท', 'รวม 3 เดือน'],
-    lifeFine: 'คิดเฉพาะค่าคอมมิชชัน Digital Renaissance (30% ของ $5,000 ต่อเดือน ใน 3 เดือนแรกของลูกค้าแต่ละราย) ที่ประมาณ ฿36.5 ต่อ $1 ตัวเลขนี้แสดงโครงสร้างค่าคอมมิชชัน ไม่ใช่รายได้ที่รับประกัน คุณได้เมื่อลูกค้าเซ็นและจ่ายเงินจริงเท่านั้น',
+    lifeFine: 'คิดจากค่าคอมมิชชัน (30% ของ $5,000 ต่อเดือน ใน 3 เดือนแรกของลูกค้าแต่ละราย) ที่ประมาณ ฿36.5 ต่อ $1 ตัวเลขนี้แสดงโครงสร้างค่าคอมมิชชัน ไม่ใช่รายได้ที่รับประกัน คุณได้เมื่อลูกค้าเซ็นและจ่ายเงินจริงเท่านั้น',
     lifeShort: 'รายชื่อธุรกิจทั่วโลก ลูกค้าแค่ 2–3 ราย:',
     example: 'ตัวอย่าง: ลูกค้า 1 รายที่ $5,000 ต่อเดือน = <b>คุณได้ $1,500 ต่อเดือน นาน 3 เดือน (รวม $4,500)</b>',
     payFine: 'จ่ายทุกเดือนผ่านพร้อมเพย์ ได้เมื่อลูกค้าจ่ายเงินจริงเท่านั้น ยอดที่คืนเงินไม่นับ ไม่มีการรับประกันรายได้',
     youH: 'คุณ',
     you: ['ภาษาไทยคล่อง และเขียนภาษาอังกฤษได้ดี', 'อยู่ในประเทศไทย มีบัญชีพร้อมเพย์', 'เป็นระเบียบ เชื่อถือได้ พูดแล้วทำ', 'ซื่อตรง ไม่โอ้อวด ไม่มีรีวิวปลอม ไม่สัญญาเกินจริง'],
     weH: 'สิ่งที่เราให้',
-    we: ['รายชื่อลูกค้าเป้าหมาย และเทมเพลตอีเมลที่อนุมัติแล้ว', 'คู่มือการทำงานทีละขั้น และการฝึกอบรม', 'LEXIS ฟรี 30 วัน ให้คุณลองใช้เอง', 'คุยตรงกับผู้ก่อตั้งได้เลย'],
+    we: ['รายชื่อธุรกิจเป้าหมายจากทั่วโลก', 'เทมเพลตอีเมลที่อนุมัติแล้ว', 'คู่มือการทำงานทีละขั้น และการฝึกอบรม', 'คุยตรงกับผู้ก่อตั้งได้เลย'],
     applyH: 'วิธีสมัคร',
     applyLead: 'ส่งข้อความหาเราที่เพจนี้ พร้อม:',
-    apply: ['แนะนำตัวสั้น ๆ 3–4 บรรทัด', 'ข้อความสั้น ๆ 1 ข้อความ (ไทยหรืออังกฤษ) ชวนคนที่อยากพูดภาษาอังกฤษให้มั่นใจขึ้นมาลอง LEXIS'],
-    applyShort: 'ข้อความสั้น ๆ (ไทยหรืออังกฤษ) ชวนคนมาลอง LEXIS',
+    apply: ['แนะนำตัวสั้น ๆ 3–4 บรรทัด', 'ข้อความสั้น ๆ 1 ข้อความ (ไทยหรืออังกฤษ) แนะนำ Digital Renaissance ให้เจ้าของธุรกิจ'],
+    applyShort: 'ข้อความสั้น ๆ แนะนำ Digital Renaissance ให้เจ้าของธุรกิจ',
     applyWhy: 'สมัครผ่านข้อความเท่านั้น งานนี้คือการเขียน ใบสมัครของคุณจึงเป็นผลงานชิ้นแรก',
     close: 'เราจะฝึกคุณให้เก่งพอที่จะไปได้<br>และดูแลคุณให้ดีพอที่คุณจะอยากอยู่',
   },
@@ -144,7 +148,7 @@ table.life{width:100%;border-collapse:collapse}
 .th .card p{line-height:1.65}
 .note{font-size:30px;font-weight:600;color:#fff;background:rgba(95,184,240,.14);border:2px solid rgba(95,184,240,.5);border-radius:20px;padding:20px 30px;margin-bottom:34px}
 .big{display:flex;align-items:center;gap:34px;margin-bottom:26px}
-.big b{font-family:Fraunces,serif;font-weight:600;font-size:150px;color:#e8b84a;line-height:.95;min-width:300px}
+.big b{font-family:Fraunces,serif;font-weight:600;font-size:130px;color:#e8b84a;line-height:.95;flex:none}
 .big span{font-size:34px;line-height:1.45}
 .ex{font-size:30px;line-height:1.55;border-top:2px solid rgba(232,184,74,.3);padding-top:28px;margin-top:6px}
 .ex b{color:#e8b84a;font-weight:600}
@@ -172,8 +176,8 @@ ol li:before{content:counter(a);background:#e8b84a;color:#0b0c10;width:56px;heig
 .th.one .sec{letter-spacing:.02em;font-size:26px}
 .one .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
 .one .mini{background:rgba(255,255,255,.05);border:2px solid rgba(232,184,74,.3);border-radius:20px;padding:16px 20px}
-.one .mini h4{font-size:25px;color:#e8b84a;font-weight:600;line-height:1.3;margin-bottom:6px}
-.one .mini p{font-size:19px;line-height:1.45;color:#e9e1cc}
+.one .mini h4{font-size:24px;color:#e8b84a;font-weight:600;line-height:1.3;margin-bottom:6px}
+.one .mini p{font-size:18px;line-height:1.4;color:#e9e1cc}
 .one .pay{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .one .pay div{display:flex;align-items:center;gap:18px;background:rgba(255,255,255,.05);border-radius:20px;padding:14px 22px}
 .one .pay b{font-family:Fraunces,serif;font-size:64px;color:#e8b84a;line-height:1}

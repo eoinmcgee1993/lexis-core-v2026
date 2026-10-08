@@ -1,26 +1,28 @@
-// "LEXIS reads the ad": a 9:16 video (1080x1920, 30fps) where LEXIS speaks
-// the hiring ad in her own voice track, framed as the voice call she is in
-// the product, with word-timed captions and the key facts on cards that
-// change as she says them.
+// "LEXIS reads the ad": a 9:16 video (1080x1920, 30fps) where LEXIS presents
+// the Digital Renaissance hiring ad, lip-synced, with word-timed captions and
+// the key facts on cards that change as she says them.
 //
 // Usage: node reads.mjs <fonts.css with data: URIs> [lang=en]
 //
 // Inputs, per language, in reads/:
-//   vo-<lang>.mp3      ElevenLabs eleven_v4 read of the script below
-//                      (EN: "Sarah – Warm & Conversational", the voice of the
-//                      earlier LEXIS reels; 8 Oct 2026, flow iFV7JgAjgmtNjBZgo5Zh)
-//   words-<lang>.json  eleven_scribe_v1 word timings of that file
+//   vo-<lang>.mp3          ElevenLabs eleven_v4 read (EN: "Sarah – Warm &
+//                          Conversational", the voice of the earlier LEXIS
+//                          reels; 8 Oct 2026, flow iFV7JgAjgmtNjBZgo5Zh)
+//   vo-<lang>-v2.mp3       the same read with "You'd refer me," cut out
+//                          (10.13-11.24s): the owner made the role Digital
+//                          Renaissance only, so she no longer asks anyone to
+//                          sell her. Cut inside the pauses, 40ms crossfade.
+//   words-<lang>-v2.json   eleven_scribe_v1 word timings, shifted to match v2
+//   lexis-lipsync-<lang>.webm her real landing-page hero footage (the
+//                          continuous 8.4-19.2s take, ping-ponged) lip-synced
+//                          to vo-<lang>-v2 with MuseTalk v1 on CPU. Paid
+//                          lip-sync (ElevenLabs creatify-aurora, Higgsfield
+//                          wan2_7) was out of credits on 8 Oct 2026.
 //
-// Why no moving lips: the plan was to lip-sync her portrait to this track,
-// but both accounts that can do it were out of credits on 8 Oct 2026 (the
-// Higgsfield one she was originally made on had 0.25; ElevenLabs had 287
-// against ~30,500 needed). A still portrait with a waveform driven by the
-// real audio is honest about what it is, and LEXIS is a voice product, so
-// a call screen is her natural frame. If credits are added, the lip-synced
-// clip can replace the portrait <img> with no other change.
-//
-// She speaks as LEXIS and says "virtual" in her first sentence: nothing here
-// may imply a human is speaking (root CLAUDE.md, LEXIS public-facing rule).
+// She is the presenter, not the product being sold: the tutor is a separate
+// project, and the $5,000 is Digital Renaissance's, so no card puts a LEXIS
+// price or LEXIS commission next to it. She says "virtual" in her first
+// sentence: nothing here may imply a human is speaking (root CLAUDE.md).
 import { readFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
@@ -36,9 +38,9 @@ const fontsCss = readFileSync(process.argv[2], 'utf8');
 const lang = process.argv[3] || 'en';
 const b64 = (p) => readFileSync(p).toString('base64');
 const logo = `data:image/png;base64,${b64(join(here, '../digital-renaissance-logo.png'))}`;
-const portrait = `data:image/jpeg;base64,${b64(join(repo, 'frontend/public/marketing/lexis-intro-hero-poster.jpg'))}`;
-const vo = join(here, `reads/vo-${lang}.mp3`);
-const words = JSON.parse(readFileSync(join(here, `reads/words-${lang}.json`), 'utf8')).words
+const face = pathToFileURL(join(here, `reads/lexis-lipsync-${lang}.webm`)).href;
+const vo = join(here, `reads/vo-${lang}-v2.mp3`);
+const words = JSON.parse(readFileSync(join(here, `reads/words-${lang}-v2.json`), 'utf8')).words
   .filter((w) => w.type === 'word' && !/^\[|\]$/.test(w.text));
 
 const FPS = 30;
@@ -76,10 +78,10 @@ const at = (text) => {
   return words[i].start + LEAD;
 };
 const cards = [
-  [0, `<div class=lab>Virtual conversation partner</div><div class=h>Hi, I'm LEXIS</div><div class=p>For spoken English and Thai</div>`],
+  [0, `<div class=lab>Virtual conversation partner</div><div class=h>Hi, I'm LEXIS</div><div class=p>Introducing a role at Digital Renaissance</div>`],
   [at('Digital'), `<div class=lab>Digital Renaissance is hiring</div><div class=h>Partner &amp; Closer</div><div class=p>Thailand · Remote</div>`],
-  [at("You'd"), `<div class=lab>The job</div><ul><li>Refer LEXIS</li><li>Email businesses from <b>worldwide lead lists</b></li><li>Close business systems</li></ul>`],
-  [at('which'), `<div class=lab>Business systems from</div><div class=big>$5,000<small>/month</small></div>`],
+  [at('Email'), `<div class=lab>The job</div><ul><li>Email businesses from <b>worldwide lead lists</b></li><li>Represent Digital Renaissance</li><li>Close premium deals</li></ul>`],
+  [at('which'), `<div class=lab>Premium business systems from</div><div class=big>$5,000<small>/month</small></div>`],
   [at('All'), `<div class=lab>How you close</div><div class=h>Email &amp; chat only</div><div class=p>No calls · No meetings</div>`],
   [at('earn'), `<div class=lab>You earn</div><div class=big>30%</div><div class=p>of every month a client pays, for their first 3 months</div>`],
   [at('Just'), `<div class=lab>Two or three clients can change your life</div><div class=rows><div><span>2 clients</span><b>$3,000/mo</b><i>≈ ฿109,500</i></div><div><span>3 clients</span><b>$4,500/mo</b><i>≈ ฿164,250</i></div></div><div class=fine>For each client's first 3 months, at ≈ ฿36.5 per $1</div>`],
@@ -99,7 +101,7 @@ body{font-family:Prompt,sans-serif;color:#f4ecd8;position:relative}
 #top .time{font-variant-numeric:tabular-nums;color:#c9b98f}
 #top img{width:110px;height:110px;mix-blend-mode:screen}
 #card{position:absolute;left:150px;top:220px;width:780px;height:960px;border-radius:56px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.6),0 0 0 3px rgba(232,184,74,.55)}
-#card img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;transform-origin:50% 35%}
+#card video{width:100%;height:100%;object-fit:cover;object-position:50% 30%;transform-origin:50% 35%}
 #card:after{content:"";position:absolute;inset:auto 0 0 0;height:320px;background:linear-gradient(transparent,rgba(0,0,0,.82))}
 #name{position:absolute;left:46px;bottom:150px;z-index:2;font-size:44px;font-weight:700;color:#fff}
 #name small{display:block;font-size:26px;font-weight:500;color:#e9e1cc;margin-top:2px}
@@ -124,8 +126,8 @@ li:before{content:"";position:absolute;left:4px;top:26px;width:20px;height:20px;
 `;
 
 const html = `<!doctype html><html><head><meta charset=utf-8><style>${css}</style></head><body><div id=bg></div>
-<div id=top><div class=live><span class=dot></span>LEXIS · voice call <span class=time id=clock>0:00</span></div><img src="${logo}"></div>
-<div id=card><img id=face src="${portrait}"><div id=name>LEXIS<small>Virtual conversation partner</small></div><div id=wave>${'<i></i>'.repeat(36)}</div></div>
+<div id=top><div class=live><span class=dot></span>LEXIS <span class=time id=clock>0:00</span></div><img src="${logo}"></div>
+<div id=card><video id=face src="${face}" muted playsinline preload=auto></video><div id=name>LEXIS<small>Virtual conversation partner</small></div><div id=wave>${'<i></i>'.repeat(36)}</div></div>
 <div id=cap><span></span></div>
 ${cards.map(([t, h], i) => `<div class=fact data-t=${t} data-e=${cards[i + 1] ? cards[i + 1][0] : DUR + 1}>${h}</div>`).join('')}
 <div id=prog></div>
@@ -134,7 +136,7 @@ const caps = ${JSON.stringify(caps)}, level = ${JSON.stringify(level.map((x) => 
 const ease = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
 const bars = [...document.querySelectorAll('#wave i')];
 window.render = (t) => {
-  document.getElementById('face').style.transform = 'scale(' + (1 + 0.07 * t / DUR) + ')';
+  document.getElementById('face').style.transform = 'scale(' + (1 + 0.04 * t / DUR) + ')';
   const f = Math.round((t - LEAD) * FPS), lv = f >= 0 && f < level.length ? level[f] : 0;
   bars.forEach((b, i) => {
     // a fixed per-bar shape times the live loudness, so it moves with her voice
@@ -152,23 +154,31 @@ window.render = (t) => {
   }
   document.getElementById('prog').style.width = (100 * t / DUR) + '%';
 };
+window.seek = (t) => new Promise((res) => {
+  const v = document.getElementById('face');
+  const want = Math.min(v.duration - 0.02, Math.max(0, t - LEAD));
+  if (Math.abs(v.currentTime - want) < 0.001) return res();
+  v.addEventListener('seeked', () => res(), { once: true });
+  v.currentTime = want;
+});
 </script></body></html>`;
 
 const tmp = join(here, '.frames');
 rmSync(tmp, { recursive: true, force: true });
 mkdirSync(tmp);
 writeFileSync(join(tmp, 'ad.html'), html);
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--allow-file-access-from-files'] });
 const pg = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
 await pg.goto(pathToFileURL(join(tmp, 'ad.html')).href, { waitUntil: 'load' });
 await pg.evaluate(() => document.fonts.ready);
+await pg.waitForFunction(() => document.getElementById('face').readyState >= 2);
 const times = process.env.PREVIEW ? process.env.PREVIEW.split(',').map(Number) : null;
 if (times) {
-  for (const t of times) { await pg.evaluate((t) => window.render(t), t); await pg.screenshot({ path: join(here, `.preview-reads-${lang}-${t}.png`) }); }
+  for (const t of times) { await pg.evaluate(async (t) => { await window.seek(t); window.render(t); }, t); await pg.screenshot({ path: join(here, `.preview-reads-${lang}-${t}.png`) }); }
 } else {
   const n = DUR * FPS;
   for (let i = 0; i < n; i++) {
-    await pg.evaluate((t) => window.render(t), i / FPS);
+    await pg.evaluate(async (t) => { await window.seek(t); window.render(t); }, i / FPS);
     await pg.screenshot({ path: join(tmp, `f${String(i).padStart(5, '0')}.jpg`), type: 'jpeg', quality: 92 });
     if (i % 300 === 0) console.log(`${i}/${n}`);
   }
