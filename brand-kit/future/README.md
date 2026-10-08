@@ -82,8 +82,8 @@ Thai headings need explicit `<br>` where a line must break.
 
 Social ad to recruit a second partner/closer, 1080×1350 (4:5) PNGs, English and
 Thai: `hiring-<lang>-single.png` is the all-in-one post,
-`hiring-<lang>-carousel-1..5.png` the carousel (cover + quote, the job, pay,
-you/we give you, how to apply). Rebuild with `node hiring/build.mjs <fonts.css>`,
+`hiring-<lang>-carousel-1..6.png` the carousel (cover + quote, the job, pay,
+what 2–3 clients would pay, you/we give you, how to apply). Rebuild with `node hiring/build.mjs <fonts.css>`,
 where the CSS is Google Fonts' Prompt + Fraunces with the woff2 URLs inlined as
 data URIs (the script's header comment says why). The build warns if any text
 overflows a slide.

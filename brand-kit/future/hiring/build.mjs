@@ -30,14 +30,14 @@ const T = {
     hiring: "We're hiring",
     title: 'Partner &amp; Closer',
     where: 'Thailand · Remote',
-    tags: ['Commission only', 'Written work only', 'No calls · No meetings'],
+    tags: ['Commission only', 'Worldwide lead lists', 'Written work only', 'No calls · No meetings'],
     quote: '“Train people well enough so they can leave. Treat them well enough so they don\'t want to.”',
     by: 'Richard Branson. This is how we work.',
     swipe: 'Swipe →',
     jobH: 'The job, in three parts',
     jobs: [
       ['Refer LEXIS', 'A virtual conversation partner for practising spoken English and Thai. One-off passes: ฿199 for 7 days, ฿599 for 30 days. Nothing auto-renews.'],
-      ['Email businesses', 'We give you lead lists of up to 500 at a time; names fill in automatically. Up to 50 emails a day, one follow-up, then stop.'],
+      ['Email businesses', 'We give you lead lists of businesses worldwide, up to 500 at a time; names fill in automatically. Up to 50 emails a day, one follow-up, then stop.'],
       ['Close Digital Renaissance deals', 'Our business systems start at $5,000/month. You close by email and chat only. No calls, no meetings.'],
     ],
     payH: 'What you earn',
@@ -46,6 +46,12 @@ const T = {
       ['20%', 'of what your LEXIS customers pay'],
       ['30%', 'of each month a Digital Renaissance client pays, for their first 3 months'],
     ],
+    lifeH: 'Two or three clients<br>can change your life',
+    lifeLead: 'Our lead lists cover businesses all over the world, so you are not limited to one city or one country. You don\'t need hundreds of sales. You need a few of the right ones.',
+    lifeRows: [['1 client', '$1,500', '≈ ฿54,750', '$4,500'], ['2 clients', '$3,000', '≈ ฿109,500', '$9,000'], ['3 clients', '$4,500', '≈ ฿164,250', '$13,500']],
+    lifeCols: ['', 'per month', 'in baht', 'over 3 months'],
+    lifeFine: 'Digital Renaissance commission only (30% of $5,000/month, for each client\'s first 3 months), at about ฿36.5 per $1. These show what the commission structure pays, not what you will earn: you earn only when clients sign and pay.',
+    lifeShort: 'Lead lists of businesses worldwide. Just 2–3 clients:',
     example: 'Example: one client at $5,000/month = <b>$1,500/month to you for 3 months ($4,500)</b>.',
     payFine: 'Paid monthly by PromptPay. You earn only when customers actually pay; refunds don\'t count. No income is promised.',
     youH: 'You',
@@ -64,14 +70,14 @@ const T = {
     hiring: 'เรากำลังรับสมัคร',
     title: 'พาร์ตเนอร์ &amp;<br>นักปิดการขาย',
     where: 'ประเทศไทย · ทำงานจากที่ไหนก็ได้',
-    tags: ['รายได้จากค่าคอมมิชชันเท่านั้น', 'ทำงานผ่านการเขียนล้วน', 'ไม่ต้องโทร · ไม่ต้องนัดเจอ'],
+    tags: ['รายได้จากค่าคอมมิชชันเท่านั้น', 'รายชื่อลูกค้าเป้าหมายทั่วโลก', 'ทำงานผ่านการเขียนล้วน', 'ไม่ต้องโทร · ไม่ต้องนัดเจอ'],
     quote: '“ฝึกคนให้เก่งพอที่จะไปจากเราได้ ดูแลเขาให้ดีพอที่เขาจะไม่อยากไป”',
     by: 'ริชาร์ด แบรนสัน · นี่คือวิธีที่เราทำงาน',
     swipe: 'ปัดดูต่อ →',
     jobH: 'งานนี้มี 3 ส่วน',
     jobs: [
       ['แนะนำ LEXIS', 'คู่สนทนาเสมือนสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย จ่ายครั้งเดียว: ฿199 ใช้ได้ 7 วัน, ฿599 ใช้ได้ 30 วัน ไม่ต่ออายุอัตโนมัติ'],
-      ['ส่งอีเมลหาธุรกิจ', 'เราให้รายชื่อครั้งละไม่เกิน 500 ราย ชื่อและรายละเอียดเติมให้อัตโนมัติ ส่งไม่เกิน 50 ฉบับต่อวัน ติดตามผลครั้งเดียวแล้วหยุด'],
+      ['ส่งอีเมลหาธุรกิจ', 'เราให้รายชื่อธุรกิจจากทั่วโลก ครั้งละไม่เกิน 500 ราย ชื่อและรายละเอียดเติมให้อัตโนมัติ ส่งไม่เกิน 50 ฉบับต่อวัน ติดตามผลครั้งเดียวแล้วหยุด'],
       ['ปิดการขายให้ Digital Renaissance', 'ระบบธุรกิจของเราเริ่มต้นที่ $5,000 ต่อเดือน ปิดการขายผ่านอีเมลและแชตเท่านั้น ไม่ต้องโทร ไม่ต้องนัดเจอ'],
     ],
     payH: 'รายได้ของคุณ',
@@ -80,6 +86,12 @@ const T = {
       ['20%', 'ของยอดที่ลูกค้า LEXIS ของคุณจ่ายจริง'],
       ['30%', 'ของทุกเดือนที่ลูกค้า Digital Renaissance จ่าย ใน 3 เดือนแรกของลูกค้า'],
     ],
+    lifeH: 'ลูกค้าแค่ 2–3 ราย<br>เปลี่ยนชีวิตคุณได้',
+    lifeLead: 'รายชื่อของเราครอบคลุมธุรกิจทั่วโลก คุณจึงไม่ถูกจำกัดอยู่แค่เมืองเดียวหรือประเทศเดียว คุณไม่ต้องขายได้เป็นร้อยราย แค่ไม่กี่รายที่ใช่',
+    lifeRows: [['ลูกค้า 1 ราย', '$1,500', '≈ ฿54,750', '$4,500'], ['ลูกค้า 2 ราย', '$3,000', '≈ ฿109,500', '$9,000'], ['ลูกค้า 3 ราย', '$4,500', '≈ ฿164,250', '$13,500']],
+    lifeCols: ['', 'ต่อเดือน', 'เป็นเงินบาท', 'รวม 3 เดือน'],
+    lifeFine: 'คิดเฉพาะค่าคอมมิชชัน Digital Renaissance (30% ของ $5,000 ต่อเดือน ใน 3 เดือนแรกของลูกค้าแต่ละราย) ที่ประมาณ ฿36.5 ต่อ $1 ตัวเลขนี้แสดงโครงสร้างค่าคอมมิชชัน ไม่ใช่รายได้ที่รับประกัน คุณได้เมื่อลูกค้าเซ็นและจ่ายเงินจริงเท่านั้น',
+    lifeShort: 'รายชื่อธุรกิจทั่วโลก ลูกค้าแค่ 2–3 ราย:',
     example: 'ตัวอย่าง: ลูกค้า 1 รายที่ $5,000 ต่อเดือน = <b>คุณได้ $1,500 ต่อเดือน นาน 3 เดือน (รวม $4,500)</b>',
     payFine: 'จ่ายทุกเดือนผ่านพร้อมเพย์ ได้เมื่อลูกค้าจ่ายเงินจริงเท่านั้น ยอดที่คืนเงินไม่นับ ไม่มีการรับประกันรายได้',
     youH: 'คุณ',
@@ -115,6 +127,14 @@ h2{font-family:Fraunces,Prompt,serif;font-weight:600;font-size:76px;color:#e8b84
 .quote{border-left:5px solid #e8b84a;padding:6px 0 6px 34px;font-size:40px;line-height:1.45;color:#fff;font-weight:500}
 .th .quote{font-size:38px;line-height:1.6}
 .quote small{display:block;font-size:24px;color:#c9b98f;margin-top:18px;font-weight:400}
+.lifelead{font-size:32px;line-height:1.55;margin-bottom:36px;color:#e9e1cc}
+.th .lifelead{line-height:1.7}
+table.life{width:100%;border-collapse:collapse}
+.life th{font-size:24px;font-weight:500;color:#5fb8f0;text-align:left;padding:0 10px 14px}
+.life td{font-size:32px;padding:24px 10px;border-top:2px solid rgba(232,184,74,.25)}
+.life td b{font-family:Fraunces,serif;font-weight:600;font-size:64px;color:#e8b84a}
+.life tr.hi td{background:rgba(232,184,74,.07)}
+.life td:last-child{font-weight:600;color:#fff}
 .foot{position:absolute;left:80px;right:80px;bottom:52px;display:flex;justify-content:space-between;align-items:center;font-size:24px;color:#8c826b}
 .foot .sw{color:#e8b84a;font-weight:600;font-size:28px}
 .card{background:rgba(255,255,255,.05);border:2px solid rgba(232,184,74,.32);border-radius:28px;padding:34px 40px;margin-bottom:28px;display:flex;gap:30px}
@@ -170,7 +190,8 @@ ol li:before{content:counter(a);background:#e8b84a;color:#0b0c10;width:56px;heig
 
 const tagsH = (t) => `<div class=tags>${t.tags.map((x) => `<span class=tag>${x}</span>`).join('')}</div>`;
 const brand = `<div class=brand><img src="${logo}">Digital Renaissance</div>`;
-const foot = (i, t) => `<div class=foot><span>${i}/5</span><span class=sw>${i < 5 ? t.swipe : ''}</span></div>`;
+const N = 6;
+const foot = (i, t) => `<div class=foot><span>${i}/${N}</span><span class=sw>${i < N ? t.swipe : ''}</span></div>`;
 
 function carousel(t) {
   return [
@@ -190,33 +211,40 @@ function carousel(t) {
       ${t.pay.map(([b, s]) => `<div class=big><b>${b}</b><span>${s}</span></div>`).join('')}
       <div class=ex>${t.example}</div><div class=fine>${t.payFine}</div>
       ${foot(3, t)}</section>`,
+    `<section class="s ${t.lang}">${brand}<h2 style="margin-top:54px">${t.lifeH}</h2>
+      <p class=lifelead>${t.lifeLead}</p>
+      <table class=life><tr>${t.lifeCols.map((c) => `<th>${c}</th>`).join('')}</tr>
+      ${t.lifeRows.map((row, i) => `<tr${i ? ' class=hi' : ''}>${row.map((c, j) => `<td>${j === 1 ? `<b>${c}</b>` : c}</td>`).join('')}</tr>`).join('')}</table>
+      <div class=fine>${t.lifeFine}</div>
+      ${foot(4, t)}</section>`,
     `<section class="s ${t.lang} cols">${brand}
       <h3 style="margin-top:60px">${t.youH}</h3><ul>${t.you.map((x) => `<li>${x}</li>`).join('')}</ul>
       <h3 style="margin-top:56px">${t.weH}</h3><ul class=we>${t.we.map((x) => `<li>${x}</li>`).join('')}</ul>
-      ${foot(4, t)}</section>`,
+      ${foot(5, t)}</section>`,
     `<section class="s ${t.lang}">${brand}<h2 style="margin-top:54px">${t.applyH}</h2>
       <div class=lead>${t.applyLead}</div><ol>${t.apply.map((x) => `<li>${x}</li>`).join('')}</ol>
       <div class=why>${t.applyWhy}</div>
       <div class=close>${t.close}</div>
-      ${foot(5, t)}</section>`,
+      ${foot(6, t)}</section>`,
   ];
 }
 
-// The single image folds the location into the tag row to make room for the
-// quote; "written work only" is dropped there because "no calls · no
-// meetings" and the closer card already say it.
+// The single image folds the location into the tag row and keeps only
+// "commission only" and "worldwide lead lists" beside it: "no calls" and
+// "written only" are already said by the closer card, and the room goes to
+// the 2-3 clients line and the quote.
 function single(t) {
   return `<section class="s one ${t.lang}">
     <div class=top><div><div class=eyebrow>${t.hiring}</div>
       <h1>${t.title.replace('<br>', ' ')}</h1>
       </div>
       <img class=logo src="${logo}" style="width:130px;height:130px"></div>
-    ${tagsH({ tags: [t.where, t.tags[0], t.tags[2]] })}
+    ${tagsH({ tags: [t.where, t.tags[0], t.tags[1]] })}
     <div class=sec>${t.jobH}</div>
     <div class=row>${t.jobs.map(([h, p]) => `<div class=mini><h4>${h}</h4><p>${p}</p></div>`).join('')}</div>
-    <div class=sec>${t.payH}</div>
+    <div class=sec style="color:#e8b84a">${t.lifeH.replace('<br>', ' ')}</div>
     <div class=pay>${t.pay.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>
-    <div class=ex><b>${t.payNote}</b> ${t.example}<br><span style="color:#c9b98f">${t.payFine}</span></div>
+    <div class=ex><b>${t.payNote}</b> ${t.lifeShort} ${t.lifeRows.slice(1).map((x) => `<b>${x[0]} = ${x[1]}/${t.lang === 'th' ? 'เดือน' : 'month'} (${x[2]})</b>`).join(' · ')}<br><span style="color:#c9b98f">${t.payFine}</span></div>
     <div class=two><div><div class=sec>${t.youH}</div><ul>${t.you.map((x) => `<li>${x}</li>`).join('')}</ul></div>
       <div><div class=sec>${t.weH}</div><ul class=we>${t.we.map((x) => `<li>${x}</li>`).join('')}</ul></div></div>
     <div class=apply><b>${t.applyH}</b>${t.applyLead} ① ${t.apply[0]} ② ${t.applyShort}</div>
