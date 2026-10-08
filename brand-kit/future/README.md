@@ -77,3 +77,17 @@ Thai headings need explicit `<br>` where a line must break.
 5. Confirm FUTURE → 10% after 23 Oct.
 6. Send her the PDFs.
 7. Optional: light (printable) version of the questionnaire.
+
+## Hiring ad for this role (`hiring/`)
+
+Social ad to recruit a second partner/closer, 1080×1350 (4:5) PNGs, English and
+Thai: `hiring-<lang>-single.png` is the all-in-one post,
+`hiring-<lang>-carousel-1..5.png` the carousel (cover + quote, the job, pay,
+you/we give you, how to apply). Rebuild with `node hiring/build.mjs <fonts.css>`,
+where the CSS is Google Fonts' Prompt + Fraunces with the woff2 URLs inlined as
+data URIs (the script's header comment says why). The build warns if any text
+overflows a slide.
+
+Pay shown is the standing rate (LEXIS 20%, DR 30% × first 3 months), not
+Future's 60% launch window. Applications are "send us a message on this page",
+so the ad needs no email address.
