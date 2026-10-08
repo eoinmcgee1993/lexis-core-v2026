@@ -1,6 +1,6 @@
-// Builds the "replace Future's role" social ads: one all-in-one image and a
+// Builds the Digital Renaissance partner/closer hiring ads: one all-in-one image and a
 // 5-slide carousel per language, 1080x1350 (4:5, the tallest feed ratio
-// Instagram and Facebook show uncropped). Same render path as the PDFs in
+// Instagram and Facebook show uncropped). Same render path as described in
 // ../README.md: self-contained HTML -> headless Chromium -> PNG.
 //
 // Usage: node build.mjs <fonts.css with data: URIs>
