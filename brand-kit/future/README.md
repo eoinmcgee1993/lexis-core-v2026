@@ -102,3 +102,18 @@ captions from the clip's own `.vtt`, then the Digital Renaissance offer, the
 used; the rest is silent so a music track can be added in the app.
 Rebuild with `node hiring/video.mjs <fonts.css>` (about 2 min per language;
 `PREVIEW=2,7,15 node …` renders stills of those seconds instead).
+
+### LEXIS reads the ad (`hiring/hiring-lexis-reads-en.mp4`)
+
+9:16, 39 s. LEXIS says the ad in her own voice (ElevenLabs eleven_v4,
+"Sarah – Warm & Conversational", the voice of the earlier LEXIS reels),
+framed as a voice call: her portrait, a waveform driven by the real audio,
+word-timed captions, and fact cards that change as she says each point.
+Script and word timings are in `hiring/reads/`; rebuild with
+`node hiring/reads.mjs <fonts.css> en`.
+
+Not lip-synced yet: on 8 Oct 2026 both accounts that can animate her were out
+of credits (Higgsfield 0.25; ElevenLabs 287 of ~30,500 needed for 36 s with
+creatify-aurora). A Thai read also needs ElevenLabs credits (~600 for the
+voice track, voice "Aom"). With credits, the lip-synced clip replaces the
+portrait image and nothing else changes.
