@@ -91,3 +91,14 @@ overflows a slide.
 Pay shown is the standing rate (LEXIS 20%, DR 30% × first 3 months), not
 Future's 60% launch window. Applications are "send us a message on this page",
 so the ad needs no email address.
+
+### Video version (`hiring/hiring-video-<lang>.mp4`)
+
+9:16 (1080×1920), 33 s, for Reels / TikTok / Stories. It features LEXIS:
+the landing page's real hero clip plays inside a phone showing the real
+landing page (`hiring/lexis-site-<lang>.png`), with her voice and burned-in
+captions from the clip's own `.vtt`, then the Digital Renaissance offer, the
+2–3 clients table, what we give, and how to apply. Only her first 8.3 s is
+used; the rest is silent so a music track can be added in the app.
+Rebuild with `node hiring/video.mjs <fonts.css>` (about 2 min per language;
+`PREVIEW=2,7,15 node …` renders stills of those seconds instead).
