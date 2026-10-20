@@ -382,6 +382,10 @@ console.log('\n--- Higgsfield refuses or does not answer ---');
   check('no answer is a 504 flagged as ambiguous', r.status === 504 && (await r.json()).code === 'ambiguous');
   check('and the POST is NOT retried (no idempotency key)', submitsSent() === before + 1);
   check('refused and ambiguous submits free the slot', !tables.generations.some((x) => x.user_id === OWNER.id && ACTIVE.has(x.status)));
+  for (let i = 0; i < 50 && !tables.error_logs.some((e) => e.context === 'Higgsfield Submit No Response'); i++) await new Promise((r) => setTimeout(r, 20));
+  const noResponseLog = tables.error_logs.find((e) => e.context === 'Higgsfield Submit No Response');
+  check('the no-response error is logged', !!noResponseLog);
+  check('…without the webhook secret from the request URL', !JSON.stringify(noResponseLog).includes(WEBHOOK_SECRET));
   submitMode = 'accept';
 }
 

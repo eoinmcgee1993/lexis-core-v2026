@@ -1483,7 +1483,14 @@ async function hfFetch(url, { method = 'GET', body, timeoutMs = 20_000 } = {}) {
     try { parsed = text ? JSON.parse(text) : null; } catch { parsed = null; }
     return { status: res.status, body: parsed, correlationId: res.headers.get('x-correlation-id') };
   } catch (err) {
-    return { networkError: err };
+    // fetch errors quote the full request URL, and the submit URL carries the
+    // webhook secret in its query string. Callers log this error to the console
+    // and to error_logs, so strip the query before it leaves this function.
+    const safeUrl = url.split('?')[0];
+    const safe = new Error(String(err?.message ?? err).split(url).join(safeUrl));
+    safe.name = err?.name || 'Error';
+    safe.code = err?.code;
+    return { networkError: safe };
   } finally {
     clearTimeout(timer);
   }
@@ -2499,7 +2506,8 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
       // nothing to take back — this is recorded only so a support question
       // about a checkout that "went through" has an answer.
       const session = event.data.object;
-      console.log('[LEXIS Webhook] Checkout payment failed:', session.id, session.metadata?.user_id);
+      // The session id is enough to find this in Stripe; a user id in logs is PII.
+      console.log('[LEXIS Webhook] Checkout payment failed:', session.id);
 
     } else if (event.type === 'customer.subscription.updated') {
       // LEGACY. Nothing sold since 2 Sep 2026 creates a subscription, but
