@@ -142,14 +142,22 @@ Use these exact tags so the numbers group cleanly. Lowercase, no spaces.
 
 | Where | Link |
 |---|---|
-| Meta ads | `https://learnwithlexis.com/?utm_source=meta&utm_medium=paid&utm_campaign=evergreen` |
-| TikTok ads | `https://learnwithlexis.com/?utm_source=tiktok&utm_medium=paid&utm_campaign=evergreen` |
-| Google ads | `https://learnwithlexis.com/?utm_source=google&utm_medium=paid&utm_campaign=evergreen` |
-| Instagram bio / posts | `https://learnwithlexis.com/?utm_source=instagram&utm_medium=social` |
-| TikTok bio | `https://learnwithlexis.com/?utm_source=tiktok&utm_medium=social` |
-| Facebook groups | `https://learnwithlexis.com/?utm_source=facebook&utm_medium=community` |
-| LINE | `https://learnwithlexis.com/th?utm_source=line&utm_medium=social` |
+| Meta ads | `https://learnwithlexis.com/?utm_source=meta&utm_medium=paid&utm_campaign=evergreen&utm_content=<ad-id>` |
+| TikTok ads | `https://learnwithlexis.com/?utm_source=tiktok&utm_medium=paid&utm_campaign=evergreen&utm_content=<ad-id>` |
+| Google ads | `https://learnwithlexis.com/?utm_source=google&utm_medium=paid&utm_campaign=evergreen&utm_content=<ad-id>` |
+| Instagram bio | `https://learnwithlexis.com/?utm_source=instagram&utm_medium=social&utm_content=bio` |
+| Instagram / Facebook / YouTube posts | `https://learnwithlexis.com/?utm_source=<platform>&utm_medium=social&utm_campaign=<campaign>&utm_content=<post-id>` |
+| TikTok bio | `https://learnwithlexis.com/?utm_source=tiktok&utm_medium=social&utm_content=bio` |
+| Facebook groups | `https://learnwithlexis.com/?utm_source=facebook&utm_medium=community&utm_content=<post-id>` |
+| LINE | `https://learnwithlexis.com/th?utm_source=line&utm_medium=social&utm_content=<post-id>` |
 | Partner / outreach email | `https://learnwithlexis.com/?ref=<partner-slug>` |
+
+`utm_content` names the one ad or post the visit came from: the creative's
+file stem for ads (`evergreen-th-story`, `meta-en-1-words`), the schedule
+slot for daily posts (`day01`, `day02`…). Without it,
+visits from a channel still count, but no single ad or post can be credited
+with them. It follows the same rule as the other tags, lowercase
+`[a-z0-9._-]` only.
 
 Launch-offer ads, until 23 Oct, use `utm_campaign=launch` instead of
 `evergreen`. That keeps the two sets apart in the numbers. Thai ads point
