@@ -259,7 +259,15 @@ const ANALYTICS_EVENTS = new Set([
 // post, ad and outreach email lands in the same undifferentiated count.
 // They are labels chosen by whoever built the link, never an identifier,
 // so they are held to a short slug alphabet rather than trusted as text.
-const SOURCE_KEYS = { src: 'string', med: 'string', cmp: 'string', refHost: 'string' };
+//
+// cnt (utm_content) added Oct 2026: links built for the posting queue and
+// ad kits put a per-post or per-ad id there, and campaign was the finest
+// grain stored, so every video in a campaign landed in one count. It has
+// to be listed here, not just sent: anything missing from this map is
+// dropped without a word, which is exactly how it was being lost.
+// docs/marketing-report.sql reads these keys by name, so renaming one
+// breaks the report silently too.
+const SOURCE_KEYS = { src: 'string', med: 'string', cmp: 'string', cnt: 'string', refHost: 'string' };
 const ANALYTICS_METADATA_SCHEMA = {
   pageview: { ...SOURCE_KEYS },
   signup_completed: { ...SOURCE_KEYS },
