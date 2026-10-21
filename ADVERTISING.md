@@ -5,6 +5,11 @@ original short ad copy, and `OUTREACH-DRAFTS.md`, which holds 52 one-to-one
 outreach drafts. This file is the paid-media set: copy written to each
 platform's own field limits, plus which creative goes with it.
 
+Refreshed 21 Oct 2026. The launch offer is now marked as ending, and an
+evergreen set becomes the default from 24 Oct. The analytics events are
+corrected, and finished reels are paired with video placements. Starting
+audiences are added, labelled as untested.
+
 **Nothing here has been published or spent against.** No ad account is
 connected, no budget is set. This is the asset, not the campaign.
 
@@ -27,6 +32,10 @@ connected, no budget is set. This is the asset, not the campaign.
 5. **Ad language matches the landing page.** The CTA is "Try It Free" in
    English and "ลองใช้ฟรี" in Thai, the same words the page uses. Ad-to-page
    copy match is a real measured conversion factor, not a style preference.
+6. **LEXIS is a virtual conversation partner (คู่สนทนาเสมือน).** No line
+   calls it, or implies it is, a person, teacher or tutor. No ad mentions,
+   compares itself with, or targets tutors or language schools. They are
+   competitors.
 
 ## Before you spend anything
 
@@ -40,11 +49,19 @@ Three things from `LAUNCH-ACTION-PLAN.md` that gate paid media, in order:
 - **Analytics.** Already built, contrary to an earlier version of this file
   that said there was none — that was wrong. `frontend/src/lib/analytics.js`
   posts first-party events to `/api/analytics/event` and they land in the
-  `analytics_events` table: `pageview`, `signup_completed`,
-  `checkout_started`, `checkout_completed`, `session_connected`,
-  `plan_cancelled`. The funnel is measurable today. What it currently
-  measures is 105 sessions, 5 accounts, and **zero checkouts, ever** — so
-  the landing page is not the bottleneck you are buying your way past.
+  `analytics_events` table. The backend accepts eight event names
+  (`ANALYTICS_EVENTS` in `backend/app.mjs`): `pageview`,
+  `signup_completed`, `checkout_started`, `checkout_completed`,
+  `session_connected`, `plan_cancelled`, `google_signin_started` and
+  `result_card_shared`. The last two were added on 3 Oct.
+  `google_signin_started` counts taps on Google sign-in. Those accounts are
+  created during Google's redirect, so `signup_completed` never fires for
+  them. Read it beside `signup_completed`, not added to it: it counts taps,
+  not finished accounts. `result_card_shared`
+  counts learners posting their result card. The funnel is measurable today.
+  On 27 Aug it showed 105 sessions, 5 accounts and **zero checkouts, ever**.
+  The landing page was not the bottleneck that paid traffic would fix. Run
+  the query under "Link tagging" for the current figures before spending.
 - **The auth wall.** ~~Tapping "Try It Free" lands a brand-new visitor on a
   **Sign in** form.~~ **Fixed** in PR #90 — `AuthPage.jsx` now opens on
   "Create your account" for anyone without a prior sign-in on the device,
@@ -56,12 +73,18 @@ Three things from `LAUNCH-ACTION-PLAN.md` that gate paid media, in order:
 
 ---
 
-## Launch offer set (runs until 23 Oct 2026)
+## Launch offer set (ENDS 23 Oct 2026, 23:59 Bangkok)
 
 `LEXIS50`: 50% off the Weekly Pass, ฿99.50 instead of ฿199, 100 uses, ends
-23 Oct 2026 (`LAUNCH_OFFER` in `facts.js`). **Pull every ad in this block
-the day it ends or the uses run out.** An ad for a code that no longer
-works is the fastest way to turn a click into a complaint.
+23 Oct 2026 at 23:59 Bangkok time (`LAUNCH_OFFER` in `facts.js`). **Pull
+every ad in this block when it ends or the uses run out, whichever comes
+first.** An ad for a code that no longer works is the fastest way to turn a
+click into a complaint. From 24 Oct the **evergreen set below is the
+default**: put it in the slots these ads leave.
+
+Once `launchOfferActive()` returns false, the generator stops rebuilding
+the `launch-*` PNGs. The old files stay in `brand-kit/ads/` as a record.
+They are not for use.
 
 ### Meta
 - **LN-1 Primary:** Launch week: your first Weekly Pass is half price with code LEXIS50. Start with 15 free minutes, no card.
@@ -84,20 +107,53 @@ works is the fastest way to turn a click into a complaint.
 
 ---
 
+## Evergreen set (default from 24 Oct 2026)
+
+There is no code, no end date and no discount. The offer is the free trial,
+which never expires, so nothing here needs pulling on a date. The images
+give the pass prices and their fair-use minutes in small print. Every number
+on them is read from `facts.js`.
+
+### Meta
+- **EV-EN Primary:** Say it out loud. Get it wrong. Say it again. Practise speaking English or Thai with LEXIS: 15 min free, no card.
+- **Headline:** 15 minutes free, no card
+- **Description:** One-off passes, no renewal
+- **Creative:** `ads/evergreen-en-1080x1350.png` (4:5 feed); `ads/evergreen-en-story-1080x1920.png` (Stories, Reels)
+- **EV-TH Primary:** ไม่ต้องกลัวพูดผิด พูดออกมาเลย ผิดก็แค่ลองใหม่ ฝึกพูดภาษาอังกฤษกับ LEXIS ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
+- **Headline:** ทดลองฟรี 15 นาที
+- **Description:** จ่ายครั้งเดียว ไม่ต่ออายุ
+- **Creative:** `ads/evergreen-th-1080x1350.png` (4:5 feed); `ads/evergreen-th-story-1080x1920.png` (Stories, Reels)
+
+Upload each pair as **one** ad, with the 4:5 for feeds and the 9:16 for
+Stories and Reels. They share a photo and a headline so the two read as
+the same ad.
+
+### TikTok
+- Say it out loud. Get it wrong. Say it again. Try LEXIS free for 15 minutes.
+- **TH:** ไม่ต้องกลัวพูดผิด ฝึกพูดภาษาอังกฤษกับ LEXIS ทดลองฟรี 15 นาที
+- **Creative:** in the TikTok feed, video. See "Video for paid placements"
+  below. The 9:16 static is for placements that take an image.
+
+---
+
 ## Link tagging
 
 Use these exact tags so the numbers group cleanly. Lowercase, no spaces.
 
 | Where | Link |
 |---|---|
-| Meta ads | `https://learnwithlexis.com/?utm_source=meta&utm_medium=paid&utm_campaign=launch` |
-| TikTok ads | `https://learnwithlexis.com/?utm_source=tiktok&utm_medium=paid&utm_campaign=launch` |
-| Google ads | `https://learnwithlexis.com/?utm_source=google&utm_medium=paid&utm_campaign=launch` |
+| Meta ads | `https://learnwithlexis.com/?utm_source=meta&utm_medium=paid&utm_campaign=evergreen` |
+| TikTok ads | `https://learnwithlexis.com/?utm_source=tiktok&utm_medium=paid&utm_campaign=evergreen` |
+| Google ads | `https://learnwithlexis.com/?utm_source=google&utm_medium=paid&utm_campaign=evergreen` |
 | Instagram bio / posts | `https://learnwithlexis.com/?utm_source=instagram&utm_medium=social` |
 | TikTok bio | `https://learnwithlexis.com/?utm_source=tiktok&utm_medium=social` |
 | Facebook groups | `https://learnwithlexis.com/?utm_source=facebook&utm_medium=community` |
 | LINE | `https://learnwithlexis.com/th?utm_source=line&utm_medium=social` |
 | Partner / outreach email | `https://learnwithlexis.com/?ref=<partner-slug>` |
+
+Launch-offer ads, until 23 Oct, use `utm_campaign=launch` instead of
+`evergreen`. That keeps the two sets apart in the numbers. Thai ads point
+at `/th` instead of `/`, with the same tags.
 
 Read it back with:
 
@@ -128,6 +184,11 @@ roughly 40; description at roughly 27. Everything below is inside those.
 - **Creative:** `ads/meta-en-1-words-1080x1350.png` (4:5 feed); `post-a-words.png` for square placements
 
 ### EN-2 — against courses
+**On hold (21 Oct).** "You need someone to talk to" reads as a person, and
+"not a course" sets LEXIS against the courses that competitors sell. Both
+break ground rule 6. Run EV-EN in this slot until the line is rewritten.
+`LINES.course` also feeds `templates/post-a-course.png`, so the line and
+both PNGs change together.
 - **Primary:** You don't need another course. You need someone to talk to. Talk to LEXIS out loud and get gentle corrections.
 - **Headline:** A partner, not a course
 - **Description:** No card required
@@ -157,6 +218,11 @@ roughly 40; description at roughly 27. Everything below is inside those.
 
 Headlines max 30 characters, descriptions max 90. Google mixes them, so each
 headline has to stand alone and none may contradict another.
+
+Headline 3 and description 2 are **on hold**, for the same reason as EN-2.
+"Real" partner reads as a person, and "Not a course" sets LEXIS against
+competitors (ground rule 6). Leave both out of the ad until they are
+rewritten.
 
 ### Headlines
 1. Practise Speaking English
@@ -214,12 +280,21 @@ is that ad's primary line.
 |---|---|
 | `meta-{en-1,en-2,en-3,th-1,th-2}-*-1080x1350.png` | Meta feed ads EN-1 to TH-2 |
 | `landscape-{en,th}-1200x628.png` | Meta link ads; Google Responsive Display landscape slot |
-| `launch-{en,th}-1080x1350.png` | Launch offer, feed |
-| `launch-{en,th}-story-1080x1920.png` | Launch offer, Stories/Reels/TikTok |
+| `evergreen-{en,th}-1080x1350.png` | Evergreen EV-EN / EV-TH, feed. **Default from 24 Oct.** |
+| `evergreen-{en,th}-story-1080x1920.png` | Evergreen, Stories/Reels; TikTok only where it takes an image |
+| `launch-{en,th}-1080x1350.png` | Launch offer, feed. **Expires 23 Oct 2026.** |
+| `launch-{en,th}-story-1080x1920.png` | Launch offer, Stories/Reels/TikTok. **Expires 23 Oct 2026.** |
 
 The launch pieces print code, price, strike price and end date, all read
 from `LAUNCH_OFFER` in `facts.js`. **They expire with the offer on 23 Oct
-2026.** Delete them from every ad set that day.
+2026.** Delete them from every ad set that day. After that the generator
+skips them. The files stay in the folder as a record.
+
+The evergreen 9:16 is laid out for Reels, the strictest of its placements.
+The headline, the trial and the button sit between 270px from the top and
+about 35% from the bottom. Reels lays its caption over that bottom 35%.
+Only the price line and the address run lower, where Stories still shows
+them.
 
 Regenerate with `node scripts/images/generate_brand_kit_social.mjs --only=ads`
 from `frontend/`.
@@ -230,11 +305,75 @@ edit the PNGs.
 
 ---
 
+## Video for paid placements
+
+Finished 9:16 reels now exist, so a static no longer has to stand in for
+video. Lead with these:
+
+| Placement | Lead with | Then test | Landing page |
+|---|---|---|---|
+| TikTok in-feed, Thai | `reels/lexis-reel-th.mp4` | `voiceovers/lexis-vo-reel-th-work.mp4`, `-th-travel`, `-th-interview`, `-th` (hospitality) | `/th`, or the matching `/th/practice/*` page |
+| Instagram & Facebook Reels, Thai | `voiceovers/lexis-vo-reel-th.mp4` (hospitality) | `-th-work`, `-th-travel`, `-th-interview` | the matching `/th/practice/*` page |
+| Reels, English (expats learning Thai) | `voiceovers/lexis-vo-reel-en-learn-thai.mp4` | `voiceovers/lexis-vo-reel-en.mp4` | `/` |
+| YouTube Shorts | `reels/lexis-reel-th.mp4`, `reels/lexis-reel-en.mp4` | `voiceovers/lexis-vo-reel-en.mp4` | `/th`, `/` |
+
+Why these reels. Each one either shows LEXIS in a session or says what a
+session is, and each ends on the free trial. The topic reels each match a
+topic page that already exists: hospitality, business, travel and
+interview English. That makes the ad-to-page match in ground rule 5 exact.
+`reels/lexis-reel-*` were built around TikTok's overlay (see
+`reels/build_reels.py`): nothing that has to be read sits in the bottom
+~400px or in the strip down the right edge.
+
+The entertainment reels are not in the table: Thinglish, airport, mai-mai,
+etiquette and nicknames. They mention LEXIS only at the end, which works for
+a follow and is weak for a cold paid view. Post them organically first. Put
+money behind one only after it has earned engagement on its own, as a TikTok
+Spark Ad or a boosted Reel.
+
+Ad text for each reel is its caption in `brand-kit/voiceovers/README.md`.
+Cut it to 100 characters for TikTok, and change `utm_medium=social` to
+`utm_medium=paid`. Paid clicks then stay separate from the same post's
+organic clicks.
+
+---
+
+## Starting audiences — untested hypotheses
+
+**None of this has been tested.** These are first guesses, there to be
+proved wrong by the numbers. Replace each one with what the first test
+shows. Platforms rename interests often, so use the closest one on offer.
+
+**Spend is the owner's decision.** This file recommends no budget and no
+bid. The owner's own first-test range is ฿100–300 a day across everything
+that is running.
+
+**A. Thai speakers practising English**
+- Location Thailand, language Thai, ages about 18–34.
+- Interests: speaking English and learning English; travel abroad;
+  hospitality, hotel and tourism work; office and business work.
+- Creative: EV-TH, TH-1 and TH-2, plus the Thai reels. Give each topic reel
+  the interest it matches: work with office/business, travel and airport
+  with travel, hospitality with hotel/tourism work. Run interview to job
+  seekers if the platform offers that interest.
+
+**B. Expats in Thailand learning Thai**
+- Location Thailand, language English. Leave age broad to start.
+- Interests: expat life in Thailand, learning Thai, Thai culture.
+- Creative: EV-EN and `voiceovers/lexis-vo-reel-en-learn-thai.mp4`.
+
+**Never.** Do not target tutors or language schools, their pages, their
+followers, or lookalikes built from any of them. They are competitors
+(ground rule 6). This applies to interests, custom audiences and
+lookalikes alike.
+
+---
+
 ## What is deliberately not here
 
-- **No video.** The single highest-performing format on TikTok and Reels, and
-  the one asset this kit cannot generate. It needs a real editing pass.
-- **No budget, bid or audience recommendations.** Those depend on numbers
-  that do not exist yet. Guessing them would be inventing a media plan.
-- **No landing pages per campaign.** Worth building once a channel shows
-  signs of life; premature before that.
+- **No budget or bid recommendations.** Those depend on numbers that do not
+  exist yet. Guessing them would be inventing a media plan. The audiences
+  above are labelled as hypotheses for the same reason.
+- **No new landing pages per campaign.** The `/th/practice/*` topic pages
+  already exist and match the topic reels. Build more only once a channel
+  shows signs of life.

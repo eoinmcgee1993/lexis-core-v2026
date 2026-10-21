@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 // onto all 14 templates after the trial was halved to 15 (PR #92).
 // facts.js is a plain constants module with no React imports, so a Node
 // script can read it directly.
-import { TRIAL as TRIAL_FACT, PRICING, FAIR_USE, LAUNCH_OFFER, LAUNCH_OFFER_PRICE_THB } from '../../src/content/facts.js';
+import { TRIAL as TRIAL_FACT, PRICING, FAIR_USE, LAUNCH_OFFER, LAUNCH_OFFER_PRICE_THB, launchOfferActive, BILLING } from '../../src/content/facts.js';
 import { markSvg } from '../../src/brand/lexisMark.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -77,7 +77,14 @@ const LINES = {
   stranger:'Your first conversation<br>in English shouldn’t<br>be with a stranger.',
   find:    'Find out if you can<br>hold a conversation<br>before it matters.',
   th_ask:  'หนังสือเรียน<br>ไม่เคยถามคำถามคุณกลับ',
-  th_first:'บทสนทนาแรกของคุณ<br>ไม่ควรเป็น<br>กับคนแปลกหน้า'
+  th_first:'บทสนทนาแรกของคุณ<br>ไม่ควรเป็น<br>กับคนแปลกหน้า',
+  // Evergreen ads, 20 Oct 2026: the headlines for the slot the launch offer
+  // vacates on 23 Oct. Same rule again. Being allowed to get it wrong with
+  // nobody listening is the experience `room` describes, said as an action.
+  // The Thai is written for Thai readers, not translated: fear of saying it
+  // wrong (กลัวพูดผิด) is how Thai learners name this problem themselves.
+  again:   'Say it out loud.<br>Get it wrong.<br>Say it again.',
+  th_again:'ไม่ต้องกลัวพูดผิด<br>พูดออกมาเลย<br>ผิดก็แค่ลองใหม่'
 };
 
 let fontCss = '';
@@ -354,6 +361,14 @@ function lexisNavy() { return '#050B14'; }
 // because the ad account will not stop them for us: ADVERTISING.md says to
 // pull them the day the offer ends, and a visible date is the backstop for
 // the day nobody does.
+//
+// After the offer ends (launchOfferActive() false), the launch set is no
+// longer rebuilt. Re-rendering it would print a code that no longer works
+// and an end date in the past. The PNGs already in brand-kit/ads/ are left
+// alone: taking them out of live ad sets is a step a person has to do in the
+// ad account, and ADVERTISING.md records that they have expired. The
+// evergreen set below replaces them. It leads with the free trial, which
+// has no end date, so nobody has to remember to pull it.
 const OFFER_END = new Date(LAUNCH_OFFER.endsAt);
 const OFFER_END_EN = OFFER_END.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'Asia/Bangkok' });
 const OFFER_END_TH = OFFER_END.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', timeZone: 'Asia/Bangkok' });
@@ -366,6 +381,16 @@ const ADS = {
     ['meta-en-3-find', '12-portrait-black-speaking-alt', LINES.find, 'en'],
     ['meta-th-1-words', '01-portrait-black-smile', LINES.th_out, 'th'],
     ['meta-th-2-first', '13-portrait-black-smile-alt', LINES.th_first, 'th']
+  ],
+  // Same shape. Each entry renders twice from the same photo and headline: a
+  // 4:5 feed piece and a 9:16 story piece. Meta lets one ad carry a separate
+  // image per placement, and the two only read as one ad if they share a
+  // face and a line. Photo 12 is her mid-sentence, which is what the line
+  // says, and her face sits high enough in the frame to leave the middle of
+  // a 9:16 free for type (see evergreenBody).
+  evergreen: [
+    ['evergreen-en', '12-portrait-black-speaking-alt', LINES.again, 'en'],
+    ['evergreen-th', '12-portrait-black-speaking-alt', LINES.th_again, 'th']
   ]
 };
 
@@ -448,10 +473,91 @@ async function ads() {
         <div ${sm(lang)} style="margin-top:30px;font-size:24px;color:#fff;opacity:.6;line-height:1.5">${o.ends}<br>${o.foot}</div>
       </div></div>`;
   };
-  console.log('\nads/ — launch offer (4:5 feed, 9:16 story)');
-  for (const lang of ['en', 'th']) {
-    await shot(`ads/launch-${lang}-1080x1350.png`, 1080, 1350, offerBody(lang, 1080, 1350, await photo('01-portrait-black-smile'), false), BLACK);
-    await shot(`ads/launch-${lang}-story-1080x1920.png`, 1080, 1920, offerBody(lang, 1080, 1920, await photo('09-story-black-lower'), true), BLACK);
+  if (launchOfferActive()) {
+    console.log('\nads/ — launch offer (4:5 feed, 9:16 story)');
+    for (const lang of ['en', 'th']) {
+      await shot(`ads/launch-${lang}-1080x1350.png`, 1080, 1350, offerBody(lang, 1080, 1350, await photo('01-portrait-black-smile'), false), BLACK);
+      await shot(`ads/launch-${lang}-story-1080x1920.png`, 1080, 1920, offerBody(lang, 1080, 1920, await photo('09-story-black-lower'), true), BLACK);
+    }
+  } else {
+    console.log(`\nads/ — launch offer ended ${OFFER_END_EN}: launch-* skipped. ` +
+      'The old PNGs are still there; take them out of every ad set.');
+  }
+
+  // Evergreen. The trial is the offer here: it is the one in facts.js
+  // with no end date. The foot gives the price and the fair-use minutes
+  // together, for the same reason the carousel's price slide does: an ad
+  // that names a price should say what that price buys.
+  // &nbsp; keeps each number on the same line as its unit. Without it, the
+  // first render broke "450 / min" and "30 / วัน" across two lines.
+  const n = (v, unit) => `${v}&nbsp;${unit}`;
+  // Two of the foot's claims are words, not numbers: no card for the trial,
+  // and no renewal. facts.js holds both as flags. If either flips, those
+  // lines become false claims on an ad that may run for months. So the
+  // build stops here and does not render them.
+  if (TRIAL_FACT.cardRequired || BILLING.autoRenews) {
+    throw new Error('Evergreen ads: TRIAL.cardRequired or BILLING.autoRenews changed in facts.js; rewrite the foot copy first.');
+  }
+  const ever = {
+    en: { tag: 'Speaking practice · English & Thai', pre: '', post: 'minutes free',
+      foot: `No card required. Then ฿${WEEK} for ${n(PRICING.weekly.days, 'days')} (up to ${n(FAIR_USE.weekly.minutes, 'min')}) ` +
+        `or ฿${MONTH} for ${n(PRICING.monthly.days, 'days')} (up to ${n(FAIR_USE.monthly.minutes, 'min')}). One-off. Nothing renews.` },
+    // Thai word order puts the number between ทดลองฟรี and นาที, as TERMS_TH
+    // does, so the big figure sits mid-phrase rather than first. The foot
+    // follows PRICING_DESCRIPTION_TH's wording, so ad and page say the same.
+    th: { tag: 'ฝึกพูดภาษาอังกฤษ', pre: 'ทดลองฟรี', post: 'นาที',
+      foot: `ไม่ต้องผูกบัตร จากนั้นจ่ายครั้งเดียว ฿${WEEK} ใช้ได้ ${n(PRICING.weekly.days, 'วัน')} (ฝึกได้สูงสุด ${n(FAIR_USE.weekly.minutes, 'นาที')}) ` +
+        `หรือ ฿${MONTH} ใช้ได้ ${n(PRICING.monthly.days, 'วัน')} (สูงสุด ${n(FAIR_USE.monthly.minutes, 'นาที')}) ไม่ต่ออายุอัตโนมัติ` }
+  };
+  // The 9:16 is laid out for the strictest place it runs, not for Stories
+  // alone. The launch story put its price and button in the bottom quarter,
+  // and Reels lays its caption and CTA over the bottom ~35% of the frame.
+  // So nothing is set in the top 270px (Stories and Reels headers). The tag,
+  // headline, trial and button sit between 270 and ~1250, which is clear on
+  // every 9:16 placement. Only the price foot and the address run lower,
+  // inside Stories' safe area, where a Reels caption may cover them. The
+  // price is also in the ad text. The face goes above the type, not under
+  // it. That is why the photo is pinned to the top at full width, not
+  // cropped to cover.
+  const evergreenBody = (lang, line, img, story) => {
+    const e = ever[lang];
+    const label = (size) => lang === 'th'
+      ? `class="t" lang="th" style="font-size:${size}px;font-weight:600;color:#fff;line-height:1"`
+      : `class="d" style="font-size:${size}px;color:#fff;line-height:1"`;
+    const block = `
+        <div ${sm(lang)} style="display:inline-block;border:2px solid ${TEAL};color:${TEAL};font-size:24px;letter-spacing:.04em;
+          padding:10px 20px;border-radius:999px;margin-bottom:30px">${e.tag}</div>
+        <div ${hd(lang, story ? 76 : 72)}>${line}</div>
+        <div style="margin-top:${story ? 36 : 30}px;display:flex;justify-content:space-between;align-items:center;gap:24px">
+          <div style="display:flex;align-items:baseline;gap:16px;white-space:nowrap">
+            ${e.pre ? `<div ${label(44)}>${e.pre}</div>` : ''}
+            <div class="d" style="font-size:112px;color:#fff;line-height:1">${TRIAL}</div>
+            <div ${label(44)}>${e.post}</div>
+          </div>${button(lang, 32)}
+        </div>
+        <div ${sm(lang)} style="margin-top:30px;font-size:24px;color:#fff;opacity:.62;line-height:1.5">${e.foot}</div>`;
+    if (!story) {
+      return `<div style="position:relative;width:100%;height:100%;background:${BLACK}">
+        <img class="fill" src="${img}" style="object-position:50% 8%"/>${scrim}
+        <div style="position:absolute;top:60px;left:64px">${lockup(38, '#fff', TEAL)}</div>
+        <div style="position:absolute;left:64px;right:64px;bottom:64px">${block}</div>
+      </div>`;
+    }
+    // The type block hangs from a fixed top, so a longer Thai headline pushes
+    // the foot down rather than pushing the button up into her face.
+    return `<div style="position:relative;width:100%;height:100%;background:${BLACK}">
+      <img src="${img}" style="position:absolute;left:0;top:-70px;width:100%"/>
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,
+        rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 12%, rgba(0,0,0,0) 32%, rgba(0,0,0,.8) 40%, ${BLACK} 50%)"></div>
+      <div style="position:absolute;top:280px;left:64px">${lockup(38, '#fff', TEAL)}</div>
+      <div style="position:absolute;left:64px;right:64px;top:720px">${block}
+        <div style="margin-top:44px;font-size:26px;color:${TEAL};letter-spacing:.05em">${SITE}</div></div>
+    </div>`;
+  };
+  console.log('\nads/ — evergreen (4:5 feed, 9:16 story/Reels)');
+  for (const [file, img, line, lang] of ADS.evergreen) {
+    await shot(`ads/${file}-1080x1350.png`, 1080, 1350, evergreenBody(lang, line, await photo(img), false), BLACK);
+    await shot(`ads/${file}-story-1080x1920.png`, 1080, 1920, evergreenBody(lang, line, await photo(img), true), BLACK);
   }
 }
 
