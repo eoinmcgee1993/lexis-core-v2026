@@ -167,12 +167,18 @@ Read it back with:
 
 ```sql
 select coalesce(metadata->>'src', metadata->>'refHost', 'direct') source,
+       coalesce(metadata->>'cmp', '-') campaign,
        count(distinct session_id) filter (where event_name='pageview') visits,
        count(*) filter (where event_name='signup_completed') signups,
        count(*) filter (where event_name='checkout_started') checkouts
 from analytics_events where created_at > now() - interval '7 days'
-group by 1 order by 2 desc;
+group by 1, 2 order by 3 desc;
 ```
+
+`campaign` is `utm_campaign`, which `analytics.js` stores as
+`metadata.cmp`. It is what splits `meta` / `launch` from `meta` /
+`evergreen`. Without it the two sets add up into one `meta` row, and the
+switch on 24 Oct cannot be seen.
 
 Signups happen after an email confirmation, often in a new tab, so a
 signup can lose its source. For a purchase, the per-channel promo code in
@@ -339,10 +345,24 @@ a follow and is weak for a cold paid view. Post them organically first. Put
 money behind one only after it has earned engagement on its own, as a TikTok
 Spark Ad or a boosted Reel.
 
-Ad text for each reel is its caption in `brand-kit/voiceovers/README.md`.
-Cut it to 100 characters for TikTok, and change `utm_medium=social` to
-`utm_medium=paid`. Paid clicks then stay separate from the same post's
-organic clicks.
+Ad text for each reel is its caption in `brand-kit/voiceovers/README.md`,
+cut to 100 characters for TikTok. **Use the caption's words but not its
+link.** Those links are tagged for organic posts on one platform:
+`utm_source=tiktok` on the Thai reels, `facebook` on learn-Thai. A paid
+Reels or Shorts click carrying them would be counted as TikTok or Facebook
+traffic. Build each paid link fresh, with the source set by where the ad
+runs:
+
+| Ad runs on | Link |
+|---|---|
+| TikTok in-feed | `<page>?utm_source=tiktok&utm_medium=paid&utm_campaign=evergreen&utm_content=<reel-key>` |
+| Instagram / Facebook Reels | `<page>?utm_source=meta&utm_medium=paid&utm_campaign=evergreen&utm_content=<reel-key>` |
+| YouTube Shorts | `<page>?utm_source=youtube&utm_medium=paid&utm_campaign=evergreen&utm_content=<reel-key>` |
+
+`<page>` is the reel's landing page from the table above, for example
+`https://learnwithlexis.com/th/practice/hospitality-english`. `<reel-key>`
+is the file stem without `lexis-`, so `vo-reel-th-work` or `reel-th`. The
+same reel on two platforms then shows as two rows that can be compared.
 
 ---
 

@@ -147,6 +147,21 @@ body{background:${bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 .fill{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 </style></head><body>${body}</body></html>`, { waitUntil: 'load' });
   await p.evaluate(() => document.fonts.ready);
+  // Layout guard for pieces that mark their lockup and type block
+  // (data-lockup / data-type; the evergreen ads do). A bottom-anchored type
+  // block grows upward when its text wraps further, and that happens with a
+  // fallback font or a longer Thai line. It then covers the lockup, which is
+  // drawn first. That gives an unbranded ad, and it is easy to miss in a
+  // thumbnail: a reviewer reported exactly that on PR #139. So refuse to
+  // write the PNG at all.
+  const clash = await p.evaluate(() => {
+    const l = document.querySelector('[data-lockup]'), t = document.querySelector('[data-type]');
+    if (!l || !t) return null;
+    const a = l.getBoundingClientRect(), b = t.getBoundingClientRect();
+    if (!a.width || !a.height) return 'lockup has no size';
+    return b.top < a.bottom + 24 ? `type block top ${Math.round(b.top)}px is within 24px of lockup bottom ${Math.round(a.bottom)}px` : null;
+  });
+  if (clash) { await p.close(); throw new Error(`${file}: ${clash}`); }
   const out = path.join(KIT, file);
   await fs.mkdir(path.dirname(out), { recursive: true });
   await p.screenshot({ path: out });
@@ -539,8 +554,8 @@ async function ads() {
     if (!story) {
       return `<div style="position:relative;width:100%;height:100%;background:${BLACK}">
         <img class="fill" src="${img}" style="object-position:50% 8%"/>${scrim}
-        <div style="position:absolute;top:60px;left:64px">${lockup(38, '#fff', TEAL)}</div>
-        <div style="position:absolute;left:64px;right:64px;bottom:64px">${block}</div>
+        <div data-lockup style="position:absolute;top:60px;left:64px">${lockup(38, '#fff', TEAL)}</div>
+        <div data-type style="position:absolute;left:64px;right:64px;bottom:64px">${block}</div>
       </div>`;
     }
     // The type block hangs from a fixed top, so a longer Thai headline pushes
@@ -549,8 +564,8 @@ async function ads() {
       <img src="${img}" style="position:absolute;left:0;top:-70px;width:100%"/>
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,
         rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 12%, rgba(0,0,0,0) 32%, rgba(0,0,0,.8) 40%, ${BLACK} 50%)"></div>
-      <div style="position:absolute;top:280px;left:64px">${lockup(38, '#fff', TEAL)}</div>
-      <div style="position:absolute;left:64px;right:64px;top:720px">${block}
+      <div data-lockup style="position:absolute;top:280px;left:64px">${lockup(38, '#fff', TEAL)}</div>
+      <div data-type style="position:absolute;left:64px;right:64px;top:720px">${block}
         <div style="margin-top:44px;font-size:26px;color:${TEAL};letter-spacing:.05em">${SITE}</div></div>
     </div>`;
   };
