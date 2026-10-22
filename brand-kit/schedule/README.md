@@ -50,7 +50,8 @@ contains a link.
 Each app gets the ending it can use. TikTok captions, Instagram captions
 and YouTube Shorts descriptions can't make a link clickable (Shorts stopped
 in Aug 2023), so they end with "ลิงก์ในโปรไฟล์" or "Link in bio." TikTok
-gets no URL at all. YouTube also prints its tracked URL under the caption,
+and Instagram get no URL at all, in the text or in the queue's `link`.
+YouTube also prints its tracked URL under the caption,
 as the old YouTube.txt did. Facebook links do click, so Facebook ends with
 the link instead.
 
@@ -59,6 +60,14 @@ Every post link has the form
 The profile links in each file's SETUP block keep the `utm_campaign` they
 were set up with (`bio`, `page`, `channel`, `greeting`). They are not posts,
 and changing them would split their analytics history.
+
+**TikTok and Instagram are measured per channel only.** Their posts carry
+no link anyone can click, and each bio holds one fixed URL
+(`utm_campaign=bio`). Every visit from either app therefore arrives as
+"came from the bio", and it can't be traced to the reel that sent it. That
+changes only if the owner later sets up a link-in-bio page with one link
+per post. Until then, judge reels on these two apps by views and profile
+taps in each app's own analytics.
 
 ## The queue
 
@@ -93,7 +102,7 @@ is its own post with a single provider.
 | `mediaPath` | `info.media: [<public URL>]`. See below. |
 | `networkData` | merged into `info` as is (`tiktokData`, `instagramData`, `youtubeData`, `facebookData`) |
 | `youtubeTitle` | already in `networkData.youtubeData.title` |
-| `link` | already inside `text` where `linkInText` is true (Facebook, YouTube). For Instagram it is the post's own link, for a link-in-bio page or the bio. TikTok has none. |
+| `link` | already inside `text` where `linkInText` is true (Facebook, YouTube). `null` on TikTok and Instagram, which can't click a caption link. |
 | `id`, `day`, `dayOffset`, `utmContent` | not sent. Used to match scheduled posts and analytics back to a slot. |
 | (from Metricool) | `blogId`, from `getBrandSettings` once accounts are linked |
 

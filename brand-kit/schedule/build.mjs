@@ -174,10 +174,14 @@ for (const s of SLOTS) {
       localTime: NETWORKS[network].time,
       mediaPath: s.media,
       text: postText(s, network),
-      // TikTok has nowhere to put a link, so it gets none. Instagram's link
-      // is not in the caption (it wouldn't click) but is kept for the bio
-      // or a link-in-bio page, so its visits still carry utm_source=instagram.
-      link: network === 'tiktok' ? null : link(network, s.slot, s.landing),
+      // Only where the URL is actually printed in the post. TikTok and
+      // Instagram captions can't hold a clickable link and their bios hold
+      // one fixed URL (utm_campaign=bio in the SETUP block), so a per-slot
+      // link here would be a number nobody can ever click. Their visits are
+      // attributed per channel, through the bio, until a link-in-bio page
+      // exists. An earlier version of this queue kept a per-slot Instagram
+      // link, and review flagged it as data that looked real but went nowhere.
+      link: linkInText ? link(network, s.slot, s.landing) : null,
       linkInText,
       youtubeTitle: network === 'youtube' ? s.youtubeTitle : null,
       utmContent: s.slot,
@@ -214,7 +218,10 @@ const queue = {
 
 for (const e of [...posts, ...manual]) {
   if (e.localTime < WINDOW[0] || e.localTime > WINDOW[1]) fail(`${e.id}: ${e.localTime} is outside ${WINDOW.join('-')} Bangkok`);
-  if (e.network === 'tiktok' && /https?:\/\/|learnwithlexis\.com/i.test(e.text)) fail(`${e.id}: TikTok text contains a link`);
+  // A URL where it can't be clicked is dead text that looks like a promise,
+  // so none may slip into a TikTok or Instagram post, as text or as `link`.
+  const noLinkHere = NETWORKS[e.network] && !NETWORKS[e.network].linkInText;
+  if (noLinkHere && (e.link || /https?:\/\/|learnwithlexis\.com/i.test(e.text))) fail(`${e.id}: ${e.network} post carries a link it can't use`);
   if (e.link) {
     const u = new URL(e.link);
     for (const k of UTM_KEYS) if (!u.searchParams.get(k)) fail(`${e.id}: link is missing ${k}`);
