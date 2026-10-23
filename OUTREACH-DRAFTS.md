@@ -2,7 +2,7 @@
 
 **Status: NOTHING HERE HAS BEEN SENT OR PUBLISHED.** Every item below is a
 draft awaiting your review. Nothing was posted to a social account, emailed
-to a real person, or submitted to a directory.
+to anyone, or submitted to a directory.
 
 Written 23 Aug 2026. 52 pieces, numbered 1–52. #31 has since been removed
 (its entry says why), so 51 remain.
@@ -107,14 +107,14 @@ day. None is a personal inbox found through a data broker. Each link carries
 | Mercy Centre (Klong Toey) | info@mercycentre.org | Community partner (template 34) | mercycentre |
 | Thai Child Development Foundation | tcdfoffice@gmail.com | Community partner (template 34) | tcdf |
 | Education for Development Foundation | info@edfthai.org | Community partner (template 34) | edf |
-| Chulalongkorn University Language Institute | culi.iadept@gmail.com | University (template 33) | culi |
+| Chulalongkorn University (CULI), on hold: see #33 | culi.iadept@gmail.com | University (template 33) | culi |
 
 **27 Sep 2026: four of the nine were deleted** on the owner's call. They were
 the four built from template 31, addressed to businesses that sell speaking
 practice themselves, so pitching them asked a competitor to send us its
 students. Their rows were taken out of this table on 21 Oct 2026; git history
 still has them. Five drafts remain: the four Community charities and
-Chulalongkorn's language institute. The partner outreach guide carries the
+Chulalongkorn's CULI, which is on hold (#33). The partner outreach guide carries the
 same rule, and companies (HR / training) were added in their place.
 
 **Those five still hold the 25 Sep wording** (see the owner action at the top
@@ -334,8 +334,8 @@ about what would actually be useful to you.
 
 > **On hold, do not send.** A university language department or institute
 > teaches languages, and Chulalongkorn's institute also sells courses to the
-> public, so this may fall under the scope rule in `CLAUDE.md` (no pitching
-> language schools). It was kept on the owner's call on 27 Sep, before that
+> public, so this may fall under the competitor rule in `CLAUDE.md` (scope
+> section). It was kept on the owner's call on 27 Sep, before that
 > rule was written down. It stays on hold until the owner confirms either way.
 
 Subject: Speaking practice tool — worth a look for [Department]?
