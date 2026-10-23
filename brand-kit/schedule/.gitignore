@@ -1,0 +1,3 @@
+# pack.mjs's default output: ~80 MB of renamed copies of videos already in
+# the repo. It is rebuilt from posts.mjs on demand, so it is never committed.
+pack/

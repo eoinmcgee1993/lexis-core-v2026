@@ -239,9 +239,11 @@ function dailyPosts() {
     'Post between 7pm and 9pm Thailand time.',
     'Same video on TikTok, then Instagram Reels, then YouTube Shorts, then Facebook, unless the day says "Only on".',
     'Copy the caption under each day exactly. TikTok, Instagram and YouTube Shorts can\'t click links in a caption, so there end the caption with: ลิงก์ในโปรไฟล์ (Link in bio. on English days). On YouTube and Facebook, also paste that app\'s Link line under the caption; on Facebook it replaces the ลิงก์ในโปรไฟล์ ending.',
-    'The exact text for each app, ending included, is in platforms/<app>.txt.',
+    // Files are named, not given a folder: in the repo they sit in
+    // platforms/, in the phone pack all of them sit together in 4-captions/.
+    'The exact text for each app, ending included, is in that app\'s own file: TikTok.txt, Instagram.txt, YouTube.txt, Facebook.txt.',
     'Pin Day 1 to the top of the TikTok, Instagram and Facebook profiles (YouTube Shorts and LINE can\'t pin a post).',
-    'LINE gets one broadcast a week, not a daily post: see platforms/LINE.txt.',
+    'LINE gets one broadcast a week, not a daily post: see LINE.txt.',
   ].join('\n');
   const days = SLOTS.map((s) => {
     const lines = [`=== DAY ${s.day} === video: ${s.phone}`];
@@ -255,7 +257,7 @@ function dailyPosts() {
   const after = [
     `=== AFTER DAY ${lastDay} ===`,
     'Start again from Day 1, or tell Claude which video got the most views and get more like it.',
-    'Posts for any day (Community swipe posts, Instagram stories, expat Facebook groups) are at the end of platforms/Instagram.txt and platforms/Facebook.txt.',
+    'Posts for any day (Community swipe posts, Instagram stories, expat Facebook groups) are at the end of Instagram.txt and Facebook.txt.',
   ].join('\n');
   return [out, ...days, after, GENERATED].join('\n\n') + '\n';
 }

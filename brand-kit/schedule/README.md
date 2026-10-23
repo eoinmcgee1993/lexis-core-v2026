@@ -99,7 +99,7 @@ is its own post with a single provider.
 | `publicationDate` (dated copy) | `info.publicationDate` |
 | `network` | `info.providers: [{ "network": <network> }]` |
 | `text` | `info.text` |
-| `mediaPath` | `info.media: [<public URL>]`. See below. |
+| `mediaPath` | `info.media: [<URL of that file>]`. See "How media gets attached" below. |
 | `networkData` | merged into `info` as is (`tiktokData`, `instagramData`, `youtubeData`, `facebookData`) |
 | `youtubeTitle` | already in `networkData.youtubeData.title` |
 | `link` | already inside `text` where `linkInText` is true (Facebook, YouTube). `null` on TikTok and Instagram, which can't click a caption link. |
@@ -108,9 +108,6 @@ is its own post with a single provider.
 
 Things that will bite:
 
-- **Media must be a public URL.** `mediaPath` is a repo path. Metricool
-  accepts public URLs, or Dropbox and Google Drive links, which it uploads
-  itself. Upload the file first and pass that URL.
 - **No idempotency key.** `createScheduledPost` creates a new post on every
   call, so a retried call can double-post. Before each run, list what is
   already scheduled with `getScheduledPosts`, skip any entry whose day,
@@ -124,6 +121,60 @@ Things that will bite:
 - **LINE is not a Metricool network.** Its broadcasts are in `manual`, not
   `posts`, and are sent from LINE Official Account Manager, which has its own
   scheduler. They are in the file so a dated copy gives their dates too.
+
+### How media gets attached
+
+The `createScheduledPost` tool has **no `saveExternalMediaFiles` field, and
+no other flag for externally hosted media**. Checked against its tool
+definition on 23 Oct 2026. Its `info` fields are `autoPublish`,
+`descendants`, `draft`, `firstCommentText`, `hasNotReadNotes`, `media`,
+`videoThumbnailUrl`, `videoCoverMilliseconds`, `mediaAltText`, `providers`,
+`publicationDate`, `shortener`, `smartLinkData`, `text` and the per-network
+`…Data` objects. So the queue carries no such field, and none should be
+invented in a call. The tool would reject an unknown key or ignore it, and
+either way it would look as if the media were safely stored when nothing
+says it is.
+
+What the definition does say about `media`: it "accepts public URLs to
+image or video files", and "external sources like Google Drive or Dropbox
+are uploaded to Metricool automatically". For Google Drive, Drive must be
+linked in the Metricool account first. So, per post:
+
+1. Put the file at `mediaPath` in the owner's Dropbox, or in a Google Drive
+   linked to Metricool, and take its share link. Metricool copies files from
+   those two sources itself, so the post doesn't depend on the link staying
+   up.
+2. Pass that link as `info.media: ["<link>"]`.
+3. Any other public URL is outside what the definition promises to copy.
+   Keep such a file reachable until its post has gone out.
+
+`mediaPath` itself is a repo path, and Metricool can't read the repo.
+
+## The phone pack
+
+`DAILY-POSTS.txt` names videos as `2-videos/dayNN-<file>.mp4`. Those names
+exist only in the pack the owner unzips on the phone, not in the repo. Build
+the pack with:
+
+```bash
+node brand-kit/schedule/pack.mjs                 # -> brand-kit/schedule/pack/ (gitignored)
+node brand-kit/schedule/pack.mjs --out=<folder>  # or anywhere else
+```
+
+It makes the four folders `LAUNCH-GUIDE.html` step 1 describes:
+- `1-profile`: the profile photo and cover banners
+- `2-videos`: every scheduled video, under its `dayNN-` name
+- `3-images`: launch posters and the Community swipe pictures
+- `4-captions`: `DAILY-POSTS.txt` and the five app files
+
+Zip that folder and send it.
+
+Before writing, it refuses stale captions (it runs `build.mjs --check`)
+and any missing source file. Afterwards, it checks that every `video:` path
+in the packed `DAILY-POSTS.txt`, and every video an app file names, is in
+the pack. It rebuilds its output folder from nothing on every run, but only
+deletes a folder it made itself (one holding its `.lexis-pack` marker). The
+renamed videos are about 80 MB, so the pack is never committed.
 
 ## Nothing is scheduled yet
 
