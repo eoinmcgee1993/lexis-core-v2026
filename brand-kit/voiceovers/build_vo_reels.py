@@ -234,7 +234,68 @@ REELS = {
               (12.5, 16.1, "กระเป๋าไม่มา\\N\"My bag didn't arrive.\""),
               (16.2, 19.3, "หาแท็กซี่\\N\"Where can I get a taxi?\""),
               (19.4, 22.9, "ซ้อมพูดกับ LEXIS\\Nก่อนออกเดินทาง")],
-        end_at=23.0, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร")
+        end_at=23.0, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    # 20 Oct 2026, TH batch 3: everyday moments at home where a Thai viewer
+    # suddenly needs English (BATCH-TH-3.md has the scripts and captions).
+    # The narrator says both sides of each exchange, as in th-airport; there
+    # is no second "foreigner" voice, which would read as a staged dialogue
+    # and invite the question of who is speaking. "เซเว่น" and "แกร็บ" are
+    # named because that is how the moment is said in Thai; a generic
+    # "convenience store" would not be the moment. Each Thai caption line
+    # is kept short and split at a space or \N: libass only wraps at
+    # spaces, so an unbroken Thai line runs off the frame instead of
+    # wrapping. Cue times are silencedetect on the takes checked in here.
+    'th-7eleven': dict(
+        photo='lexis-03-portrait-cream-listening.jpg', mode='band', fy=0.43,
+        audio='vo-th-7eleven.mp3', dur=17.0, k=1.3,
+        head="ภาษาอังกฤษ\\Nในเซเว่น",
+        cues=[(0.0, 3.7, "ยืนอยู่ในเซเว่น…\\Nแล้วนักท่องเที่ยวหันมาถามว่า"),
+              (3.8, 5.3, "\"Where's the sunscreen?\""),
+              (5.4, 7.3, "ชี้ได้… แต่พูดไม่ออก?"),
+              (7.4, 10.8, "ตอบแค่นี้ก็พอ\\N\"It's just over there, by the door.\""),
+              (10.9, 13.9, "ซ้อมพูดออกเสียงกับ LEXIS\\Nก่อนเจอของจริง")],
+        end_at=14.0, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    'th-grab': dict(
+        photo='lexis-12-portrait-black-speaking-alt.jpg', mode='band', fy=0.46,
+        audio='vo-th-grab.mp3', dur=20.4, k=1.3,
+        head="ผู้โดยสารต่างชาติ\\Nขึ้นรถคุณ",
+        cues=[(0.0, 4.3, "ขับแกร็บอยู่…\\Nผู้โดยสารคนต่อไปเป็นชาวต่างชาติ"),
+              (4.4, 5.7, "ทักยังไงดี?"),
+              (5.8, 8.8, "\"Hi! Going to Silom, right?\""),
+              (8.9, 13.6, "ถึงที่หมายแล้ว ก็แค่บอกว่า\\N\"Here we are. Have a nice day!\""),
+              (13.7, 17.2, "ซ้อมพูดออกเสียงกับ LEXIS\\Nก่อนรับงานถัดไป")],
+        end_at=17.3, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    'th-coffee': dict(
+        photo='lexis-02-portrait-black-speaking.jpg', mode='band', fy=0.43,
+        audio='vo-th-coffee.mp3', dur=16.4, k=1.3,
+        head="รับออร์เดอร์กาแฟ\\Nเป็นภาษาอังกฤษ",
+        cues=[(0.0, 3.3, "ลูกค้าต่างชาติเดินเข้าร้านกาแฟ\\Nแล้วสั่งว่า…"),
+              (3.4, 6.0, "\"Can I get an iced latte,\\Nless sweet?\""),
+              (6.1, 8.5, "ฟังออก… แต่ถามกลับไม่ถูก?"),
+              (8.6, 10.8, "\"Sure! For here or to go?\""),
+              (10.9, 13.5, "ซ้อมพูดออกเสียงกับ LEXIS\\Nก่อนเปิดร้าน")],
+        end_at=13.6, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    'th-directions': dict(
+        photo='lexis-11-portrait-teal-overshoulder.jpg', mode='band', fy=0.43,
+        audio='vo-th-directions.mp3', dur=19.2, k=1.3,
+        head="บอกทาง\\Nเป็นภาษาอังกฤษ",
+        cues=[(0.0, 3.2, "นักท่องเที่ยวหลงทาง\\Nเดินมาถามคุณว่า…"),
+              (3.3, 6.4, "\"Excuse me,\\Nhow do I get to the BTS?\""),
+              (6.5, 9.1, "รู้ทาง… แต่อธิบายไม่ถูก?"),
+              (9.2, 12.3, "\"Go straight, then turn left\\Nat the corner.\""),
+              (12.4, 16.1, "ซ้อมพูดออกเสียงกับ LEXIS\\Nก่อนเจอคำถามต่อไป")],
+        end_at=16.2, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    'th-colleague': dict(
+        photo='lexis-13-portrait-black-smile-alt.jpg', mode='band', fy=0.46,
+        audio='vo-th-colleague.mp3', dur=20.3, k=1.3,
+        head="คุยเล่นกับ\\Nเพื่อนร่วมงานต่างชาติ",
+        cues=[(0.0, 3.5, "เจอเพื่อนร่วมงานต่างชาติ\\Nหน้าลิฟต์ เขาถามว่า…"),
+              (3.6, 5.3, "\"How was your weekend?\""),
+              (5.4, 8.5, "ตอบแค่ \"Good\"…\\Nแล้วก็เงียบ"),
+              (8.6, 10.5, "ลองต่ออีกนิด…"),
+              (10.6, 13.5, "\"Good! I went to the beach.\\NHow about you?\""),
+              (13.6, 17.1, "ซ้อมคุยเล่นออกเสียงกับ LEXIS\\Nก่อนเจอกันวันจันทร์")],
+        end_at=17.2, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
 }
 
 def ts(s):
@@ -285,7 +346,7 @@ Dialogue: 0,{ts(0)},{ts(dur)},Url,,0,0,0,,learnwithlexis.com
         base = "scale=2160:-2,pad=2160:3840:0:900:color=0x050B14"
     vf = (f"{base},"
           f"zoompan=z='1+0.06*on/{frames}':x='iw/2-(iw/zoom/2)':y='ih*{r['fy']}-(ih/zoom/2)':d={frames}:s=1080x1920:fps=30,"
-          f"subtitles={ass_path}:fontsdir={FONTS}")
+          f"ass={ass_path}:fontsdir={FONTS}:shaping=complex")
     out = os.path.join(HERE, f'lexis-vo-reel-{lang}.mp4')
     subprocess.run([F, '-y', '-v', 'error', '-loop', '1', '-i', os.path.join(PHOTOS, r['photo']), '-i', os.path.join(HERE, r['audio']),
                     '-vf', vf, '-t', str(dur), '-c:v', 'libx264', '-preset', 'slow', '-crf', '21',
