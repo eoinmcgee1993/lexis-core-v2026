@@ -234,18 +234,148 @@ REELS = {
               (12.5, 16.1, "กระเป๋าไม่มา\\N\"My bag didn't arrive.\""),
               (16.2, 19.3, "หาแท็กซี่\\N\"Where can I get a taxi?\""),
               (19.4, 22.9, "ซ้อมพูดกับ LEXIS\\Nก่อนออกเดินทาง")],
-        end_at=23.0, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร")
+        end_at=23.0, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    # 20 Oct 2026, TH batch 3: everyday moments at home where a Thai viewer
+    # suddenly needs English (BATCH-TH-3.md has the scripts and captions).
+    # The narrator says both sides of each exchange, as in th-airport; there
+    # is no second "foreigner" voice, which would read as a staged dialogue
+    # and invite the question of who is speaking. "เซเว่น" and "แกร็บ" are
+    # named because that is how the moment is said in Thai; a generic
+    # "convenience store" would not be the moment. Each Thai caption line
+    # is kept short and split at a space or \N: libass only wraps at
+    # spaces, so an unbroken Thai line runs off the frame instead of
+    # wrapping. Cue times are silencedetect on the takes checked in here.
+    'th-7eleven': dict(
+        photo='lexis-03-portrait-cream-listening.jpg', mode='band', fy=0.43,
+        audio='vo-th-7eleven.mp3', dur=17.0, k=1.3,
+        head="ภาษาอังกฤษ\\Nในเซเว่น",
+        cues=[(0.0, 3.7, "ยืนอยู่ในเซเว่น…\\Nแล้วนักท่องเที่ยวหันมาถามว่า"),
+              (3.8, 5.3, "\"Where's the sunscreen?\""),
+              (5.4, 7.3, "ชี้ได้… แต่พูดไม่ออก?"),
+              (7.4, 10.8, "ตอบแค่นี้ก็พอ\\N\"It's just over there, by the door.\""),
+              (10.9, 13.9, "ซ้อมพูดออกเสียงกับ LEXIS\\Nก่อนเจอของจริง")],
+        end_at=14.0, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    'th-grab': dict(
+        photo='lexis-12-portrait-black-speaking-alt.jpg', mode='band', fy=0.46,
+        audio='vo-th-grab.mp3', dur=20.4, k=1.3,
+        head="ผู้โดยสารต่างชาติ\\Nขึ้นรถคุณ",
+        cues=[(0.0, 4.3, "ขับแกร็บอยู่…\\Nผู้โดยสารคนต่อไปเป็นชาวต่างชาติ"),
+              (4.4, 5.7, "ทักยังไงดี?"),
+              (5.8, 8.8, "\"Hi! Going to Silom, right?\""),
+              (8.9, 13.6, "ถึงที่หมายแล้ว ก็แค่บอกว่า\\N\"Here we are. Have a nice day!\""),
+              (13.7, 17.2, "ซ้อมพูดออกเสียงกับ LEXIS\\Nก่อนรับงานถัดไป")],
+        end_at=17.3, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    'th-coffee': dict(
+        photo='lexis-02-portrait-black-speaking.jpg', mode='band', fy=0.43,
+        audio='vo-th-coffee.mp3', dur=16.4, k=1.3,
+        head="รับออร์เดอร์กาแฟ\\Nเป็นภาษาอังกฤษ",
+        cues=[(0.0, 3.3, "ลูกค้าต่างชาติเดินเข้าร้านกาแฟ\\Nแล้วสั่งว่า…"),
+              (3.4, 6.0, "\"Can I get an iced latte,\\Nless sweet?\""),
+              (6.1, 8.5, "ฟังออก… แต่ถามกลับไม่ถูก?"),
+              (8.6, 10.8, "\"Sure! For here or to go?\""),
+              (10.9, 13.5, "ซ้อมพูดออกเสียงกับ LEXIS\\Nก่อนเปิดร้าน")],
+        end_at=13.6, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    'th-directions': dict(
+        photo='lexis-11-portrait-teal-overshoulder.jpg', mode='band', fy=0.43,
+        audio='vo-th-directions.mp3', dur=19.2, k=1.3,
+        head="บอกทาง\\Nเป็นภาษาอังกฤษ",
+        cues=[(0.0, 3.2, "นักท่องเที่ยวหลงทาง\\Nเดินมาถามคุณว่า…"),
+              (3.3, 6.4, "\"Excuse me,\\Nhow do I get to the BTS?\""),
+              (6.5, 9.1, "รู้ทาง… แต่อธิบายไม่ถูก?"),
+              (9.2, 12.3, "\"Go straight, then turn left\\Nat the corner.\""),
+              (12.4, 16.1, "ซ้อมพูดออกเสียงกับ LEXIS\\Nก่อนเจอคำถามต่อไป")],
+        end_at=16.2, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
+    'th-colleague': dict(
+        photo='lexis-13-portrait-black-smile-alt.jpg', mode='band', fy=0.46,
+        audio='vo-th-colleague.mp3', dur=20.3, k=1.3,
+        head="คุยเล่นกับ\\Nเพื่อนร่วมงานต่างชาติ",
+        cues=[(0.0, 3.5, "เจอเพื่อนร่วมงานต่างชาติ\\Nหน้าลิฟต์ เขาถามว่า…"),
+              (3.6, 5.3, "\"How was your weekend?\""),
+              (5.4, 8.5, "ตอบแค่ \"Good\"…\\Nแล้วก็เงียบ"),
+              (8.6, 10.5, "ลองต่ออีกนิด…"),
+              (10.6, 13.5, "\"Good! I went to the beach.\\NHow about you?\""),
+              (13.6, 17.1, "ซ้อมคุยเล่นออกเสียงกับ LEXIS\\Nก่อนเจอกันวันจันทร์")],
+        end_at=17.2, end="ทดลองฟรี 15 นาที\\Nไม่ต้องผูกบัตร"),
 }
 
 def ts(s):
     return f"0:{int(s // 60):02d}:{s % 60:05.2f}"
 
+# Output sizes. '9x16' is the TikTok / Reels / Shorts layout every reel in
+# this folder was rendered with; its numbers are the original ones, so
+# adding sizes changed nothing in the default render (checked: the ffmpeg
+# args and ASS for every reel came out identical with and without it).
+#
+# '4x5' (23 Oct 2026) is for the Facebook and Instagram feed, which gives a
+# 4:5 video the most room on screen and masks a 9:16 one to roughly its
+# middle, hiding the headline above and the captions below. It reflows
+# instead of cropping blind: the reel is drawn on the same 1080x1920 canvas,
+# with the same photo, zoom, headline and URL, and the 4:5 is the window of
+# rows `shift` to `shift + h` cut from the finished frame. So the headline,
+# URL and photo keep their exact spacing and sit `shift` px higher, and the
+# bottom of the photo (shoulders, chest) is what goes. Only the captions and
+# end card move, and their margins are in canvas px: cap_v 530 lands 60px
+# above the 4:5's bottom edge, and end_v 140 puts the end card's text 40px
+# below its top (the card's navy box reaches the edge, unseen on the band).
+# Headline and caption sizes are unchanged: both cuts are 1080 wide and fill
+# the phone's width, so the same px is the same size in hand. The end card
+# is drawn at 90% (end_k) so a Thai card's box ends above the photo; at full
+# size it would run past the band's edge at 350px.
+#  - Captions sit 60px off the bottom (440 on the 9:16, for TikTok's UI).
+#    Feed video carries only small corner icons (sound, tags), and centred
+#    captions never reach a corner.
+#  - The end card moves to the top band, replacing the headline and URL
+#    (end_align 8 = top). First render kept it at the bottom like the 9:16:
+#    even at 85% size, two lines plus the URL covered the face from the nose
+#    or mouth down on three of the four test reels and met the chin on the
+#    fourth, because 1350px leaves no chest below the face for it to sit on.
+#    In the band it sits on navy and the face stays clear.
+#  - trim: px of empty headroom cut off the top of a band-mode photo. Only
+#    lexis-05 needs it: its face sits low enough that a two-line caption
+#    covered the chin. The others' hair already starts near the band edge.
+#    lexis-10 (close crop, EN reels only) puts its chin behind a two-line
+#    caption on the 9:16 too, and has no headroom to give.
+SIZES = {
+    '9x16': dict(h=1920, shift=0, cap_v=440, end_v=400, end_k=1.0, end_align=2,
+                 trim={}),
+    '4x5': dict(h=1350, shift=100, cap_v=530, end_v=140, end_k=0.9, end_align=8,
+                trim={'lexis-05-vertical-black-headroom.jpg': 120},
+                out=os.path.join(ROOT, 'brand-kit', 'ads', 'video'), suffix='-4x5'),
+}
+
+# Usage: build_vo_reels.py [key ...] [--size=4x5]   (no keys = every reel).
+# A key that doesn't exist used to be skipped silently, which also meant a
+# mistyped flag rendered nothing and said nothing; both are errors now.
 import sys
-ONLY = sys.argv[1:]
+ONLY, SIZE = [], '9x16'
+argv = sys.argv[1:]
+while argv:
+    a = argv.pop(0)
+    if a == '--size':
+        SIZE = argv.pop(0) if argv else ''
+    elif a.startswith('--size='):
+        SIZE = a.split('=', 1)[1]
+    elif a.startswith('-'):
+        sys.exit(f'unknown option {a}; the only option is --size=' + '|'.join(SIZES))
+    else:
+        ONLY.append(a)
+if SIZE not in SIZES:
+    sys.exit('--size must be one of: ' + ', '.join(SIZES))
+if [k for k in ONLY if k not in REELS]:
+    sys.exit('no such reel: ' + ', '.join(k for k in ONLY if k not in REELS))
+L = SIZES[SIZE]
+H, SHIFT = L['h'], L['shift']
 for lang, r in REELS.items():
     if ONLY and lang not in ONLY:
         continue
     k, dur = r['k'], r['dur']
+    # With the end card in the top band (4:5) the headline and URL fade out
+    # over the 250ms before end_at and the card fades in over the 250ms
+    # after it: a half-second dip to navy, so the two never overlap in place.
+    top_end = L['end_align'] == 8
+    head_out = r['end_at'] if top_end else dur
+    head_fx = '{\\fad(300,250)}' if top_end else '{\\fad(300,0)}'
+    url_fx = '{\\fad(0,250)}' if top_end else ''
     ass = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -256,19 +386,19 @@ WrapStyle: 0
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Head,IBM Plex Sans Thai SemiBold,{70*k:.0f},&H00FFFFFF,&H00FFFFFF,&H00140B05,&H00140B05,0,0,0,0,100,100,0,0,1,0,0,8,60,60,150,1
 Style: Url,IBM Plex Sans Thai SemiBold,40,&H003AB2FF,&H003AB2FF,&H00140B05,&H00140B05,0,0,0,0,100,100,1,0,1,0,0,8,60,60,{360 if k == 1.0 else 400},1
-Style: Cap,IBM Plex Sans Thai SemiBold,{52*k:.0f},&H00FFFFFF,&H00FFFFFF,&H00140B05,&HB0140B05,0,0,0,0,100,100,0,0,3,14,0,2,70,70,440,1
-Style: End,IBM Plex Sans Thai SemiBold,{80*k:.0f},&H00FFFFFF,&H00FFFFFF,&H00140B05,&HE0140B05,0,0,0,0,100,100,0,0,3,40,0,2,60,60,400,1
+Style: Cap,IBM Plex Sans Thai SemiBold,{52*k:.0f},&H00FFFFFF,&H00FFFFFF,&H00140B05,&HB0140B05,0,0,0,0,100,100,0,0,3,14,0,2,70,70,{L['cap_v']},1
+Style: End,IBM Plex Sans Thai SemiBold,{80*k*L['end_k']:.0f},&H00FFFFFF,&H00FFFFFF,&H00140B05,&HE0140B05,0,0,0,0,100,100,0,0,3,40,0,{L['end_align']},60,60,{L['end_v']},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 0,{ts(0)},{ts(dur)},Head,,0,0,0,,{{\\fad(300,0)}}{r['head']}
-Dialogue: 0,{ts(0)},{ts(dur)},Url,,0,0,0,,learnwithlexis.com
+Dialogue: 0,{ts(0)},{ts(head_out)},Head,,0,0,0,,{head_fx}{r['head']}
+Dialogue: 0,{ts(0)},{ts(head_out)},Url,,0,0,0,,{url_fx}learnwithlexis.com
 """
     for a, b, t in r['cues']:
         ass += f"Dialogue: 0,{ts(a)},{ts(b)},Cap,,0,0,0,,{t}\n"
     # amber (#FFB23A) URL on the end card, matching the brand tile
     ass += (f"Dialogue: 1,{ts(r['end_at'])},{ts(dur)},End,,0,0,0,,{{\\fad(250,0)}}{r['end']}"
-            f"\\N{{\\fs{46*k:.0f}\\c&H3AB2FF&}}{r.get('end_url', 'learnwithlexis.com')}\n")
+            f"\\N{{\\fs{46*k*L['end_k']:.0f}\\c&H3AB2FF&}}{r.get('end_url', 'learnwithlexis.com')}\n")
     ass_path = os.path.join(FONTS, f'{lang}.ass')
     open(ass_path, 'w', encoding='utf8').write(ass)
     frames = int(dur * 30)
@@ -279,14 +409,36 @@ Dialogue: 0,{ts(0)},{ts(dur)},Url,,0,0,0,,learnwithlexis.com
     # portraits, which put hair right under the URL and, on the cream
     # backdrop, left amber-on-cream unreadable. It starts the photo at
     # y=450 so the headline and URL always sit on plain navy.
+    trim = 2 * L['trim'].get(r['photo'], 0)
     if r['mode'] == 'fill':
         base = "scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840"
-    else:
+    elif not trim:
         base = "scale=2160:-2,pad=2160:3840:0:900:color=0x050B14"
+    else:
+        base = f"scale=2160:-2,crop=2160:ih-{trim}:0:{trim},pad=2160:3840:0:900:color=0x050B14"
+    # `ass=...:shaping=complex`, not `subtitles=...`: the subtitles filter has
+    # no shaping option and lays text out with libass's simple shaper, which
+    # ignores the font's mark-stacking rules. A Thai tone mark over an upper
+    # vowel then vanished or was drawn on top of the vowel: every Thai reel
+    # rendered before 22 Oct 2026 burned in เที่ยว as เทียว (th-travel's
+    # headline) and ที่ as ที, with นี้/มั่น/ทั้ง overstruck. Complex shaping
+    # runs HarfBuzz, which stacks the mark above the vowel.
     vf = (f"{base},"
           f"zoompan=z='1+0.06*on/{frames}':x='iw/2-(iw/zoom/2)':y='ih*{r['fy']}-(ih/zoom/2)':d={frames}:s=1080x1920:fps=30,"
-          f"subtitles={ass_path}:fontsdir={FONTS}")
+          f"ass={ass_path}:fontsdir={FONTS}:shaping=complex")
     out = os.path.join(HERE, f'lexis-vo-reel-{lang}.mp4')
+    # The 4:5 window is cut after the captions are drawn (see SIZES), so the
+    # push-in (anchor and rate) is the 9:16's; th-intro's photo is trimmed
+    # first but zooms the same way. That matters: zoompan clamps its
+    # window inside the frame, so with every reel's fy under ~0.47 the
+    # push-in is really anchored at the top edge, which is what keeps band
+    # mode's photo from creeping up under the URL as it grows. Zooming a
+    # 1350-tall frame with the face's height re-expressed for it (~0.55)
+    # flips that to a bottom anchor and lifts the photo ~60px into the URL.
+    if SIZE != '9x16':
+        vf += f",crop=1080:{H}:0:{SHIFT}"
+        os.makedirs(L['out'], exist_ok=True)
+        out = os.path.join(L['out'], f"lexis-vo-reel-{lang}{L['suffix']}.mp4")
     subprocess.run([F, '-y', '-v', 'error', '-loop', '1', '-i', os.path.join(PHOTOS, r['photo']), '-i', os.path.join(HERE, r['audio']),
                     '-vf', vf, '-t', str(dur), '-c:v', 'libx264', '-preset', 'slow', '-crf', '21',
                     '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-ar', '44100',

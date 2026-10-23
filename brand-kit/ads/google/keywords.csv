@@ -1,0 +1,125 @@
+Campaign,Ad Group,Keyword,Criterion Type,Status
+lexis-th-speak-english,th-general,ฝึกพูดภาษาอังกฤษ,Phrase,Enabled
+lexis-th-speak-english,th-general,ฝึกพูดภาษาอังกฤษ,Exact,Enabled
+lexis-th-speak-english,th-general,ฝึกพูดอังกฤษ,Phrase,Enabled
+lexis-th-speak-english,th-general,ฝึกพูดอังกฤษ,Exact,Enabled
+lexis-th-speak-english,th-general,ฝึกพูดภาษาอังกฤษออนไลน์,Phrase,Enabled
+lexis-th-speak-english,th-general,ฝึกพูดภาษาอังกฤษออนไลน์,Exact,Enabled
+lexis-th-speak-english,th-general,ฝึกพูดภาษาอังกฤษกับ ai,Phrase,Enabled
+lexis-th-speak-english,th-general,ฝึกพูดภาษาอังกฤษกับ ai,Exact,Enabled
+lexis-th-speak-english,th-general,ฝึกสนทนาภาษาอังกฤษ,Phrase,Enabled
+lexis-th-speak-english,th-general,ฝึกสนทนาภาษาอังกฤษ,Exact,Enabled
+lexis-th-speak-english,th-general,ฝึกพูดภาษาอังกฤษด้วยตัวเอง,Phrase,Enabled
+lexis-th-speak-english,th-general,ฝึกพูดภาษาอังกฤษด้วยตัวเอง,Exact,Enabled
+lexis-th-speak-english,th-general,แอพฝึกพูดภาษาอังกฤษ,Phrase,Enabled
+lexis-th-speak-english,th-general,แอพฝึกพูดภาษาอังกฤษ,Exact,Enabled
+lexis-th-speak-english,th-general,แอปฝึกพูดภาษาอังกฤษ,Phrase,Enabled
+lexis-th-speak-english,th-general,แอปฝึกพูดภาษาอังกฤษ,Exact,Enabled
+lexis-th-speak-english,th-general,คุยภาษาอังกฤษกับ ai,Phrase,Enabled
+lexis-th-speak-english,th-general,คุยภาษาอังกฤษกับ ai,Exact,Enabled
+lexis-th-speak-english,th-general,english speaking practice,Phrase,Enabled
+lexis-th-speak-english,th-general,english speaking practice,Exact,Enabled
+lexis-th-speak-english,th-general,practice english speaking,Phrase,Enabled
+lexis-th-speak-english,th-general,practice english speaking,Exact,Enabled
+lexis-th-speak-english,th-general,english conversation practice,Phrase,Enabled
+lexis-th-speak-english,th-general,english conversation practice,Exact,Enabled
+lexis-th-speak-english,th-general,speak english with ai,Phrase,Enabled
+lexis-th-speak-english,th-general,speak english with ai,Exact,Enabled
+lexis-th-speak-english,th-general,ai english speaking practice,Phrase,Enabled
+lexis-th-speak-english,th-general,ai english speaking practice,Exact,Enabled
+lexis-th-speak-english,th-everyday,ภาษาอังกฤษในชีวิตประจำวัน,Phrase,Enabled
+lexis-th-speak-english,th-everyday,ภาษาอังกฤษในชีวิตประจำวัน,Exact,Enabled
+lexis-th-speak-english,th-everyday,ฝึกพูดภาษาอังกฤษในชีวิตประจำวัน,Phrase,Enabled
+lexis-th-speak-english,th-everyday,ฝึกพูดภาษาอังกฤษในชีวิตประจำวัน,Exact,Enabled
+lexis-th-speak-english,th-everyday,บทสนทนาภาษาอังกฤษในชีวิตประจำวัน,Phrase,Enabled
+lexis-th-speak-english,th-everyday,บทสนทนาภาษาอังกฤษในชีวิตประจำวัน,Exact,Enabled
+lexis-th-speak-english,th-everyday,daily english conversation,Phrase,Enabled
+lexis-th-speak-english,th-everyday,daily english conversation,Exact,Enabled
+lexis-th-speak-english,th-everyday,everyday english speaking,Phrase,Enabled
+lexis-th-speak-english,th-everyday,everyday english speaking,Exact,Enabled
+lexis-th-speak-english,th-interview,สัมภาษณ์งานภาษาอังกฤษ,Phrase,Enabled
+lexis-th-speak-english,th-interview,สัมภาษณ์งานภาษาอังกฤษ,Exact,Enabled
+lexis-th-speak-english,th-interview,ฝึกสัมภาษณ์งานภาษาอังกฤษ,Phrase,Enabled
+lexis-th-speak-english,th-interview,ฝึกสัมภาษณ์งานภาษาอังกฤษ,Exact,Enabled
+lexis-th-speak-english,th-interview,ตอบคำถามสัมภาษณ์งานภาษาอังกฤษ,Phrase,Enabled
+lexis-th-speak-english,th-interview,ตอบคำถามสัมภาษณ์งานภาษาอังกฤษ,Exact,Enabled
+lexis-th-speak-english,th-interview,แนะนำตัวภาษาอังกฤษสัมภาษณ์งาน,Phrase,Enabled
+lexis-th-speak-english,th-interview,แนะนำตัวภาษาอังกฤษสัมภาษณ์งาน,Exact,Enabled
+lexis-th-speak-english,th-interview,english job interview practice,Phrase,Enabled
+lexis-th-speak-english,th-interview,english job interview practice,Exact,Enabled
+lexis-th-speak-english,th-interview,job interview english,Phrase,Enabled
+lexis-th-speak-english,th-interview,job interview english,Exact,Enabled
+lexis-th-speak-english,th-interview,mock interview english,Phrase,Enabled
+lexis-th-speak-english,th-interview,mock interview english,Exact,Enabled
+lexis-th-speak-english,th-travel,ภาษาอังกฤษสำหรับการเดินทาง,Phrase,Enabled
+lexis-th-speak-english,th-travel,ภาษาอังกฤษสำหรับการเดินทาง,Exact,Enabled
+lexis-th-speak-english,th-travel,ภาษาอังกฤษสำหรับเที่ยวต่างประเทศ,Phrase,Enabled
+lexis-th-speak-english,th-travel,ภาษาอังกฤษสำหรับเที่ยวต่างประเทศ,Exact,Enabled
+lexis-th-speak-english,th-travel,ฝึกพูดภาษาอังกฤษไปเที่ยว,Phrase,Enabled
+lexis-th-speak-english,th-travel,ฝึกพูดภาษาอังกฤษไปเที่ยว,Exact,Enabled
+lexis-th-speak-english,th-travel,english for travel,Phrase,Enabled
+lexis-th-speak-english,th-travel,english for travel,Exact,Enabled
+lexis-th-speak-english,th-travel,travel english speaking,Phrase,Enabled
+lexis-th-speak-english,th-travel,travel english speaking,Exact,Enabled
+lexis-th-speak-english,th-hospitality,ภาษาอังกฤษสำหรับงานโรงแรม,Phrase,Enabled
+lexis-th-speak-english,th-hospitality,ภาษาอังกฤษสำหรับงานโรงแรม,Exact,Enabled
+lexis-th-speak-english,th-hospitality,ภาษาอังกฤษงานโรงแรม,Phrase,Enabled
+lexis-th-speak-english,th-hospitality,ภาษาอังกฤษงานโรงแรม,Exact,Enabled
+lexis-th-speak-english,th-hospitality,ภาษาอังกฤษสำหรับพนักงานต้อนรับ,Phrase,Enabled
+lexis-th-speak-english,th-hospitality,ภาษาอังกฤษสำหรับพนักงานต้อนรับ,Exact,Enabled
+lexis-th-speak-english,th-hospitality,ภาษาอังกฤษงานบริการ,Phrase,Enabled
+lexis-th-speak-english,th-hospitality,ภาษาอังกฤษงานบริการ,Exact,Enabled
+lexis-th-speak-english,th-hospitality,hotel english,Phrase,Enabled
+lexis-th-speak-english,th-hospitality,hotel english,Exact,Enabled
+lexis-th-speak-english,th-hospitality,english for hotel staff,Phrase,Enabled
+lexis-th-speak-english,th-hospitality,english for hotel staff,Exact,Enabled
+lexis-th-speak-english,th-hospitality,hospitality english,Phrase,Enabled
+lexis-th-speak-english,th-hospitality,hospitality english,Exact,Enabled
+lexis-th-speak-english,th-business,ภาษาอังกฤษเพื่อการทำงาน,Phrase,Enabled
+lexis-th-speak-english,th-business,ภาษาอังกฤษเพื่อการทำงาน,Exact,Enabled
+lexis-th-speak-english,th-business,ภาษาอังกฤษในที่ทำงาน,Phrase,Enabled
+lexis-th-speak-english,th-business,ภาษาอังกฤษในที่ทำงาน,Exact,Enabled
+lexis-th-speak-english,th-business,ฝึกพูดภาษาอังกฤษในที่ประชุม,Phrase,Enabled
+lexis-th-speak-english,th-business,ฝึกพูดภาษาอังกฤษในที่ประชุม,Exact,Enabled
+lexis-th-speak-english,th-business,ภาษาอังกฤษสำหรับคนทำงาน,Phrase,Enabled
+lexis-th-speak-english,th-business,ภาษาอังกฤษสำหรับคนทำงาน,Exact,Enabled
+lexis-th-speak-english,th-business,business english speaking,Phrase,Enabled
+lexis-th-speak-english,th-business,business english speaking,Exact,Enabled
+lexis-th-speak-english,th-business,english for work,Phrase,Enabled
+lexis-th-speak-english,th-business,english for work,Exact,Enabled
+lexis-th-speak-english,th-business,english for meetings,Phrase,Enabled
+lexis-th-speak-english,th-business,english for meetings,Exact,Enabled
+lexis-en-speak-thai,en-speak-thai,practice speaking thai,Phrase,Enabled
+lexis-en-speak-thai,en-speak-thai,practice speaking thai,Exact,Enabled
+lexis-en-speak-thai,en-speak-thai,thai speaking practice,Phrase,Enabled
+lexis-en-speak-thai,en-speak-thai,thai speaking practice,Exact,Enabled
+lexis-en-speak-thai,en-speak-thai,speak thai,Phrase,Enabled
+lexis-en-speak-thai,en-speak-thai,speak thai,Exact,Enabled
+lexis-en-speak-thai,en-speak-thai,practice thai speaking,Phrase,Enabled
+lexis-en-speak-thai,en-speak-thai,practice thai speaking,Exact,Enabled
+lexis-en-speak-thai,en-speak-thai,spoken thai practice,Phrase,Enabled
+lexis-en-speak-thai,en-speak-thai,spoken thai practice,Exact,Enabled
+lexis-en-speak-thai,en-learn-thai,learn to speak thai,Phrase,Enabled
+lexis-en-speak-thai,en-learn-thai,learn to speak thai,Exact,Enabled
+lexis-en-speak-thai,en-learn-thai,learn thai,Phrase,Enabled
+lexis-en-speak-thai,en-learn-thai,learn thai,Exact,Enabled
+lexis-en-speak-thai,en-learn-thai,learn thai online,Phrase,Enabled
+lexis-en-speak-thai,en-learn-thai,learn thai online,Exact,Enabled
+lexis-en-speak-thai,en-learn-thai,learn spoken thai,Phrase,Enabled
+lexis-en-speak-thai,en-learn-thai,learn spoken thai,Exact,Enabled
+lexis-en-speak-thai,en-learn-thai,learn thai language,Phrase,Enabled
+lexis-en-speak-thai,en-learn-thai,learn thai language,Exact,Enabled
+lexis-en-speak-thai,en-learn-thai,learn thai app,Phrase,Enabled
+lexis-en-speak-thai,en-learn-thai,learn thai app,Exact,Enabled
+lexis-en-speak-thai,en-learn-thai,how to speak thai,Phrase,Enabled
+lexis-en-speak-thai,en-learn-thai,how to speak thai,Exact,Enabled
+lexis-en-speak-thai,en-thai-conversation,thai conversation practice,Phrase,Enabled
+lexis-en-speak-thai,en-thai-conversation,thai conversation practice,Exact,Enabled
+lexis-en-speak-thai,en-thai-conversation,practice thai conversation,Phrase,Enabled
+lexis-en-speak-thai,en-thai-conversation,practice thai conversation,Exact,Enabled
+lexis-en-speak-thai,en-thai-conversation,ai thai conversation,Phrase,Enabled
+lexis-en-speak-thai,en-thai-conversation,ai thai conversation,Exact,Enabled
+lexis-en-speak-thai,en-thai-conversation,practice thai with ai,Phrase,Enabled
+lexis-en-speak-thai,en-thai-conversation,practice thai with ai,Exact,Enabled
+lexis-en-speak-thai,en-thai-conversation,talk in thai with ai,Phrase,Enabled
+lexis-en-speak-thai,en-thai-conversation,talk in thai with ai,Exact,Enabled

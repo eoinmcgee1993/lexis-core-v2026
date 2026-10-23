@@ -49,6 +49,8 @@ times (see the docstring).
 
 ## Suggested post captions
 
+> **Superseded, do not paste.** These captions and links are out of date and kept only as a record. The live captions are generated from `brand-kit/schedule/posts.mjs`: edit it, run `node brand-kit/schedule/build.mjs`, and post from `brand-kit/phone/DAILY-POSTS.txt` or `brand-kit/phone/platforms/<app>.txt`.
+
 **EN:** Speaking English is a skill, and skills need reps. Talk out loud with
 LEXIS and get gentle corrections as you go. 15 minutes free, no card.
 learnwithlexis.com?utm_source=tiktok&utm_medium=social&utm_campaign=vo_en
@@ -86,6 +88,8 @@ tones are a native speaker's.
 | `lexis-vo-reel-en-nicknames.mp4` | Expats: why your colleague is called Pancake | Sarah |
 
 ### Captions
+
+> **Superseded, do not paste.** These captions and links are out of date and kept only as a record. The live captions are generated from `brand-kit/schedule/posts.mjs`: edit it, run `node brand-kit/schedule/build.mjs`, and post from `brand-kit/phone/DAILY-POSTS.txt` or `brand-kit/phone/platforms/<app>.txt`.
 
 **TH Thinglish:** ประโยคไหนที่คุณพูดบ่อยที่สุด? 😂 "Open the light" "Close the air" "Check bin" ไม่ผิดนะ ฝรั่งก็พอเข้าใจ แต่ถ้าอยากพูดให้เป็นธรรมชาติ ลองซ้อมพูดกับ LEXIS ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
 learnwithlexis.com/th/practice/everyday-english?utm_source=tiktok&utm_medium=social&utm_campaign=fun_th_thinglish
