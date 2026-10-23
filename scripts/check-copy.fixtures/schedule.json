@@ -1,0 +1,6 @@
+[
+  { "day": 1, "caption": "ทดลองฟรี {{trial}} นาที ไม่ต้องผูกบัตร", "media": "brand-kit/voiceovers/lexis-vo-reel-th-intro.mp4" },
+  { "day": 2, "note": "Never write \"per week\" or \"subscription\" in a caption." },
+  { "day": 3, "caption": "Never skip practice. Only ฿{{weekly}}/week." },  ⟵ recurring
+  { "day": 4, "caption": "Free {{wrongTrial}}-minute trial." }  ⟵ trial
+]
