@@ -57,6 +57,14 @@ function getVisitSource() {
     if (src) source.src = src;
     if (params.get('utm_medium')) source.med = params.get('utm_medium');
     if (params.get('utm_campaign')) source.cmp = params.get('utm_campaign');
+    // utm_content names the one post or ad the link was on (Oct 2026: the
+    // posting queue and ad kits put a per-post id there).
+    // Without it a campaign is the finest grain we can see, and twenty
+    // videos in one campaign can't be told apart. Like the others it is a
+    // label we chose when building the link, held to the same slug alphabet
+    // and 60-char cap server-side (SOURCE_KEYS in backend/app.mjs), which
+    // is where the trust boundary is; nothing is cleaned here.
+    if (params.get('utm_content')) source.cnt = params.get('utm_content');
     if (document.referrer) {
       const host = new URL(document.referrer).hostname;
       if (host && host !== window.location.hostname) source.refHost = host;
@@ -93,10 +101,15 @@ export function trackEvent(event, { path, lang, metadata } = {}) {
       // should ever be allowed to break the app over its own failure.
     }
 
+    // The visit source is spread LAST so it always wins: it is the one
+    // attribution for the whole tab, and a call site that happened to send
+    // its own src or cnt (say, to tag which share card) would otherwise
+    // split one visit's funnel across two rows of docs/marketing-report.sql.
+    // No caller sends those keys today; this keeps it that way by design.
     fetch(`${BACKEND_URL}/api/analytics/event`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeader },
-      body: JSON.stringify({ event, path, lang, sessionId: getSessionId(), metadata: { ...getVisitSource(), ...metadata } }),
+      body: JSON.stringify({ event, path, lang, sessionId: getSessionId(), metadata: { ...metadata, ...getVisitSource() } }),
       keepalive: true
     }).catch(() => {});
   })();
