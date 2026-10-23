@@ -27,10 +27,11 @@ This repo's `main` and feature branches are **LEXIS** (the English/Thai speaking
 tutor at learnwithlexis.com) and nothing else.
 
 - **Phiraya** (the client-communication service for clinics and premium
-  businesses) is a separate business. It lives only on the orphan branch
-  `phiraya`, with its own `CLAUDE.md`. Never merge, cherry-pick or copy between
-  the two, and never reuse LEXIS code, avatars, Stripe, Supabase or other
-  accounts for Phiraya work.
+  businesses) is a separate business. It lives in its own private repo,
+  `eoinmcgee1993/phiraya`, with its own `CLAUDE.md`. The old orphan branch
+  `phiraya` in this repo is frozen (moved out 7 Oct 2026); don't commit to it.
+  Never merge, cherry-pick or copy between the two, and never reuse LEXIS code,
+  avatars, Stripe, Supabase or other accounts for Phiraya work.
 - `aether` is Phiraya's backend (Phiraya under its engineering name). It is not
   in this repo. The ElevenLabs agent "Phiraya" (`agent_9701m4b2p2xyf0eszr31vmztf8fj`)
   belongs to Phiraya, not LEXIS.

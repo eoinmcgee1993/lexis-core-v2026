@@ -259,7 +259,15 @@ const ANALYTICS_EVENTS = new Set([
 // post, ad and outreach email lands in the same undifferentiated count.
 // They are labels chosen by whoever built the link, never an identifier,
 // so they are held to a short slug alphabet rather than trusted as text.
-const SOURCE_KEYS = { src: 'string', med: 'string', cmp: 'string', refHost: 'string' };
+//
+// cnt (utm_content) added Oct 2026: links built for the posting queue and
+// ad kits put a per-post or per-ad id there, and campaign was the finest
+// grain stored, so every video in a campaign landed in one count. It has
+// to be listed here, not just sent: anything missing from this map is
+// dropped without a word, which is exactly how it was being lost.
+// docs/marketing-report.sql reads these keys by name, so renaming one
+// breaks the report silently too.
+const SOURCE_KEYS = { src: 'string', med: 'string', cmp: 'string', cnt: 'string', refHost: 'string' };
 const ANALYTICS_METADATA_SCHEMA = {
   pageview: { ...SOURCE_KEYS },
   signup_completed: { ...SOURCE_KEYS },
@@ -1483,7 +1491,14 @@ async function hfFetch(url, { method = 'GET', body, timeoutMs = 20_000 } = {}) {
     try { parsed = text ? JSON.parse(text) : null; } catch { parsed = null; }
     return { status: res.status, body: parsed, correlationId: res.headers.get('x-correlation-id') };
   } catch (err) {
-    return { networkError: err };
+    // fetch errors quote the full request URL, and the submit URL carries the
+    // webhook secret in its query string. Callers log this error to the console
+    // and to error_logs, so strip the query before it leaves this function.
+    const safeUrl = url.split('?')[0];
+    const safe = new Error(String(err?.message ?? err).split(url).join(safeUrl));
+    safe.name = err?.name || 'Error';
+    safe.code = err?.code;
+    return { networkError: safe };
   } finally {
     clearTimeout(timer);
   }
@@ -2499,7 +2514,8 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
       // nothing to take back — this is recorded only so a support question
       // about a checkout that "went through" has an answer.
       const session = event.data.object;
-      console.log('[LEXIS Webhook] Checkout payment failed:', session.id, session.metadata?.user_id);
+      // The session id is enough to find this in Stripe; a user id in logs is PII.
+      console.log('[LEXIS Webhook] Checkout payment failed:', session.id);
 
     } else if (event.type === 'customer.subscription.updated') {
       // LEGACY. Nothing sold since 2 Sep 2026 creates a subscription, but

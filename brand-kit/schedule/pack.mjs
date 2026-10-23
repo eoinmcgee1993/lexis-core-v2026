@@ -52,7 +52,9 @@ try {
 // slot or extra references them. The Community and story pictures come from
 // posts.mjs's EXTRAS, so a new swipe post is packed without editing this file.
 const PROFILE = ['lexis-avatar.png', 'facebook-cover.png', 'youtube-banner.png', 'line-cover.png'];
-const POSTERS = ['launch-th.png', 'launch-en.png'];
+// The launch-* posters printed LEXIS50, which ended 23 Oct 2026; the phone
+// kit carries the evergreen set in their place (see ADVERTISING.md).
+const POSTERS = ['evergreen-th.png', 'evergreen-en.png'];
 const extraImages = [...new Set(Object.values(EXTRAS).flat().flatMap((e) => e.media).filter((f) => f.endsWith('.png')))];
 
 const plan = [

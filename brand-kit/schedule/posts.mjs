@@ -289,9 +289,9 @@ export const EXTRAS = {
     {
       // A story's link lives on a sticker, not in a caption, so the URL is
       // printed for the owner to paste into the sticker.
-      heading: 'STORY launch-th-story.png or launch-en-story.png, with a link sticker to:',
-      slot: 'story-launch', landing: '/',
-      media: ['brand-kit/phone/launch-th-story.png', 'brand-kit/phone/launch-en-story.png'],
+      heading: 'STORY evergreen-th-story.png or evergreen-en-story.png, with a link sticker to:',
+      slot: 'story-evergreen', landing: '/',
+      media: ['brand-kit/phone/evergreen-th-story.png', 'brand-kit/phone/evergreen-en-story.png'],
       linkOnly: true,
     },
   ],
