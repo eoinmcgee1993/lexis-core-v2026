@@ -31,6 +31,12 @@
 #
 # So the frontend builds here too, `npm ci` and all, and the cost is a few
 # minutes nobody has to spend reading a Vercel dashboard to trust a green tick.
+#
+# A third job, `copy`, runs scripts/check-copy.mjs over the customer-facing
+# marketing copy (brand-kit/, ADVERTISING.md, OUTREACH-DRAFTS.md). Those
+# files make commercial claims (prices, the trial length, whether anything
+# renews) but are plain text typed by hand, so nothing else in this
+# workflow could notice when one stops matching facts.js.
 name: Tests
 
 # Read-only token. Neither job writes anything back to the repository — they
@@ -143,3 +149,39 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  # Its own job for the same reason the frontend has one: it shares no
+  # install and no failure mode with either. It also needs nothing installed
+  # at all. The checker is dependency-free and facts.js has no imports, so
+  # there is no `npm ci` and no cache (and no lockfile to key one on).
+  #
+  # Expect it to go red with no copy change on the first run after LAUNCH_OFFER
+  # in facts.js expires (23 Oct 2026, 23:59 Bangkok): every line still
+  # advertising LEXIS50 or its price starts failing, on every PR, until the
+  # ads are pulled. That is deliberate. The pricing page stops showing the
+  # offer by itself, but a pasted caption cannot, so this is the reminder
+  # ADVERTISING.md asks for ("pull every ad in this block the day it ends").
+  # It fires on the next push or PR, not at 23:59 itself. There is no
+  # schedule trigger, and adding one would change when this workflow runs
+  # for every other job too.
+  copy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # Pinned to 22 like the other jobs, so all three run on one Node and a
+      # change to the runner image's default cannot make this job behave
+      # differently from the two beside it.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # The fixtures first. A pattern that silently stops matching would
+      # otherwise turn the next step green for the wrong reason, which is
+      # exactly the false-tick problem this file's header describes.
+      - name: Checker self-test
+        run: node scripts/check-copy.mjs --self-test
+
+      - name: Check customer-facing copy
+        run: node scripts/check-copy.mjs

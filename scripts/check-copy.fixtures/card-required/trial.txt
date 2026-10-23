@@ -1,0 +1,4 @@
+Judged with the card flag set to true, so the promise in the first two lines is the false one.
+Free {{trial}}-minute trial, no card required.  ⟵ card
+ทดลองฟรี {{trial}} นาที ไม่ต้องผูกบัตร  ⟵ card
+Free {{trial}}-minute trial. A card is required to start.

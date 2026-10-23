@@ -1,0 +1,60 @@
+========================================================
+FIXTURE · PLAIN-TEXT CAPTIONS (brand-kit/phone style)
+========================================================
+RULES FOR EVERY POST
+- Never say LEXIS is a person or a teacher. She is a "virtual conversation partner" (คู่สนทนาเสมือน).
+- Prices are one-off passes: ฿{{weekly}} for {{weeklyDays}} days, ฿{{monthly}} for {{monthlyDays}} days. Never write "per week", "per month" or "subscription".
+- Free trial is {{trial}} minutes, no card. Don't promise anything else (no "fluent in {{wrongTrial}} days").
+
+CLEAN: every line below must produce nothing.
+DAY 1: lexis-vo-reel-th-intro.mp4 and lexis-tutor-photo.jpg are file names, not copy.
+รู้จัก LEXIS คู่สนทนาเสมือน ทดลองฟรี {{trial}} นาที ไม่ต้องผูกบัตร https://learnwithlexis.com/th?utm_source=tiktok&utm_campaign=tutor_per_week
+Practise speaking English out loud with LEXIS. {{trial}} minutes free, no card. Post 1-2 a week, once a week at most on LINE.
+หลังจากนั้นจ่ายครั้งเดียว ฿{{weekly}} ใช้ได้ {{weeklyDays}} วัน หรือ ฿{{monthly}} ใช้ได้ {{monthlyDays}} วัน ไม่มีการต่ออายุอัตโนมัติ
+LEXIS Community: เลือกเพิ่ม ฿{{addon}} ได้ ทุกบาทเข้ากองทุนเดียวกัน ช่วยนักเรียนผ่านโรงเรียนและกลุ่มเยาวชน
+แพ็กเกจรายเดือน ฿{{monthly}} ใช้ได้ {{monthlyDays}} วัน, แพ็กเกจรายสัปดาห์ ฿{{weekly}}
+ไม่ต้องจ่ายรายเดือน ไม่จำกัดอายุ
+Subscribe for more Thai tips every week.
+LEXIS is not a real person. She isn't your teacher either.
+LEXIS ไม่ใช่ครูสอน แต่เป็นคู่สนทนาเสมือน ฝึกกับคนจริงจังก็ได้
+ทดลองฟรี{{trial.th}}นาที Try it free for {{trial.en}} minutes.
+{{trial}} minutes free, then ฿{{weekly}} for {{weeklyDays}} days ({{fairWeekly}} minutes).
+Weekly Pass ฿{{launch}} with code {{code}}, while the launch offer lasts.
+Stress-free 30-minute sessions. Hands-free 30 min practice, so feel free to try 30 minutes.
+Only ฿{{weekly}} for a week of practice. Pay ฿{{monthly}} once. Every month you choose again.
+Never write "per week" in a caption.
+She is not my teacher. We can't guarantee fluency, only practice.
+STORIES: launch-en-story.png while the launch offer lasts.
+
+FLAGGED: each line below must produce exactly the rules after the arrow.
+Never miss a day: ฿{{weekly}}/week  ⟵ recurring
+฿{{monthly}} per month, cancel anytime.  ⟵ recurring
+฿{{weekly}} a week for {{fairWeekly}} minutes.  ⟵ recurring
+Join our happy subscribers.  ⟵ recurring
+Our monthly plan is the one to pick.  ⟵ recurring
+฿{{monthly}} ต่อเดือน, ฿{{monthly}}/เดือน, ฿{{monthly}} รายเดือน  ⟵ recurring
+ยกเลิกได้ทุกเมื่อ  ⟵ recurring
+Unlimited speaking practice.  ⟵ volume
+ฝึกได้ไม่จำกัด  ⟵ volume
+Practise with a real teacher, any time.  ⟵ human
+Talk to a real person in English.  ⟵ human
+เหมือนมีครูส่วนตัว  ⟵ human
+Cheaper than a tutor.  ⟵ competitor
+Better than a language school.  ⟵ competitor
+ไม่ต้องจ้างติวเตอร์  ⟵ competitor
+เรียนที่โรงเรียนสอนภาษามาแล้ว  ⟵ competitor
+Only ฿{{wrongPrice}} for {{weeklyDays}} days.  ⟵ price
+ทดลองฟรี {{wrongTrial}} นาที ไม่ต้องผูกบัตร  ⟵ trial
+Free {{wrongTrial}}-minute trial.  ⟵ trial
+Try it free for {{wrongTrial.en}} minutes.  ⟵ trial
+ทดลองฟรี {{wrongTrial.thdigits}} นาที  ⟵ trial
+ทดลองฟรี{{wrongTrial.th}}นาที  ⟵ trial
+Don't wait! "Subscribe now for ฿{{weekly}}/week"  ⟵ recurring
+ห้ามพลาด! "ฝึกได้ไม่จำกัด"  ⟵ volume
+ทดลองฟรีหนึ่งร้อยสิบห้านาที  ⟵ trial
+Free trial: a hundred and fifty minutes.  ⟵ trial
+LEXIS is my English teacher.  ⟵ human
+ครูของฉันคือ LEXIS  ⟵ human
+Become fluent in 30 days with LEXIS.  ⟵ outcome
+พูดคล่องใน 30 วัน  ⟵ outcome
+Pass your job interview with LEXIS.  ⟵ outcome
