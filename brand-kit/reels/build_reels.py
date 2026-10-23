@@ -63,8 +63,12 @@ Dialogue: 0,0:00:00.00,0:00:19.40,Url,,0,0,0,,learnwithlexis.com
         ass+=f"Dialogue: 0,{a},{b},Cap,,0,0,0,,{t}\n"
     ass+=f"Dialogue: 1,0:00:15.60,0:00:19.40,End,,0,0,0,,{{\\fad(250,0)}}{end}\\N{{\\fs{46*k:.0f}\\c&H009EFF&}}learnwithlexis.com\n"
     ass_path=os.path.join(FONTS,f'{lang}.ass'); open(ass_path,'w',encoding='utf8').write(ass)
+    # ass= with shaping=complex, not subtitles=: the subtitles filter uses
+    # libass's simple shaper, which drops or overstrikes a Thai tone mark over
+    # an upper vowel: this reel's "ทุกเมื่อที่คุณ" was burned in as
+    # "ทุกเมือทีคุณ". Same fix as voiceovers/build_vo_reels.py, 22 Oct 2026.
     vf=("scale=1080:-2,pad=1080:1920:0:260:color=0x050B14,"
-        f"subtitles={ass_path}:fontsdir={FONTS}")
+        f"ass={ass_path}:fontsdir={FONTS}:shaping=complex")
     subprocess.run([F,'-y','-v','error','-i',M+'lexis-intro-hero.mp4','-vf',vf,'-c:v','libx264','-preset','slow','-crf','22',
         '-pix_fmt','yuv420p','-c:a','aac','-b:a','128k','-ar','44100','-movflags','+faststart',os.path.join(OUT,f'lexis-reel-{lang}.mp4')],check=True)
 print('ok')
