@@ -73,37 +73,18 @@ Three things from `LAUNCH-ACTION-PLAN.md` that gate paid media, in order:
 
 ---
 
-## Launch offer set (ENDS 23 Oct 2026, 23:59 Bangkok)
+## Launch offer (ended 23 Oct 2026, 23:59 Bangkok)
 
-`LEXIS50`: 50% off the Weekly Pass, ฿99.50 instead of ฿199, 100 uses, ends
-23 Oct 2026 at 23:59 Bangkok time (`LAUNCH_OFFER` in `facts.js`). **Pull
-every ad in this block when it ends or the uses run out, whichever comes
-first.** An ad for a code that no longer works is the fastest way to turn a
-click into a complaint. From 24 Oct the **evergreen set below is the
-default**: put it in the slots these ads leave.
+The launch code ran until 23 Oct 2026 (`LAUNCH_OFFER` in `facts.js`). Its ad
+copy is no longer here: an ad for a code that has stopped working is the
+fastest way to turn a click into a complaint, so nothing in this file should
+still be pasteable. The old copy is in git history, at this file before this
+change.
 
-Once `launchOfferActive()` returns false, the generator stops rebuilding
-the `launch-*` PNGs. The old files stay in `brand-kit/ads/` as a record.
-They are not for use.
-
-### Meta
-- **LN-1 Primary:** Launch week: your first Weekly Pass is half price with code LEXIS50. Start with 15 free minutes, no card.
-- **Headline:** Half price launch week
-- **Description:** Code LEXIS50
-- **Creative:** `ads/launch-en-1080x1350.png`, story `ads/launch-en-story-1080x1920.png`
-- **LN-TH Primary:** เปิดตัว LEXIS: ใช้โค้ด LEXIS50 ลด 50% สำหรับ Weekly Pass เริ่มจากทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
-- **Headline:** ลดครึ่งราคาช่วงเปิดตัว
-- **Description:** โค้ด LEXIS50
-- **Creative:** `ads/launch-th-1080x1350.png`, story `ads/launch-th-story-1080x1920.png`
-
-### TikTok
-- Launch offer: code LEXIS50 halves your first Weekly Pass. Try 15 min free.
-- **TH:** โค้ด LEXIS50 ลด 50% Weekly Pass ทดลองฟรี 15 นาทีก่อน
-
-### Google RSA extra lines
-- Headline: Launch Code LEXIS50
-- Headline: Weekly Pass ฿99.50
-- Description: Launch offer: code LEXIS50 takes 50% off your first Weekly Pass, until 23 Oct.
+Once `launchOfferActive()` returns false, the generator stops rebuilding the
+`launch-*` PNGs. The old files stay in `brand-kit/ads/` as a record and are
+not for use. **From 24 Oct the evergreen set below is the default** in every
+slot the launch ads held.
 
 ---
 
@@ -373,8 +354,9 @@ proved wrong by the numbers. Replace each one with what the first test
 shows. Platforms rename interests often, so use the closest one on offer.
 
 **Spend is the owner's decision.** This file recommends no budget and no
-bid. The owner's own first-test range is ฿100–300 a day across everything
-that is running.
+bid. The owner sets the daily test budget across everything that is running
+(launch guide, step 8). No figure is written here: the copy checker reads any
+baht amount as a price claim, and a budget is not one.
 
 **A. Thai speakers practising English**
 - Location Thailand, language Thai, ages about 18–34.
@@ -390,9 +372,9 @@ that is running.
 - Interests: expat life in Thailand, learning Thai, Thai culture.
 - Creative: EV-EN and `voiceovers/lexis-vo-reel-en-learn-thai.mp4`.
 
-**Never.** Do not target tutors or language schools, their pages, their
-followers, or lookalikes built from any of them. They are competitors
-(ground rule 6). This applies to interests, custom audiences and
+**Never.** Do not target competitors (anyone selling lessons or speaking
+practice), their pages, their followers, or lookalikes built from any of
+them (ground rule 6). This applies to interests, custom audiences and
 lookalikes alike.
 
 ---
