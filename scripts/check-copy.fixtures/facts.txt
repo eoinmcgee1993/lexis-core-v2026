@@ -1,0 +1,28 @@
+FACT RULES. Cases are separated by blank lines, because the add-on context check reads one line either side.
+
+Weekly Pass ฿{{addon}} for {{weeklyDays}} days.  ⟵ price
+
+Practise more for ฿{{addon}}.  ⟵ price
+
+LEXIS Community gets the Weekly Pass ฿{{addon}} for {{weeklyDays}} days.  ⟵ price
+
+Add ฿{{addon}} to your Weekly Pass at checkout to fund a student.
+
+What ฿{{addon}} does
+[The sponsor tick box at checkout]
+
+Free {{trial}}-minute trial; card required.  ⟵ card
+
+ทดลองฟรี {{trial}} นาที ต้องผูกบัตร  ⟵ card
+
+Free {{trial}}-minute trial, no card required. ทดลองฟรี {{trial}} นาที ไม่ต้องผูกบัตร
+
+Pay by card or PromptPay when you buy a pass.
+
+Weekly Pass: up to {{wrongFair}} minutes of practice for {{weeklyDays}} days.  ⟵ fair-use
+
+฿{{monthly}} for {{monthlyDays}} days, up to {{fairWeekly}} minutes.  ⟵ fair-use
+
+A one-off ฿{{weekly}} pass: {{weeklyDays}} days, up to {{fairWeekly}} minutes of spoken practice.
+
+฿{{weekly}} for {{weeklyDays}} days ({{fairWeekly}} minutes) or ฿{{monthly}} for {{monthlyDays}} days ({{fairMonthly}} minutes).

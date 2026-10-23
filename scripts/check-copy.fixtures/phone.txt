@@ -18,16 +18,18 @@ Subscribe for more Thai tips every week.
 LEXIS is not a real person. She isn't your teacher either.
 LEXIS ไม่ใช่ครูสอน แต่เป็นคู่สนทนาเสมือน ฝึกกับคนจริงจังก็ได้
 ทดลองฟรี{{trial.th}}นาที Try it free for {{trial.en}} minutes.
-{{trial}} minutes free, then ฿{{weekly}} for {{weeklyDays}} days (150 minutes).
+{{trial}} minutes free, then ฿{{weekly}} for {{weeklyDays}} days ({{fairWeekly}} minutes).
 Weekly Pass ฿{{launch}} with code {{code}}, while the launch offer lasts.
 Stress-free 30-minute sessions. Hands-free 30 min practice, so feel free to try 30 minutes.
 Only ฿{{weekly}} for a week of practice. Pay ฿{{monthly}} once. Every month you choose again.
 Never write "per week" in a caption.
+She is not my teacher. We can't guarantee fluency, only practice.
+STORIES: launch-en-story.png while the launch offer lasts.
 
 FLAGGED: each line below must produce exactly the rules after the arrow.
 Never miss a day: ฿{{weekly}}/week  ⟵ recurring
 ฿{{monthly}} per month, cancel anytime.  ⟵ recurring
-฿{{weekly}} a week for 150 minutes.  ⟵ recurring
+฿{{weekly}} a week for {{fairWeekly}} minutes.  ⟵ recurring
 Join our happy subscribers.  ⟵ recurring
 Our monthly plan is the one to pick.  ⟵ recurring
 ฿{{monthly}} ต่อเดือน, ฿{{monthly}}/เดือน, ฿{{monthly}} รายเดือน  ⟵ recurring
@@ -51,3 +53,8 @@ Don't wait! "Subscribe now for ฿{{weekly}}/week"  ⟵ recurring
 ห้ามพลาด! "ฝึกได้ไม่จำกัด"  ⟵ volume
 ทดลองฟรีหนึ่งร้อยสิบห้านาที  ⟵ trial
 Free trial: a hundred and fifty minutes.  ⟵ trial
+LEXIS is my English teacher.  ⟵ human
+ครูของฉันคือ LEXIS  ⟵ human
+Become fluent in 30 days with LEXIS.  ⟵ outcome
+พูดคล่องใน 30 วัน  ⟵ outcome
+Pass your job interview with LEXIS.  ⟵ outcome

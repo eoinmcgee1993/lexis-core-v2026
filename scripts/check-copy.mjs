@@ -94,18 +94,16 @@ const OUT_OF_SCOPE = [
 // whole-file entry would then keep hiding that file's next regression
 // forever.
 //
+// There is deliberately no whole-file entry. OUTREACH-DRAFTS.md had one
+// while its compliance pass was in review, and a whole-file entry hides the
+// file's NEXT regression too, so the cleanup (#143) has to land first
+// instead.
+//
 // `path` alone excludes the whole file. `rule` narrows it to one rule and
 // `line` to lines containing that exact text, independently. The rest of
 // the file stays checked, which is why the brand-kit/README.md entries are
 // phrases and not the file.
 const EXCLUDE = [
-  {
-    path: 'OUTREACH-DRAFTS.md',
-    reason:
-      'Written before the 2 Sep 2026 switch to one-off passes ("฿199/week", "subscriber", ' +
-      '"tutor"). A compliance pass is in progress in a separate PR. Excluded only until it ' +
-      'lands, then remove this entry.',
-  },
   {
     path: 'brand-kit/README.md',
     rule: 'competitor',
@@ -235,7 +233,7 @@ function buildRules(facts) {
     { id: 'human', re: /\bhuman[\s-]+(?:teachers?|coach(?:es)?|partners?|beings?)\b/gi, negatable: true, msg: (m) => `"${m}" ${human}` },
     {
       id: 'human',
-      re: /\b(?:a|an|your|our)\s+(?:(?:own|private|personal|native|patient|friendly|qualified|english|thai)\s+)?teachers?\b/gi,
+      re: /\b(?:a|an|your|our|my|his|her|their)\s+(?:(?:own|private|personal|native|patient|friendly|qualified|english|thai)\s+)?teachers?\b/gi,
       negatable: true,
       msg: (m) => `"${m}" ${human}`,
     },
@@ -244,9 +242,36 @@ function buildRules(facts) {
       // คนจริงจัง ("serious person") and คนจริงใจ ("sincere person") contain
       // คนจริง, and Thai has no word boundaries to tell them apart. ครูสอนพิเศษ
       // ("private tutor") is left to the competitor rule.
-      re: /คุณครู|ครูส่วนตัว|ครูเจ้าของภาษา|ครูต่างชาติ|ครูฝรั่ง|ครูสอน(?!พิเศษ)|คนจริง(?!จัง|ใจ)|มนุษย์จริง/g,
+      re: /คุณครู|ครูของ(?:คุณ|ฉัน|ผม|เรา|เขา|เธอ|หนู)|ครูส่วนตัว|ครูเจ้าของภาษา|ครูต่างชาติ|ครูฝรั่ง|ครูสอน(?!พิเศษ)|คนจริง(?!จัง|ใจ)|มนุษย์จริง/g,
       negatable: true,
       msg: (m) => `"${m}" ${human}`,
+    },
+    {
+      id: 'outcome',
+      // ADVERTISING.md ground rule 3: nothing claims fluency, a score, a job
+      // or a timeframe, because there is no evidence for any of them yet.
+      // Narrow on purpose. "Practise for your job interview" is what the
+      // interview topic sells; "pass your interview" is the promise.
+      re: new RegExp(
+        [
+          '\\bfluent(?:ly)?\\s+(?:in|within)\\s+(?:\\d+|a|one|two|three|four|six|twelve|thirty|sixty|ninety)\\s+(?:days?|weeks?|months?)\\b',
+          '\\b(?:become|get|be)\\s+fluent\\b',
+          '\\bguarantee(?:d|s)?\\b',
+          '\\b(?:get|land|win|secure)\\s+(?:(?:the|a|your|that)\\s+)?(?:dream\\s+|new\\s+)?job\\b',
+          '\\bget\\s+hired\\b',
+          '\\bpass\\s+(?:your|the|an?)\\s+(?:[a-z]+\\s+)?(?:interview|exam|test)\\b',
+          '\\b(?:raise|boost|improve|increase)\\s+your\\s+(?:[a-z]+\\s+)?(?:score|band)\\b',
+          '\\b(?:IELTS|TOEIC|TOEFL)\\s+(?:score|band)\\b',
+          'พูดคล่อง(?:ใน|ภายใน)',
+          'คล่อง(?:ใน|ภายใน)\\s*\\d+\\s*(?:วัน|สัปดาห์|เดือน)',
+          'รับประกัน',
+          '(?<!ใช้)ได้งาน',
+          'สอบผ่าน',
+        ].join('|'),
+        'gi'
+      ),
+      negatable: true,
+      msg: (m) => `"${m}" is an outcome promise (fluency, a score, a job or a timeframe). There is no evidence for one yet (ADVERTISING.md ground rule 3).`,
     },
     { id: 'competitor', re: /\btutor(?:s|ing|ed)?\b/gi, msg: (m) => `"${m}" ${competitor}` },
     { id: 'competitor', re: /\blanguage[\s-]+(?:schools?|cent(?:re|er)s?|institutes?|academ(?:y|ies))\b/gi, msg: (m) => `"${m}" ${competitor}` },
@@ -297,6 +322,42 @@ const PRICE_RE = new RegExp(
 // Sentence and table-cell boundaries. Thai has no sentence punctuation, so a
 // Thai line is one segment and the TRIAL_GAP does the work.
 const SEGMENT_BREAK_RE = /[.!?](?=\s|$)|[|·•;]/g;
+
+// A minutes figure this close to a pass's name, price, length or period is
+// a statement of that pass's fair-use allowance. #143's outreach copy puts
+// it 8 characters away ("150 minutes on the 7-day pass").
+const FAIR_GAP = 24;
+const TH_PERIOD = { week: 'สัปดาห์', month: 'เดือน' };
+
+// SPONSOR_ADDON_THB is the Community add-on, not a pass price, so ฿50 is
+// accepted only beside the words the site and kit use for the add-on (on
+// its line or the one before or after: #143's "What ฿50 does" heading has
+// "the sponsor tick box" directly under it), and never directly beside a
+// pass's name or length ("Weekly Pass ฿50", "฿50 for 7 days").
+const ADDON_CONTEXT_RE = /community|sponsor|add-?on|optional|pay[- ]it[- ]forward|\bfunds?\b|\badd(?:s|ed|ing)?\b|checkout|ชุมชน|เลือกเพิ่ม|สนับสนุน|กองทุน|นักเรียน/i;
+const ADDON_TIER_GAP = 5;
+
+// "No card required" is the trial's own promise, so these are checked
+// against TRIAL.cardRequired in whichever direction it points, near a
+// trial word. ไม่ต้องผูกบัตร contains ต้องผูกบัตร; the lookbehind keeps it.
+const CARD_REQUIRED_RE = /\b(?:credit\s+|debit\s+)?cards?\s+(?:is\s+|are\s+)?(?:required|needed|necessary)\b|\brequires?\s+(?:a\s+)?(?:credit\s+|debit\s+)?card\b|(?<!ไม่)ต้อง(?:ใช้|ผูก)บัตร/gi;
+const NO_CARD_RE = /\bno\s+(?:credit\s+|debit\s+)?card\b|\bwithout\s+a\s+card\b|ไม่ต้อง(?:ใช้|ผูก)บัตร/gi;
+const CARD_GAP = 40;
+
+// The launch creatives print the offer price and code into the pixels
+// (frontend/scripts/images/generate_brand_kit_social.mjs, and the
+// brand-kit/phone copies), and an image cannot be read here. So after the
+// offer ends, any copy that names one fails, whatever the image says, unless
+// the same line or paragraph marks it retired. ADVERTISING.md keeps the
+// files "as a record and ... not for use" and that wording is the exemption.
+// Lowercase only, so LAUNCH-ACTION-PLAN.md is not a creative.
+const LAUNCH_CREATIVE_RE = /\blaunch-(?:\*|\{|en\b|th\b)[\w{},*.\/-]*/g;
+const RETIRED_RE = /\bexpire[sd]?\b|\bretired?\b|\bas a record\b|\bnot for use\b|\bdo not (?:use|post|schedule)\b|ห้ามใช้|หมดอายุ/i;
+
+const negatedBefore = (text, start) => {
+  const before = text.slice(Math.max(0, start - 24), start);
+  return /(?:\bnot|n['’]t|\bnever|\bno|\bwithout)\s+(?:[\w'’]+\s+){0,2}$/i.test(before) || /(?:ไม่ใช่|ไม่ต้องมี|ไม่ต้อง|ไม่มี)\s*$/.test(before);
+};
 
 function parseNumber(s) {
   if (/^\d+$/.test(s)) return Number(s);
@@ -423,6 +484,15 @@ function checkText(text, relPath, ctx) {
   known.set(facts.SPONSOR_ADDON_THB, 'Community add-on');
   const knownList = [...known].map(([thb, what]) => `฿${thb} (${what})`).join(', ');
   const codeRe = new RegExp(`\\b${escapeRe(facts.LAUNCH_OFFER.code)}\\b`, 'gi');
+  const tierAnchors = Object.entries(facts.PRICING).flatMap(([tier, p]) =>
+    [
+      ['name', `\\b${tier}\\s+pass\\b`],
+      ['price', `฿\\s?${p.thb}(?!\\d|\\.\\d)`],
+      ['days', `\\b${p.days}[\\s-]*days?\\b|${p.days}\\s*วัน`],
+      ['period', `\\ba\\s+${p.period}\\b`],
+      ...(TH_PERIOD[p.period] ? [['name', `แพ็?[กค]เกจราย${TH_PERIOD[p.period]}`]] : []),
+    ].map(([kind, src]) => ({ tier, kind, re: new RegExp(src, 'gi') }))
+  );
 
   // Masking is per source line (a cue only exempts quotes on its own
   // line), and happens before lines are joined into units. Two versions:
@@ -458,17 +528,24 @@ function checkText(text, relPath, ctx) {
     const prices = matchesOf(PRICE_RE, factText);
     const breaks = matchesOf(SEGMENT_BREAK_RE, text).map((b) => b.start);
     const segment = (pos) => breaks.filter((b) => b < pos).length;
+    const anchors = tierAnchors.flatMap(({ tier, kind, re }) => matchesOf(re, text).map((a) => ({ ...a, tier, kind })));
+    const nearestAnchor = (hit, maxGap, kinds) => {
+      let best = null;
+      for (const a of anchors) {
+        if ((kinds && !kinds.includes(a.kind)) || segment(a.start) !== segment(hit.start)) continue;
+        const gap = gapBetween(hit, a);
+        if (gap <= maxGap && (!best || gap < best.gap)) best = { a, gap };
+      }
+      return best?.a;
+    };
+    const trialWords = matchesOf(TRIAL_WORD_RE, text);
 
     if (!inRules.has(first)) {
       for (const rule of rules) {
         for (const hit of matchesOf(rule.re, text)) {
           if (rule.allow?.(text, hit.end)) continue;
           if (rule.priceTied && !prices.some((p) => segment(p.start) === segment(hit.start) && gapBetween(hit, p) <= PRICE_GAP)) continue;
-          if (rule.negatable) {
-            const before = text.slice(Math.max(0, hit.start - 24), hit.start);
-            if (/(?:\bnot|n['’]t|\bnever|\bno|\bwithout)\s+(?:[\w'’]+\s+)?$/i.test(before)) continue;
-            if (/(?:ไม่ใช่|ไม่ต้องมี|ไม่ต้อง|ไม่มี)\s*$/.test(before)) continue;
-          }
+          if (rule.negatable && negatedBefore(text, hit.start)) continue;
           report(hit.start, rule.id, rule.msg(hit.m[0]));
         }
       }
@@ -481,6 +558,16 @@ function checkText(text, relPath, ctx) {
     for (const p of prices) {
       const raw = p.m[1] ?? p.m[2] ?? p.m[3];
       const amount = Number(raw.replace(/,/g, ''));
+      if (amount === facts.SPONSOR_ADDON_THB && !Object.values(facts.PRICING).some((t) => t.thb === amount)) {
+        const around = factual.slice(Math.max(0, first - 1), last + 2).join(' ');
+        const tier = nearestAnchor(p, ADDON_TIER_GAP, ['name', 'days']);
+        if (tier || !ADDON_CONTEXT_RE.test(around)) {
+          report(p.start, 'price',
+            `"${p.m[0].trim()}" is the Community add-on (facts.js SPONSOR_ADDON_THB), not a pass price. ` +
+            (tier ? `Here it sits beside the ${tier.tier} pass.` : 'Say what it is: Community, sponsor, add-on, เลือกเพิ่ม.'));
+        }
+        continue;
+      }
       if (known.has(amount)) continue;
       if (amount === launchPrice) {
         if (!launchActive) {
@@ -500,6 +587,23 @@ function checkText(text, relPath, ctx) {
           `"${c.m[0]}" is the launch code, and the offer ended at ${facts.LAUNCH_OFFER.endsAt} ` +
           '(facts.js LAUNCH_OFFER.endsAt). Pull this line.');
       }
+      if (!RETIRED_RE.test(factText)) {
+        for (const c of matchesOf(LAUNCH_CREATIVE_RE, factText)) {
+          report(c.start, 'launch',
+            `"${c.m[0].replace(/[.,]+$/, '')}" is a launch-offer creative. The price and code are printed in the image, and the offer ` +
+            `ended at ${facts.LAUNCH_OFFER.endsAt}. Point this at an evergreen creative, or mark the file retired.`);
+        }
+      }
+    }
+
+    // Card. The trial's "no card" is a fact too (facts.js TRIAL.cardRequired).
+    const cardRe = facts.TRIAL.cardRequired ? NO_CARD_RE : CARD_REQUIRED_RE;
+    for (const c of matchesOf(cardRe, text)) {
+      if (!trialWords.some((w) => gapBetween(c, w) <= CARD_GAP)) continue;
+      if (!facts.TRIAL.cardRequired && negatedBefore(text, c.start)) continue;
+      report(c.start, 'card',
+        `"${c.m[0]}" next to the trial, but facts.js TRIAL.cardRequired is ${facts.TRIAL.cardRequired}: ` +
+        `the trial ${facts.TRIAL.cardRequired ? 'does' : 'does not'} need a card.`);
     }
 
     // Trial length. Each trial word is paired with the nearest minutes
@@ -508,7 +612,7 @@ function checkText(text, relPath, ctx) {
     // keeps "15 minutes free, then 150 minutes" from flagging the 150.
     const minutes = matchesOf(MINUTES_RE, text);
     if (minutes.length) {
-      for (const word of matchesOf(TRIAL_WORD_RE, text)) {
+      for (const word of trialWords) {
         let best = null;
         for (const mn of minutes) {
           if (segment(mn.start) !== segment(word.start)) continue;
@@ -521,6 +625,22 @@ function checkText(text, relPath, ctx) {
           report(best.mn.start, 'trial',
             `"${best.mn.m[0].replace(/\s+/g, ' ').trim()}" next to a free-trial word, but the trial is ` +
             `${facts.TRIAL.minutes} minutes (facts.js TRIAL.minutes).`);
+        }
+      }
+
+      // Fair use. A minutes figure that belongs to the trial is the trial
+      // rule's business. Any other one beside a pass is that pass's
+      // allowance and must equal FAIR_USE for its tier.
+      for (const mn of minutes) {
+        if (trialWords.some((w) => segment(w.start) === segment(mn.start) && gapBetween(w, mn) <= TRIAL_GAP)) continue;
+        const anchor = nearestAnchor(mn, FAIR_GAP);
+        if (!anchor) continue;
+        const allowance = facts.FAIR_USE[anchor.tier]?.minutes;
+        const value = parseNumber(mn.m[1] ?? mn.m[2]);
+        if (allowance !== undefined && value !== allowance) {
+          report(mn.start, 'fair-use',
+            `"${mn.m[0].replace(/\s+/g, ' ').trim()}" next to the ${anchor.tier} pass ("${anchor.m[0]}"), but its ` +
+            `fair-use allowance is ${allowance} minutes (facts.js FAIR_USE.${anchor.tier}).`);
         }
       }
     }
@@ -620,10 +740,11 @@ async function loadFacts(root) {
 // A checker whose pattern quietly stops matching passes CI green forever,
 // which is the failure this script was written to end. So the fixtures in
 // scripts/check-copy.fixtures/ pin both directions: a line ending in
-// "⟵ rule[, rule]" must produce exactly those rules, and every other line
+// "⟵ rule[, rule]" (rule ids may contain hyphens) must produce exactly those rules, and every other line
 // must produce nothing. Markers are blanked before checking. Fixtures under
 // expired/ are judged one millisecond after the launch offer ends and the
 // rest one millisecond before, so the result never depends on today's date.
+// TRIAL.cardRequired is pinned the same way (see card-required/).
 //
 // Fixtures never type a price or a trial length. They write {{weekly}},
 // {{trial}}, {{wrongTrial}} and so on, filled in from facts.js, for the same
@@ -658,6 +779,8 @@ function fixtureValues(facts) {
     monthly: facts.PRICING.monthly.thb, monthlyDays: facts.PRICING.monthly.days,
     addon: facts.SPONSOR_ADDON_THB, launch: facts.LAUNCH_OFFER_PRICE_THB, code: facts.LAUNCH_OFFER.code,
     wrongPrice,
+    fairWeekly: facts.FAIR_USE.weekly.minutes, fairMonthly: facts.FAIR_USE.monthly.minutes,
+    wrongFair: facts.FAIR_USE.weekly.minutes + facts.FAIR_USE.monthly.minutes,
   };
 }
 
@@ -677,14 +800,19 @@ async function selfTest() {
         return String(values[key]);
       })
       .split('\n')
-      .map((line, i) => line.replace(/\s*⟵\s*([\w,\s]+)$/, (marker, ids) => {
+      .map((line, i) => line.replace(/\s*⟵\s*([\w,\s-]+)$/, (marker, ids) => {
         for (const id of ids.split(',')) expected.add(`${i + 1}:${id.trim()}`);
         return blank(marker);
       }))
       .join('\n');
     expectedCount += expected.size;
     const now = rel.startsWith('expired/') ? endsAt + 1 : endsAt - 1;
-    const got = new Set(checkText(text, rel, { facts, rules, now }).map((v) => `${v.line}:${v.rule}`));
+    // Pinned like `now`, so flipping TRIAL.cardRequired in facts.js does
+    // not invert half the fixtures: card-required/ is judged with it true,
+    // everything else with it false.
+    const cardRequired = rel.startsWith('card-required/');
+    const f = { ...facts, TRIAL: { ...facts.TRIAL, cardRequired } };
+    const got = new Set(checkText(text, rel, { facts: f, rules, now }).map((v) => `${v.line}:${v.rule}`));
     for (const e of expected) if (!got.has(e)) failures.push(`${rel}:${e.split(':')[0]}: expected [${e.split(':')[1]}], not reported`);
     for (const g of got) if (!expected.has(g)) failures.push(`${rel}:${g.split(':')[0]}: unexpected [${g.split(':')[1]}]`);
   }

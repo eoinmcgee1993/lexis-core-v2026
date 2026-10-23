@@ -5,7 +5,8 @@
 1. **Every claim is a verified product fact**: a free {{trial}}-minute trial, no card
    required, then a one-off ฿{{weekly}} pass for {{weeklyDays}} days or ฿{{monthly}} for {{monthlyDays}} days. Nothing
    renews, so no copy may say "/week", "a month" or "per week".
-2. **No volume promise.** Nothing says "unlimited" or "talk all day". Never say LEXIS is a teacher.
+2. **No outcome promise.** Never write "fluent in 30 days" or "guaranteed".
+3. **No volume promise.** Nothing says "unlimited" or "talk all day". Never say LEXIS is a teacher.
 
 Only the first block under a rules heading is exempt. An unlimited pass is not.  ⟵ volume
 
