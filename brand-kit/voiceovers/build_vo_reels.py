@@ -346,7 +346,7 @@ Dialogue: 0,{ts(0)},{ts(dur)},Url,,0,0,0,,learnwithlexis.com
         base = "scale=2160:-2,pad=2160:3840:0:900:color=0x050B14"
     vf = (f"{base},"
           f"zoompan=z='1+0.06*on/{frames}':x='iw/2-(iw/zoom/2)':y='ih*{r['fy']}-(ih/zoom/2)':d={frames}:s=1080x1920:fps=30,"
-          f"subtitles={ass_path}:fontsdir={FONTS}")
+          f"ass={ass_path}:fontsdir={FONTS}:shaping=complex")
     out = os.path.join(HERE, f'lexis-vo-reel-{lang}.mp4')
     subprocess.run([F, '-y', '-v', 'error', '-loop', '1', '-i', os.path.join(PHOTOS, r['photo']), '-i', os.path.join(HERE, r['audio']),
                     '-vf', vf, '-t', str(dur), '-c:v', 'libx264', '-preset', 'slow', '-crf', '21',
