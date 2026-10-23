@@ -283,9 +283,16 @@ Dialogue: 0,{ts(0)},{ts(dur)},Url,,0,0,0,,learnwithlexis.com
         base = "scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840"
     else:
         base = "scale=2160:-2,pad=2160:3840:0:900:color=0x050B14"
+    # `ass=...:shaping=complex`, not `subtitles=...`: the subtitles filter has
+    # no shaping option and lays text out with libass's simple shaper, which
+    # ignores the font's mark-stacking rules. A Thai tone mark over an upper
+    # vowel then vanished or was drawn on top of the vowel: every Thai reel
+    # rendered before 22 Oct 2026 burned in เที่ยว as เทียว (th-travel's
+    # headline) and ที่ as ที, with นี้/มั่น/ทั้ง overstruck. Complex shaping
+    # runs HarfBuzz, which stacks the mark above the vowel.
     vf = (f"{base},"
           f"zoompan=z='1+0.06*on/{frames}':x='iw/2-(iw/zoom/2)':y='ih*{r['fy']}-(ih/zoom/2)':d={frames}:s=1080x1920:fps=30,"
-          f"subtitles={ass_path}:fontsdir={FONTS}")
+          f"ass={ass_path}:fontsdir={FONTS}:shaping=complex")
     out = os.path.join(HERE, f'lexis-vo-reel-{lang}.mp4')
     subprocess.run([F, '-y', '-v', 'error', '-loop', '1', '-i', os.path.join(PHOTOS, r['photo']), '-i', os.path.join(HERE, r['audio']),
                     '-vf', vf, '-t', str(dur), '-c:v', 'libx264', '-preset', 'slow', '-crf', '21',
