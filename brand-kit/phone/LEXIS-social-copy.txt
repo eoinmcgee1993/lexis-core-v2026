@@ -45,6 +45,9 @@ Link:   https://learnwithlexis.com/?utm_source=youtube&utm_medium=social
 ================================================
 POSTING ORDER: one reel a day, introduction first, TikTok first, then the same video on Reels + Shorts
 ================================================
+SUPERSEDED, DO NOT PASTE. The captions and links in this section are out of date and kept only as a record.
+Post from brand-kit/phone/DAILY-POSTS.txt or brand-kit/phone/platforms/<app>.txt instead.
+To change a caption, edit brand-kit/schedule/posts.mjs and run: node brand-kit/schedule/build.mjs
 
 DAY 1 (FIRST POST, pin it to the top of the profile): lexis-vo-reel-th-intro.mp4
 รู้จัก LEXIS คู่สนทนาเสมือนสำหรับฝึกพูดภาษาอังกฤษและภาษาไทย แค่กดปุ่มแล้วพูดออกมาจริง ๆ LEXIS ฟัง ตอบกลับทันที และช่วยแก้ให้อย่างอ่อนโยน ทดลองฟรี 15 นาที ไม่ต้องผูกบัตร
@@ -98,6 +101,9 @@ evergreen-th-story.png / evergreen-en-story.png = stories
 ================================================
 COMMUNITY CONTENT (post 1-2 a week, between the practice reels)
 ================================================
+SUPERSEDED, DO NOT PASTE. The captions and links in this section are out of date and kept only as a record.
+Post from brand-kit/phone/DAILY-POSTS.txt or brand-kit/phone/platforms/<app>.txt instead.
+To change a caption, edit brand-kit/schedule/posts.mjs and run: node brand-kit/schedule/build.mjs
 
 REEL: lexis-vo-reel-th-community.mp4  (TikTok / Reels / Shorts)
 การฝึกพูดของคุณ ช่วยเปิดประตูให้คนอื่นได้ ตอนซื้อแพ็กเกจ LEXIS เลือกเพิ่ม ฿50 ได้ จ่ายรวมครั้งเดียว ไม่เรียกเก็บซ้ำ ทุกบาทเข้ากองทุนเดียวกัน เพื่อช่วยให้นักเรียนได้ฝึกพูดฟรีหรือลดราคา
