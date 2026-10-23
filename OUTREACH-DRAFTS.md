@@ -218,7 +218,7 @@ Learning a language costs money. That's the whole problem with "speaking
 opens doors" — the door isn't open to everyone.
 With LEXIS Community, anyone buying a pass can add ฿50 at checkout to fund
 practice for a student who can't afford it.
-learnwithlexis.com/community
+learnwithlexis.com/community?utm_source=facebook&utm_medium=social&utm_campaign=community&utm_content=draft-18
 
 ---
 
@@ -331,6 +331,13 @@ about what would actually be useful to you.
 [Your name]
 
 **33. University language department**
+
+> **On hold, do not send.** A university language department or institute
+> teaches languages, and Chulalongkorn's institute also sells courses to the
+> public, so this may fall under the scope rule in `CLAUDE.md` (no pitching
+> language schools). It was kept on the owner's call on 27 Sep, before that
+> rule was written down. It stays on hold until the owner confirms either way.
+
 Subject: Speaking practice tool — worth a look for [Department]?
 
 Hi [Name],
