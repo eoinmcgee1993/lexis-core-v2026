@@ -65,6 +65,9 @@ const EN_AUDIENCE = ['instagram', 'youtube', 'facebook'];
 //                Facebook only, as those pages always did.
 //   hashtags     shown on TikTok and Instagram (and in DAILY-POSTS.txt).
 //   youtubeTitle required when youtube is in platforms.
+//   tiktokTitle  Metricool's tiktokData.title. Derived below from the reel's
+//                YouTube title (without #shorts) unless set, so each reel
+//                keeps one title rather than a second one written per app.
 //   line         optional weekly LINE broadcast built on the same reel.
 //
 // Days 1-13 are DAILY-POSTS.txt as of 19 Oct 2026, wording unchanged. Days 14
@@ -256,7 +259,11 @@ const RAW = [
 ];
 
 const pad = (n) => String(n).padStart(2, '0');
-export const SLOTS = RAW.map((s) => ({ ...s, phone: s.phone ?? `2-videos/day${pad(s.day)}-${basename(s.media)}` }));
+export const SLOTS = RAW.map((s) => ({
+  ...s,
+  phone: s.phone ?? `2-videos/day${pad(s.day)}-${basename(s.media)}`,
+  tiktokTitle: s.tiktokTitle ?? s.youtubeTitle?.replace(/\s*#shorts\s*$/i, ''),
+}));
 
 // Posts with no day: the owner fits them in once or twice a week, by hand.
 // They are not in the Metricool queue because they have no slot in the

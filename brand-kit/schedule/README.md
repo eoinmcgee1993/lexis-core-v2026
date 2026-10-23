@@ -98,10 +98,11 @@ is its own post with a single provider.
 | `date` (dated copy) | `date` |
 | `publicationDate` (dated copy) | `info.publicationDate` |
 | `network` | `info.providers: [{ "network": <network> }]` |
-| `text` | `info.text` |
+| `text` | `info.text`. TikTok's is a single line, joined with spaces, because TikTok's API drops line breaks. |
 | `mediaPath` | `info.media: [<URL of that file>]`. See "How media gets attached" below. |
 | `networkData` | merged into `info` as is (`tiktokData`, `instagramData`, `youtubeData`, `facebookData`) |
 | `youtubeTitle` | already in `networkData.youtubeData.title` |
+| `tiktokTitle` | already in `networkData.tiktokData.title`: the reel's YouTube title without `#shorts`, unless a slot sets its own |
 | `link` | already inside `text` where `linkInText` is true (Facebook, YouTube). `null` on TikTok and Instagram, which can't click a caption link. |
 | `id`, `day`, `dayOffset`, `utmContent` | not sent. Used to match scheduled posts and analytics back to a slot. |
 | (from Metricool) | `blogId`, from `getBrandSettings` once accounts are linked |
