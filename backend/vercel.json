@@ -33,5 +33,6 @@
       "path": "/api/cron/trial-nudge",
       "schedule": "0 3 * * *"
     }
-  ]
+  ],
+  "regions": ["sin1"]
 }
