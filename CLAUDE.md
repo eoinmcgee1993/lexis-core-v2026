@@ -21,6 +21,14 @@ Three deployed pieces, from one repo:
 is where essentially all backend logic lives, organised under numbered section
 banners (`1. ENV CHECK` … `7. ROUTES`).
 
+`backend/vercel.json` pins the functions to `sin1` (Singapore), because
+Supabase is in `ap-southeast-1` and the users are in Thailand. On Vercel's
+default `iad1` (Washington DC), every Supabase call in a request (the token mint's
+access checks, every metering heartbeat, checkout) made its own round trip across the
+Pacific. Stripe and OpenAI are US-hosted, so their single call per request gets
+slower; the several database calls that come back to Singapore outweigh it.
+Don't drop the line without moving the database too.
+
 ## Scope: LEXIS only
 
 This repo's `main` and feature branches are **LEXIS** (the English/Thai speaking
