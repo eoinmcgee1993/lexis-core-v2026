@@ -21,16 +21,19 @@ node --check backend/app.mjs
 `app.mjs` is ~1500 lines and holds all backend logic. A syntax error here
 takes down checkout, the webhook and the realtime token mint at once.
 
-## 2. All three test suites
+## 2. All the test suites
 
 ```bash
-cd backend && npm test        # fair-use.test.mjs && checkout.test.mjs
+cd backend && npm test        # fair-use, checkout, higgsfield, analytics
 node frontend/scripts/visemes.test.mjs
+node scripts/check-copy.mjs   # from the repo root, if any copy changed
 ```
 
-Expect `30 passed, 0 failed`, then `22 passed, 0 failed`, then the viseme
-counts. The two backend suites test `app.mjs` from opposite directions and
-you need both:
+Read the `N passed, 0 failed` line each suite prints last (35, 26, 67 and 16
+on 1 Nov 2026, but go by the zero failures, not the totals), then the viseme
+counts. `higgsfield` and `analytics` import `app.mjs` for real, as
+`checkout` does. The first two backend suites test `app.mjs` from opposite
+directions and you need both:
 
 - `fair-use.test.mjs` extracts helpers out of `app.mjs` **by source text**,
   so renaming `fairUseCapSeconds`, `periodSecondsUsed`, `passDays` or
@@ -48,13 +51,13 @@ you need both:
 partway through. That is the branding-rejection case working as designed, not
 a failure — read the counts at the end, not the scariest thing on screen.
 
-Both backend suites also run in CI on every PR and on pushes to `main`
-(`.github/workflows/test.yml`). The viseme suite does not; nothing but you
-runs that one.
+All four backend suites and the copy checker also run in CI on every PR and
+on pushes to `main` (`.github/workflows/test.yml`). The viseme suite does not;
+nothing but you runs that one.
 
 There is a PostToolUse hook (`.claude/hooks/run-affected-tests.sh`) that runs
-whichever suites cover a file you just edited, silently on success — editing
-`app.mjs` runs both backend suites. It only fires on Write/Edit, so a change
+whichever suites cover a file you just edited, silently on success. Editing
+`app.mjs` runs all four backend suites. It only fires on Write/Edit, so a change
 made through Bash will not trigger it: run these by hand after any
 `sed`/`python` patch.
 

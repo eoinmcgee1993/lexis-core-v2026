@@ -53,12 +53,18 @@ tutor at learnwithlexis.com) and nothing else.
 ```bash
 # Backend
 cd backend
-npm test                       # runs both suites below in sequence
+npm test                       # runs all four suites below in sequence
 node test/fair-use.test.mjs    # there is no runner; each suite is a plain script
 node test/checkout.test.mjs    # boots app.mjs against local fake Stripe/Supabase
 node test/higgsfield.test.mjs  # same, against fake Higgsfield + in-memory PostgREST
+node test/analytics.test.mjs   # same; pins utm_* keys surviving sanitiseMetadata()
 npm run dev                    # node --watch server.mjs (needs backend/.env)
 node --check app.mjs           # fast syntax gate before committing
+
+# Marketing copy (repo root)
+node scripts/check-copy.mjs              # every customer-facing file in scope
+node scripts/check-copy.mjs <file>...    # just these files
+node scripts/check-copy.mjs --self-test  # the checker's own fixtures
 
 # Frontend
 cd frontend
@@ -238,10 +244,29 @@ needs. It covers the Community add-on's two mutually exclusive paths and the
 branding fallback, and it fails loudly if `optional_items` is ever carried into
 that fallback, where the SDK's pinned API version cannot accept it.
 
-Both suites run in CI on every pull request and on pushes to `main`
-(`.github/workflows/test.yml`), alongside a second job that runs the frontend's
-real `npm ci && npm run build`, prerender included. The workflow needs no
-secrets: neither suite reaches a real service and the build reads none.
+`higgsfield.test.mjs` and `analytics.test.mjs` take the same import-it-for-real
+approach. The analytics one exists because `sanitiseMetadata()` silently drops
+any key missing from `SOURCE_KEYS`: lose `utm_content` there and nothing errors,
+the per-post marketing report (`docs/marketing-report.sql`) just comes back
+empty weeks later.
+
+All four backend suites run in CI on every pull request and on pushes to `main`
+(`.github/workflows/test.yml`) as the `backend` job. Two more jobs sit beside it:
+`frontend` runs the real `npm ci && npm run build`, prerender included, and
+`copy` runs `scripts/check-copy.mjs`. The workflow needs no secrets: no suite
+reaches a real service and neither the build nor the checker reads any.
+
+The copy checker is the "facts live in one place" rule for text that cannot
+import `facts.js`: captions, ad copy and outreach drafts pasted by hand into
+TikTok, LINE, Meta and Google. It reads the live numbers from `facts.js` at run
+time and fails on "/week", "subscription", "unlimited", human or teacher
+claims, tutor/language-school mentions, and minutes or prices that disagree
+with `facts.js`, printing `file:line: message [rule]`. Engineering docs,
+this file included, are deliberately out of its scope because they have to
+discuss the subscription history. A launch offer's end date also comes from
+`facts.js` (`LAUNCH_OFFER.endsAt`), so once it passes, any copy still quoting
+the code, the launch price or a `launch-*` creative turns the job red with no
+code change. That is how LEXIS50 was retired on 23 Oct 2026.
 
 The build job was added 22 Sep 2026 after PR #113 (vite 5 → 8) showed why
 "Vercel already builds it" was not enough. Its Vercel build failed at install
