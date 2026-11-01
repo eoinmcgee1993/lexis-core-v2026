@@ -11,16 +11,20 @@ outside that isn't a rerunnable workflow you can act on the normal way.
 
 ## What actually gates a merge
 
-`test.yml` runs two jobs on every PR and every push to `main`:
+`test.yml` runs three jobs on every PR and every push to `main`:
 
-- **`backend`** — `fair-use.test.mjs` + `checkout.test.mjs` + `higgsfield.test.mjs`
-  (65 assertions). Needs no real Stripe/Supabase/Higgsfield.
+- **`backend`** — `fair-use`, `checkout`, `higgsfield` and `analytics` test
+  suites (`npm test`). Needs no real Stripe/Supabase/Higgsfield.
+- **`copy`** — `scripts/check-copy.mjs --self-test`, then the checker over
+  every customer-facing file. Red here means a caption or ad says something
+  `facts.js` contradicts. Fix the copy, never the checker's rules, unless the
+  rule itself is wrong. The output names `file:line` and the rule.
 - **`frontend`** — the real `npm ci && npm run build`, prerender included.
   Added 22 Sep 2026 after PR #113 (vite 5→8) shipped with `backend` ✅,
   `Vercel Preview Comments` ✅ and CodeQL neutral, while Vercel's own build
   had failed at install on a peer-range conflict — a failing Vercel **build**
-  produces no check run at all, so three green ticks were not proof. Both
-  `test.yml` jobs must be green; that's the real signal.
+  produces no check run at all, so three green ticks were not proof. All
+  three `test.yml` jobs must be green; that's the real signal.
 
 Both `Vercel – lexis-commerce` / `Vercel – lexis-core-v026` commit statuses
 and the `Vercel Preview Comments` check reflect *preview deploy* success, not

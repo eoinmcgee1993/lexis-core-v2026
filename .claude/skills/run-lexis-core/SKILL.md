@@ -181,7 +181,7 @@ cd frontend && npm run dev    # vite, opens nothing headless-useful on its own
 ## Test
 
 ```bash
-cd backend && npm test        # fair-use + checkout + higgsfield suites, 65 assertions, no real Stripe/Supabase/Higgsfield reached
+cd backend && npm test        # fair-use + checkout + higgsfield + analytics suites, no real Stripe/Supabase/Higgsfield reached
 ```
 
 `higgsfield.test.mjs` runs a local mock HTTP server standing in for

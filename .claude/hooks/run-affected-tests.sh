@@ -12,7 +12,7 @@
 # paidAccessActive breaks it instantly — exactly the kind of change whose
 # author has no reason to think "tests" while making it.
 #
-# CI now runs the two backend suites too (.github/workflows/test.yml, 9 Sep
+# CI runs every backend suite too (.github/workflows/test.yml, since 9 Sep
 # 2026), which does not make this redundant: CI reports after a push, this
 # reports inside the edit that caused it, while the reason is still on
 # screen. It also still covers the viseme suite, which CI does not run.
@@ -59,6 +59,21 @@ case "$file" in
     suites+=("backend/test/checkout.test.mjs") ;;
 esac
 case "$file" in
+  # higgsfield.test.mjs and analytics.test.mjs import app.mjs the same way
+  # checkout does, but were added later (23 Sep and Oct 2026) without being
+  # wired in here, so for weeks an app.mjs edit ran two of the four backend
+  # suites. They are the two that fail most quietly in production: a broken
+  # Higgsfield lock bills the account twice, and a key dropped from
+  # SOURCE_KEYS empties the marketing report weeks later with no error
+  # anywhere. All four together take under two seconds.
+  */backend/app.mjs|*/backend/test/higgsfield.test.mjs)
+    suites+=("backend/test/higgsfield.test.mjs") ;;
+esac
+case "$file" in
+  */backend/app.mjs|*/backend/test/analytics.test.mjs)
+    suites+=("backend/test/analytics.test.mjs") ;;
+esac
+case "$file" in
   */frontend/src/lib/visemes.js|*/frontend/scripts/visemes.test.mjs)
     suites+=("frontend/scripts/visemes.test.mjs") ;;
 esac
@@ -70,7 +85,7 @@ for suite in "${suites[@]}"; do
   [ -f "$suite" ] || continue
   if ! output=$(node "$suite" 2>&1); then
     # Pull out the FAIL lines and the count summary rather than tailing
-    # blindly. All three suites print "FAIL  <name>" at the start of a line
+    # blindly. Every suite prints "FAIL  <name>" at the start of a line
     # and "N passed, M failed" last, so this is the whole story in two greps.
     #
     # The tail this replaced looked fine until checkout.test.mjs existed:
